@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {spawnSync} from "node:child_process";
-import {mkdirSync, readFileSync} from "node:fs";
+import {existsSync, mkdirSync, readFileSync} from "node:fs";
 
 const LINT_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const FMT_EXTS = [...LINT_EXTS, ".json", ".md", ".mdx", ".css", ".scss"];
@@ -63,6 +63,15 @@ export function filterFileErrors(output, filePath, maxLines = 15) {
 
 const BIN_DIR = "./node_modules/.bin/";
 
+/*
+ * Пока в репозитории нет eslint и prettier, вызов печатал бы ошибку на каждую правку.
+ * Хук, который постоянно кричит вхолостую, перестают читать — поэтому недоступный
+ * инструмент молча пропускается, а не сообщает о сбое.
+ */
+export function filterAvailable(commands, hasBin) {
+  return commands.filter((command) => hasBin(command.split(" ", 1)[0]));
+}
+
 function run(command) {
   // Локальные бинарники репо: PATH процесса их не содержит, поэтому префикс
   // node_modules/.bin + shell (путь закавычен JSON.stringify, shell-safe).
@@ -98,7 +107,9 @@ function main() {
   }
   const file = payload?.tool_input?.file_path;
 
-  for (const command of buildCommands(file)) {
+  const available = filterAvailable(buildCommands(file), (bin) => existsSync(BIN_DIR + bin));
+
+  for (const command of available) {
     const res = run(command);
 
     if (res.status !== 0) {

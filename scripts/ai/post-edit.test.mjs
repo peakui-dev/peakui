@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {buildCommands, filterFileErrors, typecheckTarget} from "./post-edit.mjs";
+import {
+  buildCommands,
+  filterAvailable,
+  filterFileErrors,
+  typecheckTarget,
+} from "./post-edit.mjs";
 
 test("ts-файл получает eslint и prettier", () => {
   assert.deepEqual(buildCommands("packages/react/src/components/button/button.tsx"), [
@@ -62,4 +67,18 @@ test("filterFileErrors: пустой вывод и обрезка до maxLines"
   assert.match(cut.text, /err 14/);
   assert.doesNotMatch(cut.text, /err 15\)/);
   assert.match(cut.text, /\+5/);
+});
+
+test("отсутствующий бинарник отбрасывается: хук не кричит вхолостую", () => {
+  const cmds = [
+    'eslint --fix "packages/react/src/a.ts"',
+    'prettier --write "packages/react/src/a.ts"',
+  ];
+  const hasBin = (name) => name === "prettier";
+
+  assert.deepEqual(filterAvailable(cmds, hasBin), [
+    'prettier --write "packages/react/src/a.ts"',
+  ]);
+  assert.deepEqual(filterAvailable(cmds, () => false), []);
+  assert.deepEqual(filterAvailable(cmds, () => true), cmds);
 });

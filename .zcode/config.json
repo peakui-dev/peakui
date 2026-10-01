@@ -1,0 +1,27 @@
+{
+  "mcp": {
+    "servers": {
+      "codegraph": {
+        "command": "pnpm",
+        "args": ["exec", "codegraph", "serve", "--mcp"]
+      }
+    }
+  },
+  "hooks": {
+    "enabled": true,
+    "events": {
+      "PreToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "hooks": [{"type": "command", "command": "node scripts/ai/protected-files.mjs"}]
+        }
+      ],
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write",
+          "hooks": [{"type": "command", "command": "node scripts/ai/post-edit.mjs"}]
+        }
+      ]
+    }
+  }
+}
