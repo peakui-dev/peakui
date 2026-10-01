@@ -8,30 +8,99 @@
 
 export type Oklch = {l: number; c: number; h: number; a: number};
 
-const OKLCH_PATTERN =
-  /^oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+|none)\s*(?:\/\s*([\d.]+)(%?)\s*)?\)$/i;
+/** A real number grammar. `[\d.]+` would accept `1.2.3` and yield NaN downstream. */
+const NUM = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)`;
+
+const OKLCH_PATTERN = new RegExp(
+  String.raw`^oklch\(\s*(${NUM}|none)(%?)\s+(${NUM}|none)\s+(${NUM}|none)(deg)?\s*` +
+    String.raw`(?:\/\s*(${NUM}|none)(%?)\s*)?\)$`,
+  "i",
+);
+
+const HEX_PATTERN = /^#(?:([\da-f]{3})|([\da-f]{6}))$/i;
 
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
 
 /** Rounds to 4 decimals and drops trailing zeros, so 0.5 stays `0.5`. */
 const round4 = (value: number): number => Number(value.toFixed(4));
 
+/** Normalises a hue to [0, 360); `-10` and `350` are the same angle. */
+const normalizeHue = (h: number): number => ((h % 360) + 360) % 360;
+
+const srgbToLinearChannel = (value: number): number =>
+  value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+
+/**
+ * Accepts the two formats the preset type advertises: `oklch(...)` and hex.
+ *
+ * Returns `null` for anything else, including a malformed number — `1.2.3` must not become
+ * `NaN`, because a NaN hue emits `oklch(... NaN)`, which a browser drops, leaving an element
+ * unstyled with no error anywhere.
+ */
 export function parseOklch(value: string): Oklch | null {
-  const match = OKLCH_PATTERN.exec(value.trim());
+  const input = value.trim();
+  const hex = HEX_PATTERN.exec(input);
+
+  if (hex) {
+    const digits = hex[1] ? [...hex[1]].map((d) => d + d).join("") : hex[2]!;
+    const channels = [0, 2, 4].map((i) =>
+      srgbToLinearChannel(Number.parseInt(digits.slice(i, i + 2), 16) / 255),
+    ) as [number, number, number];
+
+    return linearSrgbToOklch(channels[0], channels[1], channels[2]);
+  }
+
+  const match = OKLCH_PATTERN.exec(input);
 
   if (!match) return null;
 
-  const [, rawL, lPercent, rawC, rawH, rawA, aPercent] = match;
+  const [, rawL, lPercent, rawC, rawH, , rawA, aPercent] = match;
 
-  // `none` is a valid hue for an achromatic colour; parseFloat would yield NaN and poison
-  // every ratio computed downstream.
-  const h = rawH === "none" ? 0 : Number(rawH);
-  const l = lPercent === "%" ? Number(rawL) / 100 : Number(rawL);
-  const a =
-    rawA === undefined ? 1 : aPercent === "%" ? Number(rawA) / 100 : Number(rawA);
+  // `none` is valid in any component of an achromatic colour and means zero.
+  const num = (raw: string | undefined, percent: boolean): number => {
+    if (raw === undefined || raw.toLowerCase() === "none") return 0;
 
-  return {l, c: Number(rawC), h, a};
+    return percent ? Number(raw) / 100 : Number(raw);
+  };
+
+  const color: Oklch = {
+    l: num(rawL, lPercent === "%"),
+    c: num(rawC, false),
+    h: normalizeHue(num(rawH, false)),
+    a: rawA === undefined ? 1 : num(rawA, aPercent === "%"),
+  };
+
+  if (![color.l, color.c, color.h, color.a].every(Number.isFinite)) return null;
+
+  return color;
 }
+
+/** linear sRGB → OKLCH (Ottosson, the inverse of `oklchToLinearSrgb`). */
+export function linearSrgbToOklch(r: number, g: number, b: number): Oklch {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+
+  const lightness = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s;
+  const a_ = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const b_ = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+
+  return {
+    l: lightness,
+    c: Math.hypot(a_, b_),
+    h: normalizeHue((Math.atan2(b_, a_) * 180) / Math.PI),
+    a: 1,
+  };
+}
+
+/** Gamma-encodes a linear sRGB channel. CSS composites on these values, not on linear ones. */
+export function linearToSrgbChannel(value: number): number {
+  const v = Math.min(1, Math.max(0, value));
+
+  return v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
+}
+
+export {srgbToLinearChannel};
 
 export function formatOklch(color: Oklch): string {
   const base = `oklch(${round4(color.l)} ${round4(color.c)} ${round4(color.h)}`;

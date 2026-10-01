@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@12.3.4",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "scripts": {
     "check:tokens": "pnpm --filter @peakui/styles check:tokens",

@@ -29,6 +29,30 @@ describe("color", () => {
     it("возвращает null на мусоре", () => {
       expect(parseOklch("rebeccapurple")).toBeNull();
     });
+
+    it("возвращает null на битом числе, а не NaN", () => {
+      expect(parseOklch("oklch(0.5 0.1 1.2.3)")).toBeNull();
+      expect(parseOklch("oklch(0.5 0.1 abc)")).toBeNull();
+    });
+
+    it("разбирает hex, как обещает тип пресета", () => {
+      const black = parseOklch("#000000");
+      const white = parseOklch("#ffffff");
+
+      expect(black?.l).toBeCloseTo(0, 2);
+      expect(white?.l).toBeCloseTo(1, 2);
+      expect(parseOklch("#fff")?.l).toBeCloseTo(1, 2);
+    });
+
+    it("разбирает hue в градусах и отрицательный hue", () => {
+      expect(parseOklch("oklch(0.5 0.1 200deg)")?.h).toBe(200);
+      expect(parseOklch("oklch(0.5 0.1 -10)")?.h).toBe(350);
+    });
+
+    it("трактует none в светлоте и хроме как 0", () => {
+      expect(parseOklch("oklch(none 0.1 200)")?.l).toBe(0);
+      expect(parseOklch("oklch(0.5 none 200)")?.c).toBe(0);
+    });
   });
 
   describe("relativeLuminance", () => {
@@ -37,11 +61,14 @@ describe("color", () => {
       expect(relativeLuminance(black)).toBeCloseTo(0, 3);
     });
 
-    it("не выходит из [0,1] на цвете вне гаммы", () => {
-      const lum = relativeLuminance({l: 0.7, c: 0.4, h: 150, a: 1});
+    // Probes chosen so the assertion fails without the clamp: unclamped these give -0.0263 and
+    // 1.1880. The previous probe (0.7 0.4 150) lands at 0.4052 unclamped and pinned nothing.
+    it("зажимает цвет ниже гаммы — иначе яркость уходит в минус", () => {
+      expect(relativeLuminance({l: 0.18, c: 0.48, h: 270, a: 1})).toBeGreaterThanOrEqual(0);
+    });
 
-      expect(lum).toBeGreaterThanOrEqual(0);
-      expect(lum).toBeLessThanOrEqual(1);
+    it("зажимает цвет выше гаммы — иначе яркость превышает единицу", () => {
+      expect(relativeLuminance({l: 1, c: 0.48, h: 175, a: 1})).toBeLessThanOrEqual(1);
     });
   });
 

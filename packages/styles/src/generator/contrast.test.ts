@@ -43,6 +43,19 @@ describe("compositeOver", () => {
     expect(relativeLuminance(result)).toBeGreaterThan(0);
   });
 
+  // Браузер композитит в sRGB, а не в OKLab. Линейная интерполяция в OKLab даёт на этой паре
+  // яркость 0.125 против настоящих 0.214 — завышение контраста белого текста с 3.98 до 6.00.
+  it("композитит в sRGB: чёрный @0.5 на белом даёт яркость ~0.214, а не 0.125", () => {
+    expect(relativeLuminance(compositeOver({l: 0, c: 0, h: 0, a: 0.5}, white))).toBeCloseTo(0.214, 2);
+  });
+
+  it("несимметричная альфа композитится в правильную сторону", () => {
+    // При alpha 0.15 чёрного на белом результат должен быть почти белым.
+    const mostlyWhite = compositeOver({l: 0, c: 0, h: 0, a: 0.15}, white);
+
+    expect(relativeLuminance(mostlyWhite)).toBeGreaterThan(0.6);
+  });
+
   it("непрозрачный передний план не меняется", () => {
     expect(compositeOver(accent, white)).toEqual(accent);
   });
@@ -71,7 +84,7 @@ describe("ensureContrast", () => {
     expect(color.h).toBeCloseTo(275, 6);
   });
 
-  it("бросает, когда 40 шагов не хватает", () => {
+  it("бросает, когда обе стороны не дотягивают", () => {
     expect(() =>
       ensureContrast({
         token: "impossible",

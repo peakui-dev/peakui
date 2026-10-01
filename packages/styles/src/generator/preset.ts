@@ -26,7 +26,7 @@ export type SemanticSet = {
 export type ThemePreset = {
   /** The theme's directory and its `data-theme` value. */
   id: string;
-  /** hex or oklch; decomposed into l/c/h. */
+  /** hex (`#rgb` / `#rrggbb`) or oklch; decomposed into l/c/h. */
   accent: string;
   /** 0–0.03: how much of the accent's hue the neutrals carry. */
   grayChroma: number;

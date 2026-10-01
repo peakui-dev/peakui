@@ -7,7 +7,13 @@
 
 import type {Oklch} from "./color.ts";
 
-import {contrastRatio} from "./color.ts";
+import {
+  contrastRatio,
+  linearSrgbToOklch,
+  linearToSrgbChannel,
+  oklchToLinearSrgb,
+  srgbToLinearChannel,
+} from "./color.ts";
 
 /** CSS `transparent` is `rgb(0 0 0 / 0)`. */
 export const TRANSPARENT: Oklch = {l: 0, c: 0, h: 0, a: 0};
@@ -86,16 +92,18 @@ export function mix(a: Oklch, pa: number, b: Oklch, pb: number): Oklch {
 export function compositeOver(fg: Oklch, bg: Oklch): Oklch {
   if (fg.a === 1) return fg;
 
-  const f = toOklab(fg);
-  const b = toOklab(bg);
+  // Blending happens on gamma-encoded sRGB values, because that is where CSS alpha compositing
+  // happens. Interpolating in OKLab instead over-estimates the result's luminance by up to 50% at
+  // mid alpha across a high-contrast pair — black at 0.5 over white gives 0.125 in OKLab against a
+  // true 0.214, which turns a real 3.98:1 into a certified 6.00:1.
+  const f = oklchToLinearSrgb(fg);
+  const b = oklchToLinearSrgb(bg);
   const weight = fg.a;
 
-  return toOklch({
-    l: f.l * weight + b.l * (1 - weight),
-    a: f.a * weight + b.a * (1 - weight),
-    b: f.b * weight + b.b * (1 - weight),
-    alpha: 1,
-  });
+  const blend = (fc: number, bc: number): number =>
+    srgbToLinearChannel(linearToSrgbChannel(fc) * weight + linearToSrgbChannel(bc) * (1 - weight));
+
+  return linearSrgbToOklch(blend(f.r, b.r), blend(f.g, b.g), blend(f.b, b.b));
 }
 
 export type ContrastFix = {token: string; from: number; to: number; ratio: number};

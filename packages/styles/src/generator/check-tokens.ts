@@ -67,7 +67,13 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
 
   // Gates 3 and 4 — every var() in theme.css resolves, and every theme declares the full set.
   const themeCss = readOr("themes/shared/theme.css", fixtures.themeCss);
-  const referenced = [...themeCss.matchAll(/--[\w-]+:\s*var\(--([\w-]+)[,)]/g)].map((m) => m[1]!);
+  // Matches a var() anywhere in the value, not only immediately after the colon, so a reference
+  // buried in color-mix() is checked too.
+  const referenced = [...themeCss.matchAll(/var\(--([\w-]+)[,)]/g)].map((m) => m[1]!);
+  /** Names `@theme inline` exposes, i.e. what a component may legitimately reference. */
+  const themeSurface = new Set(
+    [...themeCss.matchAll(/^\s*(--[\w-]+):/gm)].map((m) => m[1]!.slice(2)),
+  );
 
   const themes: {id: string; tokens: TokenSet}[] = presets.map((preset) => {
     const {invariant, light, dark} = deriveTheme(preset);
@@ -113,6 +119,46 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
   }
 
   Object.assign(componentFiles, fixtures.componentCss ?? {});
+
+  // Gate 6 — every token a shipped stylesheet references actually exists.
+  //
+  // A missing token resolves to nothing: the declaration is dropped and the element renders
+  // unstyled, with no error in the console, in the build, or anywhere else.
+  const shippedCss: Record<string, string> = {...componentFiles};
+
+  for (const relative of [
+    "base/base.css",
+    "utilities/index.css",
+    "variants/index.css",
+    "index.css",
+  ]) {
+    try {
+      shippedCss[relative] = readFileSync(join(ROOT, relative), "utf8");
+    } catch {
+      // Not present yet; nothing to check.
+    }
+  }
+
+  const declaredAnywhere = new Set<string>([...themeSurface]);
+
+  for (const theme of themes) for (const name of Object.keys(theme.tokens)) declaredAnywhere.add(name);
+
+  for (const [name, css] of Object.entries(shippedCss)) {
+    const body = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    for (const match of body.matchAll(/var\(--([\w-]+)/g)) {
+      const token = match[1]!;
+
+      // A token the file declares itself (a component-level custom property) is fine.
+      if (new RegExp(`--${token}\\s*:`).test(body)) continue;
+      if (declaredAnywhere.has(token)) continue;
+
+      errors.push(
+        `Необъявленный токен: ${name} ссылается на --${token}, которого нет ни в @theme, ни в темах. ` +
+          `Он молча резолвится в пустоту — элемент отрендерится без стилей и без ошибки.`,
+      );
+    }
+  }
 
   for (const [name, css] of Object.entries(componentFiles)) {
     const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");

@@ -14,6 +14,13 @@ import {TRANSPARENT, compositeOver, ensureContrast, mix} from "./contrast.ts";
 import {RADIUS_BASE} from "./preset.ts";
 
 const TEXT_MIN = 4.5;
+/**
+ * WCAG 2.2 SC 1.4.11 asks 3:1 of visual information that IDENTIFIES a component or its state.
+ * A focus indicator is exactly that. Decorative hairlines — `border`, `separator` and their
+ * -secondary/-tertiary levels — are not, and forcing 3:1 on them would put a heavy outline on every
+ * card; the reference sits at the same ~1.2:1 for that reason. See the ruling in the spec.
+ */
+const BOUNDARY_MIN = 3;
 
 const DEFAULT_SANS = ["Inter", "system-ui", "sans-serif"];
 const DEFAULT_MONO = ["JetBrains Mono", "ui-monospace", "monospace"];
@@ -30,8 +37,10 @@ const ANCHOR = {
     surfaceSecondary: 0.9524,
     surfaceTertiary: 0.9373,
     overlay: 1,
-    // 0.545, not 0.5517: at 0.5517 muted text lands at 4.42:1 on this background, just under AA.
-    muted: 0.545,
+    // Chosen against the LEAST favourable background in the set, not against `background`.
+    // 0.5517 (the reference's value) gives 4.42:1 even on `background`; 0.545 passed there but sat
+    // at 3.79:1 on `background-tertiary`. 0.49 clears 4.5:1 on every background the set declares.
+    muted: 0.49,
     default: 0.94,
     segment: 1,
     border: 0.9,
@@ -198,11 +207,29 @@ const deriveScheme = (
 
   raw["field-foreground"] = raw["surface-foreground"]!;
 
-  // `muted` is secondary text, so AA applies to it too, measured against the scheme background.
+  // `muted` is secondary text and appears on every background in the set, so it is measured
+  // against the LEAST favourable of them. Checking only `background` certified it at 4.55:1 while
+  // it sat at 4.15:1 on `background-secondary` and 3.79:1 on `background-tertiary`.
+  raw["background-secondary"] = mix(c.background, 96, c.foreground, 4);
+  raw["background-tertiary"] = mix(c.background, 92, c.foreground, 8);
+
+  const mutedBackgrounds = [
+    c.background,
+    raw["background-secondary"]!,
+    raw["background-tertiary"]!,
+    c.surface,
+    c.surfaceSecondary,
+    c.surfaceTertiary,
+    c.default,
+    c.overlay,
+  ];
+  const worstForMuted = mutedBackgrounds.reduce((worst, candidate) =>
+    contrastRatio(c.muted, candidate) < contrastRatio(c.muted, worst) ? candidate : worst,
+  );
   const mutedFixed = ensureContrast({
     token: "muted",
     fg: c.muted,
-    bg: c.background,
+    bg: worstForMuted,
     min: TEXT_MIN,
   });
 
@@ -271,10 +298,59 @@ const deriveScheme = (
   raw["border-tertiary"] = mix(c.surface, 66, fg("surface"), 34);
 
   raw["field-hover"] = mix(c.field, 90, raw["field-foreground"]!, 2);
+  // The spec's table names `field-border` as the base here, but `--field-border` is `transparent`
+  // by default, so mixing against it yields a ~0.1-alpha hairline rather than a visible edge.
+  // `border` is the meaningful base; the spec table is amended to match.
   raw["field-focus"] = c.field;
   raw["field-border-hover"] = mix(c.border, 88, raw["field-foreground"]!, 10);
   raw["field-border-focus"] = mix(c.border, 74, raw["field-foreground"]!, 22);
   raw["scrollbar-thumb"] = mix(c.foreground, 15, TRANSPARENT, 85);
+
+  /*
+   * Final guarantee pass.
+   *
+   * The work list is derived from the token map, not hand-written: EVERY `X-foreground` is measured
+   * against its `X`. The earlier hand-written list silently excluded every `*-soft-foreground`, so a
+   * one-field preset could ship Chip/Badge/Alert text at 4.12:1 with the build reporting a clean
+   * palette.
+   *
+   * A translucent `X` is composited first, over both `surface` and `background`, and the worse of
+   * the two is what must hold — a soft badge sits on either.
+   */
+  for (const name of Object.keys(raw)) {
+    if (!name.endsWith("-foreground")) continue;
+
+    const partner = raw[name.replace(/-foreground$/, "")];
+
+    if (!partner) continue;
+
+    const bases = [c.surface, c.background];
+    const worst = bases.reduce((acc, base) => {
+      const composited = compositeOver(partner, base);
+
+      return contrastRatio(raw[name]!, composited) < contrastRatio(raw[name]!, acc)
+        ? composited
+        : acc;
+    }, compositeOver(partner, c.surface));
+
+    const {color, fix} = ensureContrast({token: name, fg: raw[name]!, bg: worst, min: TEXT_MIN});
+
+    raw[name] = color;
+    if (fix) fixes.push(fix);
+  }
+
+  // Focus is a state indicator, so the boundary floor applies to it.
+  for (const against of [c.background, c.surface]) {
+    const {color, fix} = ensureContrast({
+      token: "focus",
+      fg: raw["focus"]!,
+      bg: against,
+      min: BOUNDARY_MIN,
+    });
+
+    raw["focus"] = color;
+    if (fix) fixes.push(fix);
+  }
 
   const tokens: TokenSet = {};
 
@@ -311,6 +387,8 @@ export function deriveTheme(preset: ThemePreset): {
   fixes: ContrastFix[];
 } {
   const accent = must(preset.accent, "accent");
+  // No inversion is derived: without `darkAccent` the dark scheme reuses the light accent verbatim,
+  // which is what the reference does too. `darkAccent` is the ONLY mechanism, not a fallback for one.
   const darkAccent = preset.darkAccent ? must(preset.darkAccent, "darkAccent") : accent;
 
   const light = deriveScheme(
@@ -336,7 +414,7 @@ export function deriveTheme(preset: ThemePreset): {
     "cursor-disabled": "not-allowed",
     radius: RADIUS_BASE[preset.radius],
     "field-radius": RADIUS_BASE[preset.formRadius],
-    "skeleton-animation": "shimmer",
+    "skeleton-animation": "skeleton",
     "tooltip-delay": "1500ms",
     "tooltip-close-delay": "500ms",
     sans: (preset.typography?.sans ?? DEFAULT_SANS).join(", "),

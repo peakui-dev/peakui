@@ -91,3 +91,68 @@ describe("deriveTheme", () => {
     }
   });
 });
+
+describe("гарантии контраста покрывают весь набор, а не выборку", () => {
+  /** Every token that has an `X-foreground` partner, measured the way a person sees it. */
+  const checkAllPairs = (scheme: Record<string, string>, baseName: string) => {
+    const base = parseOklch(scheme[baseName]!)!;
+    const failures: string[] = [];
+
+    for (const [name, value] of Object.entries(scheme)) {
+      if (!name.endsWith("-foreground")) continue;
+
+      const bgName = name.replace(/-foreground$/, "");
+      const bgRaw = scheme[bgName];
+
+      if (!bgRaw) continue;
+
+      const ratio = contrastRatio(parseOklch(value)!, compositeOver(parseOklch(bgRaw)!, base));
+
+      if (ratio < 4.5) failures.push(`${name} на ${bgName}: ${ratio.toFixed(2)}:1`);
+    }
+
+    return failures;
+  };
+
+  it("soft-пары тоже держат 4.5:1 — включая пресет, который раньше их ломал", () => {
+    // Этот override проходил все гейты с 4.12:1 на warning-soft-foreground.
+    const {light, dark} = deriveTheme({
+      ...preset,
+      semanticOverrides: {light: {warning: {color: "oklch(0.86 0.17 95)"}}},
+    });
+
+    expect(checkAllPairs(light, "surface")).toEqual([]);
+    expect(checkAllPairs(light, "background")).toEqual([]);
+    expect(checkAllPairs(dark, "surface")).toEqual([]);
+  });
+
+  it("focus держит 3:1 против фона и поверхности в обеих схемах", () => {
+    const {light, dark} = deriveTheme(preset);
+
+    for (const scheme of [light, dark]) {
+      for (const against of ["background", "surface"]) {
+        expect(
+          contrastRatio(parseOklch(scheme["focus"]!)!, parseOklch(scheme[against]!)!),
+        ).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it("muted держит 4.5:1 против САМОГО невыгодного фона набора, а не только background", () => {
+    const {light, dark} = deriveTheme(preset);
+
+    for (const [name, scheme] of [["light", light], ["dark", dark]] as const) {
+      const muted = parseOklch(scheme["muted"]!)!;
+
+      for (const against of [
+        "background", "background-secondary", "background-tertiary",
+        "surface", "surface-secondary", "surface-tertiary", "default", "overlay",
+      ]) {
+        expect(
+          contrastRatio(muted, parseOklch(scheme[against]!)!),
+          `${name}: muted на ${against}`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+});

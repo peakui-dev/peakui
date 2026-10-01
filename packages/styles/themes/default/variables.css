@@ -14,7 +14,7 @@
     --radius: 0.5rem;
     --ring-offset-width: 2px;
     --sans: Inter, system-ui, sans-serif;
-    --skeleton-animation: shimmer;
+    --skeleton-animation: skeleton;
     --spacing: 0.25rem;
     --tooltip-close-delay: 500ms;
     --tooltip-delay: 1500ms;
@@ -62,12 +62,12 @@
     --field-focus: oklch(1 0.006 275);
     --field-foreground: oklch(0.15 0.0018 275);
     --field-hover: oklch(0.9815 0.0059 275);
-    --field-placeholder: oklch(0.545 0.006 275);
+    --field-placeholder: oklch(0.49 0.006 275);
     --field-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.04), 0 1px 2px 0 oklch(0 0 0 / 0.06), 0 0 1px 0 oklch(0 0 0 / 0.06);
     --focus: oklch(0.52 0.2 275);
     --foreground: oklch(0.2103 0.006 275);
     --link: oklch(0.2103 0.006 275);
-    --muted: oklch(0.545 0.006 275);
+    --muted: oklch(0.49 0.006 275);
     --overlay: oklch(1 0.006 275);
     --overlay-foreground: oklch(0.15 0.0018 275);
     --overlay-shadow: 0 2px 8px 0 oklch(0 0 0 / 0.06), 0 -6px 12px 0 oklch(0 0 0 / 0.03), 0 14px 28px 0 oklch(0 0 0 / 0.08);
