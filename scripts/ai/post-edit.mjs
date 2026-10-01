@@ -5,8 +5,8 @@ import {mkdirSync, readFileSync} from "node:fs";
 const LINT_EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const FMT_EXTS = [...LINT_EXTS, ".json", ".md", ".mdx", ".css", ".scss"];
 const SKIP_PREFIXES = ["node_modules/", "heroui/", "dist/", "storybook-static/"];
-const TS_ROOT = "packages/elements/src/";
-const TS_CACHE = "node_modules/.cache/ai-ts-hook/elements.tsbuildinfo";
+const TS_ROOT = "packages/react/src/";
+const TS_CACHE = "node_modules/.cache/ai-ts-hook/react.tsbuildinfo";
 const TIMEOUT_MS = 30_000;
 
 export function buildCommands(filePath) {
@@ -22,14 +22,10 @@ export function buildCommands(filePath) {
   return cmds;
 }
 
-// tsc-петля ограничена packages/elements/src; base-apca и organism
-// исключены из tsconfig пакета (легаси, выжигание не планируется)
-const TS_SKIP_PREFIXES = ["packages/elements/src/base-apca/", "packages/elements/src/organism/"];
-
+// tsc-петля ограничена packages/react/src — ядро библиотеки
 export function typecheckTarget(filePath) {
   if (!filePath || typeof filePath !== "string") return null;
   if (!filePath.startsWith(TS_ROOT)) return null;
-  if (TS_SKIP_PREFIXES.some((p) => filePath.startsWith(p))) return null;
   const ext = filePath.slice(filePath.lastIndexOf("."));
 
   return ext === ".ts" || ext === ".tsx" ? filePath : null;
@@ -75,7 +71,7 @@ function run(command) {
 
 function runTypecheck(target) {
   mkdirSync("node_modules/.cache/ai-ts-hook", {recursive: true});
-  const cmd = `tsc -p packages/elements/tsconfig.json --noEmit --incremental --tsBuildInfoFile ${TS_CACHE}`;
+  const cmd = `tsc -p packages/react/tsconfig.json --noEmit --incremental --tsBuildInfoFile ${TS_CACHE}`;
   const res = run(cmd);
 
   if (res.status !== 0) {
