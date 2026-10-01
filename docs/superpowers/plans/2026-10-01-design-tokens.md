@@ -574,7 +574,7 @@ Expected: FAIL — `defaultPreset` not exported.
 
 - [ ] **Step 3: Implement the preset, `buildTheme` and the CLI**
 
-`defaultPreset` exactly as the spec's §2 fixes it: `accent: "oklch(0.58 0.20 275)"`, `grayChroma: 0.006`, `radius: "medium"`, `formRadius: "large"`. `buildTheme` returns the three files; `scripts/build-tokens.mjs` writes them for every preset and prints each `ContrastFix`. Add `"tokens:build": "node scripts/build-tokens.mjs"`.
+`defaultPreset` exactly as the spec's §2 fixes it: `accent: "oklch(0.52 0.20 275)"`, `grayChroma: 0.006`, `radius: "medium"`, `formRadius: "large"`. `buildTheme` returns the three files; `scripts/build-tokens.mjs` writes them for every preset and prints each `ContrastFix`. Add `"tokens:build": "node scripts/build-tokens.mjs"`.
 
 - [ ] **Step 4: Run the generator, then the tests**
 
