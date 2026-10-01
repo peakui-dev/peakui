@@ -2,9 +2,9 @@ import {readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
 
-import type {ThemePreset} from "./preset";
+import type {ThemePreset} from "./preset.ts";
 
-import {deriveTheme} from "./derive";
+import {deriveTheme} from "./derive.ts";
 
 // A local preset, not the shipped `defaultPreset`: that arrives in Task 7, and this test only needs
 // *some* theme to prove every mapping resolves.

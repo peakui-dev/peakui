@@ -1,10 +1,10 @@
 import {describe, expect, it} from "vitest";
 
-import type {ThemePreset} from "./preset";
+import type {ThemePreset} from "./preset.ts";
 
-import {contrastRatio, parseOklch} from "./color";
-import {compositeOver} from "./contrast";
-import {deriveTheme} from "./derive";
+import {contrastRatio, parseOklch} from "./color.ts";
+import {compositeOver} from "./contrast.ts";
+import {deriveTheme} from "./derive.ts";
 
 const preset: ThemePreset = {
   id: "test",

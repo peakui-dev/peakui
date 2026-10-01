@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {version} from "./index";
+import {version} from "./index.ts";
 
 describe("@peakui/styles", () => {
   it("экспортирует версию пакета", () => {

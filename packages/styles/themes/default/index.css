@@ -1,0 +1,10 @@
+/* Тема «default». Сгенерировано: pnpm tokens:build — не править руками. */
+
+/* Публичная поверхность токенов для Tailwind */
+@import "../shared/theme.css";
+
+/* Значения этой темы */
+@import "./variables.css" layer(theme);
+
+/* Проход два: правки внутренностей компонентов этой темой */
+@import "./components/index.css" layer(components);

@@ -1,8 +1,8 @@
 import {describe, expect, it} from "vitest";
 
-import type {Oklch} from "./color";
+import type {Oklch} from "./color.ts";
 
-import {contrastRatio, formatOklch, parseOklch, relativeLuminance} from "./color";
+import {contrastRatio, formatOklch, parseOklch, relativeLuminance} from "./color.ts";
 
 const white: Oklch = {l: 1, c: 0, h: 0, a: 1};
 const black: Oklch = {l: 0, c: 0, h: 0, a: 1};

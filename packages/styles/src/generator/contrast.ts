@@ -5,9 +5,9 @@
  * computed here and the same declaration evaluated by a browser agree.
  */
 
-import type {Oklch} from "./color";
+import type {Oklch} from "./color.ts";
 
-import {contrastRatio} from "./color";
+import {contrastRatio} from "./color.ts";
 
 /** CSS `transparent` is `rgb(0 0 0 / 0)`. */
 export const TRANSPARENT: Oklch = {l: 0, c: 0, h: 0, a: 0};

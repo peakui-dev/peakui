@@ -8,6 +8,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     "declaration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

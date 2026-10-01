@@ -5,13 +5,13 @@
  * enforced as the final stage, so a set that leaves this function is guaranteed to meet the floors.
  */
 
-import type {Oklch} from "./color";
-import type {ContrastFix} from "./contrast";
-import type {Scheme, SemanticSet, ThemePreset, TokenSet} from "./preset";
+import type {Oklch} from "./color.ts";
+import type {ContrastFix} from "./contrast.ts";
+import type {Scheme, SemanticSet, ThemePreset, TokenSet} from "./preset.ts";
 
-import {contrastRatio, formatOklch, parseOklch} from "./color";
-import {TRANSPARENT, compositeOver, ensureContrast, mix} from "./contrast";
-import {RADIUS_BASE} from "./preset";
+import {contrastRatio, formatOklch, parseOklch} from "./color.ts";
+import {TRANSPARENT, compositeOver, ensureContrast, mix} from "./contrast.ts";
+import {RADIUS_BASE} from "./preset.ts";
 
 const TEXT_MIN = 4.5;
 

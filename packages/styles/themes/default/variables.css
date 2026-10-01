@@ -1,0 +1,213 @@
+@layer base {
+  /* Тема «default». Сгенерировано: pnpm tokens:build — не править руками. */
+
+  :root,
+  :host {
+    --black: oklch(0% 0 0);
+    --border-width: 1px;
+    --cursor-disabled: not-allowed;
+    --cursor-interactive: pointer;
+    --disabled-opacity: 0.5;
+    --field-border-width: 0px;
+    --field-radius: 0.75rem;
+    --mono: JetBrains Mono, ui-monospace, monospace;
+    --radius: 0.5rem;
+    --ring-offset-width: 2px;
+    --sans: Inter, system-ui, sans-serif;
+    --skeleton-animation: shimmer;
+    --spacing: 0.25rem;
+    --tooltip-close-delay: 500ms;
+    --tooltip-delay: 1500ms;
+    --white: oklch(100% 0 0);
+  }
+
+  :root,
+  :host,
+  .default-light,
+  [data-theme="default-light"],
+  :host(.default-light),
+  :host([data-theme="default-light"]) {
+    color-scheme: light;
+
+    --accent: oklch(0.52 0.2 275);
+    --accent-foreground: oklch(0.98 0.02 275);
+    --accent-hover: oklch(0.566 0.182 275);
+    --accent-soft: oklch(0.52 0.2 275 / 0.15);
+    --accent-soft-foreground: oklch(0.4271 0.1418 275);
+    --accent-soft-hover: oklch(0.52 0.2 275 / 0.2);
+    --backdrop: oklch(0 0 0 / 0.5);
+    --background: oklch(0.9702 0.006 275);
+    --background-inverse: oklch(0.2103 0.006 275);
+    --background-secondary: oklch(0.9398 0.006 275);
+    --background-tertiary: oklch(0.9094 0.006 275);
+    --border: oklch(0.9 0.006 275);
+    --border-secondary: oklch(0.813 0.0051 275);
+    --border-tertiary: oklch(0.711 0.0046 275);
+    --danger: oklch(0.52 0.17 27);
+    --danger-foreground: oklch(0.98 0.017 27);
+    --danger-hover: oklch(0.566 0.1547 27);
+    --danger-soft: oklch(0.52 0.17 27 / 0.15);
+    --danger-soft-foreground: oklch(0.4074 0.1074 25.9206);
+    --danger-soft-hover: oklch(0.52 0.17 27 / 0.2);
+    --default: oklch(0.94 0.006 275);
+    --default-foreground: oklch(0.15 0.0018 275);
+    --default-hover: oklch(0.9084 0.0058 275);
+    --default-soft: oklch(0.94 0.006 275 / 0.5);
+    --default-soft-foreground: oklch(0.15 0.0018 275);
+    --default-soft-hover: oklch(0.94 0.006 275 / 0.6);
+    --field-background: oklch(1 0.006 275);
+    --field-border: transparent;
+    --field-border-focus: oklch(0.7281 0.005 275);
+    --field-border-hover: oklch(0.8235 0.0056 275);
+    --field-focus: oklch(1 0.006 275);
+    --field-foreground: oklch(0.15 0.0018 275);
+    --field-hover: oklch(0.9815 0.0059 275);
+    --field-placeholder: oklch(0.545 0.006 275);
+    --field-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.04), 0 1px 2px 0 oklch(0 0 0 / 0.06), 0 0 1px 0 oklch(0 0 0 / 0.06);
+    --focus: oklch(0.52 0.2 275);
+    --foreground: oklch(0.2103 0.006 275);
+    --link: oklch(0.2103 0.006 275);
+    --muted: oklch(0.545 0.006 275);
+    --overlay: oklch(1 0.006 275);
+    --overlay-foreground: oklch(0.15 0.0018 275);
+    --overlay-shadow: 0 2px 8px 0 oklch(0 0 0 / 0.06), 0 -6px 12px 0 oklch(0 0 0 / 0.03), 0 14px 28px 0 oklch(0 0 0 / 0.08);
+    --scrollbar: var(--scrollbar-thumb);
+    --scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    --scrollbar-gutter: auto;
+    --scrollbar-thumb: oklch(0.2103 0.006 275 / 0.15);
+    --scrollbar-track: transparent;
+    --scrollbar-width: thin;
+    --segment: oklch(1 0.006 275);
+    --segment-foreground: oklch(0.15 0.0018 275);
+    --separator: oklch(0.92 0.006 275);
+    --separator-secondary: oklch(0.8725 0.0054 275);
+    --separator-tertiary: oklch(0.8385 0.0052 275);
+    --success: oklch(0.7 0.17 150);
+    --success-foreground: oklch(0.15 0.05 150);
+    --success-hover: oklch(0.645 0.158 150);
+    --success-soft: oklch(0.7 0.17 150 / 0.15);
+    --success-soft-foreground: oklch(0.4901 0.0957 151.2613);
+    --success-soft-hover: oklch(0.7 0.17 150 / 0.2);
+    --surface: oklch(1 0.006 275);
+    --surface-foreground: oklch(0.15 0.0018 275);
+    --surface-hover: oklch(0.932 0.0057 275);
+    --surface-secondary: oklch(0.9524 0.006 275);
+    --surface-secondary-foreground: oklch(0.15 0.0018 275);
+    --surface-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.04), 0 1px 2px 0 oklch(0 0 0 / 0.06), 0 0 1px 0 oklch(0 0 0 / 0.06);
+    --surface-tertiary: oklch(0.9373 0.006 275);
+    --surface-tertiary-foreground: oklch(0.15 0.0018 275);
+    --warning: oklch(0.8 0.17 75);
+    --warning-foreground: oklch(0.15 0.05 75);
+    --warning-hover: oklch(0.735 0.158 75);
+    --warning-soft: oklch(0.8 0.17 75 / 0.15);
+    --warning-soft-foreground: oklch(0.5248 0.088 74.3768);
+    --warning-soft-hover: oklch(0.8 0.17 75 / 0.2);
+  }
+
+  .default-dark,
+  [data-theme="default-dark"],
+  :host(.default-dark),
+  :host([data-theme="default-dark"]) {
+    color-scheme: dark;
+
+    --accent: oklch(0.52 0.2 275);
+    --accent-foreground: oklch(0.98 0.02 275);
+    --accent-hover: oklch(0.566 0.182 275);
+    --accent-soft: oklch(0.52 0.2 275 / 0.12);
+    --accent-soft-foreground: oklch(0.6485 0.1471 275);
+    --accent-soft-hover: oklch(0.52 0.2 275 / 0.16);
+    --backdrop: oklch(0 0 0 / 0.6);
+    --background: oklch(0.12 0.006 275);
+    --background-inverse: oklch(0.9911 0.006 275);
+    --background-secondary: oklch(0.1548 0.006 275);
+    --background-tertiary: oklch(0.1897 0.006 275);
+    --border: oklch(0.28 0.006 275);
+    --border-secondary: oklch(0.3796 0.0048 275);
+    --border-tertiary: oklch(0.472 0.0042 275);
+    --danger: oklch(0.52 0.17 27);
+    --danger-foreground: oklch(0.98 0.017 27);
+    --danger-hover: oklch(0.566 0.1547 27);
+    --danger-soft: oklch(0.52 0.17 27 / 0.15);
+    --danger-soft-foreground: oklch(0.6485 0.123 26.2934);
+    --danger-soft-hover: oklch(0.52 0.17 27 / 0.2);
+    --default: oklch(0.274 0.006 275);
+    --default-foreground: oklch(0.98 0.0006 275);
+    --default-hover: oklch(0.3022 0.0058 275);
+    --default-soft: oklch(0.274 0.006 275 / 0.5);
+    --default-soft-foreground: oklch(0.98 0.0006 275);
+    --default-soft-hover: oklch(0.274 0.006 275 / 0.6);
+    --field-background: oklch(0.2103 0.006 275);
+    --field-border: transparent;
+    --field-border-focus: oklch(0.4404 0.0048 275);
+    --field-border-hover: oklch(0.3514 0.0054 275);
+    --field-focus: oklch(0.2103 0.006 275);
+    --field-foreground: oklch(0.98 0.0006 275);
+    --field-hover: oklch(0.227 0.0059 275);
+    --field-placeholder: oklch(0.705 0.006 275);
+    --field-shadow: 0 0 0 0 transparent inset;
+    --focus: oklch(0.52 0.2 275);
+    --foreground: oklch(0.9911 0.006 275);
+    --link: oklch(0.9911 0.006 275);
+    --muted: oklch(0.705 0.006 275);
+    --overlay: oklch(0.2103 0.006 275);
+    --overlay-foreground: oklch(0.98 0.0006 275);
+    --overlay-shadow: 0 0 1px 0 oklch(1 0 0 / 0.3) inset;
+    --scrollbar: var(--scrollbar-thumb);
+    --scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    --scrollbar-gutter: auto;
+    --scrollbar-thumb: oklch(0.9911 0.006 275 / 0.15);
+    --scrollbar-track: transparent;
+    --scrollbar-width: thin;
+    --segment: oklch(0.3964 0.006 275);
+    --segment-foreground: oklch(0.98 0.0006 275);
+    --separator: oklch(0.25 0.006 275);
+    --separator-secondary: oklch(0.3258 0.0052 275);
+    --separator-tertiary: oklch(0.3565 0.005 275);
+    --success: oklch(0.7 0.17 150);
+    --success-foreground: oklch(0.15 0.05 150);
+    --success-hover: oklch(0.645 0.158 150);
+    --success-soft: oklch(0.7 0.17 150 / 0.12);
+    --success-soft-foreground: oklch(0.7794 0.1227 150.6259);
+    --success-soft-hover: oklch(0.7 0.17 150 / 0.16);
+    --surface: oklch(0.2103 0.006 275);
+    --surface-foreground: oklch(0.98 0.0006 275);
+    --surface-hover: oklch(0.2719 0.0056 275);
+    --surface-secondary: oklch(0.257 0.006 275);
+    --surface-secondary-foreground: oklch(0.98 0.0006 275);
+    --surface-shadow: 0 0 0 0 transparent inset;
+    --surface-tertiary: oklch(0.2721 0.006 275);
+    --surface-tertiary-foreground: oklch(0.98 0.0006 275);
+    --warning: oklch(0.8 0.17 75);
+    --warning-foreground: oklch(0.15 0.05 75);
+    --warning-hover: oklch(0.735 0.158 75);
+    --warning-soft: oklch(0.8 0.17 75 / 0.12);
+    --warning-soft-foreground: oklch(0.8521 0.1221 74.7374);
+    --warning-soft-hover: oklch(0.8 0.17 75 / 0.16);
+  }
+
+  @media (forced-colors: active) {
+    :root,
+    :host {
+      --accent: Highlight;
+      --accent-foreground: HighlightText;
+      --background: Canvas;
+      --border: ButtonBorder;
+      --default: ButtonFace;
+      --default-foreground: ButtonText;
+      --field-background: Field;
+      --field-border: ButtonBorder;
+      --field-foreground: FieldText;
+      --focus: CanvasText;
+      --foreground: CanvasText;
+      --link: LinkText;
+      --muted: GrayText;
+      --overlay: Canvas;
+      --overlay-foreground: CanvasText;
+      --separator: ButtonBorder;
+      --surface: Canvas;
+      --surface-foreground: CanvasText;
+      --surface-secondary: Canvas;
+      --surface-tertiary: Canvas;
+    }
+  }
+}

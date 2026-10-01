@@ -5,8 +5,8 @@
  * what actually changed about the theme rather than an incidental reordering.
  */
 
-import type {deriveTheme} from "./derive";
-import type {Scheme, ThemePreset, TokenSet} from "./preset";
+import type {deriveTheme} from "./derive.ts";
+import type {Scheme, ThemePreset, TokenSet} from "./preset.ts";
 
 type Derived = ReturnType<typeof deriveTheme>;
 

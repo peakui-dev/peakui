@@ -1,9 +1,9 @@
 import {describe, expect, it} from "vitest";
 
-import type {ThemePreset} from "./preset";
+import type {ThemePreset} from "./preset.ts";
 
-import {deriveTheme} from "./derive";
-import {emitVariablesCss} from "./emit";
+import {deriveTheme} from "./derive.ts";
+import {emitVariablesCss} from "./emit.ts";
 
 const preset: ThemePreset = {
   id: "test",
