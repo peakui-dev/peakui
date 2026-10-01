@@ -71,6 +71,62 @@ as a standalone artifact for consumers who are not on React (`styling.md`), and 
 pseudo-classes exist. A `data-*`-only rule means that consumer gets no hover and no disabled state at
 all. This is still not a licence for `is-*` classes — those are forbidden either way.
 
+## Concentric nesting
+
+A nested element inside a rounded container needs **its own** radius. Reuse the container's and the
+arcs lose a common centre: the diagonal gap goes uneven and the corner reads as pinched.
+
+```
+R_inner = max(0, R_outer − padding − border)
+```
+
+Use the utility pair; do not hand-roll the arithmetic.
+
+```css
+.card {
+  @apply concentric-host;
+  --concentric-radius: var(--radius-xl);
+  --concentric-pad-inline: calc(var(--spacing) * 4);
+}
+
+.card__media {
+  @apply concentric-inner;
+}
+```
+
+Two decisions inside the utility worth knowing:
+
+- **One radius, not per-axis — deliberately against the geometry.** Strictly, with
+  `padding-inline ≠ padding-block` no circular radius is concentric: for the arcs to share a centre
+  the semi-axes must be `R − pad-inline` and `R − pad-block`, i.e. an *ellipse*. We don't do that,
+  because **Figma cannot express an elliptical corner** — one value per corner is all it has. Any
+  handoff therefore specifies a scalar, and emitting an ellipse would put the implementation
+  permanently at odds with the design source. No major system (Material, Spectrum, Polaris, Carbon,
+  Tokens Studio) computes per-axis either.
+- **With unequal padding, the larger inset wins.** Deriving from the smaller one would give a radius
+  bigger than the space on the tight axis, pushing the inner arc toward the outer one — which is the
+  original defect. The larger inset makes the corner marginally squarer and is always safe.
+  Verified in-engine: `pad-inline: 8px; pad-block: 16px` on a 24px container computes `8px`, as does
+  the reverse ordering.
+- **It belongs in CSS, not in a build-time token.** Padding is often responsive (container queries),
+  and a baked number stops being concentric the moment the padding changes.
+
+The rule is platform-level, not taste: iOS 26 ships `ConcentricRectangle` with the same zero-clamping
+semantics when the inset exceeds the container's radius.
+
+## Spacing hierarchy
+
+Proximity is what groups things, so the gaps inside a group must be smaller than the gaps between
+groups:
+
+```
+gap(within a group) < gap(between groups) ≤ container padding
+```
+
+A card's own padding is at least its largest inner gap — otherwise the group reads as touching its
+edge rather than as a unit. Express gaps with `gap` on a flex/grid container, never with margins on
+children, so the hierarchy stays readable in one place.
+
 ## Tailwind v4 mechanics
 
 ### `@apply` versus plain CSS
@@ -172,3 +228,6 @@ system colours, so a component only handles its **structural** part — keeping 
 | `@apply` split across five consecutive lines                   | One grouped `@apply`                                  |
 | `:where()` around a component's own modifier                   | Let modifiers keep their specificity                  |
 | Hand-written `color-mix()` for a theme colour                  | Derived tokens come from the theme, not the component |
+| The container's radius reused on a nested element              | `@apply concentric-inner` — see Concentric nesting    |
+| `R_inner` arithmetic written out by hand in a component        | Use the utility pair; it handles both axes and the clamp |
+| Inner gaps ≥ gaps between groups                              | Tighten the inner gaps — proximity is what groups      |

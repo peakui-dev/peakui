@@ -20,3 +20,55 @@
 @utility no-highlight {
   -webkit-tap-highlight-color: transparent;
 }
+
+/*
+ * ---------- Концентрическое вложение ----------
+ *
+ * Вложенный элемент внутри скруглённого контейнера обязан иметь СВОЙ радиус: при одинаковом
+ * border-radius дуги теряют общий центр, зазор по диагонали становится шире, чем у кромок, и угол
+ * читается как защемлённый. Правило:
+ *
+ *   R_inner = max(0, R_outer − padding − border)
+ *
+ * Радиус ОДИН, а не по осям — и это осознанный выбор против геометрии.
+ *
+ * Строго говоря, при padding-inline ≠ padding-block концентричного кругового радиуса не существует:
+ * чтобы дуги имели общий центр, полуоси обязаны быть R−pad_inline и R−pad_block, то есть угол
+ * эллиптический. Мы так не делаем по одной причине: Figma не умеет выражать эллиптический угол —
+ * только одно значение. Любая передача из дизайна задаст скаляр, и эллипс в CSS означал бы
+ * постоянное расхождение реализации с источником дизайна. Ни одна известная система (Material,
+ * Spectrum, Polaris, Carbon, Tokens Studio) по осям тоже не считает.
+ *
+ * При разных отступах берётся БОЛЬШИЙ. Вывод из меньшего дал бы радиус больше посадочного места на
+ * тесной оси, внутренняя дуга подошла бы к внешней — это и есть исходный дефект. Больший отступ
+ * даёт угол чуть квадратнее идеала и безопасен всегда.
+ *
+ * Правило платформенное, а не вкусовое: в iOS 26 это ConcentricRectangle с той же семантикой
+ * обнуления, когда отступ превышает радиус контейнера.
+ *
+ * Контракт: хост публикует геометрию, вложенный элемент её потребляет.
+ *
+ *   .card        { @apply concentric-host;  --concentric-radius: var(--radius-xl);
+ *                                          --concentric-pad-inline: calc(var(--spacing) * 4); }
+ *   .card__media { @apply concentric-inner; }
+ */
+@utility concentric-host {
+  --concentric-inner: max(
+    0px,
+    calc(
+      var(--concentric-radius, var(--radius-lg)) -
+        max(
+          var(--concentric-pad-inline, 0px),
+          var(--concentric-pad-block, var(--concentric-pad-inline, 0px))
+        ) - var(--concentric-border, 0px)
+    )
+  );
+}
+
+@utility concentric-inner {
+  /* Логические свойства, чтобы RTL не ломал геометрию. */
+  border-start-start-radius: var(--concentric-inner);
+  border-start-end-radius: var(--concentric-inner);
+  border-end-start-radius: var(--concentric-inner);
+  border-end-end-radius: var(--concentric-inner);
+}
