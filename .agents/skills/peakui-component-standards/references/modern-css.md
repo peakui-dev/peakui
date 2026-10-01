@@ -92,6 +92,26 @@ Auto-growing inputs and textareas without a JS measure loop.
 
 Without support, fall back to rows or a `ResizeObserver` — not to nothing.
 
+### `corner-shape` / `superellipse()` — squircles
+
+The one genuinely new thing in card geometry, and the reason the concentric formula is an
+approximation rather than a law.
+
+```css
+@supports (corner-shape: squircle) {
+  .card { corner-shape: squircle; }   /* squircle == superellipse(2), the iOS look */
+}
+```
+
+Status as of early 2026: **Chrome / Edge 139+ only** (shipped August 2025), absent from Firefox and
+Safari, and **not Baseline**. So: progressive enhancement, never load-bearing — `border-radius`
+remains the shape everyone actually sees.
+
+**It interacts with concentric nesting.** `R_inner = max(0, R_outer − padding − border)` is derived
+for *circular* arcs. On a superellipse the visually concentric inner shape is not simply `R − P`,
+which is partly why Apple shipped an API instead of publishing a formula. If a component opts into
+`corner-shape`, treat the inner radius as approximate and check it by eye.
+
 ### Native `popover` and CSS anchor positioning
 
 **Do not mix these with RAC overlays.** RAC's `Popover` owns the top layer, focus containment and

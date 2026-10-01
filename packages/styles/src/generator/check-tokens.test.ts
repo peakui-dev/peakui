@@ -57,6 +57,24 @@ describe("checkTokens", () => {
     ).toContainEqual(expect.stringMatching(/--color-ghost/));
   });
 
+  it("не ругается на контрактное свойство с фолбэком — оно опционально по замыслу", () => {
+    expect(
+      checkTokens({
+        componentCss: {
+          "card.css": ".card { border-radius: var(--card-own-radius, var(--radius-lg)); }",
+        },
+      }).errors,
+    ).toEqual([]);
+  });
+
+  it("всё равно ловит опечатку в глобальном неймспейсе, даже с фолбэком", () => {
+    // Фолбэк делает ссылку рабочей, но --color-* это общий набор: опечатка там — баг,
+    // который фолбэк лишь маскирует.
+    expect(
+      checkTokens({componentCss: {"card.css": ".card { color: var(--color-nope, red); }"}}).errors,
+    ).toContainEqual(expect.stringMatching(/--color-nope/));
+  });
+
   it("ловит числовой токен в components/*.css", () => {
     expect(
       checkTokens({componentCss: {"chip.css": ".chip { color: var(--color-accent-9); }"}}).errors,

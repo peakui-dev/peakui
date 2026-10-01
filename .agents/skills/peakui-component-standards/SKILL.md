@@ -221,6 +221,10 @@ export const chipVariants = tv({base: "inline-flex px-2 py-1 rounded-full"});
 // ❌ Hardcoded Tailwind in JSX
 <span className="px-4 py-2 bg-blue-500" />
 
+// ❌ The container's radius reused on a nested element — the arcs lose a common centre
+.card { border-radius: var(--radius-xl); }
+.card__media { border-radius: var(--radius-xl); }   // use @apply concentric-inner
+
 // ❌ Data fetching in a UI library
 useEffect(() => { fetch("/api/items"); }, []);
 
@@ -286,6 +290,8 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 - [ ] Base class carries the default (`md`) size; the `--md` modifier exists but is empty
 - [ ] Every interactive state written in both forms — pseudo-class **and** `data-*` — so the standalone CSS works without React
 - [ ] Per-component CSS custom properties exposed for theming
+- [ ] Nested elements use `concentric-inner`, never the container's own radius
+- [ ] Gaps within a group are smaller than gaps between groups, and the container's padding is at least the largest inner gap
 - [ ] No `classNames` prop; no `clsx`/`tailwind-merge` import; no `floating-ui`
 - [ ] No `any`; literal unions; `import type`; polymorphism via `render`
 - [ ] WCAG 2.2 AA: target size, focus not obscured, visible focus, contrast; `forced-colors` handled; reduced motion honoured

@@ -139,6 +139,19 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
     }
   }
 
+  /**
+   * Namespaces that belong to the shared set. A reference into one of these must resolve even when
+   * it carries a fallback: `var(--color-nope, red)` works, but the name is still a typo, and the
+   * fallback only hides it. Anything outside them is a local contract property — a host publishes
+   * it, a nested element consumes it — and a fallback there makes the reference optional by design.
+   */
+  const SHARED_PREFIXES = [
+    "color-", "shadow-", "radius", "text-", "font-", "ease-", "animate-",
+    "spacing", "border-width", "tracking-", "leading-",
+  ];
+  const isSharedNamespace = (token: string): boolean =>
+    SHARED_PREFIXES.some((prefix) => token === prefix || token.startsWith(prefix));
+
   const declaredAnywhere = new Set<string>([...themeSurface]);
 
   for (const theme of themes) for (const name of Object.keys(theme.tokens)) declaredAnywhere.add(name);
@@ -146,12 +159,16 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
   for (const [name, css] of Object.entries(shippedCss)) {
     const body = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-    for (const match of body.matchAll(/var\(--([\w-]+)/g)) {
+    for (const match of body.matchAll(/var\(--([\w-]+)\s*([,)])/g)) {
       const token = match[1]!;
+      const hasFallback = match[2] === ",";
 
       // A token the file declares itself (a component-level custom property) is fine.
       if (new RegExp(`--${token}\\s*:`).test(body)) continue;
       if (declaredAnywhere.has(token)) continue;
+      // A fallback makes a local contract property optional by design — it cannot resolve to
+      // nothing. In a shared namespace a fallback only masks a typo, so it still fails.
+      if (hasFallback && !isSharedNamespace(token)) continue;
 
       errors.push(
         `Необъявленный токен: ${name} ссылается на --${token}, которого нет ни в @theme, ни в темах. ` +
