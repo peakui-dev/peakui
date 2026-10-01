@@ -19,7 +19,7 @@
 - Every emitted colour token is `oklch(...)` or `oklch(... / A)` — never hex, never `rgb()`.
 - `sideEffects: false` on every package.
 - Contrast floors: **4.5:1** text pairs, **3:1** boundary tokens (`border`, `separator`, `focus`).
-- Lightness search: step 0.01 L, max 40 iterations, chroma and hue unchanged, every adjustment reported.
+- Lightness search: step 0.01 L, up to 100 iterations **in both directions** (the smaller shift wins), chroma and hue unchanged, every adjustment reported.
 - Agent-facing docs in English; specs, plans and user-facing text in Russian.
 
 ## Deferred — not in this plan
@@ -265,7 +265,7 @@ describe("ensureContrast", () => {
     expect(color.c).toBeCloseTo(0.02, 6);   // хрома не меняется
     expect(color.h).toBeCloseTo(275, 6);    // тон не меняется
   });
-  it("бросает, когда 40 шагов не хватает", () => {
+  it("бросает, когда обе стороны не дотягивают", () => {
     expect(() => ensureContrast({
       token: "impossible", fg: {l: 0.5, c: 0, h: 0, a: 1}, bg: {l: 0.5, c: 0, h: 0, a: 1}, min: 21,
     })).toThrow(/impossible/);
@@ -280,7 +280,7 @@ Expected: FAIL — module not found.
 
 - [ ] **Step 3: Implement `contrast.ts`**
 
-`mix` normalises both weights by their sum, lerps `l`/`c`/`a` linearly and `h` along the shorter arc, operating in OKLab space per the spec. `ensureContrast` measures, and while the ratio is short, steps L by 0.01 **away from the background's luminance** (down if the background is light, up if dark), capped at 40 iterations and clamped to [0,1]; it throws naming the token and the best ratio reached. A translucent `bg` is composited over an opaque base by the caller, not here.
+`mix` normalises both weights by their sum, lerps `l`/`c`/`a` linearly and `h` along the shorter arc, operating in OKLab space per the spec. `ensureContrast` measures, and while the ratio is short, steps L by 0.01 in **both** directions, up to 100 iterations each, clamped to [0,1], and keeps whichever passes with the smaller shift; it throws naming the token and the best ratio reached. One direction chosen from the background is not enough — against a mid-toned background both can pass, and 40 steps cannot even reach the ends of the range. A translucent `bg` is composited over an opaque base by the caller, not here.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
