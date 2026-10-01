@@ -1,3 +1,28 @@
+/*
+ * CONTRACT — read before editing this layer or importing it.
+ *
+ * This package does NOT import Tailwind. It ships `@theme inline`, `@utility` and
+ * `@custom-variant`, all of which EXTEND an already-declared Tailwind. A consumer therefore
+ * imports Tailwind first, and the order is load-bearing:
+ *
+ *     @import "tailwindcss";
+ *     @import "@peakui/styles/css";
+ *
+ * Reversed or with Tailwind missing, nothing here compiles and there is no error — the
+ * utilities are simply absent. `@heroui/styles` does import Tailwind itself; we do not, so
+ * every consumer owns that line.
+ *
+ * Corollary for anything consuming these classes: Tailwind finds classes by scanning source
+ * text, so a name built by interpolation never reaches the CSS. Write the whole class string
+ * and choose between whole strings:
+ *
+ *     bad   className={`bg-${role}`}
+ *     good  className={role === "accent" ? "bg-accent" : "bg-danger"}
+ *
+ * Outside the app's own sources, Tailwind needs `@source` pointed at the directory:
+ * node_modules is outside its autodetection.
+ */
+
 /* @peakui/styles — всё сразу: тема по умолчанию, база, утилиты, варианты, компоненты. */
 
 @import "./themes/default/index.css";
