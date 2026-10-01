@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+storybook-static/
+.turbo/
+.codegraph/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+playwright-report/
+test-results/
