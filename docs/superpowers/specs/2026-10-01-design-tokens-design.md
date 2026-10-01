@@ -138,6 +138,52 @@ type ThemePreset = {
 сорока, все `-hover` и `-soft`. Генератор считает смешение сам, той же математикой, и проверяет
 разрешённое значение. Руками эти сорок токенов остаются без проверки контраста навсегда.
 
+### Таблица вывода
+
+Проценты взяты у эталона — набор имён 1:1, и структура у него проверена. `mix(A p, B q)` означает
+`color-mix(in oklab, A p%, B q%)`; когда проценты не дают в сумме 100, CSS их нормализует, и
+генератор обязан повторить эту нормализацию.
+
+| Токен                    | Светлая                          | Тёмная                           |
+| ------------------------ | -------------------------------- | -------------------------------- |
+| `surface-hover`          | mix(surface 92, surface-fg 8)    | то же                            |
+| `background-secondary`   | mix(background 96, foreground 4) | то же                            |
+| `background-tertiary`    | mix(background 92, foreground 8) | то же                            |
+| `background-inverse`     | foreground                       | то же                            |
+| `default-hover`          | mix(default 96, default-fg 4)    | то же                            |
+| `accent|success|warning|danger-hover` | mix(X 90, X-fg 10)  | то же                            |
+| `default-soft`           | mix(default 50, transparent)     | то же                            |
+| `default-soft-hover`     | mix(default 60, transparent)     | то же                            |
+| `accent-soft`            | mix(accent 15, transparent)      | mix(accent 12, transparent)      |
+| `accent-soft-hover`      | mix(accent 20, transparent)      | mix(accent 16, transparent)      |
+| `danger-soft`            | mix(danger 15, transparent)      | mix(danger 15, transparent)      |
+| `danger-soft-hover`      | mix(danger 20, transparent)      | mix(danger 20, transparent)      |
+| `warning|success-soft`   | mix(X 15, transparent)           | mix(X 12, transparent)           |
+| `warning|success-soft-hover` | mix(X 20, transparent)       | mix(X 16, transparent)           |
+| `accent-soft-foreground` | mix(accent 70, foreground 30)    | mix(accent 80, foreground 30)    |
+| `danger-soft-foreground` | mix(danger 70, foreground 40)    | mix(danger 80, foreground 30)    |
+| `warning-soft-foreground`| mix(warning 80, foreground 70)   | mix(warning 80, foreground 30)   |
+| `success-soft-foreground`| mix(success 80, foreground 60)   | mix(success 80, foreground 30)   |
+| `separator-secondary`    | mix(surface 85, surface-fg 15)   | то же                            |
+| `separator-tertiary`     | mix(surface 81, surface-fg 19)   | то же                            |
+| `border-secondary`       | mix(surface 78, surface-fg 22)   | то же                            |
+| `border-tertiary`        | mix(surface 66, surface-fg 34)   | то же                            |
+| `field-hover`            | mix(field-bg 90, field-fg 2)     | то же                            |
+| `field-border-hover`     | mix(field-border 88, field-fg 10)| то же                            |
+| `field-border-focus`     | mix(field-border 74, field-fg 22)| то же                            |
+| `scrollbar-thumb`        | mix(foreground 15, transparent)  | то же                            |
+
+### Полупрозрачность и измерение контраста
+
+`mix(X p, transparent)` уменьшает **альфу**, а не светлоту: `accent-soft` это акцент с альфой 0.15, а
+не бледный акцент. Отсюда два обязательных следствия:
+
+1. Парсер и форматтер поддерживают альфу — `oklch(L C H / A)`.
+2. **Полупрозрачный токен нельзя мерить напрямую.** Перед проверкой контраста он композитится по
+   альфе на фон своей схемы — `surface` для поверхностных частей, `background` для остального, — и
+   измеряется уже результат. Проверка `accent-soft-foreground` против непосредственно
+   `accent-soft` без композитинга даёт неверный коэффициент.
+
 ### Размещение и запуск
 
 Генератор: `packages/styles/src/generator/`. Пресеты: `packages/styles/presets/`.
