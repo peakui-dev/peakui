@@ -16,14 +16,19 @@ describe("concentric nesting utilities", () => {
     expect(css).toMatch(/max\(\s*0px/);
   });
 
-  it("считает оси раздельно — скаляр ломается о padding-inline != padding-block", () => {
-    expect(css).toContain("--concentric-inline:");
-    expect(css).toContain("--concentric-block:");
-    expect(css).toMatch(/--concentric-pad-inline/);
-    expect(css).toMatch(/--concentric-pad-block/);
+  it("даёт ОДИН радиус, а не эллипс: Figma не умеет выражать эллиптический угол", () => {
+    expect(css).toContain("--concentric-inner:");
+    expect(css).not.toContain("--concentric-inline:");
+    expect(css).not.toContain("--concentric-block:");
   });
 
-  it("применяет эллиптический радиус ко всем четырём углам через логические свойства", () => {
+  it("при разных отступах берёт БОЛЬШИЙ — меньший радиус скорее квадратит, чем защемляет", () => {
+    // Вывод из меньшего отступа даёт радиус больше посадочного места на тесной оси, и внутренняя
+    // дуга подходит к внешней — это и есть исходный дефект. Больший отступ безопасен всегда.
+    expect(css).toMatch(/max\(\s*var\(--concentric-pad-inline[\s\S]*?var\(--concentric-pad-block/);
+  });
+
+  it("применяет радиус ко всем четырём углам через логические свойства", () => {
     for (const corner of [
       "border-start-start-radius",
       "border-start-end-radius",
@@ -36,6 +41,6 @@ describe("concentric nesting utilities", () => {
 
   it("у каждого входа есть дефолт, чтобы хост задавал только отличия", () => {
     expect(css).toMatch(/var\(--concentric-border,\s*[^)]+\)/);
-    expect(css).toMatch(/var\(--concentric-pad-block,\s*var\(--concentric-pad-inline/);
+    expect(css).toMatch(/var\(--concentric-radius,\s*var\(--radius-lg\)\)/);
   });
 });

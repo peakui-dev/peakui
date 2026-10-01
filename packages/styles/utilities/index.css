@@ -25,18 +25,23 @@
  * ---------- Концентрическое вложение ----------
  *
  * Вложенный элемент внутри скруглённого контейнера обязан иметь СВОЙ радиус: при одинаковом
- * border-radius дуги теряют общий центр, зазор по диагонали становится неравномерным, и появляется
- * оптическое «защемление». Правило:
+ * border-radius дуги теряют общий центр, зазор по диагонали становится шире, чем у кромок, и угол
+ * читается как защемлённый. Правило:
  *
  *   R_inner = max(0, R_outer − padding − border)
  *
- * Два отличия от распространённой формулировки, и оба существенные:
+ * Радиус ОДИН, а не по осям — и это осознанный выбор против геометрии.
  *
- * 1. Оси считаются РАЗДЕЛЬНО. При padding-inline ≠ padding-block единого R_inner не существует:
- *    визуально концентричный угол эллиптический — по горизонтали R−pad_inline, по вертикали
- *    R−pad_block. Скалярная формула здесь молча врёт.
- * 2. Считается в CSS, а не запекается в токен сборкой. Паддинг часто отзывчивый (container
- *    queries), и статическое число перестаёт быть концентричным на первом же изменении.
+ * Строго говоря, при padding-inline ≠ padding-block концентричного кругового радиуса не существует:
+ * чтобы дуги имели общий центр, полуоси обязаны быть R−pad_inline и R−pad_block, то есть угол
+ * эллиптический. Мы так не делаем по одной причине: Figma не умеет выражать эллиптический угол —
+ * только одно значение. Любая передача из дизайна задаст скаляр, и эллипс в CSS означал бы
+ * постоянное расхождение реализации с источником дизайна. Ни одна известная система (Material,
+ * Spectrum, Polaris, Carbon, Tokens Studio) по осям тоже не считает.
+ *
+ * При разных отступах берётся БОЛЬШИЙ. Вывод из меньшего дал бы радиус больше посадочного места на
+ * тесной оси, внутренняя дуга подошла бы к внешней — это и есть исходный дефект. Больший отступ
+ * даёт угол чуть квадратнее идеала и безопасен всегда.
  *
  * Правило платформенное, а не вкусовое: в iOS 26 это ConcentricRectangle с той же семантикой
  * обнуления, когда отступ превышает радиус контейнера.
@@ -44,35 +49,26 @@
  * Контракт: хост публикует геометрию, вложенный элемент её потребляет.
  *
  *   .card        { @apply concentric-host;  --concentric-radius: var(--radius-xl);
- *                                           --concentric-pad-inline: calc(var(--spacing) * 4); }
+ *                                          --concentric-pad-inline: calc(var(--spacing) * 4); }
  *   .card__media { @apply concentric-inner; }
  */
 @utility concentric-host {
-  /* Выходы контракта. Хост задаёт только входы; эти два считаются сами. */
-  --concentric-inline: max(
-    0px,
-    calc(
-      var(--concentric-radius, var(--radius-lg)) - var(--concentric-pad-inline, 0px) -
-        var(--concentric-border, 0px)
-    )
-  );
-  --concentric-block: max(
+  --concentric-inner: max(
     0px,
     calc(
       var(--concentric-radius, var(--radius-lg)) -
-        var(--concentric-pad-block, var(--concentric-pad-inline, 0px)) -
-        var(--concentric-border, 0px)
+        max(
+          var(--concentric-pad-inline, 0px),
+          var(--concentric-pad-block, var(--concentric-pad-inline, 0px))
+        ) - var(--concentric-border, 0px)
     )
   );
 }
 
 @utility concentric-inner {
-  /*
-   * Эллиптический радиус на каждый угол: первое значение — горизонтальная полуось, второе —
-   * вертикальная. Логические свойства, чтобы RTL не ломал геометрию.
-   */
-  border-start-start-radius: var(--concentric-inline) var(--concentric-block);
-  border-start-end-radius: var(--concentric-inline) var(--concentric-block);
-  border-end-start-radius: var(--concentric-inline) var(--concentric-block);
-  border-end-end-radius: var(--concentric-inline) var(--concentric-block);
+  /* Логические свойства, чтобы RTL не ломал геометрию. */
+  border-start-start-radius: var(--concentric-inner);
+  border-start-end-radius: var(--concentric-inner);
+  border-end-start-radius: var(--concentric-inner);
+  border-end-end-radius: var(--concentric-inner);
 }

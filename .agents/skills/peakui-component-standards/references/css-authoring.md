@@ -94,12 +94,20 @@ Use the utility pair; do not hand-roll the arithmetic.
 }
 ```
 
-Two things the common formulation gets wrong, and the utility handles:
+Two decisions inside the utility worth knowing:
 
-- **The axes are separate.** With `padding-inline ≠ padding-block` there is no single `R_inner` — the
-  concentric corner is an *ellipse*: `R − pad-inline` horizontally, `R − pad-block` vertically. A
-  scalar formula silently lies here. Verified in-engine: `pad-inline: 8px; pad-block: 16px` on a
-  24px container computes `16px 8px`.
+- **One radius, not per-axis — deliberately against the geometry.** Strictly, with
+  `padding-inline ≠ padding-block` no circular radius is concentric: for the arcs to share a centre
+  the semi-axes must be `R − pad-inline` and `R − pad-block`, i.e. an *ellipse*. We don't do that,
+  because **Figma cannot express an elliptical corner** — one value per corner is all it has. Any
+  handoff therefore specifies a scalar, and emitting an ellipse would put the implementation
+  permanently at odds with the design source. No major system (Material, Spectrum, Polaris, Carbon,
+  Tokens Studio) computes per-axis either.
+- **With unequal padding, the larger inset wins.** Deriving from the smaller one would give a radius
+  bigger than the space on the tight axis, pushing the inner arc toward the outer one — which is the
+  original defect. The larger inset makes the corner marginally squarer and is always safe.
+  Verified in-engine: `pad-inline: 8px; pad-block: 16px` on a 24px container computes `8px`, as does
+  the reverse ordering.
 - **It belongs in CSS, not in a build-time token.** Padding is often responsive (container queries),
   and a baked number stops being concentric the moment the padding changes.
 
