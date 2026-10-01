@@ -1,0 +1,22 @@
+/*
+ * Собственные утилиты. Компоненты применяют их через @apply, поэтому они часть публичного
+ * контракта наравне с токенами: см. references/css-authoring.md в peakui-component-standards.
+ */
+
+/* Видимый фокус. Один источник правды — иначе каждый компонент рисует свой. */
+@utility status-focused {
+  outline: var(--ring-offset-width) solid var(--color-focus);
+  outline-offset: var(--ring-offset-width);
+}
+
+/* Недоступное состояние. */
+@utility status-disabled {
+  pointer-events: none;
+  opacity: var(--disabled-opacity);
+  cursor: var(--cursor-disabled);
+}
+
+/* Снимает синюю подсветку тапа на мобильных. */
+@utility no-highlight {
+  -webkit-tap-highlight-color: transparent;
+}

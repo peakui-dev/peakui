@@ -1,0 +1,12 @@
+/*
+ * Собственные варианты для состояний, которые React Aria отдаёт через data-атрибуты.
+ * Позволяют писать hovered:bg-surface-hover вместо data-[hovered]:bg-surface-hover.
+ */
+
+@custom-variant hovered (&[data-hovered]);
+@custom-variant pressed (&[data-pressed]);
+@custom-variant focus-visible-within (&[data-focus-visible]);
+@custom-variant selected (&[data-selected]);
+@custom-variant disabled-state (&[data-disabled]);
+@custom-variant entering (&[data-entering]);
+@custom-variant exiting (&[data-exiting]);

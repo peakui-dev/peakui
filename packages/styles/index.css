@@ -1,0 +1,7 @@
+/* @peakui/styles — всё сразу: тема по умолчанию, база, утилиты, варианты, компоненты. */
+
+@import "./themes/default/index.css";
+@import "./base/base.css" layer(base);
+@import "./utilities/index.css";
+@import "./variants/index.css";
+@import "./components/index.css" layer(components);

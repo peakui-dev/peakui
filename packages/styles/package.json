@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "tokens:build": "node scripts/build-tokens.ts"
+    "tokens:build": "node scripts/build-tokens.ts",
+    "lint:package": "publint --strict && attw --pack ."
   },
   "dependencies": {
     "tailwind-variants": "^3.3.1"
@@ -15,8 +16,50 @@
     "tailwindcss": ">=4.0.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.0",
     "@types/node": "^24.0.0",
+    "publint": "^0.3.0",
     "typescript": "5.9.3",
     "vitest": "^3.2.4"
-  }
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "style": "./index.css",
+      "default": "./src/index.ts"
+    },
+    "./base": "./base/base.css",
+    "./base/*": "./base/*",
+    "./components/*.css": "./components/*.css",
+    "./css": {
+      "style": "./index.css",
+      "default": "./index.css"
+    },
+    "./generator": {
+      "types": "./src/generator/index.ts",
+      "import": "./src/generator/index.ts",
+      "default": "./src/generator/index.ts"
+    },
+    "./package.json": "./package.json",
+    "./presets": {
+      "types": "./presets/index.ts",
+      "import": "./presets/index.ts",
+      "default": "./presets/index.ts"
+    },
+    "./themes/*": "./themes/*",
+    "./themes/default": "./themes/default/index.css",
+    "./utilities": "./utilities/index.css",
+    "./variants": "./variants/index.css"
+  },
+  "files": [
+    "src",
+    "presets",
+    "themes",
+    "base",
+    "utilities",
+    "variants",
+    "components",
+    "index.css"
+  ]
 }
