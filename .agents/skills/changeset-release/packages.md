@@ -2,9 +2,12 @@
 
 ## Publishable packages
 
-| Package | Path | Current version |
-|---------|------|-----------------|
-| @peakui/react | packages/react | 0.0.2 |
-| @peakui/styles | packages/styles | 0.0.2 |
+| Package | Path |
+|---------|------|
+| @peakui/react | packages/react |
+| @peakui/styles | packages/styles |
+
+`@peakui/react` does not exist yet; it arrives with the core. Read the version from the
+package's own `package.json` — a number copied here goes stale on the next release.
 
 When bumping a lower-level package, consider whether dependent packages need a patch bump too

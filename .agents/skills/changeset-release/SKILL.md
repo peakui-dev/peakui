@@ -42,7 +42,7 @@ If multiple packages changed, list all affected packages in the changeset.
 git checkout -b release/<scope>-<description>
 ```
 
-Examples: `release/elements-input-text-fix`, `release/charts-new-pie-component`
+Examples: `release/react-input-text-fix`, `release/charts-new-pie-component`
 
 ### Step 4: Create changeset file
 
@@ -87,7 +87,7 @@ git commit -m "chore: add changeset for <scope> <bump-type>"
 
 Use conventional commit format:
 
-- `chore(elements): add changeset for v0.4.0`
+- `chore(react): add changeset for v0.4.0`
 - `chore(tables): add changeset for input fix`
 - `chore: add changeset for release`
 

@@ -4,37 +4,52 @@ Advanced patterns, API reference, and troubleshooting for E2E testing.
 
 ## Playwright Config
 
-The `playwright.config.ts` file configures test behavior:
+This is the config the repository actually has, at `apps/storybook/playwright.config.ts`.
+It lives in the app, not the repo root: Storybook is the app's dependency and the app knows
+its own port.
 
 ```typescript
 import {defineConfig, devices} from "@playwright/test";
 
+const PORT = Number(process.env.STORYBOOK_PORT ?? 6007);
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+
 export default defineConfig({
-  testDir: "./apps/storybook/e2e",
+  forbidOnly: Boolean(process.env.CI),
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
-  use: {
-    baseURL: "http://localhost:6007",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
-  },
   projects: [
     {
       name: "chromium",
       use: {...devices["Desktop Chrome"]},
     },
   ],
-  webServer: {
-    command: "pnpm run storybook",
-    url: "http://localhost:6007",
-    reuseExistingServer: !process.env.CI,
+  reporter: process.env.CI ? "html" : "list",
+  retries: process.env.CI ? 2 : 0,
+  testDir: "./e2e",
+  use: {
+    baseURL: BASE_URL,
+    screenshot: "only-on-failure",
+    trace: "on-first-retry",
+    video: "retain-on-failure",
   },
+  webServer: {
+    command: process.env.CI
+      ? `pnpm exec http-server storybook-static --port ${PORT} --silent`
+      : "pnpm dev",
+    reuseExistingServer: !process.env.CI,
+    url: BASE_URL,
+  },
+  workers: process.env.CI ? 1 : undefined,
 });
 ```
+
+Three things to keep in mind:
+
+- `testDir` is `./e2e`, relative to the app.
+- The dev server command is `pnpm dev`. There is no `pnpm run storybook` script.
+- The port comes from `STORYBOOK_PORT`, defaulting to 6007. Port 6007 is a default, not a
+  guarantee — another project may hold it, so run `STORYBOOK_PORT=<free> pnpm test:e2e`
+  rather than assuming.
 
 ## Locator Methods Reference
 
