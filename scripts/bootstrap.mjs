@@ -13,8 +13,6 @@ import {fileURLToPath} from "node:url";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const STORYBOOK_PORT = 6007;
-const NODE_FLOOR = "22.18.0";
-const PNPM_REQUIRED = "12.3.4";
 
 /** Parses "v24.21.0" or "24.21" into numbers. Missing segments count as zero. */
 function parseVersion(raw) {
@@ -107,13 +105,69 @@ export function isMcpCommandPortable(config) {
 
   return (
     server.command === "pnpm" &&
-    PORTABLE_ARGS.every((arg, i) => Array.isArray(server.args) && server.args[i] === arg)
+    PORTABLE_ARGS.every((arg, i) => Array.isArray(server.args) && server.args[i] === arg) &&
+    server.alwaysLoad === true
   );
+}
+
+/** Пороги версий живут в package.json; дублировать их здесь значит разойтись с ним. */
+export function versionFloors(pkg) {
+  return {
+    node: String(pkg?.engines?.node ?? "").replace(/[^\d.]/g, ""),
+    pnpm: String(pkg?.packageManager ?? "").split("@").pop() ?? "",
+  };
+}
+
+/** Команды хуков из обеих форм: Claude Code держит их в hooks.*, ZCode — в hooks.events.*. */
+export function hookCommands(parsed) {
+  const events = parsed?.hooks?.events ?? parsed?.hooks ?? {};
+
+  return Object.values(events)
+    .filter(Array.isArray)
+    .flatMap((matchers) => matchers.flatMap((matcher) => matcher?.hooks ?? []))
+    .map((hook) => hook?.command)
+    .filter((command) => typeof command === "string");
+}
+
+/*
+ * Судит по содержимому. Проверка существования файла объявляла здоровьем пустой {} — та же
+ * ошибка, что и документ, утверждающий несуществующее, только в новом месте.
+ */
+export function hookConfigFinding(name, parsed, expectedScripts) {
+  const commands = hookCommands(parsed);
+  const missing = expectedScripts.filter(
+    (script) => !commands.some((command) => command.includes(script)),
+  );
+
+  return {
+    name,
+    ok: missing.length === 0,
+    detail:
+      missing.length === 0
+        ? `wires ${expectedScripts.join(", ")}`
+        : `does not wire ${missing.join(", ")}`,
+  };
+}
+
+/*
+ * Пути установки chromium из вывода `playwright install --dry-run`. Существование каталога
+ * кэша ничего не доказывает: он появляется от любого браузера, а ревизия может быть старой.
+ */
+export function chromiumPaths(dryRunOutput) {
+  return String(dryRunOutput)
+    .split("\n")
+    .map((line) => line.match(/^\s*Install location:\s*(\S+)\s*$/)?.[1])
+    .filter((path) => path && /chromium/i.test(path));
+}
+
+export function storybookPort(env) {
+  return Number(env?.STORYBOOK_PORT ?? STORYBOOK_PORT);
 }
 
 /*
  * The whole state of the harness, as data. `fsLike` is injected so this stays testable
- * without a disk, and the port result is passed in because probing it is async.
+ * without a disk; the port probe and the Playwright dry-run are passed in because they are
+ * asynchronous and spawn processes.
  */
 export function collectFindings(fsLike, env = {}) {
   const root = env.root ?? ROOT;
@@ -123,8 +177,13 @@ export function collectFindings(fsLike, env = {}) {
     ok: exists,
     detail: exists ? what : `missing — ${remedy}`,
   });
-  const present = (relative, what) =>
-    state(relative, fsLike.existsSync(at(relative)), what, "see the onboarding rule");
+  const parse = (relative) => {
+    try {
+      return JSON.parse(fsLike.readFileSync(at(relative), "utf8"));
+    } catch {
+      return null;
+    }
+  };
 
   const findings = [
     state("dependencies", fsLike.existsSync(at("node_modules")), "node_modules", "run pnpm install"),
@@ -134,39 +193,53 @@ export function collectFindings(fsLike, env = {}) {
       ".codegraph/",
       "run pnpm bootstrap",
     ),
-    present(".zcode/config.json", "ZCode MCP servers and agent hooks"),
-    present(".claude/settings.json", "Claude Code agent hooks"),
   ];
 
-  if (!fsLike.existsSync(at(".mcp.json"))) {
-    findings.push({name: ".mcp.json", ok: false, detail: "missing — should be committed"});
-  } else {
-    let portable = false;
-
-    try {
-      portable = isMcpCommandPortable(JSON.parse(fsLike.readFileSync(at(".mcp.json"), "utf8")));
-    } catch {
-      portable = false;
+  for (const [file, label] of [
+    [".zcode/config.json", "ZCode"],
+    [".claude/settings.json", "Claude Code"],
+  ]) {
+    if (!fsLike.existsSync(at(file))) {
+      findings.push(state(file, false, "", `restore it from git (${label} agent hooks)`));
+      continue;
     }
+
+    findings.push(
+      hookConfigFinding(file, parse(file), ["protected-files.mjs", "post-edit.mjs"]),
+    );
+  }
+
+  if (!fsLike.existsSync(at(".mcp.json"))) {
+    findings.push({
+      name: ".mcp.json",
+      ok: false,
+      detail: "missing — it is committed; restore it with git checkout .mcp.json",
+    });
+  } else {
+    const portable = isMcpCommandPortable(parse(".mcp.json"));
 
     findings.push({
       name: ".mcp.json",
       ok: portable,
       detail: portable
-        ? "codegraph server uses the portable pnpm exec form"
-        : "codegraph server is not the portable pnpm exec form — a later `codegraph install` may have overwritten it",
+        ? "codegraph server is the portable pnpm exec form, loaded eagerly"
+        : 'not the portable form — restore with `git checkout .mcp.json`; the codegraph server must be command "pnpm", args ["exec","codegraph","serve","--mcp"], alwaysLoad true. Do NOT re-run `codegraph install`: that is what overwrites it',
     });
   }
 
-  if (env.playwrightCache) {
-    findings.push(
-      state(
-        "playwright browser",
-        fsLike.existsSync(env.playwrightCache),
-        "chromium present",
-        "run pnpm --filter @peakui/storybook exec playwright install chromium",
-      ),
-    );
+  if (env.chromiumPaths) {
+    const missing = env.chromiumPaths.filter((path) => !fsLike.existsSync(path));
+
+    findings.push({
+      name: "playwright browser",
+      ok: env.chromiumPaths.length > 0 && missing.length === 0,
+      detail:
+        env.chromiumPaths.length === 0
+          ? "could not ask playwright which revision it needs"
+          : missing.length === 0
+            ? `chromium present at the pinned revision (${env.chromiumPaths.length} path(s))`
+            : `missing ${missing.join(", ")} — run pnpm --filter @peakui/storybook exec playwright install chromium`,
+    });
   }
 
   const port = env.port ?? STORYBOOK_PORT;
@@ -175,7 +248,7 @@ export function collectFindings(fsLike, env = {}) {
     name: "storybook port",
     ok: true,
     detail: env.portBusy
-      ? `${port} is occupied by another process — Storybook will ask for a different one`
+      ? `${port} is occupied by another process — set STORYBOOK_PORT to a free one`
       : `${port} is free`,
   });
 
@@ -210,12 +283,19 @@ export function setupSteps(fsLike, root) {
 
 /* ---------- Entry point: everything below touches the machine ---------- */
 
-function playwrightCacheDir() {
-  const home = process.env.HOME ?? "";
+function readPackage() {
+  return JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+}
 
-  return process.platform === "darwin"
-    ? join(home, "Library/Caches/ms-playwright")
-    : join(home, ".cache/ms-playwright");
+/** Спрашивает у Playwright, какая ревизия ему нужна, вместо догадки по каталогу кэша. */
+function playwrightDryRun() {
+  const result = spawnSync(
+    "pnpm",
+    ["--filter", "@peakui/storybook", "exec", "playwright", "install", "--dry-run", "chromium"],
+    {encoding: "utf8"},
+  );
+
+  return `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
 }
 
 function pnpmVersion() {
@@ -223,14 +303,18 @@ function pnpmVersion() {
 }
 
 async function gather() {
+  const floors = versionFloors(readPackage());
+  const port = storybookPort(process.env);
+
   return [
-    checkNodeVersion(process.version, NODE_FLOOR),
-    checkPnpmVersion(pnpmVersion(), PNPM_REQUIRED),
+    checkNodeVersion(process.version, floors.node),
+    checkPnpmVersion(pnpmVersion(), floors.pnpm),
     ...collectFindings(
       {existsSync, readFileSync},
       {
-        playwrightCache: playwrightCacheDir(),
-        portBusy: await isPortBusy(STORYBOOK_PORT),
+        chromiumPaths: chromiumPaths(playwrightDryRun()),
+        port,
+        portBusy: await isPortBusy(port),
       },
     ),
   ];
@@ -255,9 +339,11 @@ function step(label, command, args) {
 }
 
 async function setup() {
+  const floors = versionFloors(readPackage());
+
   for (const gate of [
-    checkNodeVersion(process.version, NODE_FLOOR),
-    checkPnpmVersion(pnpmVersion(), PNPM_REQUIRED),
+    checkNodeVersion(process.version, floors.node),
+    checkPnpmVersion(pnpmVersion(), floors.pnpm),
   ]) {
     if (!gate.ok) {
       console.error(`✗ ${gate.name}: ${gate.detail}`);
@@ -278,7 +364,8 @@ Done. What this script did NOT do:
     \`codegraph install\`, so no tool regenerates it.
   • .mcp.json is committed in the portable \`pnpm exec\` form. Running
     \`codegraph install\` later overwrites it with a PATH command; \`--check\` reports that.
-  • Storybook's port ${STORYBOOK_PORT} may be held by another project. Check with --check.
+  • Storybook's port ${storybookPort(process.env)} may be held by another project, in which
+    case set STORYBOOK_PORT to a free one. Check with --check.
 
 Verify with: pnpm bootstrap --check`);
 }

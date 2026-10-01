@@ -28,7 +28,7 @@ pnpm bootstrap
 | --- | --- | --- |
 | Version gates | A version below the floor fails later, in Vite or pnpm, where the cause is unreadable | never |
 | `pnpm install` | — | never |
-| `pnpm --filter @peakui/storybook exec playwright install chromium` | e2e has no browser otherwise, and fails before its first assertion | the browser is already cached |
+| `pnpm --filter @peakui/storybook exec playwright install chromium` | e2e has no browser otherwise, and fails before its first assertion | never skipped — Playwright itself exits early when the pinned revision is present |
 | `pnpm exec codegraph init` | Builds `.codegraph/`, the index every CodeGraph tool reads | `.codegraph/` already exists, so a second run is cheap |
 
 ## What bootstrap does not do
@@ -70,7 +70,8 @@ on your own initiative.
 
 | Symptom | Cause | What to do |
 | --- | --- | --- |
-| `storybook dev` offers a different port, or exits under `--ci` | 6007 is held by another project | `STORYBOOK_PORT=<free> pnpm test:e2e`, or free 6007 |
+| `pnpm test:e2e` fails with "http://127.0.0.1:6007/index.json is already used" | 6007 is held by another project | `STORYBOOK_PORT=<free> pnpm test:e2e`. The error is deliberate: Playwright refuses to reuse a server it did not start, so a foreign Storybook is never mistaken for ours |
+| `pnpm dev` offers a different port | 6007 is held by another project | `pnpm exec storybook dev --host 127.0.0.1 --port <free> --no-open`; `STORYBOOK_PORT` does not reach the `dev` script, because pnpm does not expand variables in script bodies |
 | e2e fails before its first assertion | no Playwright browser | `pnpm --filter @peakui/storybook exec playwright install chromium` — the package owns `@playwright/test`, so the bare `pnpm exec` form does not resolve from the root |
 | CodeGraph MCP tools are absent | the server did not start | `.mcp.json` must call `pnpm`, never a bare `codegraph` |
 | CodeGraph answers "not initialized" | no index | the human runs `pnpm bootstrap`; do not index yourself |

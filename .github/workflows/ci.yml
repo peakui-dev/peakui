@@ -32,3 +32,26 @@ jobs:
       - run: pnpm check:tokens
 
       - run: pnpm lint:package
+
+      # Тесты скриптов харнеса: bootstrap и агентские хуки. Без этого шага регрессия в
+      # compareVersions или collectFindings проходит в main зелёной.
+      - run: pnpm test:ai
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @peakui/storybook exec playwright install --with-deps chromium
+
+      # Собирает статику и гоняет e2e против неё, включая аудит WCAG 2.2 AA.
+      - run: pnpm test:e2e:ci

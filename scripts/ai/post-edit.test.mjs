@@ -5,6 +5,7 @@ import {
   buildCommands,
   filterAvailable,
   filterFileErrors,
+  typecheckReport,
   typecheckTarget,
 } from "./post-edit.mjs";
 
@@ -81,4 +82,32 @@ test("отсутствующий бинарник отбрасывается: х
   ]);
   assert.deepEqual(filterAvailable(cmds, () => false), []);
   assert.deepEqual(filterAvailable(cmds, () => true), cmds);
+});
+
+test("сбой самого tsc не теряется: ошибка конфига приходит в stdout при пустом stderr", () => {
+  // tsc пишет TS5058 в stdout, а не в stderr, и без строки (line,col) — прежний код молчал.
+  const report = typecheckReport({
+    status: 1,
+    stdout: "error TS5058: The specified path does not exist: 'packages/react/tsconfig.json'.",
+    stderr: "",
+    target: "packages/react/src/a.ts",
+  });
+
+  assert.match(report, /TS5058/);
+});
+
+test("ошибки типов целевого файла по-прежнему отчитываются с количеством", () => {
+  const report = typecheckReport({
+    status: 1,
+    stdout: "packages/react/src/a.ts(1,1): error TS7006: Parameter 'e' implicitly has an 'any' type.",
+    stderr: "",
+    target: "packages/react/src/a.ts",
+  });
+
+  assert.match(report, /1 ошибок/);
+  assert.match(report, /TS7006/);
+});
+
+test("успешный tsc не отчитывается ни о чём", () => {
+  assert.equal(typecheckReport({status: 0, stdout: "", stderr: "", target: "a.ts"}), null);
 });

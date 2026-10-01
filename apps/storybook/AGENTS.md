@@ -21,8 +21,13 @@ From the repo root the same work runs as `pnpm dev:storybook`, `pnpm build:story
 `pnpm test:e2e`, `pnpm test:e2e:ci`.
 
 **Port 6007 is a default, not a guarantee.** `storybook dev` prompts for another port when 6007 is
-taken and exits on `--ci`. Playwright reads `STORYBOOK_PORT`, so a run against a different port is
-`STORYBOOK_PORT=6017 pnpm test:e2e`.
+taken and exits on `--ci`. Playwright reads `STORYBOOK_PORT` and launches Storybook itself on that
+port, so `STORYBOOK_PORT=6017 pnpm test:e2e` works. The `dev` script cannot: pnpm does not expand
+`${VAR}` in a script body and passes it to Storybook literally, so a manual server on another port is
+`pnpm exec storybook dev --host 127.0.0.1 --port 6017 --no-open`.
+
+Playwright never reuses a server it did not start (`reuseExistingServer: false`). If 6007 is held by
+another project it fails with "already used" instead of silently testing that project's Storybook.
 
 ## Layout
 
@@ -103,7 +108,22 @@ agent-browser a11y --tags wcag2a,wcag2aa,wcag22aa
 
 The audit command is `a11y`. There is no `agent-browser axe`.
 
-## Accessibility is a build gate
+## Accessibility
 
-`preview.tsx` sets `a11y.test: "error"`, so an addon-a11y violation fails rather than warns. The
-floor is WCAG 2.2 AA plus `forced-colors`. Lowering this flag to get a story green is not a fix.
+The floor is WCAG 2.2 AA plus `forced-colors`.
+
+**The gate is `e2e/foundations.a11y.spec.ts`, not the addon.** `preview.tsx` sets
+`a11y.test: "error"`, but nothing consumes that flag here: it needs `@storybook/addon-vitest`, which
+this app does not install, and `storybook build` checks no accessibility. The addon gives a panel in
+the Storybook UI and nothing more.
+
+The spec audits a story by navigating to `/iframe.html?id=<story-id>` and running axe over the whole
+page. Do not audit through the manager with a frame selector: `injectAxe` only reaches the page's
+main frame, and `checkA11y(page, "#storybook-preview-iframe")` therefore measures the iframe element
+in the manager rather than the story inside it — it reports success having inspected nothing. That
+exact mistake shipped here once and hid a real contrast defect.
+
+Two exclusions are in the spec, each with its reason in a comment: the `status-disabled` demos, which
+carry `opacity: 0.5` by design and which WCAG 1.4.3 exempts as inactive components, and
+`.bg-accent-hover`, a confirmed token-layer defect tracked in the ecosystem backlog. Adding an
+exclusion to turn a story green is not a fix; adding one with a tracked reason is.

@@ -5,11 +5,16 @@ import {test} from "node:test";
 import {
   checkNodeVersion,
   checkPnpmVersion,
+  chromiumPaths,
   collectFindings,
   formatReport,
+  hookCommands,
+  hookConfigFinding,
   isMcpCommandPortable,
   isPortBusy,
   setupSteps,
+  storybookPort,
+  versionFloors,
 } from "./bootstrap.mjs";
 
 test("checkNodeVersion rejects below the floor and names the actual version", () => {
@@ -69,7 +74,12 @@ test("isPortBusy sees a listening port and a free one", async () => {
 test("isMcpCommandPortable accepts the pnpm exec form", () => {
   const config = {
     mcpServers: {
-      codegraph: {type: "stdio", command: "pnpm", args: ["exec", "codegraph", "serve", "--mcp"]},
+      codegraph: {
+        type: "stdio",
+        command: "pnpm",
+        args: ["exec", "codegraph", "serve", "--mcp"],
+        alwaysLoad: true,
+      },
     },
   };
 
@@ -148,4 +158,90 @@ test("setupSteps always installs dependencies and the browser", () => {
     steps.some((s) => s.args.includes("playwright")),
     true,
   );
+});
+
+test("versionFloors читает значения из package.json, а не хранит свои", () => {
+  const floors = versionFloors({
+    engines: {node: ">=22.18"},
+    packageManager: "pnpm@12.3.4",
+  });
+
+  assert.equal(floors.node, "22.18");
+  assert.equal(floors.pnpm, "12.3.4");
+});
+
+test("isMcpCommandPortable требует alwaysLoad: сервер без него не загружается заранее", () => {
+  const withoutFlag = {
+    mcpServers: {codegraph: {command: "pnpm", args: ["exec", "codegraph", "serve", "--mcp"]}},
+  };
+
+  assert.equal(isMcpCommandPortable(withoutFlag), false);
+
+  const withFlag = {
+    mcpServers: {
+      codegraph: {
+        command: "pnpm",
+        args: ["exec", "codegraph", "serve", "--mcp"],
+        alwaysLoad: true,
+      },
+    },
+  };
+
+  assert.equal(isMcpCommandPortable(withFlag), true);
+});
+
+test("hookCommands достаёт команды из обеих форм конфига", () => {
+  const claude = {
+    hooks: {
+      PreToolUse: [{matcher: "Edit|Write", hooks: [{type: "command", command: "node a.mjs"}]}],
+    },
+  };
+  const zcode = {
+    hooks: {
+      events: {
+        PostToolUse: [{matcher: "Edit|Write", hooks: [{type: "command", command: "node b.mjs"}]}],
+      },
+    },
+  };
+
+  assert.deepEqual(hookCommands(claude), ["node a.mjs"]);
+  assert.deepEqual(hookCommands(zcode), ["node b.mjs"]);
+  assert.deepEqual(hookCommands({}), []);
+});
+
+test("hookConfigFinding судит по содержимому, а не по наличию файла", () => {
+  const expected = ["protected-files.mjs", "post-edit.mjs"];
+  const good = {
+    hooks: {
+      PreToolUse: [{hooks: [{command: "node scripts/ai/protected-files.mjs"}]}],
+      PostToolUse: [{hooks: [{command: "node scripts/ai/post-edit.mjs"}]}],
+    },
+  };
+
+  assert.equal(hookConfigFinding("x", good, expected).ok, true);
+  // Пустой объект — файл есть, хуков нет. Прежняя проверка существования звала это здоровьем.
+  assert.equal(hookConfigFinding("x", {}, expected).ok, false);
+  assert.match(hookConfigFinding("x", {}, expected).detail, /protected-files\.mjs/);
+});
+
+test("chromiumPaths берёт закреплённую ревизию из вывода playwright, а не каталог кэша", () => {
+  const dryRun = [
+    "Chrome for Testing 153.0.8010.12 (playwright chromium v1243)",
+    "  Install location:    /c/ms-playwright/chromium-1243",
+    "FFmpeg (playwright ffmpeg v1011)",
+    "  Install location:    /c/ms-playwright/ffmpeg-1011",
+    "Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243)",
+    "  Install location:    /c/ms-playwright/chromium_headless_shell-1243",
+  ].join("\n");
+
+  assert.deepEqual(chromiumPaths(dryRun), [
+    "/c/ms-playwright/chromium-1243",
+    "/c/ms-playwright/chromium_headless_shell-1243",
+  ]);
+  assert.deepEqual(chromiumPaths(""), []);
+});
+
+test("storybookPort уважает STORYBOOK_PORT", () => {
+  assert.equal(storybookPort({STORYBOOK_PORT: "6017"}), 6017);
+  assert.equal(storybookPort({}), 6007);
 });

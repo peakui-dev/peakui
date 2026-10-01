@@ -10,7 +10,7 @@ const PROTECTED_PATTERNS = [
   /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock)$/,
   /scripts\/parity\/before\//, // снапшоты «до» — святое
   /(^|\/)\.codegraph\//,
-  /^heroui\//, // вендоренный референс
+  /(^|\/)heroui(-cli|-mcp)?\//, // вендоренные референсы: путь приходит абсолютным
   /storybook-static\//,
   /(^|\/)dist(-ssr)?\//,
 ];

@@ -28,3 +28,20 @@ test("обычные исходники не защищены", () => {
   assert.equal(isProtected("packages/elements/src/components/Button/Button.tsx"), false);
   assert.equal(isProtected("AGENTS.md"), false);
 });
+
+test("вендоренный heroui защищён на любой форме пути, не только относительной от корня", () => {
+  // Claude Code присылает абсолютный file_path — анкер ^ его не ловил, и защита была мертва.
+  assert.equal(
+    isProtected("/Users/vlad/Desktop/projects/peakui-company/heroui/packages/react/src/index.ts"),
+    true,
+  );
+  assert.equal(isProtected("../heroui/packages/react/src/index.ts"), true);
+  assert.equal(isProtected("heroui/packages/react/src/index.ts"), true);
+  assert.equal(isProtected("../heroui-cli/src/index.ts"), true);
+  assert.equal(isProtected("../heroui-mcp/apps/server/index.ts"), true);
+});
+
+test("файл, лишь названный heroui, не защищён", () => {
+  assert.equal(isProtected("packages/react/src/heroui.ts"), false);
+  assert.equal(isProtected("docs/heroui-notes.md"), false);
+});

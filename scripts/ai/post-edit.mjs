@@ -78,23 +78,44 @@ function run(command) {
   return spawnSync(BIN_DIR + command, {encoding: "utf8", timeout: TIMEOUT_MS, shell: true});
 }
 
+/*
+ * Отчёт о прогоне tsc, или null если докладывать нечего.
+ *
+ * Ошибку уровня конфига (TS5058 и родственные) tsc пишет в stdout и без префикса
+ * «(строка,столбец)», поэтому filterFileErrors её не видит. Прежний код смотрел в таких
+ * случаях только в stderr — а он пуст — и молчал: петля типов не выполнялась, а хук
+ * сообщал об успехе. Это ровно тот класс тихого отказа, из-за которого хук был нацелен
+ * на несуществующий пакет и никто этого не замечал.
+ */
+export function typecheckReport({status, stdout, stderr, target, maxLines}) {
+  if (status === 0) return null;
+
+  const {count, text} = filterFileErrors(stdout, target, maxLines);
+
+  if (count > 0) return `[post-edit] tsc: ${target} — ${count} ошибок\n${text}`;
+
+  const raw = `${(stderr || "").trim()}\n${(stdout || "").trim()}`.trim();
+
+  if (!raw) return null;
+
+  return `[post-edit] tsc упал сам:\n${raw.split("\n").slice(0, 5).join("\n")}`;
+}
+
 function runTypecheck(target) {
   mkdirSync("node_modules/.cache/ai-ts-hook", {recursive: true});
   const cmd = `tsc -p packages/react/tsconfig.json --noEmit --incremental --tsBuildInfoFile ${TS_CACHE}`;
+
+  if (filterAvailable([cmd], (bin) => existsSync(BIN_DIR + bin)).length === 0) return;
+
   const res = run(cmd);
+  const report = typecheckReport({
+    status: res.status,
+    stdout: res.stdout,
+    stderr: res.stderr,
+    target,
+  });
 
-  if (res.status !== 0) {
-    const {count, text} = filterFileErrors(res.stdout, target);
-
-    if (count > 0) {
-      process.stdout.write(`[post-edit] tsc: ${target} — ${count} ошибок\n${text}\n`);
-    } else if ((res.stderr || "").trim()) {
-      // tsc упал сам (не ошибки типов) — показать причину
-      process.stdout.write(
-        `[post-edit] tsc: ${(res.stderr || "").trim().split("\n").slice(0, 5).join("\n")}\n`,
-      );
-    }
-  }
+  if (report) process.stdout.write(`${report}\n`);
 }
 
 function main() {

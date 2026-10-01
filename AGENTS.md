@@ -2,8 +2,9 @@
 
 PeakUI is the UI component library of the PeakUI Design System: a pnpm workspaces monorepo.
 
-Follow **HeroUI v3**, vendored read-only at `/heroui` (gitignored). Your training data is mostly
-HeroUI v2, whose architecture is the opposite of ours — never write a component from memory.
+Follow **HeroUI v3**, vendored read-only at `../heroui` — beside this repository, not inside it.
+Your training data is mostly HeroUI v2, whose architecture is the opposite of ours: never write a
+component from memory.
 
 ## First run
 
@@ -28,8 +29,8 @@ and Read serve files you already know. The MCP server is registered in `.mcp.jso
 **Completion criterion:** quote the first query's result in your plan or task summary. Context
 work with no quoted CodeGraph result is not done.
 
-Red flags — stop and run the query: "the repo is small, I'll just read the files"; "I already
-know where this lives"; "Grep is faster here"; "I'll run it after I look around".
+Red flags — stop and run the query: "the repo is small, I'll just read the files"; "I already know
+where this lives"; "Grep is faster here"; "I'll run it after I look around".
 
 | Excuse | Reality |
 | --- | --- |
@@ -55,7 +56,8 @@ not permission to skip: report it and stop.
 | CodeGraph | `pnpm codegraph` / `codegraph:sync` / `codegraph:status` |
 
 Port 6007 is a default, not a guarantee: `storybook dev` asks for another when it is taken and
-exits under `--ci`. Playwright reads `STORYBOOK_PORT`.
+exits under `--ci`. `STORYBOOK_PORT=<free> pnpm test:e2e` works, because Playwright starts its own
+server; `pnpm dev:storybook` ignores it, so a manual server elsewhere is `pnpm exec storybook dev --port <n>`.
 
 **Behavioral smoke (agent-browser)** — text only, never screenshots; visual regression is VRT's
 job. Open the story **iframe**, not the manager: `agent-browser open <iframe-url>` →
@@ -63,8 +65,9 @@ job. Open the story **iframe**, not the manager: `agent-browser open <iframe-url
 `agent-browser axe`. Protocol: [`apps/storybook/AGENTS.md`](apps/storybook/AGENTS.md).
 
 MCP servers are declared twice — `.mcp.json` (Claude Code) and `.zcode/config.json` (ZCode);
-formats differ, so change both. Those same two files wire the agent hooks, together with
-`.claude/settings.json`.
+formats differ, so change both. Agent hooks are wired separately: `.claude/settings.json` and the
+`hooks` block of `.zcode/config.json`. `.mcp.json` holds no hooks. `pnpm bootstrap --check` reports
+what all three actually wire, not merely that they exist.
 
 ## Architecture
 
@@ -82,16 +85,16 @@ formats differ, so change both. Those same two files wire the agent hooks, toget
   `classNames` prop.
 - **React 19** — `ref` is an ordinary prop, `use(Context)`, `"use client"` on every component.
 
-Binding library choices for the core, not a description of what is installed: RAC for
-behavior and a11y (react-aria / react-stately hooks only where RAC has no primitive),
-`tailwind-variants` for BEM class names, `@tanstack/react-table` + `@tanstack/react-virtual`,
-Recharts, `@internationalized/date`, vitest + `@testing-library/react`, Playwright for browsers.
+Binding library choices for the core, not a description of what is installed: RAC for behavior and
+a11y (react-aria / react-stately hooks only where RAC lacks a primitive), `tailwind-variants` for BEM
+names, `@tanstack/react-table` + `react-virtual`, Recharts, `@internationalized/date`, vitest +
+`@testing-library/react`, Playwright.
 
 ## Conventions
 
 - TypeScript everywhere; interfaces over types; `function` for pure functions
-- Named exports only. The exception is a tool contract: Storybook CSF and config files read a
-  default export, and it stops there
+- Named exports only. One exception, a tool contract: Storybook CSF and config files read a default
+  export, and it stops there
 - **No `forwardRef`** — React 19 passes `ref` as a prop; `displayName` only where not inferred
 - No `any`: `unknown` plus narrowing. No conditional hook calls
 - Component files are **kebab-case**, matching the BEM block and CSS file
@@ -114,9 +117,8 @@ Recharts, `@internationalized/date`, vitest + `@testing-library/react`, Playwrig
 
 ## AI Resources
 
-Everything under `.agents/` is binding: a task matching a rule or skill goes through that file
-first, and the plan or task summary cites it. Process skills (brainstorming, TDD,
-writing-plans, …) come from the superpowers plugin.
+Everything under `.agents/` is binding: a task matching a rule or skill goes through that file first,
+and the plan or task summary cites it. Process skills come from the superpowers plugin.
 
 **Rules** (`.agents/rules/`) — `onboarding`: set up a clone, diagnose the harness.
 
@@ -129,10 +131,10 @@ writing-plans, …) come from the superpowers plugin.
 Nothing here exists yet. This section holds what an agent would try to **invoke or open** —
 paths, commands, files. The binding decisions above stay normative whether or not code exists.
 
-**Reaching an item here is a stop, not a shrug.** When a task needs something listed below, do
-not treat it as absent and route around it. Say so, then either create it as part of the task or
-get a decision. Silently substituting a different path, package or command for a Planned one is
-the failure this section exists to prevent.
+**Reaching an item here is a stop, not a shrug.** When a task needs something listed below, do not
+treat it as absent and route around it: say so, then either create it as part of the task or get a
+decision. Silently substituting another path, package or command for a Planned one is the failure
+this section exists to prevent.
 
 ```
 packages/react/        # core UI — what every convention above describes
