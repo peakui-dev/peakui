@@ -1,0 +1,17 @@
+/*
+ * Единственная точка сборки CSS для Storybook.
+ *
+ * Tailwind импортируется здесь явно: @peakui/styles его не подключает — пакет рассчитан на то,
+ * что потребитель приносит Tailwind сам. Порядок обязателен: @theme inline, @utility и
+ * @custom-variant из @peakui/styles расширяют уже объявленный Tailwind.
+ */
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+/* Классы, которые Tailwind должен увидеть. node_modules за пределами автодетекта. */
+@source "../src";
+
+/*
+ * Когда появится packages/react — раскомментировать, иначе утилиты компонентов не скомпилируются:
+ * @source "../../../packages/react/src";
+ */

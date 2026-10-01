@@ -6,12 +6,23 @@
     "node": ">=22.18"
   },
   "scripts": {
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "build:storybook": "pnpm --filter @peakui/storybook build",
     "check:tokens": "pnpm --filter @peakui/styles check:tokens",
+    "codegraph": "codegraph",
+    "codegraph:status": "codegraph status",
+    "codegraph:sync": "codegraph sync",
+    "dev:storybook": "pnpm --filter @peakui/storybook dev",
     "lint:package": "pnpm -r lint:package",
     "test": "pnpm -r test",
+    "test:ai": "node --test \"scripts/**/*.test.mjs\"",
+    "test:e2e": "pnpm --filter @peakui/storybook test:e2e",
+    "test:e2e:ci": "pnpm --filter @peakui/storybook test:e2e:ci",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
+    "@colbymchenry/codegraph": "1.6.1",
+    "agent-browser": "0.38.1",
     "typescript": "5.9.3"
   }
 }
