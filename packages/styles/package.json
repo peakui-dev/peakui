@@ -4,10 +4,11 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
+    "check:tokens": "node scripts/check-tokens.ts",
+    "lint:package": "publint --strict && attw --pack .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
     "tokens:build": "node scripts/build-tokens.ts",
-    "lint:package": "publint --strict && attw --pack ."
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "tailwind-variants": "^3.3.1"

@@ -6,6 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
+    "check:tokens": "pnpm --filter @peakui/styles check:tokens",
+    "lint:package": "pnpm -r lint:package",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
   },
