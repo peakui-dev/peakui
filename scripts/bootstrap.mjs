@@ -164,7 +164,7 @@ export function collectFindings(fsLike, env = {}) {
         "playwright browser",
         fsLike.existsSync(env.playwrightCache),
         "chromium present",
-        "run pnpm exec playwright install chromium",
+        "run pnpm --filter @peakui/storybook exec playwright install chromium",
       ),
     );
   }
@@ -190,9 +190,10 @@ export function setupSteps(fsLike, root) {
   const steps = [
     {label: "install dependencies", command: "pnpm", args: ["install"]},
     {
+      // @playwright/test — зависимость apps/storybook, не корня: из корня бинарь не резолвится.
       label: "install the Playwright browser",
       command: "pnpm",
-      args: ["exec", "playwright", "install", "chromium"],
+      args: ["--filter", "@peakui/storybook", "exec", "playwright", "install", "chromium"],
     },
   ];
 
