@@ -34,7 +34,7 @@ internal layout. Keep viewport media queries for genuinely page-level decisions.
 Replaces the JS-flag-into-a-class pattern.
 
 ```css
-.field:has(> .field__error) { --field-border: var(--color-danger-9); }
+.field:has(> .field__error) { --field-border: var(--color-danger); }
 .chip:has(.chip__dismiss) { padding-inline-end: 0.25rem; }
 ```
 
@@ -44,11 +44,11 @@ is purely structural and React would otherwise need to learn about it.
 ### `color-mix()` and OKLCH for derived colours
 
 ```css
-.chip--soft { --chip-bg: color-mix(in oklch, var(--color-accent-9) 12%, transparent); }
+.chip--soft { --chip-bg: color-mix(in oklab, var(--color-accent) 12%, transparent); }
 ```
 
-Derive hover, pressed and soft variants from one token instead of declaring a parallel scale. Always
-mix `in oklch`.
+Derive hover, pressed and soft variants from one token instead of declaring a parallel scale.
+Declare colours in `oklch`, but **mix in `oklab`** — it blends more predictably.
 
 ### `text-wrap` for text parts
 

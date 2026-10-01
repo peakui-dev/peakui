@@ -264,6 +264,7 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 | RAC primitive map, deep imports, render props, when to drop to raw hooks         | `references/react-aria-components.md`   |
 | Compound structure, feature routing, context splitting, anti-patterns           | `references/compound-components.md`     |
 | tv → BEM, the CSS layer, `data-slot`, CSS custom properties, Tailwind v4 tokens  | `references/styling.md`                 |
+| Authoring the `.css`: default-size pattern, dual state forms, `@apply`, nesting, animation | `references/css-authoring.md`  |
 | Types, `render`-prop polymorphism, generic parts, ref typing                     | `references/typescript.md`              |
 | WCAG 2.2, `forced-colors`, reduced motion, aria matrix, React Aria i18n          | `references/accessibility-and-i18n.md`  |
 | Test tiers, query rules, what never to assert, VRT                              | `references/testing.md`                 |
@@ -282,6 +283,8 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 - [ ] `sideEffects: false` holds for the package
 - [ ] `tv()` emits BEM names only; every Tailwind utility is in the `.css`
 - [ ] `data-slot` on every rendered element; states via `data-*`, not `is-*`
+- [ ] Base class carries the default (`md`) size; the `--md` modifier exists but is empty
+- [ ] Every interactive state written in both forms — pseudo-class **and** `data-*` — so the standalone CSS works without React
 - [ ] Per-component CSS custom properties exposed for theming
 - [ ] No `classNames` prop; no `clsx`/`tailwind-merge` import; no `floating-ui`
 - [ ] No `any`; literal unions; `import type`; polymorphism via `render`

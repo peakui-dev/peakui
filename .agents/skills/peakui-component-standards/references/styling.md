@@ -65,8 +65,8 @@ export type ChipVariants = VariantProps<typeof chipVariants>;
 }
 
 .chip--solid {
-  --chip-bg: var(--color-accent-9);
-  --chip-fg: var(--color-accent-contrast);
+  --chip-bg: var(--color-accent);
+  --chip-fg: var(--color-accent-foreground);
 }
 ```
 
@@ -135,6 +135,9 @@ import {dataAttr} from "../../utils/assertion";
 
 Never invent `is-focused` / `is-active` classes, and never toggle classes in JS to express state.
 
+RAC sets these at runtime, so a `data-*`-only rule leaves the standalone stylesheet without hover or
+disabled styling. Write both forms — the pattern is in `css-authoring.md`.
+
 ## Class composition
 
 Use `cn` / `cx` from `tailwind-variants`, through the compose helpers. **Never** build a merger from
@@ -154,14 +157,25 @@ targeting its `data-slot` in CSS.
 Tokens are declared once with `@theme inline` and consumed as `var(--…)`.
 
 ```css
+/* packages/styles/themes/shared/theme.css — maps raw tokens to Tailwind-consumable names */
 @theme inline {
-  --color-accent-9: oklch(0.62 0.19 259);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-smooth: cubic-bezier(0.45, 0, 0.15, 1);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-surface: var(--surface);
+  --shadow-overlay: var(--overlay-shadow);
+  /* Radius derives from one multiplier: change --radius, the scale follows */
+  --radius-lg: calc(var(--radius) * 1);
 }
 ```
 
-- **OKLCH for every color** — perceptually uniform lightness, so a scale stays legible when themed.
+- **Tokens are semantic, never numbered.** `--color-accent`, `--color-surface`, `--color-muted` —
+  there is no `accent-9`. The name states the role; the theme decides the shade. A component author
+  picks a role, never "a slightly darker blue".
+- **Every background token has a matching `-foreground`.** Use the pair; never mix across pairs.
+  That pairing is the contrast guarantee, and it is verified in CI.
+- **`surface` vs `overlay`** — `surface` for non-floating parts (cards, accordions), `overlay` for
+  floating ones (popover, tooltip, modal, menu). They differ in dark mode.
+- **OKLCH to declare, `oklab` to mix** — `color-mix(in oklab, …)` blends more predictably.
 - **No raw hex or `rgb()` in a component's CSS.** Reference a token.
 - Motion uses the `--ease-*` tokens, never inline cubic-beziers.
 - Theme variants live in `packages/styles/themes/`; a component never hardcodes a theme value.
