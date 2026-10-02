@@ -161,8 +161,17 @@ and no React component:
 ```
 
 If those render styled, the framework-agnostic claim is demonstrated rather than asserted — this is
-exactly the "Direct Class Application" recipe from the reference's page. The story also gains a WCAG
-gate for free: `apps/storybook/.storybook/preview.tsx` sets `a11y.test: "error"`.
+exactly the "Direct Class Application" recipe from the reference's page.
+
+A story alone is not a gate, and `a11y.test: "error"` in `preview.tsx` does **not** make it one:
+`apps/storybook/AGENTS.md` records that nothing in this app consumes that flag — it needs
+`@storybook/addon-vitest`, which is not installed, and `storybook build` checks no accessibility. The
+real gate is a Playwright spec, so Button gets `apps/storybook/e2e/Button.spec.ts`, which audits both
+stories in the light and the dark theme and asserts that the bare `<a>` resolves a real background,
+radius and height. It audits `/iframe.html?id=<story-id>` directly: auditing through the manager with
+`checkA11y(page, "#storybook-preview-iframe")` inspects the iframe element rather than the story
+inside it and reports success having seen nothing — a mistake that shipped here once and hid a real
+contrast defect.
 
 The CSS reaches the story through the chain that already exists:
 `globals.css` → `@peakui/styles/css` → `components/index.css` in `layer(components)`.
@@ -262,7 +271,9 @@ TDD, red before green, in this order:
 5. `pnpm lint:package` (`publint --strict && attw --pack . --profile esm-only`) must stay green. The
    new TypeScript entry point may need an `--exclude-entrypoints` addition; the reference has no
    equivalent script, so this is settled by running it, not by assumption.
-6. Storybook: the two Button stories render, and the `a11y.test: "error"` gate passes.
+6. Storybook: the two Button stories render, and `apps/storybook/e2e/Button.spec.ts` passes — the
+   bare-markup contract plus a WCAG 2.2 AA audit of both stories in both themes. The addon's
+   `a11y.test: "error"` is inert in this app and proves nothing; the Playwright spec is the gate.
 
 ### Skill
 

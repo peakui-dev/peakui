@@ -64,7 +64,7 @@ import {describe, expect, it} from "vitest";
 import {buttonVariants} from "./button.styles.ts";
 
 describe("buttonVariants", () => {
-  it("emits the defaults when called with no arguments", () => {
+  it("отдаёт дефолты при вызове без аргументов", () => {
     const result = buttonVariants();
 
     expect(result).toContain("button");
@@ -80,7 +80,7 @@ describe("buttonVariants", () => {
     ["danger-soft", "button--danger-soft"],
     ["ghost", "button--ghost"],
     ["outline", "button--outline"],
-  ])("maps variant %s to %s", (variant, expected) => {
+  ])("отображает variant %s в %s", (variant, expected) => {
     expect(buttonVariants({variant})).toContain(expected);
   });
 
@@ -88,16 +88,16 @@ describe("buttonVariants", () => {
     ["sm", "button--sm"],
     ["md", "button--md"],
     ["lg", "button--lg"],
-  ])("maps size %s to %s", (size, expected) => {
+  ])("отображает size %s в %s", (size, expected) => {
     expect(buttonVariants({size})).toContain(expected);
   });
 
-  it("maps the boolean variants", () => {
+  it("отображает булевы варианты", () => {
     expect(buttonVariants({isIconOnly: true})).toContain("button--icon-only");
     expect(buttonVariants({fullWidth: true})).toContain("button--full-width");
   });
 
-  it("emits no Tailwind utility", () => {
+  it("не emit-ит ни одной утилиты Tailwind", () => {
     const result = buttonVariants({size: "lg", variant: "ghost"});
 
     for (const token of result.split(" ")) {
@@ -105,7 +105,7 @@ describe("buttonVariants", () => {
     }
   });
 
-  it("survives an unknown variant value from untyped JS", () => {
+  it("переживает неизвестное значение варианта из нетипизированного JS", () => {
     const result = buttonVariants({variant: "nope"} as never);
 
     expect(result).toContain("button");
@@ -223,6 +223,7 @@ git commit -m "feat(styles): публичная JS-поверхность — tv
 - Create: `packages/styles/components/button.css`
 - Modify: `packages/styles/components/index.css`
 - Create: `apps/storybook/src/stories/button.stories.tsx`
+- Create: `apps/storybook/e2e/Button.spec.ts`
 
 **Interfaces:**
 - Consumes: the BEM names Task 1 fixed; `buttonVariants` from Task 2.
@@ -255,10 +256,18 @@ Expected: PASS — no literal colour in `button.css`.
 - A story rendering **bare markup only** — `<button className="button button--primary">` and `<a className="button button--secondary" href="#">` — with no React component and no import from `@peakui/react`. This is the Direct Class Application recipe and the executable form of the framework-agnostic claim.
 - A story rendering, for each variant and size, the `buttonVariants({...})` output beside the hand-written class string, so a modifier that exists in `tv()` with no rule behind it in `button.css` is visible.
 
-- [ ] **Step 5: Build Storybook and confirm the a11y gate**
+- [ ] **Step 5: Build Storybook, then put Button under the real a11y gate**
 
 Run: `pnpm build:storybook`
-Expected: build succeeds. `preview.tsx` sets `a11y.test: "error"`, so a WCAG finding fails the build rather than warning.
+Expected: build succeeds.
+
+A green build is **not** an accessibility result. `apps/storybook/AGENTS.md` records that `a11y.test: "error"` in `preview.tsx` is inert here — it needs `@storybook/addon-vitest`, which this app does not install, and `storybook build` audits nothing. So write `apps/storybook/e2e/Button.spec.ts`:
+
+- One test asserting the framework-agnostic contract as a contract: the bare `a.button--secondary` resolves a non-transparent background, a radius above zero, no underline, and a height at or above the 24 px WCAG 2.2 target floor.
+- A `checkA11y` audit of both stories in `default-light` and `default-dark`, run against `/iframe.html?id=<story-id>` directly. **Not** through the manager: `checkA11y(page, "#storybook-preview-iframe")` inspects the iframe element instead of the story inside it and passes having seen nothing. The `playwright-e2e` skill still shows that broken form at line 54; `apps/storybook/AGENTS.md` is the authority here, and the contradiction is a finding to report rather than a licence to copy.
+
+Run: `STORYBOOK_PORT=<free> pnpm test:e2e`
+Expected: every test passes, Button's five among them. Playwright never reuses a server it did not start, so a held 6007 is a port to step around, not a process to kill.
 
 - [ ] **Step 6: Behavioural smoke on the story iframe**
 
