@@ -26,6 +26,20 @@
   --color-surface-tertiary: var(--surface-tertiary);
   --color-surface-tertiary-foreground: var(--surface-tertiary-foreground);
 
+  /*
+   * Заливка контрола, лежащего НА поверхности, перевыведенная против каждого уровня: --color-surface-hover
+   * посчитан только против первого уровня, и на втором с третьим он приходил бы из чужого расчёта.
+   */
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-foreground: var(--on-surface-foreground);
+  --color-on-surface-hover: var(--on-surface-hover);
+  --color-on-surface-secondary: var(--on-surface-secondary);
+  --color-on-surface-secondary-foreground: var(--on-surface-secondary-foreground);
+  --color-on-surface-secondary-hover: var(--on-surface-secondary-hover);
+  --color-on-surface-tertiary: var(--on-surface-tertiary);
+  --color-on-surface-tertiary-foreground: var(--on-surface-tertiary-foreground);
+  --color-on-surface-tertiary-hover: var(--on-surface-tertiary-hover);
+
   /* overlay — для плавающих: поповеры, тултипы, модалки, меню */
   --color-overlay: var(--overlay);
   --color-overlay-foreground: var(--overlay-foreground);

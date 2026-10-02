@@ -30,6 +30,17 @@ const FORCED_COLORS: TokenSet = {
   muted: "GrayText",
   default: "ButtonFace",
   "default-foreground": "ButtonText",
+  // on-surface по роли и есть default — нейтральная заливка контрола, только на поверхности.
+  // hover намеренно тот же ButtonFace: в режиме высокого контраста состояния красит система.
+  "on-surface": "ButtonFace",
+  "on-surface-foreground": "ButtonText",
+  "on-surface-hover": "ButtonFace",
+  "on-surface-secondary": "ButtonFace",
+  "on-surface-secondary-foreground": "ButtonText",
+  "on-surface-secondary-hover": "ButtonFace",
+  "on-surface-tertiary": "ButtonFace",
+  "on-surface-tertiary-foreground": "ButtonText",
+  "on-surface-tertiary-hover": "ButtonFace",
   accent: "Highlight",
   "accent-foreground": "HighlightText",
   border: "ButtonBorder",
