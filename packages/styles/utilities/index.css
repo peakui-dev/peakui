@@ -16,6 +16,14 @@
   cursor: var(--cursor-disabled);
 }
 
+/*
+ * Состояние ожидания. Только указатель: контрол остаётся фокусируемым и объявляется
+ * ассистивным технологиям — этим занимается RAC, а не стиль. Эталон держит ровно эту форму.
+ */
+@utility status-pending {
+  pointer-events: none;
+}
+
 /* Снимает синюю подсветку тапа на мобильных. */
 @utility no-highlight {
   -webkit-tap-highlight-color: transparent;
