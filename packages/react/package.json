@@ -1,0 +1,50 @@
+{
+  "name": "@peakui/react",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:package": "publint --strict && attw --pack . --profile esm-only",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peakui/styles": "workspace:*",
+    "tailwind-variants": "^3.3.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.0",
+    "@peakui/standard": "workspace:*",
+    "@peakui/testing": "workspace:*",
+    "@testing-library/jest-dom": "7.0.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "publint": "^0.3.0",
+    "react": "^19.3.0",
+    "react-aria-components": "^1.21.1",
+    "react-dom": "^19.3.0",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@react-aria/utils": "^3.34.1",
+    "react": ">=19.0.0",
+    "react-aria-components": "^1.21.1",
+    "react-dom": ">=19.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src"
+  ]
+}
