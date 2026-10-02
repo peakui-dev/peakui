@@ -86,6 +86,79 @@ test.describe("Button — стилевой слой и React-компонент"
     await expect(button).toBeFocused();
   });
 
+  /*
+   * Паритет с эталоном по вычисленным стилям, а не по наличию класса. Всё перечисленное отваливается
+   * молча: имя класса остаётся, правило уходит, и ни один тест на BEM-имена этого не видит.
+   *
+   * Эталон: heroui/packages/styles/components/button.css.
+   */
+  test.describe("паритет с эталоном", () => {
+    test("радиус, перенос строки и переход взяты у эталона", async ({page}) => {
+      await page.goto("/iframe.html?id=components-button--variants&globals=theme:default-light");
+
+      const button = page.getByRole("button", {name: "primary"}).first();
+
+      await expect(button).toBeVisible();
+
+      /* rounded-3xl у эталона — это --radius-3xl, то есть calc(0.5rem * 3). */
+      await expect(button).toHaveCSS("border-radius", "24px");
+      /* Без nowrap длинный текст переносится и ломает высоту кнопки. */
+      await expect(button).toHaveCSS("white-space", "nowrap");
+
+      const transition = await button.evaluate((el) => getComputedStyle(el).transitionProperty);
+
+      expect(transition).toContain("transform");
+      expect(transition).toContain("background-color");
+    });
+
+    test("нажатие вжимает кнопку", async ({page}) => {
+      await page.goto("/iframe.html?id=components-button--variants&globals=theme:default-light");
+
+      const button = page.getByRole("button", {name: "primary"}).first();
+
+      await expect(button).toBeVisible();
+      /*
+       * transform-gpu на базе делает вычисленный transform единичной матрицей, а не "none" —
+       * первая версия теста сравнивала с "none" и падала на здоровом коде.
+       */
+      await expect(button).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+
+      const box = (await button.boundingBox())!;
+
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+
+      try {
+        await expect(button).toHaveAttribute("data-pressed", "true");
+        /* scale(0.97) — та же матрица, но с масштабом; шаг зависит от размера кнопки. */
+        await expect(button).not.toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+      } finally {
+        await page.mouse.up();
+      }
+    });
+
+    test("иконка внутри кнопки получает размер от кнопки, спиннер — нет", async ({page}) => {
+      await page.goto("/iframe.html?id=components-button--icon-only&globals=theme:default-light");
+
+      /*
+       * Ширина вьюпорта Desktop Chrome выше брейкпоинта sm, поэтому действует sm:size-4 — 16px.
+       * Отрицательный margin из -mx-0.5 отличает иконку, которой правило досталось, от спиннера,
+       * который из него исключён.
+       */
+      const icon = page.locator('button[data-slot="button"] svg').first();
+
+      await expect(icon).toHaveCSS("width", "16px");
+      await expect(icon).toHaveCSS("margin-left", "-2px");
+
+      await page.goto("/iframe.html?id=components-button--pending&globals=theme:default-light");
+
+      const spinnerIcon = page.locator('[data-slot="spinner"] svg').first();
+
+      await expect(spinnerIcon).toBeVisible();
+      await expect(spinnerIcon).toHaveCSS("margin-left", "0px");
+    });
+  });
+
   for (const theme of THEMES) {
     for (const id of STORIES) {
       test(`${id} не нарушает WCAG 2.2 AA в теме ${theme}`, async ({page}) => {

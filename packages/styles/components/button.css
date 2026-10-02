@@ -1,25 +1,38 @@
 /*
  * Button. Имена классов приходят из src/components/button/button.styles.ts; здесь живёт весь
  * Tailwind. Файл самодостаточен: ни одного data-* без парного псевдокласса, поэтому таблица
- * стилей работает и без React — см. css-authoring.md.
+ * стилей работает и без React — см. css-authoring.md. Единственное исключение, data-pending,
+ * объяснено на месте.
+ *
+ * Сверено построчно с heroui/packages/styles/components/button.css. Расхождения, которые остались,
+ * перечислены в конце файла — каждое с причиной.
  */
 
 .button {
   /* Шесть ручек темизации — публичный контракт переопределения, первее чем tv({extend}). */
   --button-bg: transparent;
-  --button-bg-hover: var(--color-surface-hover);
   /*
-   * По умолчанию равен hover: отдельного оттенка нажатия в наборе нет, а выводить его
-   * рукописным color-mix() запрещено — производные цвета приходят из темы, иначе их
-   * контраст не измеряет никто. Ручка есть, чтобы тема могла состояния развести.
-   * Эталон устроен так же: --button-bg-pressed на каждый вариант, существующий токен.
+   * По умолчанию hover не меняет фон: вариант, который этого хочет, задаёт ручку сам. Так же у
+   * эталона. Вариант без собственного фона иначе подсвечивался бы «ничем».
    */
-  --button-bg-pressed: var(--color-surface-hover);
+  --button-bg-hover: var(--button-bg);
+  /*
+   * Отдельного оттенка нажатия в наборе нет, а выводить его рукописным color-mix() запрещено —
+   * производные цвета приходят из темы, иначе их контраст не измеряет никто. Ручка есть, чтобы
+   * тема могла состояния развести. Эталон устроен так же.
+   */
+  --button-bg-pressed: var(--button-bg-hover);
+  /*
+   * Токен, а НЕ currentColor как у эталона. Его выбор опирается на то, что страница задаёт цвет
+   * текста сверху; обещание standalone-CSS этого не позволяет — у `.button` без класса варианта
+   * цвет наследовался бы дефолтом браузера. Измерено: в тёмной теме голая разметка так даёт
+   * нарушение color-contrast, и поймал его собственный аудит стилевого слоя.
+   */
   --button-fg: var(--color-foreground);
   --button-border: transparent;
-  --button-radius: var(--radius-lg);
+  --button-radius: var(--radius-3xl);
 
-  @apply inline-flex w-fit shrink-0 items-center justify-center gap-2 no-highlight;
+  @apply relative isolate inline-flex w-fit shrink-0 origin-center items-center justify-center gap-2 whitespace-nowrap no-highlight;
   /*
    * 40px до 48rem ширины вьюпорта, 36px от неё. Это ширина, а НЕ (pointer: coarse):
    * css-authoring.md описывает эту же форму как грубость указателя, и это его ошибка.
@@ -27,7 +40,7 @@
    */
   @apply h-10 px-4 md:h-9;
   @apply text-sm font-medium;
-  @apply select-none no-underline;
+  @apply select-none no-underline outline-none;
   cursor: var(--cursor-interactive);
 
   border: 1px solid var(--button-border);
@@ -38,18 +51,26 @@
   /*
    * CRITICAL: motion-reduce ПОСЛЕ transition. Наоборот специфичность отдаёт победу переходу,
    * и предпочтение пользователя молча игнорируется.
+   *
+   * origin-center выше и transform-gpu здесь — ради scale на нажатии: без origin-center кнопка
+   * вжималась бы от левого верхнего угла.
+   *
+   * У эталона третьим переходом стоит box-shadow, потому что его фокус-ринг — это ring-*, то есть
+   * тень. У нас фокус рисует outline (utilities/index.css), поэтому анимируется outline-color.
    */
   transition:
-    background-color 120ms var(--ease-out),
-    border-color 120ms var(--ease-out);
-  @apply motion-reduce:transition-none;
+    transform 250ms var(--ease-smooth),
+    background-color 100ms var(--ease-out),
+    border-color 100ms var(--ease-out),
+    outline-color 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
 
   /* Оба вида каждого состояния: data-* ставит React Aria в рантайме, потребителю вне React
      достаются только псевдоклассы. */
   /*
    * :hover под @media (hover: hover) — на тач-устройстве он залипает после тапа и кнопка
    * остаётся подсвеченной. data-hovered вне условия: его ставит React Aria, которая про
-   * природу указателя знает сама. Эталон делает так же.
+   * природу указателя знает сама.
    */
   @media (hover: hover) {
     &:hover {
@@ -63,10 +84,16 @@
 
   &:active,
   &[data-pressed] {
+    @apply will-change-transform;
     background-color: var(--button-bg-pressed);
+    transform: scale(0.97);
   }
 
-  &:focus-visible,
+  /*
+   * :not([data-focused]) — охрана от двойного применения: когда фокусом управляет React Aria,
+   * она ставит свой атрибут, и оба селектора совпали бы на одном элементе.
+   */
+  &:focus-visible:not([data-focused]),
   &[data-focus-visible] {
     @apply status-focused;
   }
@@ -87,6 +114,18 @@
   }
 
   /*
+   * Размер иконок задаёт кнопка, а не вызывающий код: иначе каждый потребитель подбирает его
+   * заново и набор расползается. Спиннер исключён — у него свои размеры из spinner.css, и
+   * отрицательные отступы кнопки сбили бы его центровку.
+   *
+   * У эталона исключён ещё [data-slot="link-icon"] svg. Компонента Link у нас нет; исключение
+   * добавится вместе с ним.
+   */
+  & svg:not([data-slot="spinner"] svg) {
+    @apply pointer-events-none -mx-0.5 my-0.5 size-5 shrink-0 self-center sm:my-1 sm:size-4;
+  }
+
+  /*
    * Структурная половина forced-colors — обязанность компонента, а не слоя токенов: роли
    * переназначает центральный блок темы, но опознающая граница держится здесь. Без неё каждый
    * вариант, кроме --outline, теряется целиком: идентичность несёт только background-color, а
@@ -102,8 +141,22 @@
 
 /* ---------- Размеры ---------- */
 
+/*
+ * Размер шрифта меняет только --lg. У --sm он остаётся text-sm, как у эталона: кнопка на 36px с
+ * text-xs читается хуже, а порог контраста для мелкого текста строже.
+ */
+
 .button--sm {
-  @apply h-9 gap-1.5 px-3 text-xs md:h-8;
+  @apply h-9 px-3 md:h-8;
+
+  & svg:not([data-slot="spinner"] svg) {
+    @apply size-4;
+  }
+
+  &:active,
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
 }
 
 .button--md {
@@ -111,7 +164,13 @@
 }
 
 .button--lg {
-  @apply h-11 gap-2.5 px-5 text-base md:h-10;
+  @apply h-11 text-base md:h-10;
+
+  /* Чем крупнее кнопка, тем меньше нужно сжатия, чтобы нажатие читалось. Шаг взят у эталона. */
+  &:active,
+  &[data-pressed] {
+    transform: scale(0.96);
+  }
 }
 
 /* ---------- Варианты ---------- */
@@ -127,14 +186,23 @@
   --button-bg: var(--color-default);
   --button-bg-hover: var(--color-default-hover);
   --button-bg-pressed: var(--color-default-hover);
+  /*
+   * --color-default-foreground, а не --color-accent-soft-foreground как у эталона: его палитра
+   * здесь даёт 4.44:1 в тёмной теме против требуемых 4.5 — не дотягивает на 0.06. Этот токен
+   * даёт 14.05:1. Замерено src/generator/color.ts, функцией contrastRatio.
+   */
   --button-fg: var(--color-default-foreground);
 }
 
+/*
+ * Фон тот же, что у --secondary. Эталон здесь не задаёт --button-fg вовсе, оставляя текст на
+ * currentColor; у нас токен задан по той же причине, что и дефолт выше.
+ */
 .button--tertiary {
-  --button-bg: var(--color-surface);
-  --button-bg-hover: var(--color-surface-hover);
-  --button-bg-pressed: var(--color-surface-hover);
-  --button-fg: var(--color-surface-foreground);
+  --button-bg: var(--color-default);
+  --button-bg-hover: var(--color-default-hover);
+  --button-bg-pressed: var(--color-default-hover);
+  --button-fg: var(--color-default-foreground);
 }
 
 .button--danger {
@@ -151,18 +219,15 @@
   --button-fg: var(--color-danger-soft-foreground);
 }
 
-.button--ghost {
+.button--ghost,
+.button--outline {
   --button-bg: transparent;
-  --button-bg-hover: var(--color-surface-hover);
-  --button-bg-pressed: var(--color-surface-hover);
-  --button-fg: var(--color-foreground);
+  --button-bg-hover: var(--color-default);
+  --button-bg-pressed: var(--color-default);
+  --button-fg: var(--color-default-foreground);
 }
 
 .button--outline {
-  --button-bg: transparent;
-  --button-bg-hover: var(--color-surface-hover);
-  --button-bg-pressed: var(--color-surface-hover);
-  --button-fg: var(--color-foreground);
   --button-border: var(--color-border);
 }
 
@@ -184,3 +249,37 @@
 .button--full-width {
   @apply w-full;
 }
+
+/*
+ * ---------- Что осталось не как у эталона, и почему ----------
+ *
+ * 1. forced-colors. У эталона нет вовсе. Решение принято в
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md.
+ *
+ * 2. Постоянная прозрачная граница на .button вместо `border border-border` только у --outline.
+ *    Так layout не дёргается при смене варианта, и forced-colors есть за что зацепиться.
+ *
+ * 3. Радиус через ручку --button-radius, а не хардкодом rounded-3xl. Значение то же: --radius-3xl.
+ *
+ * 4. Hover у --outline. Эталон берёт color-mix(in srgb, var(--default) 60%, transparent).
+ *    Рукописные производные цвета здесь запрещены: их контраст никто не измеряет. Используется
+ *    --color-default, как у --ghost.
+ *
+ * 5. Переход outline-color вместо box-shadow — следствие того, что фокус рисуется outline, а не
+ *    ring. Плюс переход border-color, которого у эталона нет: у нас граница участвует в вариантах.
+ *
+ * 6. [data-hovered] вне @media (hover: hover) — React Aria сама знает природу указателя.
+ *
+ * 7. Добавлен [data-disabled]: RAC ставит его наряду с aria-disabled.
+ *
+ * 8. Префикс --color-* у всех токенов — так устроен токен-слой peakui.
+ *
+ * 10. Цвет текста всегда приходит из токена, тогда как эталон оставляет дефолт и --tertiary на
+ *     currentColor, а --secondary красит в --accent-soft-foreground. Обе его формы здесь измеримо
+ *     хуже: currentColor в голой разметке наследует дефолт браузера и даёт нарушение контраста в
+ *     тёмной теме (поймал аудит стилевого слоя), а --accent-soft-foreground на --default даёт
+ *     4.44:1 против требуемых 4.5. Это не вкус, а замер.
+ *
+ * 9. Известные дефекты контраста, не закрываемые здесь: .button--outline по SC 1.4.11 и
+ *    --accent-hover. Оба измерены и записаны в peakui-company/docs/ecosystem/backlog.md.
+ */

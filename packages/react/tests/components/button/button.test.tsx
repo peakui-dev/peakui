@@ -255,7 +255,7 @@ describe("Button", () => {
   it("names an icon-only button from aria-label", () => {
     render(
       <Button isIconOnly aria-label="More options">
-        <span aria-hidden>…</span>
+        <svg aria-hidden viewBox="0 0 24 24" />
       </Button>,
     );
 

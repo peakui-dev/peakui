@@ -28,6 +28,18 @@ const SIZES = ["sm", "md", "lg"] as const;
  * его как признак готовности превью. Без него axe запускается по ещё пустому iframe, находит ноль
  * нарушений и проходит молча.
  */
+/*
+ * Настоящий svg, а не текстовая заглушка: размер иконок внутри кнопки задаёт правило
+ * `& svg:not(…)` в button.css, и проверить его можно только на реальном элементе.
+ */
+const EllipsisIcon = () => (
+  <svg aria-hidden fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="5" cy="12" fill="currentColor" r="2" />
+    <circle cx="12" cy="12" fill="currentColor" r="2" />
+    <circle cx="19" cy="12" fill="currentColor" r="2" />
+  </svg>
+);
+
 const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
   <div className="flex flex-col gap-4 bg-background p-6">
     <h2 className="text-sm font-medium text-foreground">{title}</h2>
@@ -76,7 +88,7 @@ export const IconOnly: Story = {
            * ставят, потому что история — это ещё и рецепт.
            */
           <Button key={size} isIconOnly aria-label={`Ещё, размер ${size}`} size={size}>
-            <span aria-hidden>…</span>
+            <EllipsisIcon />
           </Button>
         ))}
       </div>
