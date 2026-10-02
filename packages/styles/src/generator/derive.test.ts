@@ -4,6 +4,7 @@ import {describe, expect, it} from "vitest";
 
 import {contrastRatio, parseOklch} from "./color.ts";
 import {compositeOver} from "./contrast.ts";
+import {presets} from "../../presets/index.ts";
 import {deriveTheme} from "./derive.ts";
 
 const preset: ThemePreset = {
@@ -174,6 +175,80 @@ describe("гарантии контраста покрывают весь наб
           `${name}: muted на ${against}`,
         ).toBeGreaterThanOrEqual(4.5);
       }
+    }
+  });
+});
+
+describe("семья on-surface", () => {
+  /** Уровень поверхности и суффикс его токенов: surface → "", surface-secondary → "-secondary". */
+  const LEVELS = [
+    ["surface", ""],
+    ["surface-secondary", "-secondary"],
+    ["surface-tertiary", "-tertiary"],
+  ] as const;
+
+  it("объявляет три члена на каждый уровень в обеих схемах", () => {
+    const {dark, light} = deriveTheme(preset);
+
+    for (const [, suffix] of LEVELS) {
+      for (const member of ["", "-foreground", "-hover"]) {
+        const name = `on-surface${suffix}${member}`;
+
+        expect(light, name).toHaveProperty(name);
+        expect(dark, name).toHaveProperty(name);
+      }
+    }
+  });
+
+  /*
+   * Заливка обязана воспроизводить отношение default к background — 1.09:1 в светлой и 1.36:1 в
+   * тёмной. Это НЕ граница 3:1 и не должна ею становиться: нейтральный контрол в наборе опознаётся
+   * подписью и формой, а не обводкой, и SC 1.4.11 это разрешает. Проверяется коридор, а не точное
+   * число, потому что якоря уровней поверхности могут сдвинуться.
+   */
+  it("заливка повторяет отношение default к background, а не границу 3:1", () => {
+    const {dark, light} = deriveTheme(preset);
+
+    for (const scheme of [light, dark]) {
+      for (const [level, suffix] of LEVELS) {
+        const ratio = contrastRatio(
+          parseOklch(scheme[`on-surface${suffix}`]!)!,
+          parseOklch(scheme[level]!)!,
+        );
+
+        expect(ratio, `on-surface${suffix} на ${level}`).toBeGreaterThan(1.03);
+        expect(ratio, `on-surface${suffix} на ${level}`).toBeLessThan(1.5);
+      }
+    }
+  });
+
+  it("hover сдвигает заливку к тексту своего уровня, а не к общему foreground", () => {
+    const {dark, light} = deriveTheme(preset);
+
+    for (const scheme of [light, dark]) {
+      for (const [level, suffix] of LEVELS) {
+        const fill = parseOklch(scheme[`on-surface${suffix}`]!)!;
+        const hover = parseOklch(scheme[`on-surface${suffix}-hover`]!)!;
+        const levelFg = parseOklch(scheme[`${level}-foreground`]!)!;
+
+        expect(hover.l, `on-surface${suffix}-hover`).not.toBe(fill.l);
+        // Сдвиг идёт в сторону текста уровня: в светлой схеме темнее, в тёмной светлее.
+        expect(
+          Math.sign(hover.l - fill.l),
+          `on-surface${suffix}-hover направление`,
+        ).toBe(Math.sign(levelFg.l - fill.l));
+      }
+    }
+  });
+
+  /*
+   * Гейт 2 в check:tokens падает на ЛЮБОЙ применённой правке контраста: ensureContrast существует,
+   * чтобы обнаруживать неверную палитру, а не чтобы молча её ремонтировать. Поэтому тест идёт по
+   * поставляемым пресетам, а не по локальному: именно их проверяет гейт.
+   */
+  it("не требует ни одной правки контраста ни для одного поставляемого пресета", () => {
+    for (const shipped of presets) {
+      expect(deriveTheme(shipped).fixes, shipped.id).toEqual([]);
     }
   });
 });

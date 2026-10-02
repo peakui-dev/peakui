@@ -49,13 +49,14 @@ Each line names an input the spec implies and the task that adds its test:
 
 **Files:**
 - Modify: `packages/styles/src/generator/derive.ts`
+- Modify: `packages/styles/themes/default/variables.css` (generated — never hand-edited)
 - Test: `packages/styles/src/generator/derive.test.ts`
 
 **Interfaces:**
 - Consumes: `mix`, `ensureContrast`, `TEXT_MIN`, `FOREGROUND_PAIRS`, the `ANCHOR` table — all already in the file.
 - Produces: nine new keys in the `light` and `dark` token sets: `on-surface`, `on-surface-secondary`, `on-surface-tertiary`, each with `-foreground` and `-hover`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `packages/styles/src/generator/derive.test.ts`:
 
@@ -93,28 +94,30 @@ it("не требует ни одной правки контраста ни д�
 
 The last one is Review Focus item 2, and it is the test that would catch a wrong percentage: gate 2 reads the same `fixes` array.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd packages/styles && pnpm vitest run src/generator/derive.test.ts`
 Expected: FAIL — the token keys do not exist. (The no-fixes test should already pass; if it fails before any change, stop and report: the palette was already broken.)
 
-- [ ] **Step 3: Add the derivation to `deriveScheme`**
+- [x] **Step 3: Add the derivation to `deriveScheme`**
 
 After the existing `raw["surface-hover"]` line, loop the three levels. Percentage from a scheme-keyed constant declared beside `soft`/`softHover`: `4` for light, `12` for dark. Per level: the fill is `mix(level, 100 − p, fgL, p)` where `fgL` is `fg(level)`; the foreground is `ensureContrast({token, fg: fgL, bg: fill, min: TEXT_MIN})`; the hover is `mix(fill, 96, fgL, 4)`.
 
-Add the three names to `FOREGROUND_PAIRS` so the pair contract covers them.
+Do **not** add the names to `FOREGROUND_PAIRS`. That loop runs earlier in the file and reads `raw[name]`, which does not exist for a fill derived further down — it would read `undefined`. The explicit `ensureContrast` above is the whole mechanism, and the pair is covered anyway: the existing test "каждая текстовая пара держит 4.5:1 после вывода" walks the derived set's keys, not that list.
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run src/generator/derive.test.ts`
 Expected: PASS, all four.
 
-- [ ] **Step 5: Confirm the gate agrees**
+- [x] **Step 5: Regenerate, then confirm the gate agrees**
 
-Run: `pnpm check:tokens`
-Expected: all gates pass. A "Контраст: пресет … требует правки" error means a percentage is wrong — fix the percentage, not the gate.
+The drift gate compares the committed `variables.css` against the generator's output, so it fails the moment `derive.ts` changes. `tokens:build` is a script of `packages/styles`, not of the root.
 
-- [ ] **Step 6: Commit**
+Run: `cd packages/styles && pnpm tokens:build && pnpm check:tokens`
+Expected: the generated file gains nine tokens per scheme, the build prints "правок не потребовалось", and every gate passes. A "Контраст: пресет … требует правки" error means a percentage is wrong — fix the percentage, never the gate.
+
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/styles/src/generator/
@@ -128,7 +131,7 @@ git commit -m "feat(styles): вывести девять токенов on-surfa
 **Files:**
 - Modify: `packages/styles/themes/shared/theme.css`
 - Modify: `packages/styles/src/generator/emit.ts`
-- Modify: `packages/styles/themes/default/variables.css` (generated — do not hand-edit)
+- Modify: `packages/styles/themes/default/variables.css` (generated — regenerated again here, because the forced-colors block changes)
 - Test: `packages/styles/src/generator/exports.test.ts`
 
 **Interfaces:**

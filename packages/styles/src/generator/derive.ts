@@ -248,9 +248,50 @@ const deriveScheme = (
   const fg = (name: string): Oklch => raw[`${name}-foreground`] ?? raw["foreground"]!;
   const soft = scheme === "light" ? 15 : 12;
   const softHover = scheme === "light" ? 20 : 16;
+  /*
+   * Подмешивание для заливки on-surface. Числа выбраны не на вкус: они воспроизводят отношение
+   * `default` к `background` — 1.09:1 в светлой схеме и 1.36:1 в тёмной. Светлые фоны стоят близко
+   * друг к другу, тёмные далеко, поэтому процент на схему разный.
+   */
+  const onSurface = scheme === "light" ? 4 : 12;
 
   // Calculated set — every percentage from the spec's derivation table.
   raw["surface-hover"] = mix(c.surface, 92, fg("surface"), 8);
+
+  /*
+   * Семья on-surface: `default`, перевыведенный против каждого уровня поверхности. Контрол внутри
+   * карточки обязан брать заливку, посчитанную относительно карточки, а не относительно страницы —
+   * `surface-hover` выше считается только против `surface`, и на втором с третьим уровнях он
+   * применялся бы из чужого расчёта.
+   *
+   * Имена НЕ добавлены в FOREGROUND_PAIRS осознанно: тот цикл идёт выше по файлу и читает raw[name],
+   * которого здесь ещё не существует. Текст выводится явным ensureContrast, а покрытие гейтом всё
+   * равно есть — он перебирает ключи набора, а не список пар.
+   *
+   * Трёх `-focus` тут нет: кольцо фокуса в тёмной теме не дотягивает 3:1 уже на `surface-secondary`
+   * (2.66:1) и `surface-tertiary` (2.54:1), и это существующий дефект вывода `focus`, а не наш.
+   * Замеры и причина отсрочки — спека 2026-10-03-on-surface-tokens-design.md, раздел 6.
+   */
+  for (const level of ["surface", "surface-secondary", "surface-tertiary"] as const) {
+    const suffix = level === "surface" ? "" : level.slice("surface".length);
+    const levelFg = fg(level);
+    const fill = mix(raw[level]!, 100 - onSurface, levelFg, onSurface);
+
+    raw[`on-surface${suffix}`] = fill;
+
+    const {color, fix} = ensureContrast({
+      token: `on-surface${suffix}-foreground`,
+      fg: levelFg,
+      bg: compositeOver(fill, c.background),
+      min: TEXT_MIN,
+    });
+
+    raw[`on-surface${suffix}-foreground`] = color;
+    if (fix) fixes.push(fix);
+
+    // Тот же 4-процентный шаг, которым выведен default-hover: on-surface и есть default.
+    raw[`on-surface${suffix}-hover`] = mix(fill, 96, levelFg, 4);
+  }
   raw["background-secondary"] = mix(c.background, 96, c.foreground, 4);
   raw["background-tertiary"] = mix(c.background, 92, c.foreground, 8);
   raw["background-inverse"] = c.foreground;
