@@ -1,0 +1,105 @@
+/*
+ * Гейт на директиву "use client" в выходных файлах сборки.
+ *
+ * Rolldown умеет терять директивы — https://github.com/rolldown/rolldown/issues/7809 — и потеря
+ * проходит молча: сборка зелёная, тесты зелёные, падает потребитель на RSC в рантайме. Поэтому
+ * проверка стоит в самой сборке, а не в ревью.
+ *
+ * check() вынесен отдельной чистой функцией и не трогает ни файловую систему, ни хуки бандлера:
+ * иначе его нельзя проверить, не собрав пакет, а гейт без теста — это надежда.
+ */
+
+const DIRECTIVE = /^\s*(?:\/\*[\s\S]*?\*\/|\/\/[^\n]*|\n)*\s*["']use client["']/;
+
+export interface EmittedChunk {
+  code?: string;
+  fileName: string;
+  type: string;
+}
+
+export interface ClientDirectivePlugin {
+  check: (bundle: Record<string, EmittedChunk>, clientModules: Set<string>) => void;
+  name: string;
+  transform: (code: string, id: string) => null;
+  writeBundle: (options: unknown, bundle: Record<string, EmittedChunk>) => void;
+}
+
+/*
+ * Исходные id абсолютны, имена выходных файлов — относительны. Сопоставляем по пути без
+ * расширения: в unbundle-режиме один модуль даёт ровно один файл, поэтому хвост пути совпадает.
+ * Вынесено наружу, потому что пустой результат здесь провалил бы весь гейт вхолостую.
+ */
+export function matchDeclared(
+  outputNames: readonly string[],
+  clientModuleIds: readonly string[],
+): Set<string> {
+  const stems = clientModuleIds.map((id) => id.replace(/\.[cm]?[jt]sx?$/, ""));
+  const declared = new Set<string>();
+
+  for (const name of outputNames) {
+    const stem = name.replace(/\.[cm]?js$/, "");
+
+    if (stems.some((candidate) => candidate.endsWith(`/${stem}`) || candidate === stem)) {
+      declared.add(name);
+    }
+  }
+
+  return declared;
+}
+
+export function requireClientDirectives(): ClientDirectivePlugin {
+  const clientModules = new Set<string>();
+
+  const check = (bundle: Record<string, EmittedChunk>, declared: Set<string>): void => {
+    const offenders: string[] = [];
+
+    for (const [name, chunk] of Object.entries(bundle)) {
+      if (chunk.type !== "chunk" || !declared.has(name)) {
+        continue;
+      }
+
+      if (!DIRECTIVE.test(chunk.code ?? "")) {
+        offenders.push(name);
+      }
+    }
+
+    if (offenders.length > 0) {
+      throw new Error(
+        'Сборка потеряла директиву "use client" в выходных файлах:\n' +
+          offenders.map((name) => `  - ${name}`).join("\n") +
+          "\n\nИсходные модули её объявляют. Это rolldown#7809 либо режим сборки не unbundle.",
+      );
+    }
+  };
+
+  return {
+    check,
+    name: "require-client-directives",
+    transform(code: string, id: string) {
+      if (DIRECTIVE.test(code)) {
+        clientModules.add(id);
+      }
+
+      return null;
+    },
+    /* Rolldown передаёт в writeBundle два аргумента: сначала options, затем сам bundle. */
+    writeBundle(_options: unknown, bundle: Record<string, EmittedChunk>) {
+      const declared = matchDeclared(Object.keys(bundle), [...clientModules]);
+
+      /*
+       * Гейт не имеет права пройти вхолостую: если исходники объявили директиву, а сопоставление
+       * не нашло ни одного файла, значит сломано сопоставление — и тогда проверка ниже проверила
+       * бы пустое множество и промолчала.
+       */
+      if (clientModules.size > 0 && declared.size === 0) {
+        throw new Error(
+          `Гейт "use client" не сопоставил ни один выходной файл с ${clientModules.size} ` +
+            "исходными модулями, которые директиву объявляют. Сломано сопоставление имён, " +
+            "а не сборка: проверка прошла бы, ничего не проверив.",
+        );
+      }
+
+      check(bundle, declared);
+    },
+  };
+}
