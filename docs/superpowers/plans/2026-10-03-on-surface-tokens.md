@@ -138,7 +138,7 @@ git commit -m "feat(styles): вывести девять токенов on-surfa
 - Consumes: the nine tokens from Task 1.
 - Produces: `--color-on-surface*` as part of the `@theme inline` surface, so Tailwind utilities and the page can reach them.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `packages/styles/src/generator/exports.test.ts` — the direction no existing gate covers (Review Focus item 1):
 
@@ -157,30 +157,30 @@ it("даёт каждому токену on-surface системный цвет 
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd packages/styles && pnpm vitest run src/generator/exports.test.ts`
 Expected: FAIL on both — no mappings, no forced-colors entries.
 
-- [ ] **Step 3: Add the nine mappings to `theme.css`**
+- [x] **Step 3: Add the nine mappings to `theme.css`**
 
 `--color-on-surface*: var(--on-surface*)`, placed in the surfaces block beside the existing `--color-surface*` lines so related tokens stay together.
 
-- [ ] **Step 4: Add the nine entries to `FORCED_COLORS` in `emit.ts`**
+- [x] **Step 4: Add the nine entries to `FORCED_COLORS` in `emit.ts`**
 
 Fills and hovers to `ButtonFace`, foregrounds to `ButtonText` — the pair the map already uses for `default`. The spec's section 4 carries the table.
 
-- [ ] **Step 5: Regenerate and verify no drift**
+- [x] **Step 5: Regenerate and verify no drift**
 
 Run: `pnpm tokens:build && pnpm check:tokens`
 Expected: `variables.css` gains the nine tokens per scheme and the forced-colors block grows; every gate passes, drift included. The generated file is committed, never hand-edited.
 
-- [ ] **Step 6: Run the test to verify it passes**
+- [x] **Step 6: Run the test to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run && pnpm typecheck`
 Expected: all green.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/styles/
@@ -198,7 +198,7 @@ git commit -m "feat(styles): выставить on-surface через @theme inl
 - Consumes: `--color-*` names exposed by `theme.css`.
 - Produces: story ids `foundations-color-system--all-colors` and its autodocs page.
 
-- [ ] **Step 1: Write the story**
+- [x] **Step 1: Write the story**
 
 `title: "Foundations/Color System"`, `parameters: {layout: "fullscreen"}`, default export is the CSF meta. One story `AllColors`, container `mx-auto max-w-4xl p-6`.
 
@@ -210,17 +210,17 @@ Three things the reference gets wrong and this page must not:
 - **Show alpha.** Render each swatch over a two-tone backdrop — two halves, one light one dark, behind the swatch — so a translucent token reads as translucent. Four `*-soft` families and `backdrop` carry alpha.
 - **List nothing that does not exist.** The three `on-surface-*-focus` tokens are absent; a footnote names them as deferred and cites the spec's section 6.
 
-- [ ] **Step 2: Typecheck and build**
+- [x] **Step 2: Typecheck and build**
 
 Run: `pnpm typecheck && pnpm build:storybook`
 Expected: both succeed.
 
-- [ ] **Step 3: Confirm the story renders and the values are not blank**
+- [x] **Step 3: Confirm the story renders and the values are not blank**
 
 Serve the static build on a free port and open the story iframe per `apps/storybook/AGENTS.md`: `agent-browser open <iframe-url>` → `errors` → `console`. Text only, never screenshots.
 Expected: no page errors, no console output, and a spot check of three variables across different sections returns non-empty computed values.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/storybook/src/stories/color-system.stories.tsx
@@ -238,7 +238,7 @@ git commit -m "feat(storybook): страница Foundations/Color System — 77
 - Consumes: the story from Task 3, the token surface from Task 2.
 - Produces: the gate that makes the reference's silent-empty-swatch defect impossible here.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `apps/storybook/e2e/ColorSystem.spec.ts`, auditing `/iframe.html?id=foundations-color-system--all-colors` **directly**. Not through the manager: `checkA11y(page, "#storybook-preview-iframe")` inspects the iframe element rather than the story inside it and passes having seen nothing — a mistake that shipped here once, per `apps/storybook/AGENTS.md`.
 
@@ -251,23 +251,23 @@ Four tests:
 
 Plus a `checkA11y` audit of the story in both themes.
 
-- [ ] **Step 2: Run it to verify it fails against a deliberate gap**
+- [x] **Step 2: Run it to verify it fails against a deliberate gap**
 
 Temporarily remove one mapping line from `theme.css`.
 Run: `STORYBOOK_PORT=<free> pnpm test:e2e -- e2e/ColorSystem.spec.ts`
 Expected: FAIL on the blank-value test, naming the variable. Restore the line.
 
-- [ ] **Step 3: Run the whole suite intact**
+- [x] **Step 3: Run the whole suite intact**
 
 Run: `STORYBOOK_PORT=<free> pnpm test:e2e`
 Expected: every test passes, the new five among them. Playwright never reuses a server it did not start, so a held 6007 is a port to step around, not a process to kill.
 
-- [ ] **Step 4: Run every gate**
+- [x] **Step 4: Run every gate**
 
 Run: `pnpm typecheck && pnpm test && pnpm check:tokens && pnpm lint:package && pnpm build:storybook`
 Expected: all green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/storybook/e2e/ColorSystem.spec.ts
