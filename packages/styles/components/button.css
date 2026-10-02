@@ -182,16 +182,27 @@
   --button-fg: var(--color-accent-foreground);
 }
 
+/*
+ * Тональный вариант, а не второй нейтральный.
+ *
+ * Прежняя версия брала --color-default с --color-default-foreground и совпадала с --tertiary
+ * побайтово: тот же фон, тот же hover, тот же текст. Различать было нечем, и --secondary читался
+ * как --tertiary.
+ *
+ * Предыдущий замер верен: --color-accent-soft-foreground, как у эталона, даёт в тёмной теме
+ * 4.44:1 на --default и 4.04:1 на --default-hover против пола 4.5:1 — его взять нельзя. Но
+ * отвергнут был только текст поверх нейтрального фона. Тональная пара целиком безопасна, потому
+ * что это пара X / X-foreground, а их контраст держит check:tokens постоянно: после композитинга
+ * полупрозрачного фона на странице — 6.37:1 и 5.92:1 на hover в светлой теме, 5.65:1 и 5.48:1 в
+ * тёмной. Замерено compositeOver + contrastRatio из src/generator.
+ *
+ * Иерархия становится трёхступенчатой и читаемой: solid accent → tonal accent → neutral.
+ */
 .button--secondary {
-  --button-bg: var(--color-default);
-  --button-bg-hover: var(--color-default-hover);
-  --button-bg-pressed: var(--color-default-hover);
-  /*
-   * --color-default-foreground, а не --color-accent-soft-foreground как у эталона: его палитра
-   * здесь даёт 4.44:1 в тёмной теме против требуемых 4.5 — не дотягивает на 0.06. Этот токен
-   * даёт 14.05:1. Замерено src/generator/color.ts, функцией contrastRatio.
-   */
-  --button-fg: var(--color-default-foreground);
+  --button-bg: var(--color-accent-soft);
+  --button-bg-hover: var(--color-accent-soft-hover);
+  --button-bg-pressed: var(--color-accent-soft-hover);
+  --button-fg: var(--color-accent-soft-foreground);
 }
 
 /*

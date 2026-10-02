@@ -211,6 +211,7 @@ with its reason, in the skill, as a divergence that is correct.
 | Barrel is hand-maintained with nothing guarding it | Hand-maintained plus a completeness gate | "Component exists, barrel forgot it" is silent and cheap to prevent. |
 | No `lint:package` script | `publint --strict && attw` | PeakUI gates packaging; the reference's silence is not evidence either way. |
 | No `forced-colors` support | Central per-theme block from the token layer | Pre-existing decision, `2026-10-01-design-tokens-design.md`. |
+| `.button--secondary` is `--default` background with `--accent-soft-foreground` text | A tonal pair: `--accent-soft` background with its own `--accent-soft-foreground` | The reference's cross-family pick measures 4.44:1 on `--default` and 4.04:1 on `--default-hover` in the dark theme, under the 4.5:1 floor, and the pair is not one `check:tokens` gates. Keeping the neutral foreground instead made `--secondary` byte-identical to `--tertiary`. The tonal pair is an `X` / `X-foreground` pair, so CI holds its contrast: 6.37:1 and 5.92:1 light, 5.65:1 and 5.48:1 dark, measured after compositing the translucent background over the page. |
 
 ## 4. Skill changes
 
