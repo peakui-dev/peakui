@@ -5,9 +5,16 @@
  */
 
 .button {
-  /* Пять ручек темизации — публичный контракт переопределения, первее чем tv({extend}). */
+  /* Шесть ручек темизации — публичный контракт переопределения, первее чем tv({extend}). */
   --button-bg: transparent;
   --button-bg-hover: var(--color-surface-hover);
+  /*
+   * По умолчанию равен hover: отдельного оттенка нажатия в наборе нет, а выводить его
+   * рукописным color-mix() запрещено — производные цвета приходят из темы, иначе их
+   * контраст не измеряет никто. Ручка есть, чтобы тема могла состояния развести.
+   * Эталон устроен так же: --button-bg-pressed на каждый вариант, существующий токен.
+   */
+  --button-bg-pressed: var(--color-surface-hover);
   --button-fg: var(--color-foreground);
   --button-border: transparent;
   --button-radius: var(--radius-lg);
@@ -39,14 +46,24 @@
 
   /* Оба вида каждого состояния: data-* ставит React Aria в рантайме, потребителю вне React
      достаются только псевдоклассы. */
-  &:hover,
+  /*
+   * :hover под @media (hover: hover) — на тач-устройстве он залипает после тапа и кнопка
+   * остаётся подсвеченной. data-hovered вне условия: его ставит React Aria, которая про
+   * природу указателя знает сама. Эталон делает так же.
+   */
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--button-bg-hover);
+    }
+  }
+
   &[data-hovered] {
     background-color: var(--button-bg-hover);
   }
 
   &:active,
   &[data-pressed] {
-    background-color: color-mix(in oklab, var(--button-bg-hover), var(--color-foreground) 8%);
+    background-color: var(--button-bg-pressed);
   }
 
   &:focus-visible,
@@ -93,42 +110,49 @@
 .button--primary {
   --button-bg: var(--color-accent);
   --button-bg-hover: var(--color-accent-hover);
+  --button-bg-pressed: var(--color-accent-hover);
   --button-fg: var(--color-accent-foreground);
 }
 
 .button--secondary {
   --button-bg: var(--color-default);
   --button-bg-hover: var(--color-default-hover);
+  --button-bg-pressed: var(--color-default-hover);
   --button-fg: var(--color-default-foreground);
 }
 
 .button--tertiary {
   --button-bg: var(--color-surface);
   --button-bg-hover: var(--color-surface-hover);
+  --button-bg-pressed: var(--color-surface-hover);
   --button-fg: var(--color-surface-foreground);
 }
 
 .button--danger {
   --button-bg: var(--color-danger);
   --button-bg-hover: var(--color-danger-hover);
+  --button-bg-pressed: var(--color-danger-hover);
   --button-fg: var(--color-danger-foreground);
 }
 
 .button--danger-soft {
   --button-bg: var(--color-danger-soft);
   --button-bg-hover: var(--color-danger-soft-hover);
+  --button-bg-pressed: var(--color-danger-soft-hover);
   --button-fg: var(--color-danger-soft-foreground);
 }
 
 .button--ghost {
   --button-bg: transparent;
   --button-bg-hover: var(--color-surface-hover);
+  --button-bg-pressed: var(--color-surface-hover);
   --button-fg: var(--color-foreground);
 }
 
 .button--outline {
   --button-bg: transparent;
   --button-bg-hover: var(--color-surface-hover);
+  --button-bg-pressed: var(--color-surface-hover);
   --button-fg: var(--color-foreground);
   --button-border: var(--color-border);
 }
