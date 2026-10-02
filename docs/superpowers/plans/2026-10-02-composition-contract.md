@@ -296,13 +296,19 @@ git commit -m "feat(styles): слой CSS Button и доказательство
 
 `packages/styles/src/components/index.test.ts`. It reads the filesystem, not the module graph, so a forgotten barrel line is caught rather than silently absent:
 
+Strip comments from both sources before matching. Without that the gate passes on a **disabled** export: `// export * from "./button/index.ts";` contains the searched substring in full, and the first version of this test duly went green against a deliberately broken barrel. `check-tokens.ts` strips the same way.
+
 ```ts
+const stripComments = (source: string): string =>
+  source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[^\n\S]*\/\/.*$/gm, "");
+
 const componentDirs = readdirSync("src/components", {withFileTypes: true})
   .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name);
+  .map((entry) => entry.name)
+  .sort();
 
-const barrel = readFileSync("src/components/index.ts", "utf8");
-const cssLayer = readFileSync("components/index.css", "utf8");
+const barrel = stripComments(readFileSync("src/components/index.ts", "utf8"));
+const cssLayer = stripComments(readFileSync("components/index.css", "utf8"));
 
 it("не проходит вхолостую на пустом наборе", () => {
   expect(componentDirs.length).toBeGreaterThan(0);
@@ -322,11 +328,14 @@ The vacuous-pass guard is declared **first**, because `it.each([])` registers no
 
 The third assertion is Review Focus item 4: without it both gates pass vacuously on an empty glob and prove nothing.
 
-- [ ] **Step 2: Run it against a deliberate gap to verify it fails**
+- [ ] **Step 2: Run it against two deliberate gaps to verify it fails on each**
 
-Temporarily comment out the Button line in `src/components/index.ts`.
-Run: `cd packages/styles && pnpm vitest run src/components/index.test.ts`
-Expected: FAIL on the re-export assertion, naming `button`. Then restore the line.
+Both halves of the gate need proving, because each can pass vacuously in its own way.
+
+1. Comment out the Button line in `src/components/index.ts`. Expected: FAIL on the re-export assertion, naming `button`. Restore it.
+2. Comment out `@import "./button.css";` in `components/index.css`. Expected: FAIL on the paired-CSS assertion. Restore it.
+
+Run after each: `cd packages/styles && pnpm vitest run src/components/index.test.ts`
 
 - [ ] **Step 3: Run it intact to verify it passes**
 
