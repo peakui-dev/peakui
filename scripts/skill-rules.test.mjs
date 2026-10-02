@@ -18,9 +18,18 @@ const SKILL = ".agents/skills/peakui-component-standards/SKILL.md";
 test("a hardcoded English default is no longer called a defect", () => {
   const text = read(A11Y);
 
-  assert.ok(!text.includes("Hardcoded Russian or English in JSX is a defect"), `${A11Y}: всё ещё называет зашитую строку дефектом`);
-  assert.ok(/hardcoded English default is acceptable/i.test(text), `${A11Y}: нет разрешения на английский дефолт`);
-  assert.ok(/consumer-supplied label always wins/i.test(text), `${A11Y}: потеряно правило о приоритете метки потребителя`);
+  assert.ok(
+    !text.includes("Hardcoded Russian or English in JSX is a defect"),
+    `${A11Y}: всё ещё называет зашитую строку дефектом`,
+  );
+  assert.ok(
+    /hardcoded English default is acceptable/i.test(text),
+    `${A11Y}: нет разрешения на английский дефолт`,
+  );
+  assert.ok(
+    /consumer-supplied label always wins/i.test(text),
+    `${A11Y}: потеряно правило о приоритете метки потребителя`,
+  );
 });
 
 test("the any relaxation is scoped to the polymorphic spread boundary", () => {
@@ -28,15 +37,24 @@ test("the any relaxation is scoped to the polymorphic spread boundary", () => {
     const text = read(path);
 
     assert.ok(/DOMRenderProps/.test(text), `${path}: исключение не привязано к DOMRenderProps`);
-    assert.ok(/polymorphic spread/i.test(text), `${path}: исключение не ограничено полиморфным spread'ом`);
+    assert.ok(
+      /polymorphic spread/i.test(text),
+      `${path}: исключение не ограничено полиморфным spread'ом`,
+    );
   }
 });
 
 test("tests are located under tests/, stories beside the component", () => {
   const text = read(SKILL);
 
-  assert.ok(/tests\/components\/<component-name>\//.test(text), `${SKILL}: тесты не перенесены в tests/`);
-  assert.ok(!text.includes("<component-name>.test.tsx # jsdom"), `${SKILL}: старое расположение тестов осталось`);
+  assert.ok(
+    /tests\/components\/<component-name>\//.test(text),
+    `${SKILL}: тесты не перенесены в tests/`,
+  );
+  assert.ok(
+    !text.includes("<component-name>.test.tsx # jsdom"),
+    `${SKILL}: старое расположение тестов осталось`,
+  );
 });
 
 test("AGENTS.md and CLAUDE.md stay byte-identical", () => {

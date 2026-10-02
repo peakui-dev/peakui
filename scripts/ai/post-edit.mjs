@@ -87,7 +87,7 @@ function run(command) {
  * сообщал об успехе. Это ровно тот класс тихого отказа, из-за которого хук был нацелен
  * на несуществующий пакет и никто этого не замечал.
  */
-export function typecheckReport({status, stdout, stderr, target, maxLines}) {
+export function typecheckReport({maxLines, status, stderr, stdout, target}) {
   if (status === 0) return null;
 
   const {count, text} = filterFileErrors(stdout, target, maxLines);

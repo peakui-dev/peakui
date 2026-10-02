@@ -135,20 +135,20 @@ export const States: Story = {
         <h3 className="text-sm font-semibold text-foreground">Варианты по data-атрибутам</h3>
         <div className="flex flex-wrap gap-4">
           <div
-            className="rounded-lg bg-surface px-4 py-2 text-sm text-surface-foreground hovered:bg-surface-hover"
             data-hovered
+            className="rounded-lg bg-surface px-4 py-2 text-sm text-surface-foreground hovered:bg-surface-hover"
           >
             hovered:bg-surface-hover
           </div>
           <div
-            className="rounded-lg bg-default px-4 py-2 text-sm text-default-foreground selected:bg-accent selected:text-accent-foreground"
             data-selected
+            className="rounded-lg bg-default px-4 py-2 text-sm text-default-foreground selected:bg-accent selected:text-accent-foreground"
           >
             selected:bg-accent
           </div>
           <div
-            className="rounded-lg bg-surface px-4 py-2 text-sm text-surface-foreground disabled-state:status-disabled"
             data-disabled
+            className="rounded-lg bg-surface px-4 py-2 text-sm text-surface-foreground disabled-state:status-disabled"
           >
             disabled-state:status-disabled
           </div>

@@ -1,8 +1,8 @@
+import type {ThemePreset} from "./preset.ts";
+
 import {readFileSync} from "node:fs";
 
 import {describe, expect, it} from "vitest";
-
-import type {ThemePreset} from "./preset.ts";
 
 import {deriveTheme} from "./derive.ts";
 

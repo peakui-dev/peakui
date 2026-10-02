@@ -66,10 +66,14 @@ const selectorsFor = (id: string, scheme: Scheme): string => {
 export function emitVariablesCss(preset: ThemePreset, derived: Derived): string {
   const parts: string[] = [];
 
-  parts.push(`${INDENT}/* Тема «${preset.id}». Сгенерировано: pnpm tokens:build — не править руками. */`);
+  parts.push(
+    `${INDENT}/* Тема «${preset.id}». Сгенерировано: pnpm tokens:build — не править руками. */`,
+  );
 
   // `:root` matches nothing inside a shadow tree, so scheme-invariant tokens are declared on both.
-  parts.push(`${INDENT}:root,\n${INDENT}:host {\n${declarations(derived.invariant, INDENT.repeat(2))}\n${INDENT}}`);
+  parts.push(
+    `${INDENT}:root,\n${INDENT}:host {\n${declarations(derived.invariant, INDENT.repeat(2))}\n${INDENT}}`,
+  );
 
   for (const scheme of ["light", "dark"] as const) {
     const tokens = scheme === "light" ? derived.light : derived.dark;

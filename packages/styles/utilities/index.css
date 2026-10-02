@@ -60,7 +60,8 @@
         max(
           var(--concentric-pad-inline, 0px),
           var(--concentric-pad-block, var(--concentric-pad-inline, 0px))
-        ) - var(--concentric-border, 0px)
+        ) -
+        var(--concentric-border, 0px)
     )
   );
 }

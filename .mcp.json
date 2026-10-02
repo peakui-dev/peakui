@@ -3,12 +3,7 @@
     "codegraph": {
       "type": "stdio",
       "command": "pnpm",
-      "args": [
-        "exec",
-        "codegraph",
-        "serve",
-        "--mcp"
-      ],
+      "args": ["exec", "codegraph", "serve", "--mcp"],
       "alwaysLoad": true
     }
   }

@@ -115,13 +115,11 @@ export type ContrastFix = {token: string; from: number; to: number; ratio: numbe
  * adjustment is reported rather than applied silently: a palette that quietly moves underneath the
  * designer is worse than one that fails loudly.
  */
-export function ensureContrast(args: {
-  token: string;
-  fg: Oklch;
-  bg: Oklch;
-  min: number;
-}): {color: Oklch; fix?: ContrastFix} {
-  const {token, fg, bg, min} = args;
+export function ensureContrast(args: {token: string; fg: Oklch; bg: Oklch; min: number}): {
+  color: Oklch;
+  fix?: ContrastFix;
+} {
+  const {bg, fg, min, token} = args;
 
   if (contrastRatio(fg, bg) >= min) return {color: fg};
 

@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
-
 import type {Oklch} from "./color.ts";
+
+import {describe, expect, it} from "vitest";
 
 import {contrastRatio, formatOklch, parseOklch, relativeLuminance} from "./color.ts";
 

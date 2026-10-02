@@ -8,12 +8,13 @@
  * Fixtures are injectable so each gate can be driven in a test without touching the real tree.
  */
 
+import type {TokenSet} from "./preset.ts";
+
 import {readFileSync, readdirSync} from "node:fs";
 import {join, resolve} from "node:path";
 
-import type {TokenSet} from "./preset.ts";
-
 import {presets} from "../../presets/index.ts";
+
 import {deriveTheme} from "./derive.ts";
 import {emitVariablesCss} from "./emit.ts";
 
@@ -76,7 +77,7 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
   );
 
   const themes: {id: string; tokens: TokenSet}[] = presets.map((preset) => {
-    const {invariant, light, dark} = deriveTheme(preset);
+    const {dark, invariant, light} = deriveTheme(preset);
 
     return {id: preset.id, tokens: {...invariant, ...light, ...dark}};
   });
@@ -90,7 +91,9 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
 
     for (const name of referenced) {
       if (!declared.has(name)) {
-        errors.push(`Висящий токен: theme.css ссылается на --${name}, тема «${theme.id}» его не объявляет.`);
+        errors.push(
+          `Висящий токен: theme.css ссылается на --${name}, тема «${theme.id}» его не объявляет.`,
+        );
       }
     }
 
@@ -146,15 +149,25 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
    * it, a nested element consumes it — and a fallback there makes the reference optional by design.
    */
   const SHARED_PREFIXES = [
-    "color-", "shadow-", "radius", "text-", "font-", "ease-", "animate-",
-    "spacing", "border-width", "tracking-", "leading-",
+    "color-",
+    "shadow-",
+    "radius",
+    "text-",
+    "font-",
+    "ease-",
+    "animate-",
+    "spacing",
+    "border-width",
+    "tracking-",
+    "leading-",
   ];
   const isSharedNamespace = (token: string): boolean =>
     SHARED_PREFIXES.some((prefix) => token === prefix || token.startsWith(prefix));
 
   const declaredAnywhere = new Set<string>([...themeSurface]);
 
-  for (const theme of themes) for (const name of Object.keys(theme.tokens)) declaredAnywhere.add(name);
+  for (const theme of themes)
+    for (const name of Object.keys(theme.tokens)) declaredAnywhere.add(name);
 
   for (const [name, css] of Object.entries(shippedCss)) {
     const body = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -185,7 +198,9 @@ export function checkTokens(fixtures: CheckFixtures = {}): {errors: string[]} {
     }
 
     if (/\b(?:rgb|rgba|hsl|hsla)\(/.test(stripped)) {
-      errors.push(`Литеральный цвет: ${name} содержит rgb()/hsl(). Ссылайтесь на семантический токен.`);
+      errors.push(
+        `Литеральный цвет: ${name} содержит rgb()/hsl(). Ссылайтесь на семантический токен.`,
+      );
     }
 
     const numbered = stripped.match(/--color-[\w-]*?-\d+\b/g);

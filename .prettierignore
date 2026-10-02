@@ -1,0 +1,21 @@
+# Вендоренный эталон — read-only и не наш код.
+heroui/
+heroui-cli/
+heroui-mcp/
+
+dist/
+coverage/
+storybook-static/
+test-results/
+playwright-report/
+pnpm-lock.yaml
+
+# Документы. Prettier выравнивает markdown-таблицы пробелами, разгоняя строки далеко за 100
+# символов, и переписывает *курсив* в _курсив_ — то есть отменяет стиль, в котором здесь написан
+# каждый документ. Код, конфиги и CSS он форматирует как обычно.
+*.md
+
+# Сгенерированные темы. Их формат — вывод генератора, и check:tokens сверяет файл байт в байт;
+# переформатировав его, Prettier ломает гейт токенов. themes/shared/ написан руками — он остаётся.
+packages/styles/themes/
+!packages/styles/themes/shared/

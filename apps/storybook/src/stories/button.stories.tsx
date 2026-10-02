@@ -53,10 +53,14 @@ export const WithoutReact: Story = {
         <button className="button button--outline" type="button">
           Контурная
         </button>
-        <button className="button button--primary" disabled type="button">
+        <button disabled className="button button--primary" type="button">
           Недоступная
         </button>
-        <button aria-label="Избранное" className="button button--ghost button--icon-only" type="button">
+        <button
+          aria-label="Избранное"
+          className="button button--ghost button--icon-only"
+          type="button"
+        >
           ★
         </button>
       </section>
@@ -97,7 +101,7 @@ export const VariantFunctionParity: Story = {
       <h2 className="text-xl font-semibold text-foreground">buttonVariants() и класс руками</h2>
 
       {VARIANTS.map((variant) => (
-        <section className="flex flex-col gap-2" key={variant}>
+        <section key={variant} className="flex flex-col gap-2">
           <code className="font-mono text-xs text-muted">{variant}</code>
           <div className="flex flex-wrap items-center gap-3">
             <button className={buttonVariants({variant})} type="button">
@@ -111,7 +115,7 @@ export const VariantFunctionParity: Story = {
       ))}
 
       {SIZES.map((size) => (
-        <section className="flex flex-col gap-2" key={size}>
+        <section key={size} className="flex flex-col gap-2">
           <code className="font-mono text-xs text-muted">{size}</code>
           <div className="flex flex-wrap items-center gap-3">
             <button className={buttonVariants({size})} type="button">

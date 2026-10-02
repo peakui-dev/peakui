@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "storybook dev --host 127.0.0.1 --port 6007 --no-open",
     "build": "storybook build",
+    "dev": "storybook dev --host 127.0.0.1 --port 6007 --no-open",
+    "lint": "eslint . --max-warnings=0",
     "test:e2e": "playwright test",
     "test:e2e:ci": "storybook build --quiet && playwright test",
     "typecheck": "tsc --noEmit"

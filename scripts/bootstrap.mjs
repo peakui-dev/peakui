@@ -63,9 +63,7 @@ export function checkPnpmVersion(actual, required) {
 
 /** Renders the findings and decides the exit code: any failure makes it non-zero. */
 export function formatReport(findings) {
-  const lines = findings.map(
-    ({name, ok, detail}) => `${ok ? "ok  " : "FAIL"}  ${name}: ${detail}`,
-  );
+  const lines = findings.map(({detail, name, ok}) => `${ok ? "ok  " : "FAIL"}  ${name}: ${detail}`);
   const failed = findings.filter((finding) => !finding.ok);
 
   if (failed.length > 0) {
@@ -114,7 +112,10 @@ export function isMcpCommandPortable(config) {
 export function versionFloors(pkg) {
   return {
     node: String(pkg?.engines?.node ?? "").replace(/[^\d.]/g, ""),
-    pnpm: String(pkg?.packageManager ?? "").split("@").pop() ?? "",
+    pnpm:
+      String(pkg?.packageManager ?? "")
+        .split("@")
+        .pop() ?? "",
   };
 }
 
@@ -186,7 +187,12 @@ export function collectFindings(fsLike, env = {}) {
   };
 
   const findings = [
-    state("dependencies", fsLike.existsSync(at("node_modules")), "node_modules", "run pnpm install"),
+    state(
+      "dependencies",
+      fsLike.existsSync(at("node_modules")),
+      "node_modules",
+      "run pnpm install",
+    ),
     state(
       "codegraph index",
       fsLike.existsSync(at(".codegraph")),
@@ -204,9 +210,7 @@ export function collectFindings(fsLike, env = {}) {
       continue;
     }
 
-    findings.push(
-      hookConfigFinding(file, parse(file), ["protected-files.mjs", "post-edit.mjs"]),
-    );
+    findings.push(hookConfigFinding(file, parse(file), ["protected-files.mjs", "post-edit.mjs"]));
   }
 
   if (!fsLike.existsSync(at(".mcp.json"))) {
@@ -321,7 +325,7 @@ async function gather() {
 }
 
 async function check() {
-  const {text, code} = formatReport(await gather());
+  const {code, text} = formatReport(await gather());
 
   console.log(text);
   process.exit(code);
@@ -353,7 +357,7 @@ async function setup() {
     console.log(`ok  ${gate.name}: ${gate.detail}`);
   }
 
-  for (const {label, command, args} of setupSteps({existsSync}, ROOT)) {
+  for (const {args, command, label} of setupSteps({existsSync}, ROOT)) {
     step(label, command, args);
   }
 

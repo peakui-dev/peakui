@@ -11,7 +11,10 @@ import {checkA11y, injectAxe} from "axe-playwright";
  * настоящий дефект контраста, см. ../AGENTS.md.
  */
 
-const STORIES = ["components-button--without-react", "components-button--variant-function-parity"] as const;
+const STORIES = [
+  "components-button--without-react",
+  "components-button--variant-function-parity",
+] as const;
 const THEMES = ["default-light", "default-dark"] as const;
 
 test.describe("Button — стилевой слой", () => {

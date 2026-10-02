@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
-
 import type {ThemePreset} from "./preset.ts";
+
+import {describe, expect, it} from "vitest";
 
 import {deriveTheme} from "./derive.ts";
 import {emitVariablesCss} from "./emit.ts";

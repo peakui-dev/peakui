@@ -138,7 +138,7 @@ export function oklchToLinearSrgb(color: Oklch): {r: number; g: number; b: numbe
  * so the weights apply directly — gamma-encoding and re-linearising would only add error.
  */
 export function relativeLuminance(color: Oklch): number {
-  const {r, g, b} = oklchToLinearSrgb(color);
+  const {b, g, r} = oklchToLinearSrgb(color);
 
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }

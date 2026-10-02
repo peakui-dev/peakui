@@ -5,6 +5,7 @@
   "sideEffects": false,
   "scripts": {
     "check:tokens": "node scripts/check-tokens.ts",
+    "lint": "eslint . --max-warnings=0",
     "lint:package": "publint --strict && attw --pack . --profile esm-only --exclude-entrypoints base css utilities variants themes/default",
     "test": "vitest run",
     "tokens:build": "node scripts/build-tokens.ts",

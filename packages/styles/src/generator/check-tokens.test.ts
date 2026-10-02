@@ -35,7 +35,8 @@ describe("checkTokens", () => {
     // Это буквальный пример из Review Focus #5 плана, и он проходил все гейты.
     const errors = checkTokens({
       componentCss: {
-        "card.css": ".card { color: var(--color-muted-foreground); background: var(--color-nope); }",
+        "card.css":
+          ".card { color: var(--color-muted-foreground); background: var(--color-nope); }",
       },
     }).errors;
 
@@ -52,7 +53,9 @@ describe("checkTokens", () => {
   it("ловит var() внутри color-mix, а не только сразу после двоеточия", () => {
     expect(
       checkTokens({
-        componentCss: {"c.css": ".c { color: color-mix(in oklab, var(--color-ghost), transparent); }"},
+        componentCss: {
+          "c.css": ".c { color: color-mix(in oklab, var(--color-ghost), transparent); }",
+        },
       }).errors,
     ).toContainEqual(expect.stringMatching(/--color-ghost/));
   });

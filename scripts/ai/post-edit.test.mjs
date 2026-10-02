@@ -77,11 +77,15 @@ test("отсутствующий бинарник отбрасывается: х
   ];
   const hasBin = (name) => name === "prettier";
 
-  assert.deepEqual(filterAvailable(cmds, hasBin), [
-    'prettier --write "packages/react/src/a.ts"',
-  ]);
-  assert.deepEqual(filterAvailable(cmds, () => false), []);
-  assert.deepEqual(filterAvailable(cmds, () => true), cmds);
+  assert.deepEqual(filterAvailable(cmds, hasBin), ['prettier --write "packages/react/src/a.ts"']);
+  assert.deepEqual(
+    filterAvailable(cmds, () => false),
+    [],
+  );
+  assert.deepEqual(
+    filterAvailable(cmds, () => true),
+    cmds,
+  );
 });
 
 test("сбой самого tsc не теряется: ошибка конфига приходит в stdout при пустом stderr", () => {
@@ -99,7 +103,8 @@ test("сбой самого tsc не теряется: ошибка конфиг
 test("ошибки типов целевого файла по-прежнему отчитываются с количеством", () => {
   const report = typecheckReport({
     status: 1,
-    stdout: "packages/react/src/a.ts(1,1): error TS7006: Parameter 'e' implicitly has an 'any' type.",
+    stdout:
+      "packages/react/src/a.ts(1,1): error TS7006: Parameter 'e' implicitly has an 'any' type.",
     stderr: "",
     target: "packages/react/src/a.ts",
   });

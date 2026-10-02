@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
-
 import type {Oklch} from "./color.ts";
+
+import {describe, expect, it} from "vitest";
 
 import {relativeLuminance} from "./color.ts";
 import {TRANSPARENT, compositeOver, ensureContrast, mix} from "./contrast.ts";
@@ -46,7 +46,10 @@ describe("compositeOver", () => {
   // Браузер композитит в sRGB, а не в OKLab. Линейная интерполяция в OKLab даёт на этой паре
   // яркость 0.125 против настоящих 0.214 — завышение контраста белого текста с 3.98 до 6.00.
   it("композитит в sRGB: чёрный @0.5 на белом даёт яркость ~0.214, а не 0.125", () => {
-    expect(relativeLuminance(compositeOver({l: 0, c: 0, h: 0, a: 0.5}, white))).toBeCloseTo(0.214, 2);
+    expect(relativeLuminance(compositeOver({l: 0, c: 0, h: 0, a: 0.5}, white))).toBeCloseTo(
+      0.214,
+      2,
+    );
   });
 
   it("несимметричная альфа композитится в правильную сторону", () => {

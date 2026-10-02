@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
-
 import type {ThemePreset} from "./preset.ts";
+
+import {describe, expect, it} from "vitest";
 
 import {contrastRatio, parseOklch} from "./color.ts";
 import {compositeOver} from "./contrast.ts";
@@ -16,13 +16,23 @@ const preset: ThemePreset = {
 
 describe("deriveTheme", () => {
   it("объявляет полный набор в обеих схемах", () => {
-    const {light, dark} = deriveTheme(preset);
+    const {dark, light} = deriveTheme(preset);
 
     expect(Object.keys(light).sort()).toEqual(Object.keys(dark).sort());
 
     for (const name of [
-      "background", "foreground", "surface", "overlay", "muted", "default",
-      "accent", "accent-foreground", "border", "separator", "focus", "backdrop",
+      "background",
+      "foreground",
+      "surface",
+      "overlay",
+      "muted",
+      "default",
+      "accent",
+      "accent-foreground",
+      "border",
+      "separator",
+      "focus",
+      "backdrop",
     ]) {
       expect(light[name], name).toBeDefined();
     }
@@ -74,7 +84,7 @@ describe("deriveTheme", () => {
   });
 
   it("каждая текстовая пара держит 4.5:1 после вывода", () => {
-    const {light, dark} = deriveTheme(preset);
+    const {dark, light} = deriveTheme(preset);
 
     for (const scheme of [light, dark]) {
       const base = parseOklch(scheme["background"]!)!;
@@ -85,8 +95,10 @@ describe("deriveTheme", () => {
         const bgName = name.replace(/-foreground$/, "");
         const bg = parseOklch(scheme[bgName] ?? scheme["background"]!)!;
 
-        expect(contrastRatio(parseOklch(value)!, compositeOver(bg, base)), name)
-          .toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(parseOklch(value)!, compositeOver(bg, base)),
+          name,
+        ).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
@@ -116,7 +128,7 @@ describe("гарантии контраста покрывают весь наб
 
   it("soft-пары тоже держат 4.5:1 — включая пресет, который раньше их ломал", () => {
     // Этот override проходил все гейты с 4.12:1 на warning-soft-foreground.
-    const {light, dark} = deriveTheme({
+    const {dark, light} = deriveTheme({
       ...preset,
       semanticOverrides: {light: {warning: {color: "oklch(0.86 0.17 95)"}}},
     });
@@ -127,7 +139,7 @@ describe("гарантии контраста покрывают весь наб
   });
 
   it("focus держит 3:1 против фона и поверхности в обеих схемах", () => {
-    const {light, dark} = deriveTheme(preset);
+    const {dark, light} = deriveTheme(preset);
 
     for (const scheme of [light, dark]) {
       for (const against of ["background", "surface"]) {
@@ -139,14 +151,23 @@ describe("гарантии контраста покрывают весь наб
   });
 
   it("muted держит 4.5:1 против САМОГО невыгодного фона набора, а не только background", () => {
-    const {light, dark} = deriveTheme(preset);
+    const {dark, light} = deriveTheme(preset);
 
-    for (const [name, scheme] of [["light", light], ["dark", dark]] as const) {
+    for (const [name, scheme] of [
+      ["light", light],
+      ["dark", dark],
+    ] as const) {
       const muted = parseOklch(scheme["muted"]!)!;
 
       for (const against of [
-        "background", "background-secondary", "background-tertiary",
-        "surface", "surface-secondary", "surface-tertiary", "default", "overlay",
+        "background",
+        "background-secondary",
+        "background-tertiary",
+        "surface",
+        "surface-secondary",
+        "surface-tertiary",
+        "default",
+        "overlay",
       ]) {
         expect(
           contrastRatio(muted, parseOklch(scheme[against]!)!),

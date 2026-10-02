@@ -149,8 +149,16 @@ const buildScheme = (
 
 /** `X` and its `X-foreground`, in the order they are enforced. */
 const FOREGROUND_PAIRS = [
-  "surface", "surface-secondary", "surface-tertiary", "overlay", "default",
-  "accent", "success", "warning", "danger", "segment",
+  "surface",
+  "surface-secondary",
+  "surface-tertiary",
+  "overlay",
+  "default",
+  "accent",
+  "success",
+  "warning",
+  "danger",
+  "segment",
 ] as const;
 
 const deriveScheme = (
@@ -279,18 +287,8 @@ const deriveScheme = (
     raw[`${key}-soft-hover`] = mix(raw[key]!, softHover, TRANSPARENT, 100 - softHover);
   }
 
-  raw["warning-soft-foreground"] = mix(
-    c.warning,
-    80,
-    c.foreground,
-    scheme === "light" ? 70 : 30,
-  );
-  raw["success-soft-foreground"] = mix(
-    c.success,
-    80,
-    c.foreground,
-    scheme === "light" ? 60 : 30,
-  );
+  raw["warning-soft-foreground"] = mix(c.warning, 80, c.foreground, scheme === "light" ? 70 : 30);
+  raw["success-soft-foreground"] = mix(c.success, 80, c.foreground, scheme === "light" ? 60 : 30);
 
   raw["separator-secondary"] = mix(c.surface, 85, fg("surface"), 15);
   raw["separator-tertiary"] = mix(c.surface, 81, fg("surface"), 19);
@@ -325,13 +323,16 @@ const deriveScheme = (
     if (!partner) continue;
 
     const bases = [c.surface, c.background];
-    const worst = bases.reduce((acc, base) => {
-      const composited = compositeOver(partner, base);
+    const worst = bases.reduce(
+      (acc, base) => {
+        const composited = compositeOver(partner, base);
 
-      return contrastRatio(raw[name]!, composited) < contrastRatio(raw[name]!, acc)
-        ? composited
-        : acc;
-    }, compositeOver(partner, c.surface));
+        return contrastRatio(raw[name]!, composited) < contrastRatio(raw[name]!, acc)
+          ? composited
+          : acc;
+      },
+      compositeOver(partner, c.surface),
+    );
 
     const {color, fix} = ensureContrast({token: name, fg: raw[name]!, bg: worst, min: TEXT_MIN});
 
@@ -421,5 +422,10 @@ export function deriveTheme(preset: ThemePreset): {
     mono: (preset.typography?.mono ?? DEFAULT_MONO).join(", "),
   };
 
-  return {invariant, light: light.tokens, dark: dark.tokens, fixes: [...light.fixes, ...dark.fixes]};
+  return {
+    invariant,
+    light: light.tokens,
+    dark: dark.tokens,
+    fixes: [...light.fixes, ...dark.fixes],
+  };
 }
