@@ -1,0 +1,61 @@
+/*
+ * Spinner. Имена классов приходят из src/components/spinner/spinner.styles.ts; здесь живёт весь
+ * Tailwind. Анимация берётся из темы — --animate-spin-fast объявлен в themes/shared/theme.css,
+ * рукописного @keyframes здесь нет и быть не должно.
+ */
+
+.spinner {
+  /* Размер по умолчанию живёт здесь, а не в .spinner--md: иначе два источника правды разъедутся. */
+  @apply inline-flex size-6 shrink-0;
+  @apply pointer-events-none;
+  /*
+   * motion-reduce ПОСЛЕ animate: наоборот специфичность отдаёт победу анимации, и предпочтение
+   * пользователя молча игнорируется. Та же ловушка, что с transition в button.css.
+   */
+  @apply animate-spin-fast motion-reduce:animate-none;
+}
+
+/* ---------- Размеры ---------- */
+
+.spinner--sm {
+  @apply size-4;
+}
+
+.spinner--md {
+  /* Без стилей: размер по умолчанию живёт в .spinner. */
+}
+
+.spinner--lg {
+  @apply size-8;
+}
+
+.spinner--xl {
+  @apply size-10;
+}
+
+/* ---------- Цвета ---------- */
+
+/*
+ * Цвет несёт currentColor: SVG внутри закрашивается градиентами от currentColor, поэтому
+ * достаточно одного свойства на вариант.
+ */
+
+.spinner--current {
+  color: inherit;
+}
+
+.spinner--accent {
+  color: var(--color-accent);
+}
+
+.spinner--danger {
+  color: var(--color-danger);
+}
+
+.spinner--success {
+  color: var(--color-success);
+}
+
+.spinner--warning {
+  color: var(--color-warning);
+}
