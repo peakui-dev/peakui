@@ -20,6 +20,7 @@
     "@peakui/standard": "workspace:*",
     "@peakui/testing": "workspace:*",
     "@react-aria/utils": "^3.34.1",
+    "@storybook/react-vite": "^10.6.1",
     "@testing-library/jest-dom": "7.0.1",
     "@types/node": "^24.0.0",
     "@types/react": "^19.3.0",

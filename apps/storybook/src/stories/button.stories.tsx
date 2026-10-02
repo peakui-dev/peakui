@@ -4,8 +4,9 @@ import {buttonVariants} from "@peakui/styles";
 
 /*
  * Доказательство обещания Framework-Agnostic Styles: ни одна история здесь не рендерит
- * React-компонент PeakUI — его не существует, packages/react ещё не создан. Стилизуется голая
- * разметка, ровно как это сделал бы потребитель на Vue, Svelte или чистом HTML.
+ * React-компонент PeakUI, хотя он уже существует — @peakui/react и его истории живут рядом, в
+ * packages/react/src/components/button/. Здесь стилизуется голая разметка, ровно как это сделал
+ * бы потребитель на Vue, Svelte или чистом HTML, и этот ярус вторым не вытесняется.
  *
  * Имена BEM собираются строкой сознательно и это безопасно, в отличие от утилит Tailwind:
  * .button--primary — настоящее правило в components/button.css, а не класс, который Tailwind

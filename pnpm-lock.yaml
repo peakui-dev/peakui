@@ -196,6 +196,9 @@ importers:
 
   apps/storybook:
     dependencies:
+      '@peakui/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@peakui/styles':
         specifier: workspace:*
         version: link:../../packages/styles
@@ -270,6 +273,9 @@ importers:
       '@react-aria/utils':
         specifier: ^3.34.1
         version: 3.34.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@storybook/react-vite':
+        specifier: ^10.6.1
+        version: 10.6.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.63.5)(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.7)(react@19.3.0))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(jiti@2.7.0))
       '@testing-library/jest-dom':
         specifier: 7.0.1
         version: 7.0.1(@testing-library/dom@10.4.2)(vitest@3.2.7(@types/node@24.19.0)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(supports-color@7.2.0))

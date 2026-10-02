@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@peakui/react": "workspace:*",
     "@peakui/styles": "workspace:*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
