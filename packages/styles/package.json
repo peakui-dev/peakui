@@ -32,6 +32,11 @@
     },
     "./base": "./base/base.css",
     "./base/*": "./base/*",
+    "./components/*": {
+      "types": "./src/components/*/index.ts",
+      "import": "./src/components/*/index.ts",
+      "default": "./src/components/*/index.ts"
+    },
     "./components/*.css": "./components/*.css",
     "./css": {
       "style": "./index.css",

@@ -395,10 +395,14 @@ Expected: PASS.
 Run: `pnpm lint:package`
 Expected: PASS. If `attw --profile esm-only` rejects the TypeScript-source entry point, add `components/*` to the existing `--exclude-entrypoints` list and record the reason in the commit body — the spec's risk table anticipates exactly this. If the failure is anything other than "types point at source", stop and report: that is a packaging decision, not a flag.
 
-- [ ] **Step 6: Confirm the import path end to end**
+- [ ] **Step 6: Pin the import path permanently**
 
-Run: `cd packages/styles && pnpm vitest run --reporter dot` plus a one-off check that `@peakui/styles/components/button` resolves — a temporary test file importing it, deleted after it passes.
-Expected: the deep import yields the same `buttonVariants` object as the root import.
+Node self-referencing resolves inside the package, so this belongs in `src/index.test.ts` rather than a throwaway file: import `buttonVariants` from `@peakui/styles/components/button` and assert `toBe` against the root import.
+
+Identity, not equal output — "both imports work identically" means one function object. Two copies would produce the same string and still break `tv({extend})` for a consumer, who would extend something other than what they style.
+
+Run: `cd packages/styles && pnpm vitest run src/index.test.ts`
+Expected: PASS.
 
 - [ ] **Step 7: Commit**
 
