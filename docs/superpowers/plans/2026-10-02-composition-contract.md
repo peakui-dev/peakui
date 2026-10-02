@@ -56,7 +56,7 @@ The spec implies these and no task's tests reach them unless the listed task add
 - Consumes: nothing.
 - Produces: `buttonVariants` — a `tv()` return value callable as `buttonVariants(props?: ButtonVariants): string`; and `type ButtonVariants = VariantProps<typeof buttonVariants>`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import {describe, expect, it} from "vitest";
@@ -113,26 +113,26 @@ describe("buttonVariants", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd packages/styles && pnpm vitest run src/components/button/button.styles.test.ts`
 Expected: FAIL — cannot resolve `./button.styles.ts`.
 
-- [ ] **Step 3: Implement `buttonVariants` in `packages/styles/src/components/button/button.styles.ts`**
+- [x] **Step 3: Implement `buttonVariants` in `packages/styles/src/components/button/button.styles.ts`**
 
 `tv()` from `tailwind-variants`. `base: "button"`. Variants and values exactly as the spec's "Variant shape" section fixes them, each value mapping to its BEM modifier name and nothing else. `defaultVariants: {size: "md", variant: "primary"}`. Export `type ButtonVariants = VariantProps<typeof buttonVariants>` alongside. Mirror the formatting of `heroui/packages/styles/src/components/button/button.styles.ts` (alphabetically sorted keys).
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run src/components/button/button.styles.test.ts`
 Expected: PASS, 7 test cases green (the `it.each` blocks count their rows).
 
-- [ ] **Step 5: Typecheck**
+- [x] **Step 5: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: no errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/styles/src/components/button/
@@ -153,7 +153,7 @@ git commit -m "feat(styles): buttonVariants — BEM-имена варианто�
 - Consumes: `buttonVariants`, `ButtonVariants` from Task 1.
 - Produces: `@peakui/styles` root exports — `tv`, `cn`, `type VariantProps` re-exported from `tailwind-variants`; every component's variant function and variant type; `version`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `packages/styles/src/index.test.ts`, keeping the existing `version` test untouched:
 
@@ -177,17 +177,17 @@ it("отдаёт вариант-функции компонентов из ко�
 
 The identity assertion is Review Focus item 3: a copied `tv` would pass `typeof` and still break `tv({extend})`.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd packages/styles && pnpm vitest run src/index.test.ts`
 Expected: FAIL — `tv`, `cn` and `buttonVariants` are not exported from `./index.ts`.
 
-- [ ] **Step 3: Create the two barrels**
+- [x] **Step 3: Create the two barrels**
 
 `src/components/button/index.ts` is one line: `export * from "./button.styles.ts";`
 `src/components/index.ts` is the flat list, one `export * from "./<name>/index.ts";` per component directory, alphabetically sorted — Button alone for now.
 
-- [ ] **Step 4: Rewrite `packages/styles/src/index.ts`**
+- [x] **Step 4: Rewrite `packages/styles/src/index.ts`**
 
 ```ts
 export {cn, tv, type VariantProps} from "tailwind-variants";
@@ -198,17 +198,17 @@ export const version = "0.0.0";
 
 No `export * from "./utils"` — the spec's section 3 forbids copying the reference's JS utility strings.
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run src/index.test.ts`
 Expected: PASS, including the pre-existing `version` test.
 
-- [ ] **Step 6: Run the package's whole suite and typecheck**
+- [x] **Step 6: Run the package's whole suite and typecheck**
 
 Run: `pnpm typecheck && pnpm test`
 Expected: all green.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/styles/src/
@@ -229,7 +229,7 @@ git commit -m "feat(styles): публичная JS-поверхность — tv
 - Consumes: the BEM names Task 1 fixed; `buttonVariants` from Task 2.
 - Produces: the `.button` block and its modifiers as real CSS rules; two stories under `Components/Button`.
 
-- [ ] **Step 1: Write `packages/styles/components/button.css`**
+- [x] **Step 1: Write `packages/styles/components/button.css`**
 
 One `.button` block plus one rule per modifier. Required by the spec and the global constraints:
 
@@ -240,23 +240,23 @@ One `.button` block plus one rule per modifier. Required by the spec and the glo
 - `transition` first, `@apply motion-reduce:transition-none` after it.
 - The structural half of `forced-colors`, which the token layer does **not** cover: a transparent border held in the normal state, and `border-color: ButtonBorder` inside `@media (forced-colors: active)`. `css-authoring.md` gives the pattern; skipping it loses every variant but `--outline` in that mode.
 
-- [ ] **Step 2: Import it from the components layer**
+- [x] **Step 2: Import it from the components layer**
 
 Add `@import "./button.css";` to `packages/styles/components/index.css`, replacing the placeholder comment's claim that the layer is empty.
 
-- [ ] **Step 3: Verify the token gate**
+- [x] **Step 3: Verify the token gate**
 
 Run: `pnpm check:tokens`
 Expected: PASS — no literal colour in `button.css`.
 
-- [ ] **Step 4: Write the two stories**
+- [x] **Step 4: Write the two stories**
 
 `apps/storybook/src/stories/button.stories.tsx`, `title: "Components/Button"`, default export is the CSF meta (the sanctioned exception to named-exports-only).
 
 - A story rendering **bare markup only** — `<button className="button button--primary">` and `<a className="button button--secondary" href="#">` — with no React component and no import from `@peakui/react`. This is the Direct Class Application recipe and the executable form of the framework-agnostic claim.
 - A story rendering, for each variant and size, the `buttonVariants({...})` output beside the hand-written class string, so a modifier that exists in `tv()` with no rule behind it in `button.css` is visible.
 
-- [ ] **Step 5: Build Storybook, then put Button under the real a11y gate**
+- [x] **Step 5: Build Storybook, then put Button under the real a11y gate**
 
 Run: `pnpm build:storybook`
 Expected: build succeeds.
@@ -269,12 +269,12 @@ A green build is **not** an accessibility result. `apps/storybook/AGENTS.md` rec
 Run: `STORYBOOK_PORT=<free> pnpm test:e2e`
 Expected: every test passes, Button's five among them. Playwright never reuses a server it did not start, so a held 6007 is a port to step around, not a process to kill.
 
-- [ ] **Step 6: Behavioural smoke on the story iframe**
+- [x] **Step 6: Behavioural smoke on the story iframe**
 
 Per `apps/storybook/AGENTS.md`: `agent-browser open <iframe-url>` → `snapshot -i` → `errors` / `console` / `a11y`. Text only, never screenshots.
 Expected: no console errors, no a11y findings, and the bare `<a>` carries the computed background of `--button-bg` rather than the browser default.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/styles/components/ apps/storybook/src/stories/button.stories.tsx
@@ -292,7 +292,7 @@ git commit -m "feat(styles): слой CSS Button и доказательство
 - Consumes: the directory layout from Tasks 1–3.
 - Produces: a gate every later component inherits — no new exported symbol.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `packages/styles/src/components/index.test.ts`. It reads the filesystem, not the module graph, so a forgotten barrel line is caught rather than silently absent:
 
@@ -328,7 +328,7 @@ The vacuous-pass guard is declared **first**, because `it.each([])` registers no
 
 The third assertion is Review Focus item 4: without it both gates pass vacuously on an empty glob and prove nothing.
 
-- [ ] **Step 2: Run it against two deliberate gaps to verify it fails on each**
+- [x] **Step 2: Run it against two deliberate gaps to verify it fails on each**
 
 Both halves of the gate need proving, because each can pass vacuously in its own way.
 
@@ -337,12 +337,12 @@ Both halves of the gate need proving, because each can pass vacuously in its own
 
 Run after each: `cd packages/styles && pnpm vitest run src/components/index.test.ts`
 
-- [ ] **Step 3: Run it intact to verify it passes**
+- [x] **Step 3: Run it intact to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run src/components/index.test.ts`
 Expected: PASS, all three.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add packages/styles/src/components/index.test.ts
@@ -361,7 +361,7 @@ git commit -m "test(styles): гейт полноты бочки компонен
 - Consumes: `src/components/button/index.ts` from Task 2 — the subpath must resolve to a file that exists, which is why this task follows rather than leads.
 - Produces: `@peakui/styles/components/<name>` as a public import path.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `packages/styles/src/generator/exports.test.ts`, add `"./components/*"` to the list of required paths, and add:
 
@@ -376,26 +376,26 @@ it("разводит JS- и CSS-подпути одного префикса", (
 
 That second assertion is Review Focus item 5. Node resolves subpath patterns by specificity, not declaration order, so `*.css` keeps winning for CSS requests — the test pins both halves so a later edit cannot collapse them into one.
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `cd packages/styles && pnpm vitest run src/generator/exports.test.ts`
 Expected: FAIL — `exports` has no `./components/*`.
 
-- [ ] **Step 3: Add the subpath to `packages/styles/package.json`**
+- [x] **Step 3: Add the subpath to `packages/styles/package.json`**
 
 The three-condition form from the spec's "Exports map" section, placed to keep the map alphabetically sorted.
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `cd packages/styles && pnpm vitest run src/generator/exports.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Run the packaging gate and resolve what it says**
+- [x] **Step 5: Run the packaging gate and resolve what it says**
 
 Run: `pnpm lint:package`
 Expected: PASS. If `attw --profile esm-only` rejects the TypeScript-source entry point, add `components/*` to the existing `--exclude-entrypoints` list and record the reason in the commit body — the spec's risk table anticipates exactly this. If the failure is anything other than "types point at source", stop and report: that is a packaging decision, not a flag.
 
-- [ ] **Step 6: Pin the import path permanently**
+- [x] **Step 6: Pin the import path permanently**
 
 Node self-referencing resolves inside the package, so this belongs in `src/index.test.ts` rather than a throwaway file: import `buttonVariants` from `@peakui/styles/components/button` and assert `toBe` against the root import.
 
@@ -404,7 +404,7 @@ Identity, not equal output — "both imports work identically" means one functio
 Run: `cd packages/styles && pnpm vitest run src/index.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/styles/package.json packages/styles/src/generator/exports.test.ts
