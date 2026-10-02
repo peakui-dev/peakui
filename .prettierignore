@@ -15,7 +15,12 @@ pnpm-lock.yaml
 # каждый документ. Код, конфиги и CSS он форматирует как обычно.
 *.md
 
-# Сгенерированные темы. Их формат — вывод генератора, и check:tokens сверяет файл байт в байт;
-# переформатировав его, Prettier ломает гейт токенов. themes/shared/ написан руками — он остаётся.
-packages/styles/themes/
-!packages/styles/themes/shared/
+# Сгенерированные файлы тем: их формат — вывод генератора (src/generator/index.ts), и check:tokens
+# сверяет variables.css байт в байт — переформатировав его, Prettier ломает гейт токенов.
+#
+# Исключение по путям, а не по каталогу: gitignore-семантика не умеет вернуть файл, у которого
+# исключён родительский каталог, поэтому "packages/styles/themes/" плюс "!.../shared/" выключал и
+# рукописный themes/shared/theme.css — 7 КБ токенов, через которые разрешается каждый var(--color-*).
+packages/styles/themes/*/variables.css
+packages/styles/themes/*/index.css
+packages/styles/themes/*/components/index.css

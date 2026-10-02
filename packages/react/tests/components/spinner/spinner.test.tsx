@@ -65,6 +65,36 @@ describe("Spinner", () => {
   });
 
   /*
+   * Уникальности id недостаточно, и это не придирка: суффикс useId() стоит в ЧЕТЫРЁХ отдельных
+   * шаблонных строках — двух на id у linearGradient и двух на fill="url(#…)" у path. Разъедутся
+   * только ссылки — id останутся уникальными, предыдущий тест останется зелёным, а оба спиннера
+   * отрисуются пустыми рамками. Это ровно тот исход, ради которого проверка и существует.
+   */
+  it("resolves every gradient reference inside its own instance", () => {
+    render(
+      <>
+        <Spinner data-testid="first" />
+        <Spinner data-testid="second" />
+      </>,
+    );
+
+    for (const testId of ["first", "second"]) {
+      const root = screen.getByTestId(testId);
+      const declared = new Set([...root.querySelectorAll("linearGradient")].map((node) => node.id));
+      const referenced = [...root.querySelectorAll("path[fill]")]
+        .map((node) => node.getAttribute("fill") ?? "")
+        .filter((fill) => fill.startsWith("url(#"))
+        .map((fill) => fill.slice("url(#".length, -1));
+
+      expect(referenced.length).toBeGreaterThan(0);
+
+      for (const id of referenced) {
+        expect(declared, `${testId}: fill url(#${id}) ни на что не указывает`).toContain(id);
+      }
+    }
+  });
+
+  /*
    * render обязан вернуть элемент ожидаемого типа — это записано в контракте DOMRenderProps, и
    * первая версия этого теста его нарушала, возвращая <div> вместо <span>. Проверяется то, что
    * Spinner действительно пробрасывает render вниз, а не подмена тега.

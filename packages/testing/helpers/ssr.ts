@@ -13,7 +13,16 @@ import {renderToString} from "react-dom/server";
  * минифицированные коды продакшн-сборки.
  */
 const HYDRATION_WARNING =
-  /Hydration|did not match|Text content does not match|Expected server HTML|Minified React error #(418|419|422|423|425)/i;
+  /hydrat|did ?n[o']?t match|Text content does not match|Expected server HTML|Minified React error #(418|419|422|423|425)/i;
+
+/*
+ * Выделено и проверяется отдельно, потому что одна из трёх формулировок React 19 ловится только
+ * специально: «A tree hydrated but some attributes … didn't match the client properties. This
+ * won't be patched up» — в ней нет слова «Hydration», только «hydrated», и «didn't», а не «did
+ * not». Именно про неё React говорит, что не починит её: серверный атрибут останется в живом DOM.
+ * Первая версия детектора её пропускала, и ssrSmoke сообщал об успехе.
+ */
+export const isHydrationError = (text: string): boolean => HYDRATION_WARNING.test(text);
 
 export type SsrSmokeOptions = {
   wrapper?: (props: {children: ReactNode}) => ReactNode;
@@ -86,7 +95,7 @@ export const ssrSmoke = async (ui: ReactElement, options: SsrSmokeOptions = {}) 
     const hydrationErrors = errors.filter((entry) => {
       const text = Array.isArray(entry) ? entry.map(String).join(" ") : String(entry);
 
-      return HYDRATION_WARNING.test(text);
+      return isHydrationError(text);
     });
 
     expect(hydrationErrors).toEqual([]);

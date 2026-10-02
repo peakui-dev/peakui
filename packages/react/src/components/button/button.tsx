@@ -4,7 +4,7 @@ import type {ButtonVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef} from "react";
 
 import {buttonVariants} from "@peakui/styles";
-import {Button as ButtonPrimitive} from "react-aria-components";
+import {Button as ButtonPrimitive} from "react-aria-components/Button";
 
 import {composeTwRenderProps} from "../../utils/compose.ts";
 

@@ -322,7 +322,10 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 - [ ] No `classNames` prop; no `clsx`/`tailwind-merge` import; no `floating-ui`
 - [ ] No `any` outside the `DOMRenderProps` spread boundary, and that one commented and lint-disabled inline; literal unions; `import type`; polymorphism via `render`
 - [ ] WCAG 2.2 AA: target size, focus not obscured, visible focus, contrast; `forced-colors` handled; reduced motion honoured
-- [ ] Component strings go through React Aria i18n with a `ru` entry — never hardcoded
+- [ ] A string the component generates itself has a hardcoded **English** default at most, and a
+      consumer-supplied label overrides it — the props spread comes *after* the `aria-label`.
+      The formatter with a `ru-RU` entry arrives when a component owns many strings:
+      `references/accessibility-and-i18n.md`
 - [ ] Tests: jsdom behaviour suite queried by role/label/text; no assertions on colors, full class lists or RAC internals
 - [ ] Stories titled `Components/<Name>`
 - [ ] Derived values via `useMemo`; element size via `ResizeObserver`

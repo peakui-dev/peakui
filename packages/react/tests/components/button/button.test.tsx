@@ -2,6 +2,7 @@ import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
 import {Button} from "@/components/button";
+import {Spinner} from "@/components/spinner";
 
 const pointerOpts = {
   button: 0,
@@ -163,6 +164,31 @@ describe("Button", () => {
     expect(button.className).toEqual(expect.stringContaining("mt-4"));
   });
 
+  /*
+   * Review Focus 2, на той высоте, на которой это использует потребитель. Тест на
+   * composeTwRenderProps проверяет функцию напрямую — он останется зелёным, если кто-то упростит
+   * button.tsx до className={cx(className, styles)}: со строкой всё работает, а с функцией в
+   * class попадёт "[object Object]". Ловится только отсюда.
+   */
+  it("accepts a function className and resolves it against render props", () => {
+    render(
+      <Button className={({isPressed}) => (isPressed ? "is-pressed-class" : "is-idle-class")}>
+        Save
+      </Button>,
+    );
+    const button = screen.getByRole("button", {name: "Save"});
+
+    expect(button.className).toEqual(expect.stringContaining("button--primary"));
+    expect(button.className).toEqual(expect.stringContaining("is-idle-class"));
+    expect(button.className).not.toEqual(expect.stringContaining("[object Object]"));
+
+    pressDown(button);
+    expect(button.className).toEqual(expect.stringContaining("is-pressed-class"));
+
+    pressUp(button);
+    expect(button.className).toEqual(expect.stringContaining("is-idle-class"));
+  });
+
   /* Review Focus 3: без forwardRef больше ничто не доказывает, что ref доезжает до узла. */
   it("forwards ref to the button element", () => {
     const ref = createRef<HTMLButtonElement>();
@@ -207,6 +233,23 @@ describe("Button", () => {
 
     button.focus();
     expect(button).not.toHaveFocus();
+  });
+
+  /*
+   * Рецепт pending из сторей, проверенный на доступное имя. Spinner — это role="status" с
+   * aria-label="Loading", и внутри кнопки его метка вливается в её имя: без aria-hidden кнопка
+   * объявляется как «Loading Сохраняем». Имя сверяется целиком, не подстрокой, иначе загрязнение
+   * пролезет назад незамеченным — именно так оно и прошло в e2e.
+   */
+  it("does not let the pending indicator pollute the button name", () => {
+    render(
+      <Button isPending>
+        <Spinner aria-hidden color="current" size="sm" />
+        Сохраняем
+      </Button>,
+    );
+
+    expect(screen.getByRole("button", {name: "Сохраняем"})).toBeInTheDocument();
   });
 
   it("names an icon-only button from aria-label", () => {

@@ -23,8 +23,12 @@ const STYLE_LAYER_STORIES = [
 
 const REACT_STORIES = [
   "components-button--variants",
+  "components-button--icon-only",
+  "components-button--full-width",
+  "components-button--disabled",
   "components-button--pending",
   "components-spinner--sizes",
+  "components-spinner--colors",
 ] as const;
 
 const STORIES = [...STYLE_LAYER_STORIES, ...REACT_STORIES] as const;
@@ -69,7 +73,11 @@ test.describe("Button — стилевой слой и React-компонент"
   test("pending-кнопка не принимает нажатие и остаётся фокусируемой", async ({page}) => {
     await page.goto("/iframe.html?id=components-button--pending&globals=theme:default-light");
 
-    const button = page.getByRole("button", {name: "Сохраняем"});
+    /*
+     * exact: true не для красоты — по умолчанию getByRole сверяет имя подстрокой, и загрязнение
+     * имени индикатором («Loading Сохраняем») проходило бы здесь незамеченным.
+     */
+    const button = page.getByRole("button", {exact: true, name: "Сохраняем"});
 
     await expect(button).toHaveAttribute("data-pending", "true");
     await expect(button).toHaveCSS("pointer-events", "none");
@@ -84,16 +92,30 @@ test.describe("Button — стилевой слой и React-компонент"
         await page.goto(`/iframe.html?id=${id}&globals=theme:${theme}`);
 
         /*
-         * Заголовок второго уровня несёт двойную роль и поэтому есть у КАЖДОЙ истории в наборе:
-         * он и признак готовности (холодный dev-сервер отдаёт пустой iframe раньше, чем история
-         * отрендерится), и пауза, за которую успевает закончиться собственный прогон axe от
-         * addon-a11y. Проба, срабатывающая раньше, роняет аудит ошибкой «Axe is already running».
+         * Признак готовности: холодный dev-сервер отдаёт пустой iframe раньше, чем история
+         * отрендерится, и axe по пустой странице нашёл бы ноль нарушений — молча и зелёным.
+         * Заголовок второго уровня есть у каждой истории набора именно для этого.
+         *
+         * Гонки с собственным прогоном axe от addon-a11y здесь больше нет: он выключен в
+         * preview.tsx (parameters.a11y.test = "off"), и этот аудит — единственный, кто запускает
+         * axe на странице.
          */
         await expect(page.getByRole("heading", {level: 2})).toBeVisible();
 
         await injectAxe(page);
         await checkA11y(page, undefined, {
-          axeOptions: {runOnly: {type: "tag", values: ["wcag2a", "wcag2aa", "wcag22aa"]}},
+          /*
+           * WCAG 2.2 AA — строгое надмножество 2.1 AA, поэтому теги 2.1 обязательны: без них
+           * правила, которые axe помечает добавленными в 2.1 (autocomplete-valid для SC 1.3.5,
+           * avoid-inline-spacing для SC 1.4.12 и прочие), не выполняются вообще, а тест при этом
+           * называется «не нарушает WCAG 2.2 AA». Набор без них измерял меньше, чем обещал.
+           */
+          axeOptions: {
+            runOnly: {
+              type: "tag",
+              values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
+            },
+          },
           detailedReport: true,
         });
       });

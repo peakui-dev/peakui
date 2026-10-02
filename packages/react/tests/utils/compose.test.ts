@@ -1,4 +1,4 @@
-import {composeTwRenderProps} from "@/utils/compose";
+import {composeSlotClassName, composeTwRenderProps} from "@/utils/compose";
 
 /*
  * Первые два случая — пункты 1 и 2 Review Focus плана: потребительский className обязан
@@ -42,5 +42,47 @@ describe("composeTwRenderProps", () => {
     );
 
     expect(result).toEqual(expect.stringContaining("button--lg"));
+  });
+});
+
+/*
+ * composeSlotClassName существует потому, что SKILL.md:110 называет его частью фундамента («если
+ * его ещё нет, создать — первая задача, а не импровизация внутри компонента»), SKILL.md:206
+ * требует композировать слоты только им, и он стоит в рабочих примерах architecture.md,
+ * styling.md и typescript.md. Пять мест в стандарте инструктировали импортировать несуществующий
+ * символ.
+ *
+ * Ни Button, ни Spinner слотов не имеют, поэтому первым потребителем будет многослотовый
+ * компонент — но стандарт обещает функцию уже сейчас.
+ *
+ * Подпись эталона типизирована через any; здесь unknown: это не граница полиморфного spread'а, и
+ * исключение на неё не распространяется.
+ */
+describe("composeSlotClassName", () => {
+  it("returns the consumer className unchanged when there is no slot function", () => {
+    expect(composeSlotClassName(undefined, "mt-4")).toBe("mt-4");
+  });
+
+  it("returns undefined when there is neither a slot function nor a className", () => {
+    expect(composeSlotClassName(undefined)).toBeUndefined();
+  });
+
+  it("passes the className into the slot function", () => {
+    const slot = (args?: {className?: string}) => `select__trigger ${args?.className ?? ""}`.trim();
+
+    expect(composeSlotClassName(slot, "mt-4")).toBe("select__trigger mt-4");
+  });
+
+  it("passes variants into the slot function alongside the className", () => {
+    const slot = (args?: Record<string, unknown> & {className?: string}) =>
+      `chip--${String(args?.size)} ${args?.className ?? ""}`.trim();
+
+    expect(composeSlotClassName(slot, "mt-4", {size: "lg"})).toBe("chip--lg mt-4");
+  });
+
+  it("lets the slot function run with no className at all", () => {
+    const slot = (args?: {className?: string}) => `spinner ${args?.className ?? ""}`.trim();
+
+    expect(composeSlotClassName(slot)).toBe("spinner");
   });
 });

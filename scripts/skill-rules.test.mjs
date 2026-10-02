@@ -90,3 +90,27 @@ test("the Commands table names the delivered commands", () => {
     assert.ok(text.includes(name), `таблица Commands не упоминает ${name}`);
   }
 });
+
+test("the Pre-Review Checklist agrees with the corrected i18n rule", () => {
+  const text = read(SKILL);
+
+  assert.ok(
+    !text.includes(
+      "Component strings go through React Aria i18n with a `ru` entry — never hardcoded",
+    ),
+    `${SKILL}: чеклист всё ещё запрещает то, что ships в spinner.tsx`,
+  );
+  assert.ok(
+    /hardcoded \*\*English\*\* default/.test(text),
+    `${SKILL}: чеклист не описывает исправленное правило`,
+  );
+});
+
+test("composeSlotClassName, which the skill mandates, exists", () => {
+  const compose = read("packages/react/src/utils/compose.ts");
+
+  assert.ok(
+    /export function composeSlotClassName/.test(compose),
+    "SKILL.md называет composeSlotClassName частью фундамента — функция обязана существовать",
+  );
+});

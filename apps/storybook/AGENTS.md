@@ -113,9 +113,11 @@ The audit command is `a11y`. There is no `agent-browser axe`.
 The floor is WCAG 2.2 AA plus `forced-colors`.
 
 **The gate is `e2e/foundations.a11y.spec.ts`, not the addon.** `preview.tsx` sets
-`a11y.test: "error"`, but nothing consumes that flag here: it needs `@storybook/addon-vitest`, which
-this app does not install, and `storybook build` checks no accessibility. The addon gives a panel in
-the Storybook UI and nothing more.
+`a11y.test: "off"`, and nothing is lost by that: enforcing the flag needs `@storybook/addon-vitest`,
+which this app does not install, and `storybook build` checks no accessibility. What the flag *did*
+do was make the addon run axe inside the preview on every story render — a second axe on the same
+page as this spec's own, which collided with it as `Axe is already running` on a random story once
+the suite grew past ten tests.
 
 The spec audits a story by navigating to `/iframe.html?id=<story-id>` and running axe over the whole
 page. Do not audit through the manager with a frame selector: `injectAxe` only reaches the page's

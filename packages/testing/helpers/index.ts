@@ -1,6 +1,6 @@
 export {render, type PeakUIRenderOptions} from "./render.ts";
 export {setupUser, type SetupUserOptions} from "./user.ts";
-export {ssrSmoke, type SsrSmokeOptions} from "./ssr.ts";
+export {isHydrationError, ssrSmoke, type SsrSmokeOptions} from "./ssr.ts";
 
 export {
   act,

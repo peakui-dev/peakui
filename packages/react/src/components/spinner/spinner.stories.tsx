@@ -7,9 +7,9 @@ const SIZES = ["sm", "md", "lg", "xl"] as const;
 const COLORS = ["accent", "danger", "success", "warning"] as const;
 
 /*
- * Заголовок второго уровня есть у каждой истории не для красоты: apps/storybook/e2e/Button.spec.ts
- * и foundations.a11y.spec.ts ждут его как признак готовности превью перед запуском axe. История
- * без него роняет аудит.
+ * Заголовок второго уровня есть у каждой истории не для красоты: аудит в apps/storybook/e2e/ ждёт
+ * его как признак готовности превью. Без него axe запускается по ещё пустому iframe, находит ноль
+ * нарушений и проходит молча.
  */
 const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
   <div className="flex flex-col gap-4 bg-background p-6">

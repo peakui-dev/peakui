@@ -1,6 +1,6 @@
 "use client";
 
-import {composeRenderProps} from "react-aria-components";
+import {composeRenderProps} from "react-aria-components/composeRenderProps";
 import {cx} from "tailwind-variants";
 
 /*
@@ -19,4 +19,23 @@ export function composeTwRenderProps<T>(
 
     return cx(tw, resolved ?? "") ?? "";
   });
+}
+
+/** Аргументы слот-функции: её собственные варианты плюс className потребителя. */
+type SlotArgs = Record<string, unknown> & {className?: string};
+
+/*
+ * Композиция className для одного слота многослотового компонента. Слот-функция приходит из
+ * tv({slots}) и сама знает своё BEM-имя; здесь к ней добавляются варианты и className
+ * потребителя — так же, как composeTwRenderProps делает это для Root.
+ *
+ * Эталон типизирует подпись через any. Здесь unknown: это не граница полиморфного spread'а, и
+ * исключение для any на неё не распространяется.
+ */
+export function composeSlotClassName(
+  slotFn: ((args?: SlotArgs) => string) | undefined,
+  className?: string,
+  variants?: Record<string, unknown>,
+): string | undefined {
+  return typeof slotFn === "function" ? slotFn({...variants, className}) : className;
 }

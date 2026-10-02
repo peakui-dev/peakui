@@ -24,10 +24,9 @@ const VARIANTS = [
 const SIZES = ["sm", "md", "lg"] as const;
 
 /*
- * Заголовок второго уровня есть у каждой истории не для красоты: apps/storybook/e2e/Button.spec.ts
- * ждёт его как признак готовности превью перед запуском axe, и за эту же паузу успевает закончиться
- * собственный прогон axe от addon-a11y. История без него роняет аудит ошибкой «Axe is already
- * running».
+ * Заголовок второго уровня есть у каждой истории не для красоты: аудит в apps/storybook/e2e/ ждёт
+ * его как признак готовности превью. Без него axe запускается по ещё пустому iframe, находит ноль
+ * нарушений и проходит молча.
  */
 const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
   <div className="flex flex-col gap-4 bg-background p-6">
@@ -122,6 +121,15 @@ export const Disabled: Story = {
  *
  * RAC сам блокирует нажатие и hover, сохраняя фокусируемость; стиль приходит из
  * .button[data-pending] в @peakui/styles.
+ *
+ * aria-hidden на индикаторе обязателен, а не на вкус: Spinner — это role="status" с
+ * aria-label="Loading", и внутри кнопки его метка вливается в её доступное имя. Без aria-hidden
+ * кнопка объявляется как «Loading Сохраняем». Проверено тестом на имя целиком.
+ *
+ * Оставшийся пробел записан в docs/ecosystem/backlog.md: RAC заводит progressId и ждёт индикатор,
+ * умеющий ProgressBarContext, а Spinner — обычный span. Поэтому для кнопки-иконки под pending
+ * ассистивное объявление не несёт сведений о загрузке. Закрыть это значит заставить Button
+ * потреблять контекст — против решения «Button не добавляет к isPending ничего».
  */
 export const Pending: Story = {
   name: "Ожидание",
@@ -129,11 +137,11 @@ export const Pending: Story = {
     <Showcase title="Ожидание">
       <div className="flex flex-wrap items-center gap-3">
         <Button isPending>
-          <Spinner color="current" size="sm" />
+          <Spinner aria-hidden color="current" size="sm" />
           Сохраняем
         </Button>
         <Button isPending variant="tertiary">
-          <Spinner color="current" size="sm" />
+          <Spinner aria-hidden color="current" size="sm" />
           Загружаем
         </Button>
       </div>
