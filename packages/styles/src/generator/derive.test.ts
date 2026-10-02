@@ -2,9 +2,10 @@ import type {ThemePreset} from "./preset.ts";
 
 import {describe, expect, it} from "vitest";
 
+import {presets} from "../../presets/index.ts";
+
 import {contrastRatio, parseOklch} from "./color.ts";
 import {compositeOver} from "./contrast.ts";
-import {presets} from "../../presets/index.ts";
 import {deriveTheme} from "./derive.ts";
 
 const preset: ThemePreset = {
@@ -233,10 +234,9 @@ describe("семья on-surface", () => {
 
         expect(hover.l, `on-surface${suffix}-hover`).not.toBe(fill.l);
         // Сдвиг идёт в сторону текста уровня: в светлой схеме темнее, в тёмной светлее.
-        expect(
-          Math.sign(hover.l - fill.l),
-          `on-surface${suffix}-hover направление`,
-        ).toBe(Math.sign(levelFg.l - fill.l));
+        expect(Math.sign(hover.l - fill.l), `on-surface${suffix}-hover направление`).toBe(
+          Math.sign(levelFg.l - fill.l),
+        );
       }
     }
   });
