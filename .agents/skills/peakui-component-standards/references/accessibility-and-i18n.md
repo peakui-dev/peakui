@@ -96,8 +96,17 @@ These come free from RAC. The review question is never "did you implement it" bu
 
 ## Internationalization
 
-Component strings go through **React Aria i18n** — not `react-i18next`, which is not a dependency of
-`@peakui/react`.
+A component owns very few strings, and the bar scales with how many. **A hardcoded English default is
+acceptable** for a string the component generates itself. When a component owns many strings — a
+calendar's month labels, a table's empty state — they go through **React Aria i18n**, never
+`react-i18next`, which is not a dependency of `@peakui/react`.
+
+This is measured, not conceded. Across the entire library code of the vendored reference, excluding
+stories, there are **five** hardcoded strings: `Loading`, `Close`, `Clear selection`, `Remove tag`,
+`pagination`. A formatter, a dictionary and a locale provider built for five strings is machinery
+without a load.
+
+The shape to use once a component does carry that load:
 
 ```tsx
 import {useLocalizedStringFormatter} from "@react-aria/i18n";
@@ -115,9 +124,15 @@ const ChipDismiss = ({"aria-label": ariaLabel, ...props}: ChipDismissProps) => {
 
 Rules:
 
-- **Every user-visible or assistive string a component generates itself** goes through the formatter
-  with a `ru-RU` entry. Hardcoded Russian or English in JSX is a defect.
-- A consumer-supplied label always wins over the default.
+- **A hardcoded English default is acceptable** for a string the component generates itself. Russian
+  hardcoded in JSX is still a defect — the default is the neutral one, and the locale-specific text
+  arrives with the formatter.
+- **A consumer-supplied label always wins over the default.** This is the half that makes the
+  hardcoded default safe, and it is not optional: spread the consumer's props *after* your
+  `aria-label`, never before. `heroui/packages/react/src/components/spinner/spinner.tsx` is the
+  worked example.
+- Reach for the formatter when a component owns **many** strings of its own, and give it a `ru-RU`
+  entry when you do. One assistive label is not that threshold.
 - Locale comes from `I18nProvider` at the app root; a component never reads a global locale itself.
 - Dates and numbers are formatted with `@react-aria/i18n` / `@internationalized/date`, which are
   locale-aware — never with hand-written format strings.

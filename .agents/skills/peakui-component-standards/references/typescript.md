@@ -4,7 +4,7 @@
 
 | Rule                    | Detail                                                        |
 | ----------------------- | ------------------------------------------------------------- |
-| No `any`                | `unknown` + narrowing, or a generic. No `as unknown as` casts to escape a bad signature — fix the signature. |
+| No `any`                | `unknown` + narrowing, or a generic. No `as unknown as` casts to escape a bad signature — fix the signature. One scoped exception: the polymorphic spread boundary, below. |
 | Type-only imports       | `import type {ComponentPropsWithRef} from "react"`             |
 | Named exports only      | no default exports anywhere                                    |
 | Literal unions          | `'sm' \| 'md' \| 'lg'`, never bare `string`                     |
@@ -91,3 +91,35 @@ Never widen an item type to `object` or `any` to dodge the generic.
 Every part's props type is exported, flat (`SelectTriggerProps`) and through the dotted type
 namespace (`Select.TriggerProps`). The Root's props also get the short alias
 (`SelectRootProps as SelectProps`). See the export contract in `SKILL.md`.
+
+## The one place `any` is permitted: the polymorphic spread boundary
+
+A component that takes a `render` prop through `DOMRenderProps` is generic over
+`keyof JSX.IntrinsicElements`. Spreading the caller's props onto the resolved element cannot be
+expressed: the props type depends on a type parameter the spread has already erased. TypeScript has
+no way to say it, so `any` is the honest annotation rather than a shortcut.
+
+```tsx
+const SpinnerRoot = <E extends keyof JSX.IntrinsicElements = "span">({...props}: SpinnerRootProps<E>) => (
+  <dom.span
+    aria-label="Loading"
+    data-slot="spinner"
+    role="status"
+    /* The element type is a type parameter the spread erases; no expressible annotation exists. */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    {...(props as any)}
+  />
+);
+```
+
+Conditions, all of them:
+
+- The component is generic over an intrinsic element and takes `render` through `DOMRenderProps`.
+- The `any` is at the spread itself, never on a declared prop, return type or exported signature.
+- A comment says why, at the site.
+- An inline `eslint-disable-next-line @typescript-eslint/no-explicit-any` marks it.
+
+That last line is the mechanism. `@typescript-eslint/no-explicit-any` stays at **`"error"`** in
+`@peakui/standard/eslint/base.mjs`, where the vendored reference sets it `"off"`. The reference has
+115 `as any` sites in library code precisely because nothing stops the next one; here each one has to
+be written down to compile.

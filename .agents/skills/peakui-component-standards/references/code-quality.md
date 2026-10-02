@@ -123,7 +123,7 @@ Also: no barrel-to-barrel re-export chains inside `src`, and no top-level side e
 ```tsx
 props.value = newValue;                        // mutating props
 eval("…"); new Function("…");                  // never
-const handler = (e: any) => …;                 // any
+const handler = (e: any) => …;                 // any — except the polymorphic spread, see typescript.md
 const s = cond ? useA() : useB();              // conditional hook
 import {twMerge} from "tailwind-merge";        // build your merger from tailwind-variants
 useEffect(() => { fetch("/api"); }, []);       // no I/O in this library

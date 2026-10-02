@@ -96,7 +96,8 @@ names, `@tanstack/react-table` + `react-virtual`, Recharts, `@internationalized/
 - Named exports only. One exception, a tool contract: Storybook CSF and config files read a default
   export, and it stops there
 - **No `forwardRef`** — React 19 passes `ref` as a prop; `displayName` only where not inferred
-- No `any`: `unknown` plus narrowing. No conditional hook calls
+- No `any`: `unknown` plus narrowing. One scoped exception — the polymorphic spread boundary of a
+  `DOMRenderProps` component, commented and lint-disabled inline. No conditional hook calls
 - Component files are **kebab-case**, matching the BEM block and CSS file
   (`select.tsx` ↔ `select.css` ↔ `.select__trigger`)
 - No hardcoded Tailwind in JSX, and none inside `tv()` — utilities live in `@peakui/styles` CSS
@@ -107,10 +108,11 @@ names, `@tanstack/react-table` + `react-virtual`, Recharts, `@internationalized/
 - **Write every document in English.** Existing Russian content is legacy: leave it alone and
   never translate it opportunistically — migration is a backlog item with its own task
 - Conventional commits required; Russian subjects allowed, header ≤ 150 chars
-- Component tests sit beside the component in `packages/react/src/components/<component-name>/`:
-  `<component-name>.test.tsx` (jsdom, the bulk of contracts) and `<component-name>.ssr.test.tsx`
-  (client SSR smoke via `ssrSmoke()`). Browser tests are Playwright specs in `apps/storybook/e2e/`
-  — overlays and high-risk portals, not one per component
+- Component tests sit in `packages/react/tests/components/<component-name>/`, mirroring the component
+  path: `<component-name>.test.tsx` (jsdom, the bulk of contracts) and `<component-name>.ssr.test.tsx`
+  (client SSR smoke via `ssrSmoke()` from `@peakui/testing/helpers`). **Stories stay beside the
+  component.** Browser tests are Playwright specs in `apps/storybook/e2e/` — overlays and high-risk
+  portals, not one per component
 - A breaking change to a component's public API ships with a codemod in the same PR: an automated
   transform where possible, a manifest entry with manual instructions where not. Protocol in the
   `changeset-release` skill

@@ -33,6 +33,21 @@ you will write v2 and it will be rejected.
 pattern looks like, read it: `heroui/packages/react/src/components/<name>/`,
 `heroui/packages/styles/src/components/<name>/`. One file read beats a confident memory.
 
+**Where PeakUI differs on purpose.** Some differences from the reference are decisions, not drift, and
+reading the reference will tempt you to "fix" them back. They are written down with their reasons —
+check there before you change one:
+
+- `docs/superpowers/specs/2026-10-02-react-package-button-design.md`, section 12 — the build tool
+  (`tsdown` unbundle, not rollup), the absent vitest browser tier, the `--color-` token prefix, the
+  missing ButtonGroup hook points in `Button`, and the two reaffirmed below.
+- `docs/superpowers/specs/2026-10-02-composition-contract-design.md`, section 3 — utilities stay
+  CSS-native instead of being exported as JS strings.
+- `docs/superpowers/specs/2026-10-01-design-tokens-design.md` — `forced-colors` support, which the
+  reference has none of.
+
+The three rules in this file that were corrected *toward* the reference — hardcoded assistive strings,
+the `any` boundary, test location — each carry their reason where they are stated.
+
 ## Philosophy: compose the primitive, don't rebuild it
 
 React Aria Components (RAC) already owns behavior, state, focus, keyboard and ARIA. A PeakUI
@@ -72,9 +87,11 @@ Files are **kebab-case**, matching the BEM block and the CSS file, so `button.ts
 packages/react/src/components/<component-name>/
 ├── <component-name>.tsx          # "use client"; context + every part; types inline
 ├── <component-name>.stories.tsx  # title: "Components/<Name>"
-├── <component-name>.test.tsx     # jsdom behaviour suite
-├── <component-name>.ssr.test.tsx # SSR smoke — risk-based, not universal
 └── index.ts                      # the three-section export contract
+
+packages/react/tests/components/<component-name>/
+├── <component-name>.test.tsx     # jsdom behaviour suite
+└── <component-name>.ssr.test.tsx # SSR smoke — risk-based, not universal
 
 packages/styles/src/components/<component-name>/
 ├── <component-name>.styles.ts    # tv() → BEM class names ONLY
@@ -98,6 +115,12 @@ they do not exist yet, creating them is the first task, not an improvisation ins
 Both packages need `sideEffects: false`, and a new component must be registered in the
 `@peakui/react` barrel and the styles CSS entry. **Never invent a local copy of one of these helpers
 inside a component** — import it, or add it to the shared module.
+
+Tests live under `packages/react/tests/`, mirroring the component path; **stories stay beside the
+component**. This is the reference's own split, and it is why the package needs a `@/*` path alias
+resolving to `./src/*` and `include: ["src", "tests"]` in its `tsconfig.json` — a test addresses the
+component as `@/components/<component-name>`. `packages/styles` keeps its tests beside its source;
+the two packages differ here by decision, not by accident.
 
 Mandatory: the `.tsx`, the stories, the jsdom test, `index.ts`, the `.styles.ts`, the `.css`.
 A separate `<component-name>.types.ts` is **not** created by default — types live beside the parts
@@ -184,7 +207,11 @@ theming seam (`--chip-bg`, `--chip-fg`). Full pattern: `references/styling.md`.
 
 ### TypeScript
 
-- No `any` — `unknown` plus narrowing, or generics.
+- No `any` — `unknown` plus narrowing, or generics. One scoped exception: the polymorphic spread
+  boundary of a component taking `render` through `DOMRenderProps`, where the element type is a
+  type parameter the spread erases. It carries a comment and an inline
+  `eslint-disable-next-line @typescript-eslint/no-explicit-any`; the lint rule itself stays at
+  `"error"`, which is what keeps the exception one line wide. `references/typescript.md`.
 - `import type {...}` for types; named exports only.
 - Literal unions (`'sm' | 'md' | 'lg'`), never bare `string`.
 - Polymorphism is a **`render` prop**, not an `as` prop: the consumer must return the expected
@@ -241,7 +268,7 @@ const state = isRange ? useRangeCalendarState(o) : useCalendarState(o);
 useEffect(() => { setLabel(compute(a, b)); }, [a, b]);
 
 // ❌ Global useWindowSize() to observe one element — use ResizeObserver
-// ❌ any; mutating props; eval
+// ❌ any (outside the DOMRenderProps spread); mutating props; eval
 ```
 
 ## Accessibility Floor
@@ -293,7 +320,7 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 - [ ] Nested elements use `concentric-inner`, never the container's own radius
 - [ ] Gaps within a group are smaller than gaps between groups, and the container's padding is at least the largest inner gap
 - [ ] No `classNames` prop; no `clsx`/`tailwind-merge` import; no `floating-ui`
-- [ ] No `any`; literal unions; `import type`; polymorphism via `render`
+- [ ] No `any` outside the `DOMRenderProps` spread boundary, and that one commented and lint-disabled inline; literal unions; `import type`; polymorphism via `render`
 - [ ] WCAG 2.2 AA: target size, focus not obscured, visible focus, contrast; `forced-colors` handled; reduced motion honoured
 - [ ] Component strings go through React Aria i18n with a `ru` entry — never hardcoded
 - [ ] Tests: jsdom behaviour suite queried by role/label/text; no assertions on colors, full class lists or RAC internals
