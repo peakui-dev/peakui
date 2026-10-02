@@ -238,7 +238,7 @@ One `.button` block plus one rule per modifier. Required by the spec and the glo
 - A `--button-bg` / `--button-fg` / `--button-border` seam declared on `.button`, with every colour read through `var(--button-*)` and every `--button-*` default read from a token.
 - Each interactive state in both forms: `&:hover, &[data-hovered]`, `&:active, &[data-pressed]`, `&:focus-visible, &[data-focus-visible]`, `&:disabled, &[aria-disabled="true"], &[data-disabled]`.
 - `transition` first, `@apply motion-reduce:transition-none` after it.
-- Nothing for `forced-colors`: the token layer emits one central block per theme.
+- The structural half of `forced-colors`, which the token layer does **not** cover: a transparent border held in the normal state, and `border-color: ButtonBorder` inside `@media (forced-colors: active)`. `css-authoring.md` gives the pattern; skipping it loses every variant but `--outline` in that mode.
 
 - [ ] **Step 2: Import it from the components layer**
 

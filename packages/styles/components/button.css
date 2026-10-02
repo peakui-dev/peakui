@@ -5,7 +5,7 @@
  */
 
 .button {
-  /* Семь ручек темизации — публичный контракт переопределения, первее чем tv({extend}). */
+  /* Пять ручек темизации — публичный контракт переопределения, первее чем tv({extend}). */
   --button-bg: transparent;
   --button-bg-hover: var(--color-surface-hover);
   --button-fg: var(--color-foreground);
@@ -13,10 +13,15 @@
   --button-radius: var(--radius-lg);
 
   @apply inline-flex w-fit shrink-0 items-center justify-center gap-2 no-highlight;
-  /* 40px при грубом указателе, 36px при точном: цель WCAG 2.2 без особого случая. */
+  /*
+   * 40px до 48rem ширины вьюпорта, 36px от неё. Это ширина, а НЕ (pointer: coarse):
+   * css-authoring.md описывает эту же форму как грубость указателя, и это его ошибка.
+   * Порог WCAG 2.2 в 24px выдержан в обоих случаях, поэтому форма оставлена.
+   */
   @apply h-10 px-4 md:h-9;
   @apply text-sm font-medium;
-  @apply cursor-pointer select-none no-underline;
+  @apply select-none no-underline;
+  cursor: var(--cursor-interactive);
 
   border: 1px solid var(--button-border);
   border-radius: var(--button-radius);
@@ -53,6 +58,19 @@
   &[aria-disabled="true"],
   &[data-disabled] {
     @apply status-disabled;
+  }
+
+  /*
+   * Структурная половина forced-colors — обязанность компонента, а не слоя токенов: роли
+   * переназначает центральный блок темы, но опознающая граница держится здесь. Без неё каждый
+   * вариант, кроме --outline, теряется целиком: идентичность несёт только background-color, а
+   * прозрачная граница ничего не рисует. Хуже всего голой <a class="button">: браузер не
+   * применяет к ссылке стиль кнопки, и контрол исчезает как контрол.
+   *
+   * Граница держится прозрачной в обычном состоянии, поэтому layout не дёргается.
+   */
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
   }
 }
 

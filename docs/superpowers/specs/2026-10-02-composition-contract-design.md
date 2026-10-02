@@ -146,9 +146,13 @@ pattern, and the reference happens to agree.
 - `motion-reduce:transition-none` after the `transition` declaration, not before.
 - Base height written in the `@apply h-10 md:h-9` form from `css-authoring.md` — 40 px where the
   pointer is coarse, 36 px where it is fine — which meets WCAG 2.2 target size with no special case.
-- `forced-colors` needs nothing per-component: the token layer emits one central block per theme
-  (`2026-10-01-design-tokens-design.md`, section 5), so a component using tokens honestly degrades
-  for free.
+- `forced-colors` is **half** free. The token layer emits one central block per theme
+  (`2026-10-01-design-tokens-design.md`, section 5) and that covers the colour roles, but the
+  structural half stays the component's own job, as `css-authoring.md` shows with its `.chip`
+  example: hold a transparent border in the normal state and set `border-color: ButtonBorder`
+  inside `@media (forced-colors: active)`. Without it every variant but `--outline` carries its
+  identity in `background-color` alone and disappears — worst of all for the bare
+  `<a class="button">`, which a browser gives no button styling of its own.
 
 ### The executable proof
 
