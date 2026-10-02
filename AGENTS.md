@@ -49,6 +49,9 @@ not permission to skip: report it and stop.
 | Dev Storybook | `pnpm dev:storybook` (port **6007**) |
 | Build Storybook | `pnpm build:storybook` |
 | Unit tests | `pnpm test` |
+| Coverage | `pnpm test:coverage` |
+| Build packages | `pnpm build` / `pnpm build:packages` |
+| Lint / format | `pnpm lint` / `pnpm format` / `pnpm format:fix` |
 | Agent hook + script tests | `pnpm test:ai` |
 | E2E | `pnpm test:e2e` / `pnpm test:e2e:ci` (builds Storybook first) |
 | Typecheck | `pnpm typecheck` |
@@ -89,6 +92,11 @@ Binding library choices for the core, not a description of what is installed: RA
 a11y (react-aria / react-stately hooks only where RAC lacks a primitive), `tailwind-variants` for BEM
 names, `@tanstack/react-table` + `react-virtual`, Recharts, `@internationalized/date`, vitest +
 `@testing-library/react`, Playwright.
+
+The jsdom setup those tests need, and the `render` / `setupUser` / `ssrSmoke` helpers, live in the
+private `packages/testing` — never published, and not optional: without `installPointerEvent()` and
+its jsdom stubs, RAC tests do not run at all. Import them from `@peakui/testing/helpers`, and take a
+package's vitest defaults from `@peakui/testing/configs/react`.
 
 ## Conventions
 
@@ -139,15 +147,13 @@ decision. Silently substituting another path, package or command for a Planned o
 this section exists to prevent.
 
 ```
-packages/react/        # core UI — what every convention above describes
-packages/standard/     # shared code style and lint config
 packages/codemodes/    # @peakui/codemodes — jscodeshift migrations
 apps/docs/             # PeakUI Docs
 .claude/agents/        # docs-curator, storybook-debugger, tailwind-v4-css-expert
 .claude/guides/        # styling is covered by the component-standards skill until one exists
 ```
 
-`pnpm build`, `pnpm build:packages`, `pnpm test:coverage` arrive with `packages/react`;
-`pnpm lint`, `pnpm format`, `pnpm format:fix` with ESLint 9 + Prettier in `packages/standard`;
-`pnpm commit` and the commit-msg hook with commitizen + commitlint; `pnpm changeset add` and
-`pnpm clean:install` with the release setup, whose workflow is the `changeset-release` skill.
+`pnpm commit` and the commit-msg hook arrive with commitizen + commitlint; `pnpm changeset add` and
+`pnpm clean:install` with the release setup, whose workflow is the `changeset-release` skill. The
+publish-time rewrite of `@peakui/react`'s `exports` from `src` to `dist` belongs to that setup too —
+in-repo the package is consumed from source, which is why Storybook and vitest need no build.
