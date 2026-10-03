@@ -60,6 +60,6 @@ The Description component uses this CSS class ([view source styles](https://gith
 | `children` | `React.ReactNode` | - | The helper text |
 | `className` | `string` | - | Additional classes |
 | `elementType` | `string` | `'span'` | The element to render |
-| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element with your own |
+| `render` | `DOMRenderFunction<any, any>` | - | Replaces the rendered element with your own. React Aria types it loosely because `elementType` can change the element |
 
 The `slot` defaults to `description`; it is what links the text to the field, so leave it as it is inside a field.
