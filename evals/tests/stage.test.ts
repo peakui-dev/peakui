@@ -179,7 +179,10 @@ describe("commentInventory", () => {
 
   it("reads a multi-line doc comment as one line without its asterisks", () => {
     const inventory = commentInventory([
-      {path: "dist/d.d.ts", text: "/**\n * First line\n * second line\n */\nexport declare const d: 1;\n"},
+      {
+        path: "dist/d.d.ts",
+        text: "/**\n * First line\n * second line\n */\nexport declare const d: 1;\n",
+      },
     ]);
 
     expect(inventory.samples).toEqual([{file: "dist/d.d.ts", text: "First line second line"}]);

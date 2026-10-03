@@ -8,11 +8,12 @@ import {beforeAll, describe, expect, it} from "vitest";
 
 import {fixtures} from "../../fixtures/index.ts";
 import {copyDir} from "../../src/files.ts";
-import {labelLinked, parseHtml} from "../../src/scoring/dom.ts";
-import {renderSsr} from "../../src/scoring/render.ts";
 import {prepareTemplate} from "../../src/fixtures/prepare.ts";
 import {packLibrary} from "../../src/pack/stage.ts";
 import {templatesDir} from "../../src/paths.ts";
+import {labelLinked, parseHtml} from "../../src/scoring/dom.ts";
+import {renderSsr} from "../../src/scoring/render.ts";
+
 import {useFreshHarnessHome} from "./home.ts";
 
 describe.each(Object.values(fixtures))("template $id", (fixture) => {
