@@ -1,8 +1,8 @@
 ---
 name: peakui-react
-description: Use when writing or changing React code that imports @peakui/react or @peakui/styles - PeakUI buttons, pending or loading buttons, text fields, forms with validation, spinners, or a link that must look like a button.
+description: Use when writing or changing React code that imports @peakui/react or @peakui/styles, or when setting up PeakUI styles in an app - buttons, pending or loading buttons, text fields, forms with validation, spinners, a link that must look like a button, changing the HTML element a component renders, or Tailwind classes that are missing from the build.
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # PeakUI React
@@ -38,6 +38,9 @@ of each part come from step 1.
 | A link that looks like a button | `<a className={buttonVariants({variant: "primary"})} href="...">` |
 | A required or length-limited field | `isRequired`, `minLength`, `type`, `validate` on `TextField` |
 | An error message under a field | `<FieldError />` inside that `TextField` |
+| A different HTML element for a part | `render={(props) => <footer {...props} />}` on that part |
+| PeakUI styles in a new app | `@import "tailwindcss";` then `@import "@peakui/styles/css";`, in that order |
+| Classes from another package missing in the build | `@source "../node_modules/<package>";` in the CSS entry file |
 
 A busy button keeps its label. `isPending` blocks presses by itself; it draws no spinner:
 
@@ -83,6 +86,25 @@ import {buttonVariants} from "@peakui/react";
 <a className={buttonVariants({variant: "primary"})} href="/dashboard">Open dashboard</a>
 ```
 
+There is no `as` prop. A part keeps its classes, `data-slot` and ref only when you change its
+element through `render` and spread the props it hands you; replacing the part with a plain
+element throws all of that away:
+
+```tsx
+<Fieldset.Actions render={(props) => <footer {...props} />}>
+  <Button type="submit">Save changes</Button>
+</Fieldset.Actions>
+```
+
+Tailwind v4 reads its configuration from CSS. It does not scan `node_modules`, and it ignores a
+`tailwind.config` file with `content` or `safelist`. Point it at a package from the CSS entry file:
+
+```css
+@import "tailwindcss";
+@import "@peakui/styles/css";
+@source "../node_modules/some-package";
+```
+
 Examples show the pattern. Labels, text, names and variants come from the request you were given,
 not from the example.
 
@@ -97,6 +119,9 @@ file has not compiled yet.
 | "The project does not need a type-check" | It has a `tsconfig.json`. Run `npx tsc --noEmit`. |
 | "I copied the documented pattern" | Around different props and imports. Run it. |
 | "The types disagree but it works at runtime" | A type error on a PeakUI component is a wrong prop. |
+
+When you touched a CSS file or the setup, also run the build (`npm run build`). A wrong import
+path or a missing `@source` passes the type-check and fails, or silently drops styles, in the build.
 
 A type error means go back to step 1 and find the right prop. Never silence it: no `as any`, no
 `@ts-ignore`, no hooks from `react-aria` wired onto a PeakUI component by hand. Code that needed a
