@@ -61,6 +61,9 @@ export function withTarballDependencies(
   return {...manifest, dependencies};
 }
 
+const SIDECAR_NOTE =
+  "CSS comments are stripped in the staged copy of @peakui/styles, while the source package ships them. JavaScript and declaration comments are kept as built; commentInventory counts them.";
+
 function sidecarPath(fixture: FixtureDefinition): string {
   return join(templatesDir(), `${fixture.id}.json`);
 }
@@ -146,7 +149,9 @@ export async function prepareTemplate(
         fixture: fixture.id,
         fixtureHash: hash,
         libraryHash: pack.libraryHash,
+        commentInventory: pack.commentInventory,
         node: process.version,
+        note: SIDECAR_NOTE,
         npm: npm.stdout.trim(),
       },
       null,

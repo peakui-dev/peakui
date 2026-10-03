@@ -1,6 +1,7 @@
 import {describe, expect, it} from "vitest";
 
 import {
+  commentInventory,
   findForbidden,
   rewriteReactManifest,
   rewriteStylesManifest,
@@ -139,5 +140,44 @@ describe("findForbidden", () => {
         {path: "dist/a.d.ts", text: `// ${hit} v3`},
       ]),
     ).toEqual(["dist/a.d.ts", "index.css"]);
+  });
+});
+
+describe("commentInventory", () => {
+  const files = [
+    {
+      path: "dist/a.mjs",
+      text: "// first\nconst a = `/* not a comment */`;\n/** doc */\nexport {a}; // trailing\nconst r = /\\/\\/x/;\n",
+    },
+    {path: "dist/b.d.ts", text: "/** Кнопка основная */\nexport declare const b: 1;\n"},
+    {path: "dist/c.js", text: "export const c = 1;\n"},
+    {path: "dist/readme.txt", text: "// ignored: not JavaScript or TypeScript\n"},
+  ];
+
+  it("counts comments in JavaScript and declaration files only", () => {
+    const inventory = commentInventory(files);
+
+    expect(inventory.files).toBe(3);
+    expect(inventory.comments).toBe(4);
+  });
+
+  it("counts the comments that contain Cyrillic characters", () => {
+    expect(commentInventory(files).cyrillic).toBe(1);
+  });
+
+  it("keeps at most five short samples with their file names, Cyrillic first", () => {
+    const many = [
+      {path: "dist/m.mjs", text: Array.from({length: 9}, (_, i) => `// note ${i}`).join("\n")},
+      ...files,
+    ];
+    const inventory = commentInventory(many);
+
+    expect(inventory.samples).toHaveLength(5);
+    expect(inventory.samples[0]).toEqual({file: "dist/b.d.ts", text: "Кнопка основная"});
+    expect(inventory.samples.every((sample) => sample.text.length <= 80)).toBe(true);
+  });
+
+  it("returns zeros for no files", () => {
+    expect(commentInventory([])).toEqual({comments: 0, cyrillic: 0, files: 0, samples: []});
   });
 });

@@ -4,6 +4,7 @@ import {mkdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {join} from "node:path";
 
 import postcss from "postcss";
+import ts from "typescript";
 
 import {runCommand} from "../exec.ts";
 import {copyDir, hashFiles, readFiles, walkFiles} from "../files.ts";
@@ -13,7 +14,23 @@ export interface PackageManifest {
   [key: string]: unknown;
 }
 
+export interface CommentSample {
+  file: string;
+  text: string;
+}
+
+/** What an agent can read in the shipped JavaScript and declaration files. Informational only. */
+export interface CommentInventory {
+  /** JavaScript and TypeScript files looked at. */
+  files: number;
+  comments: number;
+  /** Comments containing Cyrillic characters. */
+  cyrillic: number;
+  samples: CommentSample[];
+}
+
 export interface PackResult {
+  commentInventory: CommentInventory;
   libraryHash: string;
   tarballs: {react: string; styles: string; acmeStatus: string};
 }
@@ -101,6 +118,54 @@ export function stripCssComments(css: string): string {
   return out;
 }
 
+const CODE_FILE = /\.(?:[cm]?js|[cm]?ts)$/;
+const SAMPLE_LIMIT = 5;
+const SAMPLE_LENGTH = 80;
+
+function commentTexts(file: ProjectFile): string[] {
+  const kind = file.path.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const source = ts.createSourceFile(file.path, file.text, ts.ScriptTarget.Latest, true, kind);
+  const seen = new Map<number, string>();
+
+  function note(ranges: ts.CommentRange[] | undefined) {
+    for (const range of ranges ?? []) {
+      if (!seen.has(range.pos)) seen.set(range.pos, file.text.slice(range.pos, range.end));
+    }
+  }
+
+  function visit(node: ts.Node) {
+    note(ts.getLeadingCommentRanges(file.text, node.getFullStart()));
+    note(ts.getTrailingCommentRanges(file.text, node.getEnd()));
+    for (const child of node.getChildren(source)) visit(child);
+  }
+
+  visit(source);
+
+  return [...seen.values()].map((raw) =>
+    raw
+      .replace(/^\/\/+|^\/\*+|\*+\/$/g, "")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+}
+
+export function commentInventory(files: ProjectFile[]): CommentInventory {
+  const code = files.filter((file) => CODE_FILE.test(file.path));
+  const all: CommentSample[] = [];
+
+  for (const file of code) {
+    for (const text of commentTexts(file)) all.push({file: file.path, text});
+  }
+
+  const cyrillic = all.filter((entry) => /\p{Script=Cyrillic}/u.test(entry.text));
+  const others = all.filter((entry) => !cyrillic.includes(entry));
+  const samples = [...cyrillic, ...others]
+    .slice(0, SAMPLE_LIMIT)
+    .map((entry) => ({file: entry.file, text: entry.text.slice(0, SAMPLE_LENGTH)}));
+
+  return {comments: all.length, cyrillic: cyrillic.length, files: code.length, samples};
+}
+
 export function findForbidden(files: ProjectFile[]): string[] {
   return files
     .filter((file) => /hero\s?ui/i.test(file.text))
@@ -183,6 +248,9 @@ export async function packLibrary(): Promise<PackResult> {
   }
 
   const libraryHash = hashFiles(files);
+  const inventory = commentInventory(
+    files.filter((file) => file.path.startsWith("react/") || file.path.startsWith("styles/")),
+  );
 
   async function pack(directory: string): Promise<string> {
     const stdout = await run(
@@ -195,6 +263,7 @@ export async function packLibrary(): Promise<PackResult> {
   }
 
   return {
+    commentInventory: inventory,
     libraryHash,
     tarballs: {
       acmeStatus: await pack("acme-status"),
