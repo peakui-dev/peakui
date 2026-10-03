@@ -165,8 +165,12 @@ Node and npm versions. A template is reused while both hashes match.
 
 ### 5.5 Workspace lifecycle
 
-1. **Guard.** Walk from the workspace's parent to the filesystem root. If any directory holds
-   `CLAUDE.md`, `AGENTS.md`, `.claude/`, `.mcp.json`, `.cursor/` or `.agents/`, refuse to run.
+1. **Guard.** Resolve the workspace path to an absolute real path (symlinks resolved, a relative
+   harness home made absolute), then walk from its parent to the filesystem root. If any directory
+   holds `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.claude/`, `.mcp.json`, `.cursor/`, `.cursorrules`,
+   `.windsurf/`, `.windsurfrules`, `.clinerules`, `.agents/`, `.github/copilot-instructions.md` or
+   `.github/instructions/` — tested with `lstat`, so a dangling link of that name counts — refuse
+   to run.
 2. Copy the template (`COPYFILE_FICLONE`, `verbatimSymlinks`).
 3. Copy the task's `overlay/`.
 4. Apply the configuration (section 9).

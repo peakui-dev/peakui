@@ -55,6 +55,20 @@ describe("assertIsolated", () => {
     expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(".claude");
   });
 
+  it.each([
+    "GEMINI.md",
+    ".cursorrules",
+    ".windsurf",
+    ".windsurfrules",
+    ".clinerules",
+    ".github/copilot-instructions.md",
+    ".github/instructions",
+  ])("rejects an ancestor holding %s", (name) => {
+    write(join(root, name, name.endsWith(".md") || name.startsWith(".c") ? "" : "x"), "x");
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(name);
+  });
+
   it("walks the ancestors of a relative directory from the current directory", () => {
     const project = join(realpathSync(root), "project");
     const previous = process.cwd();

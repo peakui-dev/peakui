@@ -10,12 +10,19 @@ import {copyDir, readFiles, walkFiles} from "../files.ts";
 import {PACKAGE_DIR, workspacesDir} from "../paths.ts";
 
 export const AGENT_FILES: readonly string[] = [
-  "CLAUDE.md",
   "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
   ".claude",
   ".mcp.json",
   ".cursor",
+  ".cursorrules",
+  ".windsurf",
+  ".windsurfrules",
+  ".clinerules",
   ".agents",
+  ".github/copilot-instructions.md",
+  ".github/instructions",
 ];
 
 export interface Workspace {
