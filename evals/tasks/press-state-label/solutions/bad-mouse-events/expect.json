@@ -1,0 +1,6 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "pass"},
+  "rules": {
+    "static": ["dom-event-on-button", "press-state-source", "no-pointer-handlers", "press-handler"]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "typecheck": ["unknown-variant"],
+    "static": ["color-prop"],
+    "render": ["danger-variant", "outline-variant"]
+  }
+}
