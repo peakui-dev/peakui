@@ -11,6 +11,7 @@ import {
   createWorkspace,
   diffSnapshots,
   projectFiles,
+  removeWorkspace,
   snapshot,
   staticContext,
 } from "../src/workspace/workspace.ts";
@@ -86,6 +87,95 @@ describe("createWorkspace", () => {
     write(join(first.dir, "stale.ts"), "stale");
 
     expect(existsSync(join(createWorkspace(options).dir, "stale.ts"))).toBe(false);
+  });
+});
+
+describe("workspace path containment", () => {
+  function sentinels(): string[] {
+    const paths = [
+      join(root, "home/sentinel.txt"),
+      join(root, "home/workspaces/sentinel.txt"),
+      join(root, "home/workspaces/other/k/app/keep.ts"),
+      join(root, "outside.txt"),
+    ];
+
+    for (const path of paths) write(path, "keep");
+    write(join(root, "template/a.ts"), "a");
+
+    return paths;
+  }
+
+  function create(batch: string, key: string) {
+    return createWorkspace({
+      batch,
+      key,
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+  }
+
+  it.each([
+    ["", "k"],
+    ["b", ""],
+    ["", ""],
+    [".", "k"],
+    ["b", "."],
+    ["..", "k"],
+    ["b", ".."],
+    ["../..", "k"],
+    ["b/c", "k"],
+    ["b", "k/../../.."],
+    ["b\\c", "k"],
+    ["b", "k\\..\\.."],
+    ["b", "-rf"],
+    ["b", "a b"],
+    ["b", "k\0x"],
+    ["b", "k".repeat(200)],
+    ["/abs", "k"],
+  ])("refuses batch %j and key %j without touching anything", (batch, key) => {
+    const paths = sentinels();
+
+    expect(() => create(batch, key)).toThrow(/invalid workspace/);
+
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it("accepts the key shapes the runner produces", () => {
+    sentinels();
+
+    expect(() => create("2026-10-03T12-00-00Z", "sign-in-form__none__r1")).not.toThrow();
+  });
+
+  it("removes exactly one workspace and nothing around it", () => {
+    const paths = sentinels();
+    const workspace = create("b", "k");
+
+    removeWorkspace(workspace);
+
+    expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it.each([
+    ["the workspaces root", "home/workspaces"],
+    ["the harness home", "home"],
+    ["a batch directory", "home/workspaces/other/app"],
+    ["a path outside the root", "outside-ws/app"],
+    ["a path climbing out through ..", "home/workspaces/b/k/../../../../outside-ws/app"],
+    ["a directory not named app", "home/workspaces/b/k/other"],
+  ])("removeWorkspace refuses %s", (_label, relative) => {
+    const paths = sentinels();
+    const dir = join(root, relative);
+
+    write(join(root, "outside-ws/app/x"), "x");
+
+    expect(() => removeWorkspace({dir, scratchDir: join(dir, "../scratch")})).toThrow(
+      /refusing to remove/,
+    );
+
+    for (const path of [...paths, join(root, "outside-ws/app/x")]) {
+      expect(existsSync(path), path).toBe(true);
+    }
   });
 });
 

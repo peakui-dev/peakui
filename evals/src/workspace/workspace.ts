@@ -2,7 +2,7 @@ import type {FileChanges, ProjectFile, StaticContext, TaskDefinition} from "../t
 
 import {createHash} from "node:crypto";
 import {existsSync, mkdirSync, readFileSync, rmSync} from "node:fs";
-import {dirname, join} from "node:path";
+import {basename, dirname, isAbsolute, join, relative, resolve, sep} from "node:path";
 
 import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
 import {runCommand} from "../exec.ts";
@@ -45,15 +45,40 @@ export function assertIsolated(dir: string): void {
   }
 }
 
+const SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._=-]{0,127}$/;
+
+function assertSegment(label: string, value: string): void {
+  if (!SEGMENT.test(value) || value === "." || value === "..") {
+    throw new Error(
+      `invalid workspace ${label} ${JSON.stringify(value)}: use 1 to 128 letters, digits, ".", "_", "=" or "-", starting with a letter or digit`,
+    );
+  }
+}
+
+/** True when `path` is strictly inside `root` once both are resolved. */
+function isStrictlyInside(root: string, path: string): boolean {
+  const rel = relative(resolve(root), resolve(path));
+
+  return rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+}
+
 export function createWorkspace(options: {
   templateDir: string;
   overlayDir: string | undefined;
   batch: string;
   key: string;
 }): Workspace {
-  const base = join(workspacesDir(), options.batch, options.key);
+  assertSegment("batch", options.batch);
+  assertSegment("key", options.key);
+
+  const root = workspacesDir();
+  const base = join(root, options.batch, options.key);
   const dir = join(base, "app");
   const scratchDir = join(base, "scratch");
+
+  if (!isStrictlyInside(root, base)) {
+    throw new Error(`invalid workspace location ${base}: outside ${root}`);
+  }
 
   assertIsolated(dir);
   rmSync(base, {force: true, recursive: true});
@@ -146,6 +171,23 @@ export function staticContext(dir: string, changes: FileChanges): StaticContext 
   };
 }
 
+/** Removes one workspace directory, and only a path of the exact shape `<root>/<batch>/<key>/app`. */
 export function removeWorkspace(workspace: Workspace): void {
-  rmSync(dirname(workspace.dir), {force: true, recursive: true});
+  const root = workspacesDir();
+  const dir = resolve(workspace.dir);
+  const base = dirname(dir);
+  const parts = relative(resolve(root), base).split(sep);
+  const shaped =
+    basename(dir) === "app" &&
+    isStrictlyInside(root, base) &&
+    parts.length === 2 &&
+    parts.every((part) => SEGMENT.test(part));
+
+  if (!shaped) {
+    throw new Error(
+      `refusing to remove ${workspace.dir}: not a workspace directory inside ${root}`,
+    );
+  }
+
+  rmSync(base, {force: true, recursive: true});
 }
