@@ -17,6 +17,10 @@ const machineOnlyPaths = [
   "/api/components",
 ];
 
+// `proxy.ts` answers these URLs with markdown or HTML depending on `Accept`, so a shared cache must
+// key on it, or it serves one representation to clients that asked for the other.
+const negotiatedPaths = ["/", "/:lang(en)", "/:lang(en)/docs/:path*", "/docs/:path*"];
+
 const config: NextConfig = {
   compress: true,
   experimental: {
@@ -29,7 +33,10 @@ const config: NextConfig = {
     ],
   },
   async headers() {
-    return machineOnlyPaths.map((source) => ({headers: noindexHeaders, source}));
+    return [
+      ...machineOnlyPaths.map((source) => ({headers: noindexHeaders, source})),
+      ...negotiatedPaths.map((source) => ({headers: [{key: "Vary", value: "Accept"}], source})),
+    ];
   },
   reactStrictMode: true,
   async redirects() {
