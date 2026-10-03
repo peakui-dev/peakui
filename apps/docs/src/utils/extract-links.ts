@@ -1,4 +1,4 @@
-import {COMPONENT_PATH, COMPONENT_STYLES_PATH, THEMES_PATH} from "@/utils/constants";
+import {COMPONENT_PATH, COMPONENT_STYLES_PATH} from "@/utils/constants";
 
 /** The `links` frontmatter field of a docs page; its schema lives in `source.config.ts`. */
 export interface ComponentLinksType {
@@ -8,10 +8,6 @@ export interface ComponentLinksType {
   source?: string;
   /** Path under `packages/styles/components`, e.g. `button.css`. */
   styles?: string;
-  /** Path of the Tailwind CSS documentation page. */
-  tailwind?: string;
-  /** Whether to link the theme sources. */
-  themes?: boolean;
 }
 
 /** Turns the frontmatter `links` into absolute URLs. */
@@ -22,7 +18,5 @@ export function generateComponentLinks(links: ComponentLinksType | null | undefi
     rac: links.rac ? `https://react-aria.adobe.com/${links.rac}` : undefined,
     source: links.source ? `${COMPONENT_PATH}/${links.source}` : undefined,
     styles: links.styles ? `${COMPONENT_STYLES_PATH}/${links.styles}` : undefined,
-    tailwind: links.tailwind ? `https://tailwindcss.com/docs/${links.tailwind}` : undefined,
-    themes: links.themes ? THEMES_PATH : undefined,
   };
 }

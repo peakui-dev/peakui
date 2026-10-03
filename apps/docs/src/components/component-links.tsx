@@ -3,7 +3,7 @@
 import type {ComponentLinksType} from "@/utils/extract-links";
 
 import {useDictionary} from "@/hooks/use-dictionary";
-import {GithubIcon, ReactAriaIcon, TailwindIcon} from "@/icons/dev";
+import {GithubIcon, ReactAriaIcon} from "@/icons/dev";
 import {generateComponentLinks} from "@/utils/extract-links";
 import {docsButtonVariants} from "@/utils/variants";
 
@@ -59,19 +59,6 @@ export const ComponentLinks = ({links}: ComponentLinksProps) => {
       {componentLinks.styles ? (
         <ButtonLink href={componentLinks.styles} startContent={<GithubIcon size={20} />}>
           {dict.stylesSource}
-        </ButtonLink>
-      ) : null}
-      {componentLinks.themes ? (
-        <ButtonLink href={componentLinks.themes} startContent={<GithubIcon size={20} />}>
-          {dict.themeSource}
-        </ButtonLink>
-      ) : null}
-      {componentLinks.tailwind ? (
-        <ButtonLink
-          href={componentLinks.tailwind}
-          startContent={<TailwindIcon className="text-lg text-[#38bdf8]" />}
-        >
-          Tailwind CSS
         </ButtonLink>
       ) : null}
     </div>

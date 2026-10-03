@@ -34,8 +34,7 @@
   },
   "componentLinks": {
     "source": "Source",
-    "stylesSource": "Styles source",
-    "themeSource": "Theme source"
+    "stylesSource": "Styles source"
   },
   "pageActions": {
     "copyMarkdown": "Copy Markdown",

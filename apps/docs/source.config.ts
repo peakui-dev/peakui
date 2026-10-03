@@ -13,8 +13,6 @@ export const docs = defineDocs({
           rac: z.string().optional(),
           source: z.string().optional(),
           styles: z.string().optional(),
-          tailwind: z.string().optional(),
-          themes: z.boolean().optional(),
         })
         .optional(),
     }),

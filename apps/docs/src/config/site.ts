@@ -6,7 +6,6 @@ export const siteConfig = {
     "Accessible React components built on React Aria Components and Tailwind CSS v4, styled with BEM classes and CSS custom properties.",
   fullName: "PeakUI - Accessible React components, styled with plain CSS.",
   githubRawUrl: RAW_DOCS_CONTENT_PATH,
-  githubRepo: REPO_NAME,
   githubUrl: `${GITHUB_URL}/${REPO_NAME}`,
   name: "PeakUI",
   siteUrl: __BASE_URL__,
