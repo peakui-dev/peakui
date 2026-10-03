@@ -1,6 +1,8 @@
 import type {ProjectFile} from "../types.ts";
 
-import {mkdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {randomBytes} from "node:crypto";
+import {mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync} from "node:fs";
+import {createRequire} from "node:module";
 import {join} from "node:path";
 
 import postcss from "postcss";
@@ -175,6 +177,125 @@ export function findForbidden(files: ProjectFile[]): string[] {
     .sort();
 }
 
+/** Where the hash looks. Every field has a default; tests point them at small fixtures. */
+export interface HashInputs {
+  reactDir: string;
+  stylesDir: string;
+  acmeDir: string;
+  /** The file that holds the staging rules; its text is part of the hash. */
+  rulesFile: string;
+  /** Versions of the tools that produce the build output. */
+  tools: Record<string, string>;
+}
+
+/** Tools whose version changes what the build emits. */
+const BUILD_TOOLS = ["tsdown", "rolldown", "rolldown-plugin-dts", "typescript"];
+const NOT_AN_INPUT = [
+  "node_modules",
+  "dist",
+  "*.test.ts",
+  "*.test.tsx",
+  "*.stories.ts",
+  "*.stories.tsx",
+];
+/** The parts of each package that the build reads or the staging copies. */
+const REACT_INPUTS = ["src", "package.json", "tsdown.config.ts", "tsconfig.json"];
+const STYLES_INPUTS = [
+  "src",
+  "package.json",
+  "tsconfig.json",
+  "index.css",
+  "base",
+  "components",
+  "themes",
+  "utilities",
+  "variants",
+];
+
+function toolVersions(): Record<string, string> {
+  const versions: Record<string, string> = {};
+  let resolveFrom: NodeJS.Require;
+
+  try {
+    // pnpm keeps a package's own dependencies beside its real location, not beside the link.
+    resolveFrom = createRequire(
+      join(realpathSync(join(PACKAGE_DIR, "node_modules/tsdown")), "package.json"),
+    );
+  } catch {
+    resolveFrom = createRequire(join(PACKAGE_DIR, "package.json"));
+  }
+
+  for (const name of BUILD_TOOLS) {
+    try {
+      const manifest = JSON.parse(
+        readFileSync(resolveFrom.resolve(`${name}/package.json`), "utf8"),
+      );
+
+      versions[name] = String(manifest.version);
+    } catch {
+      versions[name] = "unresolved";
+    }
+  }
+
+  return versions;
+}
+
+function defaultHashInputs(): HashInputs {
+  return {
+    acmeDir: join(PACKAGE_DIR, "fixtures/packages/acme-status"),
+    reactDir: join(REPO_DIR, "packages/react"),
+    rulesFile: import.meta.filename,
+    stylesDir: join(REPO_DIR, "packages/styles"),
+    tools: toolVersions(),
+  };
+}
+
+function inputFiles(prefix: string, dir: string, entries: string[]): ProjectFile[] {
+  const files: ProjectFile[] = [];
+
+  for (const entry of entries) {
+    let paths: string[];
+
+    try {
+      paths = walkFiles(join(dir, entry), NOT_AN_INPUT).map((path) => `${entry}/${path}`);
+    } catch {
+      // A file, not a directory (or absent): read it by its own name.
+      paths = [entry];
+    }
+
+    try {
+      for (const file of readFiles(dir, paths)) {
+        files.push({path: `${prefix}/${file.path}`, text: file.text});
+      }
+    } catch {
+      // Absent: nothing to hash, and an addition changes the hash.
+    }
+  }
+
+  return files;
+}
+
+/**
+ * A SHA-256 over what the build is made FROM: the source files of both packages that feed it, the
+ * Acme package, the staging rules (this file) and the versions of the build tools. Never over the
+ * emitted `dist`: the declaration emit reorders members from one run to the next, so the same
+ * library would carry several hashes.
+ */
+export function libraryInputHash(inputs: HashInputs = defaultHashInputs()): string {
+  const files: ProjectFile[] = [
+    ...inputFiles("react", inputs.reactDir, REACT_INPUTS),
+    ...inputFiles("styles", inputs.stylesDir, STYLES_INPUTS),
+    ...inputFiles("acme-status", inputs.acmeDir, ["."]),
+    {path: "rules/stage", text: readFileSync(inputs.rulesFile, "utf8")},
+    ...Object.entries(inputs.tools).map(([name, version]) => ({
+      path: `tool/${name}`,
+      text: version,
+    })),
+  ];
+
+  return hashFiles(files);
+}
+
 async function run(
   argv: string[],
   cwd: string,
@@ -197,15 +318,34 @@ function readJson(path: string): PackageManifest {
 }
 
 export async function packLibrary(): Promise<PackResult> {
-  const stage = join(evalsHome(), "stage");
+  // One directory per pack, so packs that run at the same time never clear each other's files.
+  const stage = join(evalsHome(), `stage-${process.pid}-${randomBytes(4).toString("hex")}`);
+  const libraryHash = libraryInputHash();
   const reactSource = join(REPO_DIR, "packages/react");
   const stylesSource = join(REPO_DIR, "packages/styles");
   const tsdown = join(PACKAGE_DIR, "node_modules/.bin/tsdown");
 
-  rmSync(stage, {force: true, recursive: true});
   mkdirSync(join(stage, "react"), {recursive: true});
   mkdirSync(join(stage, "styles"), {recursive: true});
   mkdirSync(tarballsDir(), {recursive: true});
+
+  try {
+    return await buildAndPack({libraryHash, reactSource, stage, stylesSource, tsdown});
+  } finally {
+    rmSync(stage, {force: true, recursive: true});
+  }
+}
+
+interface BuildPlan {
+  libraryHash: string;
+  reactSource: string;
+  stage: string;
+  stylesSource: string;
+  tsdown: string;
+}
+
+async function buildAndPack(plan: BuildPlan): Promise<PackResult> {
+  const {libraryHash, reactSource, stage, stylesSource, tsdown} = plan;
 
   await run([tsdown, "--out-dir", join(stage, "react/dist")], reactSource);
   await run(
@@ -254,18 +394,25 @@ export async function packLibrary(): Promise<PackResult> {
     throw new Error(`staged files name the reference library: ${forbidden.join(", ")}`);
   }
 
-  const libraryHash = hashFiles(files);
   const inventory = commentInventory(
     files.filter((file) => file.path.startsWith("react/") || file.path.startsWith("styles/")),
   );
 
   async function pack(directory: string): Promise<string> {
+    // Into the stage first and then renamed into place: a pack that runs at the same time never
+    // sees a half-written tarball, and identical inputs give identical files.
+    const scratch = join(stage, "tarballs");
+
+    mkdirSync(scratch, {recursive: true});
+
     const stdout = await run(
-      ["npm", "pack", "--pack-destination", tarballsDir()],
+      ["npm", "pack", "--pack-destination", scratch],
       join(stage, directory),
       npmEnvironment(),
     );
     const name = stdout.trim().split("\n").at(-1) ?? "";
+
+    renameSync(join(scratch, name), join(tarballsDir(), name));
 
     return join(tarballsDir(), name);
   }
