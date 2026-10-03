@@ -3,11 +3,13 @@ import type {TaskDefinition} from "../src/types.ts";
 import {brandPrimaryButton} from "./brand-primary-button/task.ts";
 import {customButtonVariant} from "./custom-button-variant/task.ts";
 import {destructiveActions} from "./destructive-actions/task.ts";
+import {firstTimeSetup} from "./first-time-setup/task.ts";
 import {linkAsButton} from "./link-as-button/task.ts";
 import {pendingButton} from "./pending-button/task.ts";
 import {prefixedField} from "./prefixed-field/task.ts";
 import {pressStateLabel} from "./press-state-label/task.ts";
 import {sectionGroupRender} from "./section-group-render/task.ts";
+import {serverPageAction} from "./server-page-action/task.ts";
 import {signInForm} from "./sign-in-form/task.ts";
 import {unstyledSharedBadge} from "./unstyled-shared-badge/task.ts";
 
@@ -22,6 +24,8 @@ export const tasks: TaskDefinition[] = [
   sectionGroupRender,
   unstyledSharedBadge,
   brandPrimaryButton,
+  firstTimeSetup,
+  serverPageAction,
 ];
 
 export function getTask(id: string): TaskDefinition {

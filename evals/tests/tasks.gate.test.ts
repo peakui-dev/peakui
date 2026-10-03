@@ -56,3 +56,23 @@ describe("task set", () => {
     },
   );
 });
+
+describe("pitfall coverage", () => {
+  it("exercises every pitfall with at least one task, and has twelve tasks", () => {
+    const covered = new Set(tasks.flatMap((task) => task.pitfalls));
+
+    expect([...covered].sort()).toEqual([
+      "composition",
+      "css-order",
+      "fields",
+      "imports",
+      "no-provider",
+      "peers-rsc",
+      "rac-props",
+      "styling",
+      "tailwind-scanning",
+      "variants",
+    ]);
+    expect(tasks).toHaveLength(12);
+  });
+});
