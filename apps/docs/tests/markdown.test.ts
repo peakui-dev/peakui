@@ -16,6 +16,27 @@ interface Node {
   children?: Node[];
   name?: string | null;
   type: string;
+  url?: string;
+}
+
+/** Every destination in the markdown: inline links, images, reference definitions, autolinks. */
+function findDestinations(markdown: string): string[] {
+  const found: string[] = [];
+
+  function walk(node: Node) {
+    if (
+      (node.type === "link" || node.type === "image" || node.type === "definition") &&
+      node.url !== undefined
+    ) {
+      found.push(node.url);
+    }
+
+    node.children?.forEach(walk);
+  }
+
+  walk(parser.parse(markdown) as Node);
+
+  return found;
 }
 
 /** Every JSX element or MDX expression left in the markdown, ignoring code fences. */
@@ -98,6 +119,36 @@ describe("page markdown", () => {
 
       expect(markdown, page.url).not.toMatch(/\\?\[!toc\\?\]/);
     }
+  });
+
+  it("leaves no relative destination in any link form", async () => {
+    for (const page of pages) {
+      const markdown = await getPageMarkdown(page);
+
+      for (const url of findDestinations(markdown)) {
+        expect(url, `${page.url}: ${url}`).toMatch(/^(https?:\/\/|mailto:)/);
+      }
+    }
+  });
+
+  it("makes every link form absolute", async () => {
+    const markdown = await mdxToMarkdown(
+      [
+        "[inline](/docs/react/components/button) and [rel](../button) and [hash](#usage)",
+        "",
+        "![image](/images/a.png)",
+        "",
+        "[ref][r]",
+        "",
+        "[r]: /docs/react/components/button",
+      ].join("\n"),
+      pages[0]!,
+    );
+    const urls = findDestinations(markdown);
+
+    expect(urls.length).toBe(5);
+
+    for (const url of urls) expect(url).toMatch(/^https?:\/\//);
   });
 
   it("makes in-body links absolute", async () => {

@@ -127,6 +127,15 @@ function componentsCategoryNode(node: MdNode, locale?: string): MdNode[] {
   return items.length > 0 ? [{children: items, type: "list"}] : [];
 }
 
+/** Resolves a destination against the page's own URL; absolute URLs and `mailto:` pass through. */
+function resolveUrl(url: string, page: Page): string {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url)) return url;
+
+  if (url.startsWith("/")) return absoluteUrl(url);
+
+  return new URL(url, absoluteUrl(page.url)).toString();
+}
+
 /** Returns the markdown nodes that replace `node`: itself, a substitute, its children or nothing. */
 async function transformNode(node: MdNode, page: Page): Promise<MdNode[]> {
   if (isMdxScript(node)) return [];
@@ -157,9 +166,13 @@ async function transformNode(node: MdNode, page: Page): Promise<MdNode[]> {
   // The `[!toc]` suffix hides a heading from the on-page table of contents; it is not content.
   if (node.type === "heading") return [stripTocMarker(await withChildren(node, page))];
 
-  // A site-relative link is useless outside the site: agents read it detached from the origin.
-  if (node.type === "link" && node.url?.startsWith("/")) {
-    return [{...(await withChildren(node, page)), url: absoluteUrl(node.url)}];
+  // A relative destination is useless outside the site: agents read it detached from the origin.
+  // This covers inline links, images and reference definitions alike.
+  if (
+    (node.type === "link" || node.type === "image" || node.type === "definition") &&
+    node.url !== undefined
+  ) {
+    return [{...(await withChildren(node, page)), url: resolveUrl(node.url, page)}];
   }
 
   if (node.children) return [await withChildren(node, page)];
