@@ -28,3 +28,4 @@ pnpm-lock.yaml
 packages/styles/themes/*/variables.css
 packages/styles/themes/*/index.css
 packages/styles/themes/*/components/index.css
+evals/results/

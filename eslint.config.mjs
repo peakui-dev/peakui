@@ -8,6 +8,16 @@ import reactConfig from "@peakui/standard/eslint/react.mjs";
 import {defineConfig} from "eslint/config";
 
 const config = defineConfig([
+  {
+    // Consumer code the evals show to an agent, known-bad reference solutions and agent output:
+    // none of it is this repository's source.
+    ignores: [
+      "evals/fixtures/*/**",
+      "evals/tasks/*/overlay/**",
+      "evals/tasks/*/solutions/**",
+      "evals/results/**",
+    ],
+  },
   ...reactConfig,
   {
     /*
