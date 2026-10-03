@@ -8,6 +8,7 @@ import {runCommand} from "../exec.ts";
 import {copyDir, hashFiles, readFiles, walkFiles} from "../files.ts";
 import {npmEnvironment} from "../npm.ts";
 import {templatesDir} from "../paths.ts";
+import {commandEnvironment} from "../scoring/commands.ts";
 
 export interface TemplateInfo {
   fixture: string;
@@ -166,7 +167,13 @@ export async function prepareTemplate(
   if (installed.exitCode !== 0) await fail(install, installed.stderr || installed.stdout);
 
   for (const command of fixture.prepare) {
-    const result = await runCommand(command, {cwd: dir, timeoutMs: 600_000});
+    // Fixture commands run configuration the fixture ships, so they get the same allow-listed
+    // environment as the scoring commands.
+    const result = await runCommand(command, {
+      cwd: dir,
+      env: commandEnvironment(),
+      timeoutMs: 600_000,
+    });
 
     if (result.exitCode !== 0) await fail(command, result.stderr || result.stdout);
   }

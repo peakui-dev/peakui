@@ -81,7 +81,7 @@ export interface FixtureDefinition {
 }
 
 export interface StaticContext {
-  /** Every `.ts`, `.tsx` and `.css` project file after the run. */
+  /** Every TypeScript, JavaScript (`.js`, `.jsx`, `.mjs`, `.cjs`, `.mts`, `.cts`) and `.css` project file after the run. */
   files: ProjectFile[];
   changes: FileChanges;
   file(path: string): ProjectFile | undefined;
@@ -96,8 +96,13 @@ export interface RenderCase {
 export interface RenderContext {
   /** Keyed by case name; the document of `html` is keyed "html". */
   documents: Map<string, Document>;
-  /** Parsed concatenation of the built CSS; undefined when the build left none. */
+  /**
+   * Parsed concatenation of the built CSS, in path order; undefined when the build left none. Fine
+   * for "does this rule exist"; the join is not load order, so never read cascade order from it.
+   */
   css: Root | undefined;
+  /** Each built CSS file on its own, in path order (not load order). Use `builtLayerOrder` for layer order. */
+  cssFiles: Root[];
 }
 
 export interface RenderSpec {

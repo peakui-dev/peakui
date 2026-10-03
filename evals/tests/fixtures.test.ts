@@ -1,4 +1,4 @@
-import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 
@@ -166,4 +166,56 @@ describe("readTemplate", () => {
 
     expect(() => readTemplate(fixture)).toThrow(/template sidecar.*vite-app.*malformed/);
   });
+});
+
+describe("prepareTemplate", () => {
+  it("runs a fixture's prepare commands without the parent's environment", async () => {
+    const {prepareTemplate} = await import("../src/fixtures/prepare.ts");
+    const home = mkdtempSync(join(tmpdir(), "prepare-env-"));
+    const previous = process.env.PEAKUI_EVALS_HOME;
+    const fixtureDir = join(home, "fixture");
+
+    mkdirSync(fixtureDir, {recursive: true});
+    writeFileSync(
+      join(fixtureDir, "package.json"),
+      JSON.stringify({name: "x", private: true, version: "0.0.0"}),
+    );
+    process.env.PEAKUI_EVALS_HOME = join(home, "evals-home");
+    process.env.PEAKUI_PREPARE_SECRET = "leaked";
+
+    try {
+      await prepareTemplate(
+        {
+          build: [],
+          builtCssDir: "dist",
+          clean: [],
+          dir: fixtureDir,
+          id: "env-probe",
+          prepare: [
+            [
+              process.execPath,
+              "-e",
+              "require('fs').writeFileSync('env.txt', process.env.PEAKUI_PREPARE_SECRET ?? 'absent')",
+            ],
+          ],
+          typecheck: [],
+        },
+        {
+          commentInventory: {comments: 0, cyrillic: 0, files: 0, samples: []},
+          libraryHash: "l",
+          tarballs: {acmeStatus: "a", react: "r", styles: "s"},
+        },
+        {force: true},
+      );
+
+      expect(
+        readFileSync(join(home, "evals-home", "templates", "env-probe", "env.txt"), "utf8"),
+      ).toBe("absent");
+    } finally {
+      delete process.env.PEAKUI_PREPARE_SECRET;
+      if (previous === undefined) delete process.env.PEAKUI_EVALS_HOME;
+      else process.env.PEAKUI_EVALS_HOME = previous;
+      rmSync(home, {force: true, recursive: true});
+    }
+  }, 120_000);
 });
