@@ -8,6 +8,7 @@ import ts from "typescript";
 
 import {runCommand} from "../exec.ts";
 import {copyDir, hashFiles, readFiles, walkFiles} from "../files.ts";
+import {npmEnvironment} from "../npm.ts";
 import {PACKAGE_DIR, REPO_DIR, evalsHome, tarballsDir} from "../paths.ts";
 
 export interface PackageManifest {
@@ -173,8 +174,13 @@ export function findForbidden(files: ProjectFile[]): string[] {
     .sort();
 }
 
-async function run(argv: string[], cwd: string, timeoutMs = 600_000): Promise<string> {
-  const result = await runCommand(argv, {cwd, timeoutMs});
+async function run(
+  argv: string[],
+  cwd: string,
+  env?: NodeJS.ProcessEnv,
+  timeoutMs = 600_000,
+): Promise<string> {
+  const result = await runCommand(argv, {cwd, env, timeoutMs});
 
   if (result.exitCode !== 0) {
     throw new Error(
@@ -256,6 +262,7 @@ export async function packLibrary(): Promise<PackResult> {
     const stdout = await run(
       ["npm", "pack", "--pack-destination", tarballsDir()],
       join(stage, directory),
+      npmEnvironment(),
     );
     const name = stdout.trim().split("\n").at(-1) ?? "";
 

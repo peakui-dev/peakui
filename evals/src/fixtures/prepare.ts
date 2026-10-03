@@ -6,6 +6,7 @@ import {basename, join} from "node:path";
 
 import {runCommand} from "../exec.ts";
 import {copyDir, hashFiles, readFiles, walkFiles} from "../files.ts";
+import {npmEnvironment} from "../npm.ts";
 import {templatesDir} from "../paths.ts";
 
 export interface TemplateInfo {
@@ -59,6 +60,33 @@ export function withTarballDependencies(
   }
 
   return {...manifest, dependencies};
+}
+
+const PEER_PACKAGES = [
+  "react-aria-components",
+  "@react-aria/utils",
+  "react",
+  "react-dom",
+  "tailwindcss",
+];
+
+/** Versions read from the installed `node_modules`; null for a package that is not there. */
+export function installedVersions(dir: string, names: string[]): Record<string, string | null> {
+  const found: Record<string, string | null> = {};
+
+  for (const name of names) {
+    try {
+      const manifest = JSON.parse(
+        readFileSync(join(dir, "node_modules", name, "package.json"), "utf8"),
+      ) as {version?: unknown};
+
+      found[name] = typeof manifest.version === "string" ? manifest.version : null;
+    } catch {
+      found[name] = null;
+    }
+  }
+
+  return found;
 }
 
 const SIDECAR_NOTE =
@@ -129,7 +157,11 @@ export async function prepareTemplate(
   );
 
   const install = ["npm", "install", "--no-audit", "--no-fund"];
-  const installed = await runCommand(install, {cwd: dir, timeoutMs: 600_000});
+  const installed = await runCommand(install, {
+    cwd: dir,
+    env: npmEnvironment(),
+    timeoutMs: 600_000,
+  });
 
   if (installed.exitCode !== 0) await fail(install, installed.stderr || installed.stdout);
 
@@ -139,7 +171,11 @@ export async function prepareTemplate(
     if (result.exitCode !== 0) await fail(command, result.stderr || result.stdout);
   }
 
-  const npm = await runCommand(["npm", "--version"], {cwd: dir, timeoutMs: 30_000});
+  const npm = await runCommand(["npm", "--version"], {
+    cwd: dir,
+    env: npmEnvironment(),
+    timeoutMs: 30_000,
+  });
 
   writeFileSync(
     sidecarPath(fixture),
@@ -153,6 +189,7 @@ export async function prepareTemplate(
         node: process.version,
         note: SIDECAR_NOTE,
         npm: npm.stdout.trim(),
+        peers: installedVersions(dir, PEER_PACKAGES),
       },
       null,
       2,
