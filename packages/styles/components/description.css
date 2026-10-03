@@ -1,0 +1,11 @@
+/*
+ * Description — подсказка под контролом. Имена классов приходят из
+ * src/components/description/description.styles.ts.
+ *
+ * Одно правило, как у эталона: описание не имеет состояний. Скрывает его невалидное поле, и это
+ * правило живёт в textfield.css, у того, кто про состояние знает.
+ */
+
+.description {
+  @apply text-xs text-wrap wrap-break-word text-muted;
+}
