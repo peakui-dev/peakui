@@ -131,7 +131,8 @@ function componentsCategoryNode(node: MdNode, locale?: string): MdNode[] {
 function resolveUrl(url: string, page: Page): string {
   if (/^[a-z][a-z0-9+.-]*:/i.test(url)) return url;
 
-  if (url.startsWith("/")) return absoluteUrl(url);
+  // `//host/x` names another host, not a path on this site; it takes the page's own scheme.
+  if (url.startsWith("/") && !url.startsWith("//")) return absoluteUrl(url);
 
   return new URL(url, absoluteUrl(page.url)).toString();
 }

@@ -151,6 +151,35 @@ describe("page markdown", () => {
     for (const url of urls) expect(url).toMatch(/^https?:\/\//);
   });
 
+  it("resolves a protocol-relative destination to its own host", async () => {
+    const markdown = await mdxToMarkdown("[cdn](//cdn.example.com/x.css)", pages[0]!);
+    const [url] = findDestinations(markdown);
+
+    expect(url).toMatch(/^https?:\/\/cdn\.example\.com\/x\.css$/);
+  });
+
+  it("has no page with an href or src attribute outside code fences", async () => {
+    for (const page of pages) {
+      const raw = await readFile(`content/docs/${page.path}`, "utf-8");
+      const offenders: string[] = [];
+
+      function walk(node: Node & {attributes?: {name?: string}[]}) {
+        if (node.type === "mdxJsxFlowElement" || node.type === "mdxJsxTextElement") {
+          for (const attribute of node.attributes ?? []) {
+            if (attribute.name === "href" || attribute.name === "src") {
+              offenders.push(`<${node.name}>`);
+            }
+          }
+        }
+
+        node.children?.forEach(walk);
+      }
+
+      walk(parser.parse(raw.replace(/^---[\s\S]*?\n---/, "")) as Node);
+      expect(offenders, page.url).toEqual([]);
+    }
+  });
+
   it("makes in-body links absolute", async () => {
     for (const page of pages) {
       const markdown = await getPageMarkdown(page);
