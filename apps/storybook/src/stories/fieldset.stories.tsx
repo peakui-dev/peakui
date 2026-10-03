@@ -83,6 +83,23 @@ export const WithoutReact: Story = {
           </button>
         </div>
       </fieldset>
+
+      {/*
+       * Нативный disabled БЕЗ data-disabled: именно так напишет потребитель вне React, и подпись
+       * обязана погаснуть вместе с контролом. Парная форма состояния живёт в label.css.
+       */}
+      <fieldset disabled className="fieldset max-w-sm">
+        <legend className="fieldset__legend">Недоступная группа без data-атрибута</legend>
+
+        <div className="fieldset__group">
+          <div className="textfield textfield--full-width">
+            <label className="label" htmlFor="city-native">
+              Город
+            </label>
+            <input className="input" defaultValue="Вена" id="city-native" />
+          </div>
+        </div>
+      </fieldset>
     </div>
   ),
 };

@@ -4,6 +4,7 @@ import type {InputGroupVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef, MouseEvent} from "react";
 
 import {inputGroupVariants} from "@peakui/styles";
+import {mergeRefs} from "@react-aria/utils";
 import {createContext, use, useMemo, useRef} from "react";
 import {Group as GroupPrimitive} from "react-aria-components/Group";
 import {Input as InputPrimitive} from "react-aria-components/Input";
@@ -28,8 +29,31 @@ const InputGroupContext = createContext<InputGroupContextValue>({});
  * Что считается «кликом по своему контролу»: сам контрол и любой интерактивный элемент внутри
  * оболочки. Клик по кнопке в суффиксе принадлежит кнопке, и перевод фокуса на поле его украл бы.
  */
-const INTERACTIVE =
-  "input, textarea, select, button, a[href], [role='button'], [contenteditable='true']";
+const INTERACTIVE = [
+  "input",
+  "textarea",
+  "select",
+  "button",
+  "label",
+  "a[href]",
+  "[role='button']",
+  "[role='link']",
+  "[role='checkbox']",
+  "[role='switch']",
+  "[role='radio']",
+  "[role='menuitem']",
+  "[role='combobox']",
+  "[tabindex]:not([tabindex='-1'])",
+  "[contenteditable]:not([contenteditable='false'])",
+].join(", ");
+
+/*
+ * Контрол группы опознаётся по своему data-slot, а не как «первый input в поддереве». Разница не
+ * теоретическая: интерактивный контрол в префиксе — select-all чекбокс, переключатель видимости
+ * пароля — стоит в документе раньше и забирал бы фокус себе. Те же два значения уже ключуют правила
+ * в input-group.css, так что JS и CSS теперь говорят об одном элементе.
+ */
+const CONTROL = '[data-slot="input-group-input"], [data-slot="input-group-textarea"]';
 
 /* -------------------------------------------------------------------------------------------------
  * InputGroup Root
@@ -58,15 +82,22 @@ const InputGroupRoot = ({
     [fullWidth, inherited.variant, variant],
   );
   const contextValue = useMemo(() => ({slots}), [slots]);
+  /*
+   * mergeRefs в useMemo, а не стрелка в JSX: собранный заново на каждый рендер ref React отцепляет
+   * (зовёт с null) и прицепляет обратно. У контролируемого поля это один цикл отцепа на нажатие
+   * клавиши, то есть снос и пересборка любого побочного эффекта в ref-колбэке потребителя —
+   * ResizeObserver, setState, регистрация в floating-ui. utils/dom.tsx делает это так же.
+   */
+  const mergedRef = useMemo(() => mergeRefs(ref, ownRef), [ref]);
 
   const handleClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
 
     /*
-     * input, textarea — оба: эталон ищет только "input", поэтому у него клик по префиксу рядом с
-     * многострочным контролом не ставит фокус никуда.
+     * Оба слота: эталон ищет только "input", поэтому у него клик по префиксу рядом с многострочным
+     * контролом не ставит фокус никуда.
      */
-    const control = ownRef.current?.querySelector<HTMLElement>("input, textarea");
+    const control = ownRef.current?.querySelector<HTMLElement>(CONTROL);
 
     if (control && !target.closest(INTERACTIVE)) {
       control.focus();
@@ -79,16 +110,7 @@ const InputGroupRoot = ({
     <InputGroupContext value={contextValue}>
       <GroupPrimitive
         {...rest}
-        ref={(node) => {
-          ownRef.current = node;
-
-          if (typeof ref === "function") {
-            return ref(node);
-          }
-          if (ref) {
-            ref.current = node;
-          }
-        }}
+        ref={mergedRef}
         className={composeTwRenderProps(className, slots.base())}
         data-slot="input-group"
         onClick={handleClick}

@@ -154,6 +154,34 @@ test.describe("Семейство полей — стилевой слой и Re
       expect(measured.shellOverflow).toBe("visible");
     });
 
+    /*
+     * Найдено ревью ветки: кольцо поля рисовалось и тогда, когда фокус стоял на кнопке в суффиксе —
+     * оболочка сообщала «поле в фокусе», когда ввода нет. Причина была в [data-focus-within]: RAC
+     * ставит его из useFocusRing({within: true}), то есть на фокус где угодно внутри.
+     */
+    test("кольцо поля не рисуется, когда фокус на кнопке в суффиксе", async ({page}) => {
+      await page.goto(
+        "/iframe.html?id=components-inputgroup--with-button-in-suffix&globals=theme:default-light",
+      );
+
+      const button = page.getByRole("button", {name: "Очистить"});
+      const shell = page.locator('[data-slot="input-group"]');
+
+      await expect(button).toBeVisible();
+      await button.focus();
+
+      await expect(shell).toHaveCSS("outline-style", "none");
+
+      /* И наоборот: фокус в самом контроле кольцо рисует. */
+      await page.getByLabel("Запрос").focus();
+
+      const width = await shell.evaluate((el) =>
+        Number.parseFloat(getComputedStyle(el).outlineWidth),
+      );
+
+      expect(width).toBeGreaterThan(0);
+    });
+
     /* Оболочка растёт вместе с многострочным контролом, а не обрезает его. */
     test("оболочка растёт под многострочный контрол", async ({page}) => {
       await page.goto(
@@ -179,6 +207,31 @@ test.describe("Семейство полей — стилевой слой и Re
       expect(measured.shellHeight).toBeGreaterThan(48);
       expect(measured.shellHeight).toBeGreaterThanOrEqual(measured.textareaHeight);
     });
+  });
+
+  /*
+   * Найдено ревью ветки: у .label--disabled не было парного псевдокласса, поэтому в разметке без
+   * React нативный <fieldset disabled> гасил контролы и НЕ гасил их подписи.
+   */
+  test("нативный fieldset disabled гасит и контрол, и его подпись", async ({page}) => {
+    await page.goto(
+      "/iframe.html?id=components-fieldset--without-react&globals=theme:default-light",
+    );
+
+    const label = page.getByText("Город").last();
+    const input = page.locator("#city-native");
+
+    await expect(input).toBeVisible();
+
+    const measured = await label.evaluate((el) => ({
+      labelOpacity: Number.parseFloat(getComputedStyle(el).opacity),
+      inputOpacity: Number.parseFloat(
+        getComputedStyle(el.parentElement!.querySelector("input")!).opacity,
+      ),
+    }));
+
+    expect(measured.inputOpacity).toBeLessThan(1);
+    expect(measured.labelOpacity).toBeLessThan(1);
   });
 
   for (const theme of THEMES) {

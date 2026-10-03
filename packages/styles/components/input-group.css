@@ -79,11 +79,15 @@
    * префикса. :has(...:focus) — форма для разметки без React, data-focus-within ставит React Aria.
    *
    * :focus-within целиком не годится: фокус на кнопке в суффиксе тоже попадает под него, и
-   * оболочка подсвечивалась бы как поле, когда ввода нет.
+   * оболочка подсвечивалась бы как поле, когда ввода нет. По той же причине здесь НЕ
+   * [data-focus-within]: RAC ставит его из useFocusRing({within: true}), то есть на фокус где угодно
+   * внутри — включая кнопку в суффиксе. Парная data-форма — [data-focused] на самом контроле, его
+   * ставят примитивы Input и TextArea. Найдено ревью ветки.
    */
   &:has([data-slot="input-group-input"]:focus),
   &:has([data-slot="input-group-textarea"]:focus),
-  &[data-focus-within] {
+  &:has([data-slot="input-group-input"][data-focused]),
+  &:has([data-slot="input-group-textarea"][data-focused]) {
     @apply status-focused-field;
     background-color: var(--input-group-bg-focus);
     border-color: var(--input-group-border-focus);
@@ -213,6 +217,16 @@
   /* Внутренняя кромка слота не скругляется: там он стыкуется с контролом. */
   border-start-end-radius: 0;
   border-end-end-radius: 0;
+
+  /*
+   * Структурная половина forced-colors для разделительной линии: её ширина — тот же
+   * --border-width-field, равный 0px, и тема его не поднимает. Без этого блока в режиме
+   * принудительных цветов слот сливается с контролом в один неразделённый прямоугольник.
+   */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
 }
 
 .input-group__suffix {
@@ -221,6 +235,16 @@
   border-inline-start: var(--border-width-field) solid var(--input-group-border);
   border-start-start-radius: 0;
   border-end-start-radius: 0;
+
+  /*
+   * Структурная половина forced-colors для разделительной линии: её ширина — тот же
+   * --border-width-field, равный 0px, и тема его не поднимает. Без этого блока в режиме
+   * принудительных цветов слот сливается с контролом в один неразделённый прямоугольник.
+   */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
 }
 
 /* ---------- Варианты ---------- */
