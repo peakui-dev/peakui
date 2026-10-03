@@ -4,6 +4,8 @@ export interface Location {
   file?: string;
   line?: number;
   excerpt?: string;
+  agentChanged?: boolean;
+  inNodeModules?: boolean;
 }
 
 function make(

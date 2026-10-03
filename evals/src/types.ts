@@ -31,6 +31,10 @@ export interface Finding {
   /** 1-based. */
   line?: number;
   excerpt?: string;
+  /** Set when the finding names a file: the agent added or modified it during the run. */
+  agentChanged?: boolean;
+  /** Set when the finding names a file: the file sits under a `node_modules` directory. */
+  inNodeModules?: boolean;
 }
 
 export interface LayerResult {

@@ -233,3 +233,159 @@ describe("the environment of type-check and build commands", () => {
     },
   );
 });
+
+describe("diagnostics without a position", () => {
+  it.each([
+    ["error TS18003: No inputs were found in config file '/w/tsconfig.json'.", "TS18003"],
+    ["error TS5083: Cannot read file '/w/tsconfig.json'.", "TS5083"],
+    ["tsconfig.json: error TS5083: Cannot read file '/w/tsconfig.json'.", "TS5083"],
+  ])("parses %s", (line, code) => {
+    const [diagnostic] = parseTscOutput(`${line}\n  Detail line`);
+
+    expect(diagnostic).toMatchObject({code});
+    expect(diagnostic!.file === undefined || diagnostic!.file === "tsconfig.json").toBe(true);
+    expect(diagnostic!.line).toBeUndefined();
+    expect(diagnostic!.message).toContain("Detail line");
+  });
+});
+
+describe("runTypecheck and runBuild findings", () => {
+  let dir: string;
+  let home: string;
+  let previousHome: string | undefined;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), "cmd-find-"));
+    home = mkdtempSync(join(tmpdir(), "cmd-find-home-"));
+    previousHome = process.env.PEAKUI_EVALS_HOME;
+    process.env.PEAKUI_EVALS_HOME = home;
+  });
+
+  afterEach(() => {
+    if (previousHome === undefined) delete process.env.PEAKUI_EVALS_HOME;
+    else process.env.PEAKUI_EVALS_HOME = previousHome;
+    rmSync(dir, {force: true, recursive: true});
+    rmSync(home, {force: true, recursive: true});
+  });
+
+  // The text goes through a file so the echoed command line cannot look like tool output.
+  function printing(text: string, exit = 1): string[] {
+    const path = join(dir, `out-${Math.random().toString(36).slice(2)}.txt`);
+
+    writeFileSync(path, text);
+
+    return [
+      "node",
+      "-e",
+      `process.stdout.write(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exitCode = ${exit}`,
+      path,
+    ];
+  }
+
+  function fixtureOf(typecheck: string[], build: string[] = typecheck) {
+    return {
+      build: [build],
+      builtCssDir: "dist",
+      clean: [],
+      dir: "",
+      id: "x",
+      prepare: [],
+      typecheck: [typecheck],
+    };
+  }
+
+  it("reports a positionless diagnostic by its own message, not the last output line", async () => {
+    const result = await runTypecheck(
+      fixtureOf(
+        printing(
+          "error TS18003: No inputs were found in config file 'tsconfig.json'.\nFound 1 error.\n",
+        ),
+      ),
+      dir,
+      join(dir, "t.log"),
+    );
+
+    expect(result.status).toBe("fail");
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]!.message).toContain("No inputs were found");
+    expect(result.findings[0]!.file).toBeUndefined();
+  });
+
+  it("marks whether the agent changed the file and whether it sits under node_modules", async () => {
+    const result = await runTypecheck(
+      fixtureOf(
+        printing(
+          [
+            "src/a.tsx(1,1): error TS2322: bad one",
+            "src/b.tsx(1,1): error TS2322: bad two",
+            "node_modules/x/index.d.ts(2,3): error TS2304: bad three",
+            "",
+          ].join("\n"),
+        ),
+      ),
+      dir,
+      join(dir, "t.log"),
+      {changes: {added: [], deleted: [], modified: ["src/a.tsx"]}},
+    );
+    const flags = result.findings.map((finding) => [
+      finding.file,
+      finding.agentChanged,
+      finding.inNodeModules,
+    ]);
+
+    expect(flags).toEqual([
+      ["src/a.tsx", true, false],
+      ["src/b.tsx", false, false],
+      ["node_modules/x/index.d.ts", false, true],
+    ]);
+  });
+
+  it("strips ANSI codes from messages", async () => {
+    const result = await runTypecheck(
+      fixtureOf(printing("src/a.tsx(1,1): error TS2322: \u001B[31mred\u001B[39m text\n")),
+      dir,
+      join(dir, "t.log"),
+    );
+
+    expect(result.findings[0]!.message).toBe("red text");
+    expect(classifyBuildOutput("\u001B[31merror\u001B[39m during build")[0]!.message).toBe(
+      "error during build",
+    );
+  });
+
+  it("does not take a line such as '0 errors' for the cause of a failed build", () => {
+    const [finding] = classifyBuildOutput("Found 0 errors in the config\nthe real cause\nexit");
+
+    expect(finding!.message).not.toContain("0 errors");
+    expect(finding!.message).toBe("exit");
+  });
+
+  it("records build warnings on a passing build without failing it", async () => {
+    const result = await runBuild(
+      fixtureOf(
+        printing(
+          "(!) Some chunks are larger than 500 kB\nwarning: unused import\nbuilt in 1s\n",
+          0,
+        ),
+      ),
+      dir,
+      join(dir, "b.log"),
+    );
+
+    expect(result.status).toBe("pass");
+    expect(result.findings.map((finding) => [finding.rule, finding.gate, finding.pass])).toEqual([
+      ["build-warning", false, false],
+      ["build-warning", false, false],
+    ]);
+  });
+
+  it("records no warning for a clean build", async () => {
+    const result = await runBuild(
+      fixtureOf(printing("built in 1s\n0 warnings\n", 0)),
+      dir,
+      join(dir, "b.log"),
+    );
+
+    expect(result.findings).toEqual([]);
+  });
+});

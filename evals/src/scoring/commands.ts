@@ -1,4 +1,4 @@
-import type {Finding, FixtureDefinition, LayerResult, PitfallId} from "../types.ts";
+import type {FileChanges, Finding, FixtureDefinition, LayerResult, PitfallId} from "../types.ts";
 
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {join} from "node:path";
@@ -6,25 +6,39 @@ import {join} from "node:path";
 import {runCommand} from "../exec.ts";
 import {evalsHome} from "../paths.ts";
 
-import {check, layerResult} from "./findings.ts";
+import {check, info, layerResult} from "./findings.ts";
 
 export interface Diagnostic {
-  file: string;
-  line: number;
-  column: number;
+  /** Absent for a diagnostic that carries no file position, such as TS18003 or TS5083. */
+  file?: string;
+  line?: number;
+  column?: number;
   code: string;
   message: string;
 }
 
 const DIAGNOSTIC_START = /^(.+?)\((\d+),(\d+)\): error (TS\d+): (.*)$/;
+const POSITIONLESS_START = /^(?:(.+?): )?error (TS\d+): (.*)$/;
 const MESSAGE_LIMIT = 300;
+// CSI sequences (colours, cursor moves) and OSC sequences (titles, hyperlinks).
+const ESC = String.fromCharCode(27);
+const BEL = String.fromCharCode(7);
+const ANSI = new RegExp(
+  `${ESC}\\[[0-9;?]*[ -/]*[@-~]|${ESC}\\][^${BEL}${ESC}]*(?:${BEL}|${ESC}\\\\)`,
+  "g",
+);
+
+export function stripAnsi(text: string): string {
+  return text.replace(ANSI, "");
+}
 
 export function parseTscOutput(output: string): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   let current: Diagnostic | undefined;
 
-  for (const line of output.split(/\r?\n/)) {
+  for (const line of stripAnsi(output).split(/\r?\n/)) {
     const match = DIAGNOSTIC_START.exec(line);
+    const positionless = match ? null : POSITIONLESS_START.exec(line);
 
     if (match) {
       current = {
@@ -34,6 +48,10 @@ export function parseTscOutput(output: string): Diagnostic[] {
         line: Number(match[2]),
         message: match[5]!,
       };
+      diagnostics.push(current);
+    } else if (positionless) {
+      current = {code: positionless[2]!, message: positionless[3]!};
+      if (positionless[1] !== undefined) current.file = positionless[1];
       diagnostics.push(current);
     } else if (current && /^\s/.test(line)) {
       current.message += `\n${line}`;
@@ -115,10 +133,37 @@ const BUILD_RULES: {pattern: RegExp; rule: string; pitfall: PitfallId}[] = [
 ];
 
 function clip(text: string): string {
-  return text.trim().slice(0, MESSAGE_LIMIT);
+  return stripAnsi(text).trim().slice(0, MESSAGE_LIMIT);
 }
 
-export function classifyBuildOutput(output: string): Finding[] {
+// "0 errors", "no errors" and "zero errors" report success.
+const CLEAN_COUNT = /\b(?:0|no|zero) (?:errors?|warnings?)\b/i;
+
+function isErrorLine(line: string): boolean {
+  return /\berrors?\b/i.test(line) && !CLEAN_COUNT.test(line);
+}
+
+const WARNING_LINE = /(?:^|[\s:[(])warn(?:ing)?s?\b|⚠|^\s*\(!\)/i;
+const WARNING_LIMIT = 5;
+
+/** Non-gating findings for the warnings a build printed. */
+export function classifyBuildWarnings(output: string): Finding[] {
+  const seen = new Set<string>();
+
+  for (const raw of stripAnsi(output).split(/\r?\n/)) {
+    const line = raw.trim();
+
+    if (line.startsWith("$ ") || CLEAN_COUNT.test(line) || !WARNING_LINE.test(line)) continue;
+    seen.add(clip(line));
+  }
+
+  return [...seen]
+    .slice(0, WARNING_LIMIT)
+    .map((message) => info("build-warning", "other", false, message));
+}
+
+export function classifyBuildOutput(rawOutput: string): Finding[] {
+  const output = stripAnsi(rawOutput);
   const lines = output.split(/\r?\n/);
   const findings: Finding[] = [];
 
@@ -131,7 +176,7 @@ export function classifyBuildOutput(output: string): Finding[] {
   if (findings.length > 0) return findings;
 
   const nonEmpty = lines.filter((line) => line.trim() !== "");
-  const first = nonEmpty.find((line) => /error/i.test(line)) ?? nonEmpty.at(-1) ?? "build failed";
+  const first = nonEmpty.find(isErrorLine) ?? nonEmpty.at(-1) ?? "build failed";
 
   return [check("build-error", "other", false, clip(first))];
 }
@@ -218,10 +263,23 @@ async function runAll(
   return {durationMs: Date.now() - started, failed, output, timedOut};
 }
 
+export interface LayerOptions {
+  /** What the agent changed; findings that name a file say whether it is one of those. */
+  changes?: FileChanges;
+}
+
+function locate(file: string, changes: FileChanges | undefined) {
+  return {
+    ...(changes ? {agentChanged: [...changes.added, ...changes.modified].includes(file)} : {}),
+    inNodeModules: file.split(/[\\/]/).includes("node_modules"),
+  };
+}
+
 export async function runTypecheck(
   fixture: FixtureDefinition,
   dir: string,
   logPath: string,
+  options: LayerOptions = {},
 ): Promise<LayerResult> {
   const run = await runAll(fixture.typecheck, dir, logPath, 180_000);
 
@@ -237,10 +295,15 @@ export async function runTypecheck(
   const findings: Finding[] = diagnostics.map((diagnostic) => {
     const {pitfall, rule} = classifyDiagnostic(diagnostic.message);
 
+    if (diagnostic.file === undefined || diagnostic.line === undefined) {
+      return check(rule, pitfall, false, clip(`${diagnostic.code}: ${diagnostic.message}`));
+    }
+
     return check(rule, pitfall, false, clip(diagnostic.message), {
       excerpt: excerptOf(dir, diagnostic.file, diagnostic.line),
       file: diagnostic.file,
       line: diagnostic.line,
+      ...locate(diagnostic.file, options.changes),
     });
   });
 
@@ -266,5 +329,9 @@ export async function runBuild(
     );
   }
 
-  return layerResult("build", run.failed ? classifyBuildOutput(run.output) : [], run.durationMs);
+  return layerResult(
+    "build",
+    run.failed ? classifyBuildOutput(run.output) : classifyBuildWarnings(run.output),
+    run.durationMs,
+  );
 }
