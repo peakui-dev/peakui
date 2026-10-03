@@ -1,7 +1,7 @@
 import type {FileChanges, ProjectFile, StaticContext, TaskDefinition} from "../types.ts";
 
 import {createHash} from "node:crypto";
-import {existsSync, lstatSync, mkdirSync, realpathSync, rmSync} from "node:fs";
+import {existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, rmSync} from "node:fs";
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from "node:path";
 
 import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
@@ -28,6 +28,8 @@ export const AGENT_FILES: readonly string[] = [
 export interface Workspace {
   dir: string;
   scratchDir: string;
+  /** Hash of the toolchain files at creation; see `toolchainChanged`. */
+  toolchain: string;
 }
 
 function exists(path: string): boolean {
@@ -127,7 +129,66 @@ export function createWorkspace(options: {
   if (options.overlayDir) copyDir(options.overlayDir, dir);
   mkdirSync(scratchDir, {recursive: true});
 
-  return {dir, scratchDir};
+  return {dir, scratchDir, toolchain: toolchainHash(dir)};
+}
+
+const TOOLCHAIN_FILES = ["package.json", "package-lock.json"];
+
+/**
+ * A hash of what executes during scoring: `node_modules/.bin` (names, link targets and, for a link
+ * into `node_modules`, the script it points at), `package.json` and the lockfile. The agent may
+ * change any of it; the run record carries whether it did.
+ */
+export function toolchainHash(dir: string): string {
+  const hash = createHash("sha256");
+  const bin = join(dir, "node_modules", ".bin");
+  const modules = join(dir, "node_modules");
+
+  function add(label: string, bytes: Buffer | undefined): void {
+    hash.update(
+      `${label}\0${bytes ? createHash("sha256").update(bytes).digest("hex") : "absent"}\0`,
+    );
+  }
+
+  for (const name of TOOLCHAIN_FILES) {
+    add(name, exists(join(dir, name)) ? readEntry(dir, name) : undefined);
+  }
+
+  let entries: string[] = [];
+
+  try {
+    entries = readdirSync(bin).sort();
+  } catch {
+    // No node_modules/.bin: hashed as an empty list.
+  }
+
+  for (const name of entries) {
+    const relative = `node_modules/.bin/${name}`;
+
+    add(relative, readEntry(dir, relative));
+
+    // The link target is what actually runs; follow it only while it stays inside node_modules.
+    try {
+      const real = realpathSync(join(bin, name));
+
+      if (isStrictlyInside(modules, real) && lstatSync(real).isFile()) {
+        add(`${relative} -> script`, readEntry(dir, relativeTo(dir, real)));
+      }
+    } catch {
+      // A dangling link has no script; its target string is already hashed above.
+    }
+  }
+
+  return hash.digest("hex");
+}
+
+function relativeTo(dir: string, path: string): string {
+  return relative(realResolve(dir), path);
+}
+
+/** True when the toolchain of `workspace` differs from what it was at creation. */
+export function toolchainChanged(workspace: Workspace): boolean {
+  return toolchainHash(workspace.dir) !== workspace.toolchain;
 }
 
 export function overlayDirOf(task: TaskDefinition): string | undefined {

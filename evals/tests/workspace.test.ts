@@ -23,6 +23,7 @@ import {
   removeWorkspace,
   snapshot,
   staticContext,
+  toolchainChanged,
 } from "../src/workspace/workspace.ts";
 
 let root: string;
@@ -241,13 +242,80 @@ describe("workspace path containment", () => {
 
     write(join(root, "outside-ws/app/x"), "x");
 
-    expect(() => removeWorkspace({dir, scratchDir: join(dir, "../scratch")})).toThrow(
-      /refusing to remove/,
-    );
+    expect(() =>
+      removeWorkspace({dir, scratchDir: join(dir, "../scratch"), toolchain: ""}),
+    ).toThrow(/refusing to remove/);
 
     for (const path of [...paths, join(root, "outside-ws/app/x")]) {
       expect(existsSync(path), path).toBe(true);
     }
+  });
+});
+
+describe("toolchain tracking", () => {
+  function fresh() {
+    write(join(root, "template/package.json"), '{"name":"app"}');
+    write(join(root, "template/package-lock.json"), "{}");
+    write(join(root, "template/src/App.tsx"), "app");
+    write(join(root, "template/node_modules/pkg/cli.js"), "cli");
+    mkdirSync(join(root, "template/node_modules/.bin"), {recursive: true});
+    symlinkSync("../pkg/cli.js", join(root, "template/node_modules/.bin/tool"));
+
+    return createWorkspace({
+      batch: "b",
+      key: "k",
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+  }
+
+  it("reports no change after the agent edits only source files", () => {
+    const workspace = fresh();
+
+    write(join(workspace.dir, "src/App.tsx"), "edited");
+    write(join(workspace.dir, "src/New.tsx"), "new");
+
+    expect(toolchainChanged(workspace)).toBe(false);
+  });
+
+  it.each([
+    ["package.json is edited", (dir: string) => write(join(dir, "package.json"), '{"x":1}')],
+    ["the lockfile is edited", (dir: string) => write(join(dir, "package-lock.json"), '{"x":1}')],
+    ["the lockfile is deleted", (dir: string) => rmSync(join(dir, "package-lock.json"))],
+    [
+      "a binary is added to .bin",
+      (dir: string) => write(join(dir, "node_modules/.bin/evil"), "#!/bin/sh"),
+    ],
+    [
+      "a .bin link is retargeted",
+      (dir: string) => {
+        rmSync(join(dir, "node_modules/.bin/tool"));
+        symlinkSync("../pkg/other.js", join(dir, "node_modules/.bin/tool"));
+      },
+    ],
+    [
+      "the script a .bin link points at is rewritten",
+      (dir: string) => write(join(dir, "node_modules/pkg/cli.js"), "rewritten"),
+    ],
+  ])("reports a change when %s", (_label, act) => {
+    const workspace = fresh();
+
+    act(workspace.dir);
+
+    expect(toolchainChanged(workspace)).toBe(true);
+  });
+
+  it("copes with a workspace that has no node_modules at all", () => {
+    write(join(root, "template/package.json"), "{}");
+
+    const workspace = createWorkspace({
+      batch: "b",
+      key: "k2",
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+
+    expect(toolchainChanged(workspace)).toBe(false);
   });
 });
 
