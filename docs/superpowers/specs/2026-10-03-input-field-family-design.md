@@ -305,10 +305,11 @@ React, and for them only the pseudo-classes exist.
 
 Three magic numbers in the reference are replaced. `min-height: 38px` on the grouped textarea and
 `padding-top: 0.5rem` on a prefix or suffix beside a textarea become multiples of `--spacing`. The
-group's fixed `min-h-9` becomes the pointer-aware `h-10 md:h-9` pattern from `css-authoring.md` —
-40px where the pointer is coarse, 36px where it is fine — expressed once as a per-component custom
-property so `.input` and `.input-group` cannot drift apart. `css-authoring.md` requires an arbitrary
-value to be justified, and a value needed twice to become a token.
+group's fixed `min-h-9` becomes the pointer-aware pattern `css-authoring.md` prescribes,
+`min-h-10 md:min-h-9` — 40px where the pointer is coarse, 36px where it is fine. That string appears
+in both `input.css` and `input-group.css`; it is a pair of Tailwind utilities rather than a literal
+value, so the rule about a twice-used number becoming a token does not apply to it, and introducing a
+custom property to share it would hide the breakpoint it depends on.
 
 ### 3.2 Spacing and radius
 
