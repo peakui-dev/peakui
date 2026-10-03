@@ -6,6 +6,7 @@ import {join} from "node:path";
 import {SNAPSHOT_IGNORE, getFixture} from "../../fixtures/index.ts";
 import {readFiles, walkFiles} from "../../src/files.ts";
 import {PACKAGE_DIR} from "../../src/paths.ts";
+import {SOURCE_FILE} from "../../src/scoring/ast.ts";
 import {diffSnapshots, overlayDirOf} from "../../src/workspace/workspace.ts";
 
 export interface Expectation {
@@ -62,7 +63,7 @@ export function inMemoryContext(task: TaskDefinition, solution: string): StaticC
   // `diffSnapshots` compares values; whole texts compare as well as hashes do.
   const changes = diffSnapshots(base, result);
   const files = [...result]
-    .filter(([path]) => /\.(?:ts|tsx|css)$/.test(path))
+    .filter(([path]) => SOURCE_FILE.test(path) || path.endsWith(".css"))
     .map(([path, text]) => ({path, text}))
     .sort((a, b) => (a.path < b.path ? -1 : 1));
 

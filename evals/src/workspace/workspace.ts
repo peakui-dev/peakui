@@ -8,6 +8,7 @@ import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
 import {runCommand} from "../exec.ts";
 import {cloneDir, copyDir, readEntry, readFiles, walkFiles} from "../files.ts";
 import {PACKAGE_DIR, evalsHome, workspacesDir} from "../paths.ts";
+import {SOURCE_FILE} from "../scoring/ast.ts";
 
 export const AGENT_FILES: readonly string[] = [
   "AGENTS.md",
@@ -295,7 +296,9 @@ export function diffSnapshots(
 }
 
 export function projectFiles(dir: string): ProjectFile[] {
-  const paths = walkFiles(dir, SNAPSHOT_IGNORE).filter((path) => /\.(?:ts|tsx|css)$/.test(path));
+  const paths = walkFiles(dir, SNAPSHOT_IGNORE).filter(
+    (path) => SOURCE_FILE.test(path) || path.endsWith(".css"),
+  );
 
   return readFiles(dir, paths);
 }
