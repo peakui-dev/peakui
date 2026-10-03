@@ -47,7 +47,12 @@
   border: var(--border-width-field) solid var(--input-group-border);
   border-radius: var(--input-group-radius);
   background-color: var(--input-group-bg);
-  box-shadow: var(--input-group-shadow);
+  /*
+   * Кольцо фокуса приходит тенью через --field-ring (utilities/index.css) и ложится ПОВЕРХ
+   * собственной тени поля, а не вместо неё. Запасное значение прозрачное и той же формы,
+   * поэтому список теней не меняет длину — box-shadow интерполируется без скачка.
+   */
+  box-shadow: var(--field-ring, 0 0 0 0 transparent), var(--input-group-shadow);
   color: var(--input-group-fg);
 
   /* Многострочный контрол тянет оболочку вверх по высоте и прижимает слоты к верхнему краю. */
@@ -58,12 +63,12 @@
   /*
    * CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу.
    *
-   * Кольца фокуса в списке нет по той же причине, что у .input: outline появляется мгновенно, и
-   * переход на его цвете давал бы мигание рамки вместо плавного появления.
+   * box-shadow в списке — это кольцо фокуса, собранное тенью, как у .input и как у эталона.
    */
   transition:
     background-color 150ms var(--ease-smooth),
-    border-color 150ms var(--ease-smooth);
+    border-color 150ms var(--ease-smooth),
+    box-shadow 150ms var(--ease-out);
   @apply motion-reduce:transition-none;
 
   @media (hover: hover) {
@@ -265,7 +270,12 @@
   --input-group-bg: var(--color-default);
   --input-group-bg-hover: var(--color-default-hover);
   --input-group-bg-focus: var(--color-default);
-  --input-group-shadow: none;
+  /*
+   * Прозрачная тень, а не none: тень поля стоит членом списка рядом с кольцом, а none
+   * членом списка быть не может — объявление стало бы невалидным целиком, и кольцо
+   * пропало бы вместе с ним.
+   */
+  --input-group-shadow: 0 0 0 0 transparent;
 }
 
 /* ---------- Ширина ---------- */

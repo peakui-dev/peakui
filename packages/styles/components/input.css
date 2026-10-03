@@ -40,7 +40,12 @@
   border: var(--border-width-field) solid var(--input-border);
   border-radius: var(--input-radius);
   background-color: var(--input-bg);
-  box-shadow: var(--input-shadow);
+  /*
+   * Кольцо фокуса приходит тенью через --field-ring (utilities/index.css) и ложится ПОВЕРХ
+   * собственной тени поля, а не вместо неё. Запасное значение прозрачное и той же формы,
+   * поэтому список теней не меняет длину — box-shadow интерполируется без скачка.
+   */
+  box-shadow: var(--field-ring, 0 0 0 0 transparent), var(--input-shadow);
   color: var(--input-fg);
 
   &::placeholder {
@@ -51,14 +56,13 @@
    * CRITICAL: motion-reduce ПОСЛЕ transition. Наоборот специфичность отдаёт победу переходу, и
    * предпочтение пользователя молча игнорируется.
    *
-   * Кольца фокуса в списке НЕТ, и это осознанно. У эталона там стоит box-shadow, потому что его
-   * кольцо — ring, то есть тень, и тень интерполируется. Наше кольцо — outline, его ширина
-   * возникает мгновенно (0 → 2px), и переход остался бы только на цвете: это не плавное появление,
-   * а мигание цвета рамки. Фокус обязан читаться сразу — он сообщает состояние, а не украшает.
+   * box-shadow в списке — это кольцо фокуса: оно собрано тенью, ровно как у эталона, и тень
+   * интерполируется, поэтому кольцо появляется плавно. Третьим в списке у эталона стоит он же.
    */
   transition:
     background-color 150ms var(--ease-smooth),
-    border-color 150ms var(--ease-smooth);
+    border-color 150ms var(--ease-smooth),
+    box-shadow 150ms var(--ease-out);
   @apply motion-reduce:transition-none;
 
   /*
@@ -136,7 +140,12 @@
   --input-bg: var(--color-default);
   --input-bg-hover: var(--color-default-hover);
   --input-bg-focus: var(--color-default);
-  --input-shadow: none;
+  /*
+   * Прозрачная тень, а не none: тень поля стоит членом списка рядом с кольцом, а none
+   * членом списка быть не может — объявление стало бы невалидным целиком, и кольцо
+   * пропало бы вместе с ним.
+   */
+  --input-shadow: 0 0 0 0 transparent;
 }
 
 /* ---------- Ширина ---------- */
