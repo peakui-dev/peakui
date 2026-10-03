@@ -64,11 +64,12 @@ export const StatesByHand: Story = {
         <input className="input" id="a" />
       </div>
 
-      <div aria-required="true" className="textfield">
+      <div className="textfield">
         <label className="label" htmlFor="b">
-          aria-required на обёртке
+          aria-required на контроле
         </label>
-        <input className="input" id="b" />
+        {/* Атрибут живёт на контроле: на обёртке без роли он не разрешён (aria-allowed-attr). */}
+        <input aria-required="true" className="input" id="b" />
       </div>
 
       <div data-invalid className="textfield">

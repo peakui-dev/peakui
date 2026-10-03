@@ -124,6 +124,7 @@ export const StatesByHand: Story = {
               className="input-group__input"
               data-slot="input-group-input"
               defaultValue={label}
+              disabled={label === "data-disabled"}
             />
           </div>
         </div>

@@ -74,12 +74,28 @@ export const StatesByHand: Story = {
         <input data-hovered aria-label="hovered" className="input" defaultValue="data-hovered" />
         <input data-focused aria-label="focused" className="input" defaultValue="data-focused" />
         <input data-invalid aria-label="invalid" className="input" defaultValue="data-invalid" />
-        <input data-disabled aria-label="disabled" className="input" defaultValue="data-disabled" />
+        {/*
+         * disabled рядом с data-disabled не для красоты: React Aria ставит оба, и без нативного
+         * атрибута контрол выглядит недоступным, оставаясь доступным — текст при opacity 0.5 тогда
+         * обязан держать 4.5:1, и axe справедливо зовёт это нарушением.
+         */}
+        <input
+          data-disabled
+          disabled
+          aria-label="disabled"
+          className="input"
+          defaultValue="data-disabled"
+        />
       </section>
 
       <section className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold text-foreground">Нативными атрибутами</h3>
-        <input aria-invalid className="input" defaultValue="aria-invalid" />
+        <input
+          aria-invalid
+          aria-label="aria-invalid"
+          className="input"
+          defaultValue="aria-invalid"
+        />
         <input disabled aria-label="native disabled" className="input" defaultValue="disabled" />
         <input aria-label="placeholder" className="input" placeholder="placeholder" />
       </section>
