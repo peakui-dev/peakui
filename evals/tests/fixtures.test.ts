@@ -1,10 +1,17 @@
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
 import {join} from "node:path";
 
-import {describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
 
 import {fixtures, getFixture} from "../fixtures/index.ts";
 import {readFiles, walkFiles} from "../src/files.ts";
-import {fixtureHash, templateIsCurrent, withTarballDependencies} from "../src/fixtures/prepare.ts";
+import {
+  fixtureHash,
+  readTemplate,
+  templateIsCurrent,
+  withTarballDependencies,
+} from "../src/fixtures/prepare.ts";
 
 const OTHER_LIBRARIES =
   /hero\s?ui|next\s?ui|shadcn|radix|material[- ]ui|\bmui\b|chakra|mantine|ant design|\bantd\b|daisy\s?ui|headless ui|bootstrap/i;
@@ -114,5 +121,49 @@ describe("templates", () => {
     );
 
     expect(out.dependencies).not.toHaveProperty("@acme/status");
+  });
+});
+
+describe("readTemplate", () => {
+  let home: string;
+  let previous: string | undefined;
+  const fixture = fixtures["vite-app"]!;
+
+  beforeEach(() => {
+    home = mkdtempSync(join(tmpdir(), "evals-template-"));
+    previous = process.env.PEAKUI_EVALS_HOME;
+    process.env.PEAKUI_EVALS_HOME = home;
+    mkdirSync(join(home, "templates", fixture.id), {recursive: true});
+  });
+
+  afterEach(() => {
+    if (previous === undefined) delete process.env.PEAKUI_EVALS_HOME;
+    else process.env.PEAKUI_EVALS_HOME = previous;
+    rmSync(home, {force: true, recursive: true});
+  });
+
+  function sidecar(text: string) {
+    writeFileSync(join(home, "templates", `${fixture.id}.json`), text);
+  }
+
+  it("reads a well-formed sidecar", () => {
+    sidecar(JSON.stringify({fixtureHash: "f", libraryHash: "l"}));
+
+    expect(readTemplate(fixture)).toMatchObject({fixtureHash: "f", libraryHash: "l", reused: true});
+  });
+
+  it("is undefined when there is no sidecar", () => {
+    expect(readTemplate(fixture)).toBeUndefined();
+  });
+
+  it.each([
+    ["a missing hash", JSON.stringify({libraryHash: "l"})],
+    ["a non-string hash", JSON.stringify({fixtureHash: 1, libraryHash: "l"})],
+    ["an array", "[]"],
+    ["text that is not JSON", "{oops"],
+  ])("throws a clear error for %s", (_name, text) => {
+    sidecar(text);
+
+    expect(() => readTemplate(fixture)).toThrow(/template sidecar.*vite-app.*malformed/);
   });
 });

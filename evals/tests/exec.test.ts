@@ -77,3 +77,31 @@ describe("installedVersions", () => {
     });
   });
 });
+
+describe("runCommand output cap", () => {
+  const spew = [
+    "node",
+    "-e",
+    "process.stdout.write('x'.repeat(200000)); process.stderr.write('e'.repeat(200000))",
+  ];
+
+  it("caps each stream and marks the truncation", async () => {
+    const result = await runCommand(spew, {cwd: home, maxOutputBytes: 1000, timeoutMs: 30_000});
+
+    expect(result.exitCode).toBe(0);
+    expect(result.truncated).toBe(true);
+    expect(result.stdout.length).toBeLessThan(1200);
+    expect(result.stdout).toMatch(/\[output truncated at 1000 bytes\]$/);
+    expect(result.stderr).toMatch(/\[output truncated at 1000 bytes\]$/);
+  });
+
+  it("does not mark output that fits", async () => {
+    const result = await runCommand(["node", "-e", "process.stdout.write('ok')"], {
+      cwd: home,
+      timeoutMs: 30_000,
+    });
+
+    expect(result.truncated).toBe(false);
+    expect(result.stdout).toBe("ok");
+  });
+});

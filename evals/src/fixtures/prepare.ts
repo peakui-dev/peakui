@@ -201,17 +201,37 @@ export async function prepareTemplate(
 
 export function readTemplate(fixture: FixtureDefinition): TemplateInfo | undefined {
   const dir = join(templatesDir(), fixture.id);
-  const sidecar = readSidecar(fixture);
 
-  if (!existsSync(dir) || typeof sidecar !== "object" || sidecar === null) return undefined;
+  if (!existsSync(dir) || !existsSync(sidecarPath(fixture))) return undefined;
+
+  function malformed(reason: string): never {
+    throw new Error(
+      `template sidecar for ${fixture.id} is malformed (${reason}): ${sidecarPath(fixture)}; run pnpm evals prepare --force`,
+    );
+  }
+
+  let sidecar: unknown;
+
+  try {
+    sidecar = JSON.parse(readFileSync(sidecarPath(fixture), "utf8"));
+  } catch {
+    return malformed("not valid JSON");
+  }
+
+  if (typeof sidecar !== "object" || sidecar === null || Array.isArray(sidecar)) {
+    return malformed("not an object");
+  }
 
   const record = sidecar as Record<string, unknown>;
+
+  if (typeof record.fixtureHash !== "string") return malformed("fixtureHash is not a string");
+  if (typeof record.libraryHash !== "string") return malformed("libraryHash is not a string");
 
   return {
     dir,
     fixture: fixture.id,
-    fixtureHash: String(record.fixtureHash),
-    libraryHash: String(record.libraryHash),
+    fixtureHash: record.fixtureHash,
+    libraryHash: record.libraryHash,
     reused: true,
   };
 }
