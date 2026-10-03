@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "pass", "render": "fail"},
+  "rules": {"render": ["spinner-while-pending"]}
+}

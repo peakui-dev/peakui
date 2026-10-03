@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "pass", "render": "fail"},
+  "rules": {"typecheck": ["unknown-composition-prop"], "render": ["secondary-group", "prefix-part"]}
+}

@@ -178,6 +178,10 @@ const config = defineConfig([
       "**/node_modules/**",
       "**/pnpm-lock.yaml",
       "**/storybook-static/**",
+      // Build output and generated sources of the Next.js docs app.
+      "**/.next/**",
+      "**/.source/**",
+      "**/next-env.d.ts",
       "**/test-results/**",
       "**/playwright-report/**",
       /*

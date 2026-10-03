@@ -1,0 +1,485 @@
+import {
+  chmodSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
+
+import {runCommand} from "../src/exec.ts";
+import {
+  assertIsolated,
+  commitInitialState,
+  createWorkspace,
+  diffSnapshots,
+  projectFiles,
+  removeWorkspace,
+  snapshot,
+  staticContext,
+  toolchainChanged,
+} from "../src/workspace/workspace.ts";
+
+let root: string;
+
+beforeEach(() => {
+  root = mkdtempSync(join(tmpdir(), "ws-"));
+  process.env.PEAKUI_EVALS_HOME = join(root, "home");
+});
+
+afterEach(() => {
+  delete process.env.PEAKUI_EVALS_HOME;
+  rmSync(root, {force: true, recursive: true});
+});
+
+function write(path: string, text: string): void {
+  mkdirSync(join(path, ".."), {recursive: true});
+  writeFileSync(path, text);
+}
+
+describe("assertIsolated", () => {
+  it.each(["CLAUDE.md", "AGENTS.md", ".mcp.json"])("rejects an ancestor holding %s", (name) => {
+    write(join(root, name), "x");
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(name);
+  });
+
+  it("rejects an ancestor holding a .claude directory", () => {
+    mkdirSync(join(root, "a/.claude"), {recursive: true});
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(".claude");
+  });
+
+  it.each([
+    "GEMINI.md",
+    ".cursorrules",
+    ".windsurf",
+    ".windsurfrules",
+    ".clinerules",
+    ".github/copilot-instructions.md",
+    ".github/instructions",
+  ])("rejects an ancestor holding %s", (name) => {
+    write(join(root, name, name.endsWith(".md") || name.startsWith(".c") ? "" : "x"), "x");
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(name);
+  });
+
+  it("walks the ancestors of a relative directory from the current directory", () => {
+    const project = join(realpathSync(root), "project");
+    const previous = process.cwd();
+
+    // Above the working directory: a walk that ends at "." never reaches it.
+    write(join(realpathSync(root), "AGENTS.md"), "x");
+    mkdirSync(join(project, "home"), {recursive: true});
+    process.chdir(project);
+
+    try {
+      expect(() => assertIsolated("home/workspaces/b/k/app")).toThrow("AGENTS.md");
+      process.env.PEAKUI_EVALS_HOME = "home";
+      expect(() =>
+        createWorkspace({batch: "b", key: "k", overlayDir: undefined, templateDir: project}),
+      ).toThrow("AGENTS.md");
+    } finally {
+      process.chdir(previous);
+    }
+  });
+
+  it("walks the real chain behind a symlinked root", () => {
+    const real = join(realpathSync(root), "real");
+
+    write(join(real, "AGENTS.md"), "x");
+    mkdirSync(join(real, "inner"), {recursive: true});
+    symlinkSync(join(real, "inner"), join(root, "link"));
+
+    // Lexically `root/link/app` has no agent file above it; really it sits under `real/`.
+    expect(() => assertIsolated(join(root, "link/app/x"))).toThrow("AGENTS.md");
+  });
+
+  it("counts a dangling link named like an agent file", () => {
+    symlinkSync(join(root, "missing-target"), join(root, "CLAUDE.md"));
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow("CLAUDE.md");
+  });
+
+  it("accepts a clean chain and ignores agent files inside the workspace itself", () => {
+    write(join(root, "a/b/app/AGENTS.md"), "written by a configuration");
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).not.toThrow();
+  });
+});
+
+describe("createWorkspace", () => {
+  it("copies the template, lays the overlay over it and makes a scratch directory", () => {
+    write(join(root, "template/src/App.tsx"), "base");
+    write(join(root, "template/src/index.css"), "css");
+    write(join(root, "overlay/src/App.tsx"), "overlaid");
+    write(join(root, "overlay/src/components/Hero.tsx"), "hero");
+
+    const workspace = createWorkspace({
+      batch: "b1",
+      key: "t__none__r1",
+      overlayDir: join(root, "overlay"),
+      templateDir: join(root, "template"),
+    });
+
+    expect(workspace.dir).toBe(join(root, "home/workspaces/b1/t__none__r1/app"));
+    expect(readFileSync(join(workspace.dir, "src/App.tsx"), "utf8")).toBe("overlaid");
+    expect(readFileSync(join(workspace.dir, "src/index.css"), "utf8")).toBe("css");
+    expect(existsSync(join(workspace.dir, "src/components/Hero.tsx"))).toBe(true);
+    expect(existsSync(workspace.scratchDir)).toBe(true);
+  });
+
+  it("replaces a leftover workspace of the same key", () => {
+    write(join(root, "template/a.ts"), "a");
+    const options = {
+      batch: "b1",
+      key: "k",
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    };
+    const first = createWorkspace(options);
+
+    write(join(first.dir, "stale.ts"), "stale");
+
+    expect(existsSync(join(createWorkspace(options).dir, "stale.ts"))).toBe(false);
+  });
+});
+
+describe("workspace path containment", () => {
+  function sentinels(): string[] {
+    const paths = [
+      join(root, "home/sentinel.txt"),
+      join(root, "home/workspaces/sentinel.txt"),
+      join(root, "home/workspaces/other/k/app/keep.ts"),
+      join(root, "outside.txt"),
+    ];
+
+    for (const path of paths) write(path, "keep");
+    write(join(root, "template/a.ts"), "a");
+
+    return paths;
+  }
+
+  function create(batch: string, key: string) {
+    return createWorkspace({
+      batch,
+      key,
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+  }
+
+  it.each([
+    ["", "k"],
+    ["b", ""],
+    ["", ""],
+    [".", "k"],
+    ["b", "."],
+    ["..", "k"],
+    ["b", ".."],
+    ["../..", "k"],
+    ["b/c", "k"],
+    ["b", "k/../../.."],
+    ["b\\c", "k"],
+    ["b", "k\\..\\.."],
+    ["b", "-rf"],
+    ["b", "a b"],
+    ["b", "k\0x"],
+    ["b", "k".repeat(200)],
+    ["/abs", "k"],
+  ])("refuses batch %j and key %j without touching anything", (batch, key) => {
+    const paths = sentinels();
+
+    expect(() => create(batch, key)).toThrow(/invalid workspace/);
+
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it("refuses a batch directory that is a symlink out of the root", () => {
+    const paths = sentinels();
+
+    mkdirSync(join(root, "home/workspaces"), {recursive: true});
+    symlinkSync(join(root, "outside-dir"), join(root, "home/workspaces/linked"));
+    write(join(root, "outside-dir/k/app/precious"), "keep");
+
+    expect(() => create("linked", "k")).toThrow(/invalid workspace location/);
+    expect(existsSync(join(root, "outside-dir/k/app/precious"))).toBe(true);
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it("accepts the key shapes the runner produces", () => {
+    sentinels();
+
+    expect(() => create("2026-10-03T12-00-00Z", "sign-in-form__none__r1")).not.toThrow();
+  });
+
+  it("removes exactly one workspace and nothing around it", () => {
+    const paths = sentinels();
+    const workspace = create("b", "k");
+
+    removeWorkspace(workspace);
+
+    expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it.each([
+    ["the workspaces root", "home/workspaces"],
+    ["the harness home", "home"],
+    ["a batch directory", "home/workspaces/other/app"],
+    ["a path outside the root", "outside-ws/app"],
+    ["a path climbing out through ..", "home/workspaces/b/k/../../../../outside-ws/app"],
+    ["a directory not named app", "home/workspaces/b/k/other"],
+  ])("removeWorkspace refuses %s", (_label, relative) => {
+    const paths = sentinels();
+    const dir = join(root, relative);
+
+    write(join(root, "outside-ws/app/x"), "x");
+
+    expect(() =>
+      removeWorkspace({dir, scratchDir: join(dir, "../scratch"), toolchain: ""}),
+    ).toThrow(/refusing to remove/);
+
+    for (const path of [...paths, join(root, "outside-ws/app/x")]) {
+      expect(existsSync(path), path).toBe(true);
+    }
+  });
+});
+
+describe("toolchain tracking", () => {
+  function fresh() {
+    write(join(root, "template/package.json"), '{"name":"app"}');
+    write(join(root, "template/package-lock.json"), "{}");
+    write(join(root, "template/src/App.tsx"), "app");
+    write(join(root, "template/node_modules/pkg/cli.js"), "cli");
+    mkdirSync(join(root, "template/node_modules/.bin"), {recursive: true});
+    symlinkSync("../pkg/cli.js", join(root, "template/node_modules/.bin/tool"));
+
+    return createWorkspace({
+      batch: "b",
+      key: "k",
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+  }
+
+  it("reports no change after the agent edits only source files", () => {
+    const workspace = fresh();
+
+    write(join(workspace.dir, "src/App.tsx"), "edited");
+    write(join(workspace.dir, "src/New.tsx"), "new");
+
+    expect(toolchainChanged(workspace)).toBe(false);
+  });
+
+  it.each([
+    ["package.json is edited", (dir: string) => write(join(dir, "package.json"), '{"x":1}')],
+    ["the lockfile is edited", (dir: string) => write(join(dir, "package-lock.json"), '{"x":1}')],
+    ["the lockfile is deleted", (dir: string) => rmSync(join(dir, "package-lock.json"))],
+    [
+      "a binary is added to .bin",
+      (dir: string) => write(join(dir, "node_modules/.bin/evil"), "#!/bin/sh"),
+    ],
+    [
+      "a .bin link is retargeted",
+      (dir: string) => {
+        rmSync(join(dir, "node_modules/.bin/tool"));
+        symlinkSync("../pkg/other.js", join(dir, "node_modules/.bin/tool"));
+      },
+    ],
+    [
+      "the script a .bin link points at is rewritten",
+      (dir: string) => write(join(dir, "node_modules/pkg/cli.js"), "rewritten"),
+    ],
+  ])("reports a change when %s", (_label, act) => {
+    const workspace = fresh();
+
+    act(workspace.dir);
+
+    expect(toolchainChanged(workspace)).toBe(true);
+  });
+
+  it("copes with a workspace that has no node_modules at all", () => {
+    write(join(root, "template/package.json"), "{}");
+
+    const workspace = createWorkspace({
+      batch: "b",
+      key: "k2",
+      overlayDir: undefined,
+      templateDir: join(root, "template"),
+    });
+
+    expect(toolchainChanged(workspace)).toBe(false);
+  });
+});
+
+describe("workspace creation", () => {
+  const options = (templateDir: string, overlayDir?: string) => ({
+    batch: "b",
+    key: "k",
+    overlayDir,
+    templateDir,
+  });
+
+  it("copies node_modules for real: no symlink to the template, and edits never reach it", () => {
+    write(join(root, "template/node_modules/pkg/index.js"), "original");
+
+    const workspace = createWorkspace(options(join(root, "template")));
+    const modules = join(workspace.dir, "node_modules");
+
+    expect(lstatSync(modules).isSymbolicLink()).toBe(false);
+    expect(lstatSync(join(modules, "pkg")).isSymbolicLink()).toBe(false);
+
+    write(join(modules, "pkg/index.js"), "edited");
+
+    expect(readFileSync(join(root, "template/node_modules/pkg/index.js"), "utf8")).toBe("original");
+  });
+
+  it("keeps symlinks inside the template as symlinks", () => {
+    write(join(root, "template/pkg/cli.js"), "cli");
+    mkdirSync(join(root, "template/.bin"), {recursive: true});
+    symlinkSync("../pkg/cli.js", join(root, "template/.bin/tool"));
+
+    const workspace = createWorkspace(options(join(root, "template")));
+
+    expect(lstatSync(join(workspace.dir, ".bin/tool")).isSymbolicLink()).toBe(true);
+  });
+
+  it("removes the partial workspace when the copy fails", () => {
+    write(join(root, "template/src/ok.ts"), "ok");
+    write(join(root, "template/src/unreadable.ts"), "no");
+    chmodSync(join(root, "template/src/unreadable.ts"), 0o000);
+
+    try {
+      expect(() => createWorkspace(options(join(root, "template")))).toThrow();
+      expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+    } finally {
+      chmodSync(join(root, "template/src/unreadable.ts"), 0o644);
+    }
+  });
+
+  it("removes the partial workspace when the overlay is missing", () => {
+    write(join(root, "template/a.ts"), "a");
+
+    expect(() =>
+      createWorkspace(options(join(root, "template"), join(root, "no-overlay"))),
+    ).toThrow();
+    expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+  });
+});
+
+describe("snapshot and diff", () => {
+  it("reports added, modified and deleted files and skips ignored paths", () => {
+    const dir = join(root, "app");
+
+    write(join(dir, "src/keep.ts"), "keep");
+    write(join(dir, "src/change.ts"), "one");
+    write(join(dir, "src/remove.ts"), "gone");
+    write(join(dir, "node_modules/x/index.js"), "x");
+
+    const before = snapshot(dir);
+
+    write(join(dir, "src/change.ts"), "two");
+    write(join(dir, "src/new.tsx"), "new");
+    write(join(dir, "dist/out.css"), "built");
+    write(join(dir, "node_modules/x/index.js"), "changed");
+    rmSync(join(dir, "src/remove.ts"));
+
+    expect(diffSnapshots(before, snapshot(dir))).toEqual({
+      added: ["src/new.tsx"],
+      deleted: ["src/remove.ts"],
+      modified: ["src/change.ts"],
+    });
+  });
+});
+
+describe("projectFiles and staticContext", () => {
+  it("returns only ts, tsx and css files outside ignored directories", () => {
+    const dir = join(root, "app");
+
+    write(join(dir, "src/a.tsx"), "a");
+    write(join(dir, "src/b.css"), "b");
+    write(join(dir, "package.json"), "{}");
+    write(join(dir, "node_modules/x/index.ts"), "x");
+
+    expect(projectFiles(dir).map((file) => file.path)).toEqual(["src/a.tsx", "src/b.css"]);
+
+    const context = staticContext(dir, {added: ["src/a.tsx"], deleted: [], modified: []});
+
+    expect(context.file("src/a.tsx")?.text).toBe("a");
+    expect(context.file("missing.ts")).toBeUndefined();
+  });
+});
+
+describe("commitInitialState ignores the developer's git setup", () => {
+  it("commits as Acme Dev, unsigned, without running global hooks", async () => {
+    const fakeHome = join(root, "fake-home");
+    const hooks = join(root, "hooks");
+    const marker = join(root, "hook-ran");
+    const saved = {
+      HOME: process.env.HOME,
+      XDG: process.env.XDG_CONFIG_HOME,
+    };
+
+    write(join(hooks, "pre-commit"), `#!/bin/sh\ntouch ${JSON.stringify(marker)}\nexit 1\n`);
+    chmodSync(join(hooks, "pre-commit"), 0o755);
+    write(
+      join(fakeHome, ".gitconfig"),
+      `[user]\n\tname = Real Dev\n\temail = real@example.com\n\tsigningkey = DEADBEEF\n[commit]\n\tgpgsign = true\n[core]\n\thooksPath = ${hooks}\n[gpg]\n\tprogram = /nonexistent-gpg\n`,
+    );
+    process.env.HOME = fakeHome;
+    process.env.XDG_CONFIG_HOME = join(fakeHome, ".config");
+
+    const dir = join(root, "app");
+
+    write(join(dir, "src/a.ts"), "a");
+
+    try {
+      await commitInitialState(dir);
+
+      const log = await runCommand(["git", "log", "--format=%an <%ae> | %cn <%ce> | %G?"], {
+        cwd: dir,
+        env: {...process.env, GIT_CONFIG_GLOBAL: "/dev/null"},
+        timeoutMs: 10_000,
+      });
+
+      expect(log.stdout.trim()).toBe(
+        "Acme Dev <dev@acme.example> | Acme Dev <dev@acme.example> | N",
+      );
+      expect(existsSync(marker)).toBe(false);
+    } finally {
+      if (saved.HOME === undefined) delete process.env.HOME;
+      else process.env.HOME = saved.HOME;
+      if (saved.XDG === undefined) delete process.env.XDG_CONFIG_HOME;
+      else process.env.XDG_CONFIG_HOME = saved.XDG;
+    }
+  });
+});
+
+describe("commitInitialState", () => {
+  it("leaves a repository with one commit and a clean tree", async () => {
+    const dir = join(root, "app");
+
+    write(join(dir, "src/a.ts"), "a");
+    write(join(dir, ".gitignore"), "node_modules\n");
+    await commitInitialState(dir);
+
+    const log = await runCommand(["git", "log", "--oneline"], {cwd: dir, timeoutMs: 10_000});
+    const status = await runCommand(["git", "status", "--porcelain"], {
+      cwd: dir,
+      timeoutMs: 10_000,
+    });
+
+    expect(log.stdout.trim().split("\n")).toHaveLength(1);
+    expect(log.stdout).toContain("Initial commit");
+    expect(status.stdout).toBe("");
+  });
+});

@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "pass", "build": "fail", "static": "fail", "render": "fail"},
+  "rules": {"static": ["page-stays-server"], "render": ["render-unavailable"]}
+}

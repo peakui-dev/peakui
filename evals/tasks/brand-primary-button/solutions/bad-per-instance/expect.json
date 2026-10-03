@@ -1,0 +1,7 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "static": ["buttons-untouched"],
+    "render": ["primary-is-brand", "primary-hover-is-brand"]
+  }
+}

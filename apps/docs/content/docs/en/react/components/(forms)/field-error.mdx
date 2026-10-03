@@ -1,0 +1,89 @@
+---
+title: FieldError
+description: A validation message for a form field, rendered only while the field is invalid.
+links:
+  rac: Forms
+  source: field-error/field-error.tsx
+  styles: field-error.css
+---
+
+## Usage
+
+```tsx
+import {FieldError} from "@peakui/react";
+```
+
+<ComponentPreview name="field-error-basic" />
+
+`FieldError` belongs inside a field such as `TextField`. It renders only while the field is invalid, and the field links it to the control with `aria-describedby`. Outside a field it renders nothing.
+
+## Examples
+
+### Native Validation
+
+A bare `<FieldError />` shows the field's own messages, which for a built-in constraint are the browser's, in the browser's language and wording. To write a message of your own for each kind of error, use the children function and read `validationDetails`, as in the next example.
+
+Without children, `FieldError` shows the field's own validation messages: the browser's messages for constraints such as `isRequired` and `type="email"`, and the strings returned from the field's `validate` function. Submit the form empty to see it.
+
+<ComponentPreview name="field-error-validation" />
+
+### Render Function
+
+Per-error messages need the children function: `<FieldError>{({validationDetails}) => ...}</FieldError>`. `validationDetails` is the control's native `ValidityState`, so `valueMissing`, `tooShort`, `typeMismatch` and the rest say which constraint failed. A static child such as `<FieldError>Invalid</FieldError>` replaces every message with that one text.
+
+<ComponentPreview name="field-error-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<FieldError className="text-xs font-medium">Enter a valid email address.</FieldError>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .field-error {
+    @apply text-xs;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The FieldError component uses this CSS class ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/field-error.css)):
+
+- `.field-error` - Base error message styles
+
+### Interactive States
+
+- **Visible**: `[data-visible]` - present whenever the message is rendered
+
+### Slots
+
+- `[data-slot="field-error"]`
+
+## API Reference
+
+### FieldError
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| (values: FieldErrorRenderProps) => React.ReactNode` | - | The message, or a function of the validation state. Defaults to the field's validation messages |
+| `className` | `string \| (values: FieldErrorRenderProps) => string` | - | Additional classes, or a function of the validation state |
+| `elementType` | `string` | `'span'` | The element to render. Use `'div'` for block-level children |
+| `render` | `DOMRenderFunction<'div', FieldErrorRenderProps>` | - | Replaces the rendered element with your own |
+
+### Render Props
+
+When `children` or `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isInvalid` | `boolean` | Whether the field is invalid |
+| `validationErrors` | `string[]` | The current error messages |
+| `validationDetails` | `ValidityState` | The native validity state of the control |

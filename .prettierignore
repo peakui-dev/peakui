@@ -6,6 +6,9 @@ heroui-mcp/
 dist/
 coverage/
 storybook-static/
+.next/
+.source/
+next-env.d.ts
 test-results/
 playwright-report/
 pnpm-lock.yaml
@@ -14,6 +17,7 @@ pnpm-lock.yaml
 # символов, и переписывает *курсив* в _курсив_ — то есть отменяет стиль, в котором здесь написан
 # каждый документ. Код, конфиги и CSS он форматирует как обычно.
 *.md
+*.mdx
 
 # Сгенерированные файлы тем: их формат — вывод генератора (src/generator/index.ts), и check:tokens
 # сверяет variables.css байт в байт — переформатировав его, Prettier ломает гейт токенов.
@@ -24,3 +28,4 @@ pnpm-lock.yaml
 packages/styles/themes/*/variables.css
 packages/styles/themes/*/index.css
 packages/styles/themes/*/components/index.css
+evals/results/

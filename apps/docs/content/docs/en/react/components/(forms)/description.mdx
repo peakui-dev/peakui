@@ -1,0 +1,65 @@
+---
+title: Description
+description: Helper text for a form field, linked to the control so assistive technology reads it with the label.
+links:
+  rac: TextField
+  source: description/description.tsx
+  styles: description.css
+---
+
+## Usage
+
+```tsx
+import {Description} from "@peakui/react";
+```
+
+<ComponentPreview name="description-basic" />
+
+`Description` belongs inside a field such as `TextField`. The field links it to the control with `aria-describedby`; you do not set any ids.
+
+<Callout type="warn">
+  Outside a field, `Description` still renders its `<span>`, but nothing links it to a control, so assistive technology does not read it with one. For free-standing helper text, use a plain element with the `description` class: `<p className="description">`.
+</Callout>
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Description className="text-xs italic">Optional</Description>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .description {
+    @apply text-xs;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The Description component uses this CSS class ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/description.css)):
+
+- `.description` - Base description styles
+
+### Slots
+
+- `[data-slot="description"]`
+
+## API Reference
+
+### Description
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The helper text |
+| `className` | `string` | - | Additional classes |
+| `elementType` | `string` | `'span'` | The element to render |
+| `render` | `DOMRenderFunction<any, any>` | - | Replaces the rendered element with your own. React Aria types it loosely because `elementType` can change the element |
+
+The `slot` defaults to `description`; it is what links the text to the field, so leave it as it is inside a field.

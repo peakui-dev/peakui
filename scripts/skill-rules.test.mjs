@@ -70,7 +70,7 @@ test("AGENTS.md and CLAUDE.md stay byte-identical", () => {
 test("no delivered package is still listed as Planned", () => {
   const planned = read("AGENTS.md").split("## Planned")[1];
 
-  for (const delivered of ["packages/react/", "packages/standard/"]) {
+  for (const delivered of ["packages/react/", "packages/standard/", "apps/docs/"]) {
     assert.ok(!planned.includes(delivered), `${delivered} доставлен, но всё ещё в Planned`);
   }
 });
@@ -78,7 +78,16 @@ test("no delivered package is still listed as Planned", () => {
 test("every delivered command exists in the root package.json", () => {
   const {scripts} = JSON.parse(read("package.json"));
 
-  for (const name of ["build", "build:packages", "test:coverage", "lint", "format", "format:fix"]) {
+  for (const name of [
+    "build",
+    "build:docs",
+    "build:packages",
+    "dev:docs",
+    "test:coverage",
+    "lint",
+    "format",
+    "format:fix",
+  ]) {
     assert.ok(name in scripts, `в корневом package.json нет ${name}`);
   }
 });
@@ -86,7 +95,13 @@ test("every delivered command exists in the root package.json", () => {
 test("the Commands table names the delivered commands", () => {
   const text = read("AGENTS.md");
 
-  for (const name of ["pnpm build", "pnpm lint", "pnpm format"]) {
+  for (const name of [
+    "pnpm build",
+    "pnpm build:docs",
+    "pnpm dev:docs",
+    "pnpm lint",
+    "pnpm format",
+  ]) {
     assert.ok(text.includes(name), `таблица Commands не упоминает ${name}`);
   }
 });

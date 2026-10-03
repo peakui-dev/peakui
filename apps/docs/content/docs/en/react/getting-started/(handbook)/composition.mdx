@@ -1,0 +1,154 @@
+---
+title: Composition
+description: How PeakUI components are assembled - compound parts, field composition, the render prop and reusing styles on your own elements.
+---
+
+PeakUI components are small parts that you compose. The library never assembles them behind a single prop: there is no `<Input label="...">`.
+
+## Compound Components
+
+A component with several parts exposes them on the root:
+
+```tsx
+import {Button, Fieldset} from "@peakui/react";
+
+<Fieldset>
+  <Fieldset.Legend>Profile</Fieldset.Legend>
+  <Fieldset.Group>{/* fields */}</Fieldset.Group>
+  <Fieldset.Actions>
+    <Button>Save</Button>
+  </Fieldset.Actions>
+</Fieldset>
+```
+
+The same parts are also exported under flat names, which some teams prefer for tree-shaking clarity or code search. All three forms render the same thing:
+
+```tsx
+import {Fieldset, FieldsetLegend, FieldsetRoot} from "@peakui/react";
+
+<Fieldset>…</Fieldset>
+<Fieldset.Root>…</Fieldset.Root>
+<FieldsetRoot>…</FieldsetRoot>
+
+<Fieldset.Legend>…</Fieldset.Legend>
+<FieldsetLegend>…</FieldsetLegend>
+```
+
+## Fields
+
+A text field is a root with sibling parts. `TextField` owns the value, the validation state and the ids that link the parts together:
+
+```tsx
+import {Description, FieldError, Input, Label, TextField} from "@peakui/react";
+
+<TextField isRequired name="email" type="email">
+  <Label>Email</Label>
+  <Input placeholder="jane@example.com" />
+  <Description>We never share your email.</Description>
+  <FieldError />
+</TextField>
+```
+
+- `Label`, `Description` and `FieldError` are connected to the input through `aria-labelledby` and `aria-describedby` without any ids from you.
+- Outside a field the two differ. `Description` still renders its `<span>`, but nothing links it to a control. `FieldError` renders nothing: it needs the field's validation state, and it also renders nothing while the field is valid.
+- `variant` on `TextField` flows down to `Input` and `InputGroup`. A nested field resets it rather than inheriting.
+
+Swap `Input` for `InputGroup` when the control needs a prefix or a suffix:
+
+```tsx
+<TextField name="website">
+  <Label>Website</Label>
+  <InputGroup>
+    <InputGroup.Prefix>https://</InputGroup.Prefix>
+    <InputGroup.Input placeholder="example.com" />
+  </InputGroup>
+</TextField>
+```
+
+## React Aria Props
+
+Interaction props follow React Aria's names, not the DOM's:
+
+| Use | Instead of |
+|-----|------------|
+| `onPress` | `onClick` |
+| `isDisabled` | `disabled` |
+| `isPending` | a `loading` prop |
+| `isRequired`, `isInvalid`, `isReadOnly` | `required`, `aria-invalid`, `readOnly` |
+
+Two exceptions follow the DOM because they render a native element with no React Aria state of their own: a standalone `Input` takes `disabled`, and `Fieldset` takes `disabled`.
+
+A pending button does not show a spinner by itself. Put one in its children:
+
+```tsx
+import {Button, Spinner} from "@peakui/react";
+
+<Button isPending>
+  <Spinner aria-hidden color="current" size="sm" />
+  Saving
+</Button>
+```
+
+## Custom DOM Element
+
+There is no `as` prop. Components that render a plain DOM element accept `render`, a function that receives the props the part would have applied and returns your element:
+
+```tsx
+<Fieldset.Group render={(props) => <section {...props} aria-label="Address" />}>
+  {/* fields */}
+</Fieldset.Group>
+```
+
+Spread `props` onto the element you return: it carries the class, the `data-slot` and the ref.
+
+Components built on a React Aria primitive, such as `Button`, take the same prop with one restriction from React Aria: the function must return the element type the component expects. A `Button` must still render a `<button>`.
+
+## Styling Another Element
+
+To make a link look like a button, do not change the button's element. Apply the button's classes to the link:
+
+```tsx
+import {buttonVariants} from "@peakui/react";
+import Link from "next/link";
+
+<Link className={buttonVariants({variant: "primary"})} href="/dashboard">
+  Open dashboard
+</Link>
+```
+
+The BEM classes work on their own as well, in any framework and in plain HTML:
+
+```html
+<a class="button button--md button--tertiary" href="/dashboard">Open dashboard</a>
+```
+
+## Custom Components
+
+Wrap parts into your own component when a composition repeats:
+
+```tsx
+import type {TextFieldProps} from "@peakui/react";
+
+import {Description, FieldError, Input, Label, TextField} from "@peakui/react";
+
+interface EmailFieldProps extends Omit<TextFieldProps, "children"> {
+  description?: string;
+  label: string;
+}
+
+export function EmailField({description, label, ...props}: EmailFieldProps) {
+  return (
+    <TextField type="email" {...props}>
+      <Label>{label}</Label>
+      <Input placeholder="jane@example.com" />
+      {description ? <Description>{description}</Description> : null}
+      <FieldError />
+    </TextField>
+  );
+}
+```
+
+## Next Steps
+
+- [Styling](/docs/react/getting-started/styling) – class names, state selectors and variant functions.
+- [All Components](/docs/react/components)

@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "fail", "build": "fail", "static": "fail", "render": "fail"},
+  "rules": {"typecheck": ["provider"], "static": ["provider"], "render": ["render-unavailable"]}
+}

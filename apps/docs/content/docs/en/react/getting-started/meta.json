@@ -1,0 +1,18 @@
+{
+  "title": "Getting Started",
+  "description": "Get started with PeakUI",
+  "root": true,
+  "icon": "book-open",
+  "pages": [
+    "---Overview---",
+    "index",
+    "(overview)/quick-start",
+    "---Handbook---",
+    "(handbook)/theming",
+    "(handbook)/dark-mode",
+    "(handbook)/styling",
+    "(handbook)/composition",
+    "---UI for Agents---",
+    "(ui-for-agents)/llms-txt"
+  ]
+}

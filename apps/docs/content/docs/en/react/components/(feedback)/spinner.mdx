@@ -1,0 +1,103 @@
+---
+title: Spinner
+description: A loading indicator in four sizes and five colors, announced to assistive technology as a status.
+links:
+  source: spinner/spinner.tsx
+  styles: spinner.css
+---
+
+## Usage
+
+```tsx
+import {Spinner} from "@peakui/react";
+```
+
+<ComponentPreview name="spinner-basic" />
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="spinner-sizes" />
+
+### Colors
+
+`color="current"` takes the text color of the parent, which is what you want inside a button.
+
+<ComponentPreview name="spinner-colors" />
+
+### Custom Label
+
+The spinner has `role="status"` and is labelled "Loading" by default. Pass `aria-label` to say what is loading.
+
+<ComponentPreview name="spinner-custom-label" />
+
+When the spinner sits next to text that already says what is happening, hide it from assistive technology with `aria-hidden` instead:
+
+```tsx
+<Button isPending>
+  <Spinner aria-hidden color="current" size="sm" />
+  Saving
+</Button>
+```
+
+## Customization
+
+### Tailwind CSS
+
+The spinner draws with `currentColor`, so any text color utility recolors it.
+
+```tsx
+<Spinner className="size-10 text-pink-500" color="current" />
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .spinner--lg {
+    @apply size-10;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The Spinner component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/spinner.css)):
+
+#### Base & Size Classes [!toc]
+
+- `.spinner` - Base spinner styles
+- `.spinner--sm` - Small size
+- `.spinner--md` - Medium size
+- `.spinner--lg` - Large size
+- `.spinner--xl` - Extra large size
+
+#### Color Classes [!toc]
+
+- `.spinner--current` - Inherits the parent's text color
+- `.spinner--accent`
+- `.spinner--success`
+- `.spinner--warning`
+- `.spinner--danger`
+
+### Slots
+
+- `[data-slot="spinner"]` - The root element
+- `[data-slot="spinner-icon"]` - The animated SVG
+
+## API Reference
+
+### Spinner
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Size of the spinner |
+| `color` | `'current' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | `'accent'` | Color of the spinner |
+| `aria-label` | `string` | `'Loading'` | Accessible name announced for the status |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.

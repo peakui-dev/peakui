@@ -48,6 +48,8 @@ not permission to skip: report it and stop.
 | Set up a clone / diagnose | `pnpm bootstrap` / `pnpm bootstrap --check` |
 | Dev Storybook | `pnpm dev:storybook` (port **6007**) |
 | Build Storybook | `pnpm build:storybook` |
+| Dev Docs | `pnpm dev:docs` (port **3000**) |
+| Build Docs | `pnpm build:docs` |
 | Unit tests | `pnpm test` |
 | Coverage | `pnpm test:coverage` |
 | Build packages | `pnpm build` / `pnpm build:packages` |
@@ -97,6 +99,36 @@ The jsdom setup those tests need, and the `render` / `setupUser` / `ssrSmoke` he
 private `packages/testing` — never published, and not optional: without `installPointerEvent()` and
 its jsdom stubs, RAC tests do not run at all. Import them from `@peakui/testing/helpers`, and take a
 package's vitest defaults from `@peakui/testing/configs/react`.
+
+## Docs app
+
+`apps/docs` is the documentation site (`@peakui/docs`, private): Next.js + Fumadocs, ported from the
+reference's docs app — attribution in `apps/docs/NOTICE`.
+
+- **Pages** — MDX under `apps/docs/content/docs/en/react/`; a component page lives at
+  `components/(category)/<component-name>.mdx` and follows Usage → Examples → Customization →
+  Styling Reference → API Reference. The `links` frontmatter feeds the components index.
+- **Demos** — one file per example in `apps/docs/src/demos/<component-name>/`, registered in
+  `apps/docs/src/demos/index.ts` and shown with `<ComponentPreview name="…" />`. They are
+  type-checked. A demo that passes a function prop starts with `"use client"`.
+- **Agent routes** — `/llms.txt`, `/llms-components.txt`, `/llms-patterns.txt`, `<page>.md` and
+  `/api/components` are generated from the MDX by `apps/docs/src/lib/get-llm-text.ts`. Never write
+  them by hand.
+- **Nothing a visitor or an agent reads may name the reference library** — pages, demos, UI text,
+  generated markdown. `NOTICE` is the one exception.
+- **Site URL** — `NEXT_PUBLIC_SITE_URL` (see `apps/docs/.env.example`) must be an absolute URL for
+  `pnpm build:docs` and again when the production server starts (`next start`); both fail without
+  it. The prerendered llms files and `/api/components` embed it, and its value is inlined at build
+  time, so changing it needs a rebuild. `pnpm dev:docs` falls back to `http://localhost:3000`.
+- **Deployment requirement: `Vary: Accept`** — `/en`, `/en/docs/...` and `/` answer markdown or HTML
+  depending on `Accept`, but the prerendered HTML pages are served by `next start` with their own
+  cache headers: `Vary: Accept` set in `next.config.ts` `headers()` or on the response in `proxy.ts`
+  does not reach them (checked against `next start`). The host must vary cached HTML docs pages on
+  `Accept`, or run the proxy before its cache. Without that a shared cache can hand HTML to an agent
+  that asked for markdown, or the reverse.
+- **Storybook stays independent** — docs never import stories, and stories never import demos.
+- The app has no `@heroui/*` dependency: those styles define the same BEM classes as
+  `@peakui/styles` and would collide.
 
 ## Conventions
 
@@ -148,7 +180,6 @@ this section exists to prevent.
 
 ```
 packages/codemodes/    # @peakui/codemodes — jscodeshift migrations
-apps/docs/             # PeakUI Docs
 .claude/agents/        # docs-curator, storybook-debugger, tailwind-v4-css-expert
 .claude/guides/        # styling is covered by the component-standards skill until one exists
 ```

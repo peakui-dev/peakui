@@ -1,0 +1,8 @@
+{
+  "layers": {"typecheck": "pass", "build": "fail", "static": "fail", "render": "fail"},
+  "rules": {
+    "build": ["function-across-server-boundary"],
+    "static": ["handler-in-client-file"],
+    "render": ["render-unavailable"]
+  }
+}

@@ -1,0 +1,134 @@
+---
+title: Input
+description: A single-line text input, used on its own or as the control inside a TextField.
+links:
+  rac: TextField
+  source: input/input.tsx
+  styles: input.css
+---
+
+## Usage
+
+```tsx
+import {Input} from "@peakui/react";
+```
+
+<ComponentPreview name="input-basic" />
+
+A standalone `Input` has no visible label, so give it an `aria-label`. For a labelled field with a description and validation, compose it inside a [TextField](/docs/react/components/text-field).
+
+## Examples
+
+### Variants
+
+Use `primary` on the page background and `secondary` on a surface such as a card.
+
+<ComponentPreview name="input-variants" />
+
+### Types
+
+<ComponentPreview name="input-types" />
+
+### Controlled
+
+<ComponentPreview name="input-controlled" />
+
+### Full Width
+
+<ComponentPreview name="input-full-width" />
+
+### Disabled State
+
+A standalone `Input` is a native input and takes `disabled`. Inside a `TextField`, set `isDisabled` on the field instead.
+
+<ComponentPreview name="input-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Input aria-label="Search" className="rounded-full px-4" placeholder="Search" />
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .input {
+    --input-radius: var(--radius-lg);
+  }
+
+  .input--secondary {
+    --input-bg: var(--color-surface-secondary);
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The Input component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/input.css)):
+
+- `.input` - Base input styles
+- `.input--primary` - Primary variant
+- `.input--secondary` - Secondary variant
+- `.input--full-width` - Stretches to the container's width
+
+### Slots
+
+- `[data-slot="input"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--input-bg` | Background color |
+| `--input-bg-hover` | Background color when hovered |
+| `--input-bg-focus` | Background color when focused |
+| `--input-fg` | Text color |
+| `--input-placeholder` | Placeholder color |
+| `--input-border` | Border color |
+| `--input-border-hover` | Border color when hovered |
+| `--input-border-focus` | Border color when focused |
+| `--input-radius` | Corner radius |
+| `--input-shadow` | Box shadow |
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Focus**: `:focus` or `[data-focused]`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]`
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]`
+
+## API Reference
+
+### Input
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary'` | `'primary'` | Surface style. Inside a `TextField` it defaults to the field's `variant` |
+| `fullWidth` | `boolean` | `false` | Whether the input takes the full width of its container |
+| `type` | `string` | `'text'` | The native input type |
+| `value` | `string` | - | The controlled value |
+| `defaultValue` | `string` | - | The initial value when uncontrolled |
+| `placeholder` | `string` | - | Placeholder text |
+| `disabled` | `boolean` | `false` | Whether the input is disabled |
+| `onChange` | `(e: React.ChangeEvent<HTMLInputElement>) => void` | - | Handler called when the value changes |
+| `className` | `string \| (values: InputRenderProps) => string` | - | Additional classes, or a function of the input's state |
+| `render` | `DOMRenderFunction<'input', InputRenderProps>` | - | Replaces the rendered `<input>` with your own element |
+
+Every other attribute of an `<input>` is accepted.
+
+### Render Props
+
+When `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isHovered` | `boolean` | Whether the input is hovered |
+| `isFocused` | `boolean` | Whether the input is focused |
+| `isFocusVisible` | `boolean` | Whether the input is focused by keyboard |
+| `isDisabled` | `boolean` | Whether the input is disabled |
+| `isInvalid` | `boolean` | Whether the input is invalid |

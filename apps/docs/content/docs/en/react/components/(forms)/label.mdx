@@ -1,0 +1,88 @@
+---
+title: Label
+description: A text label for a form control, with required, invalid and disabled states.
+links:
+  rac: TextField
+  source: label/label.tsx
+  styles: label.css
+---
+
+## Usage
+
+```tsx
+import {Label} from "@peakui/react";
+```
+
+<ComponentPreview name="label-basic" />
+
+## Examples
+
+### In a TextField
+
+Inside a `TextField` the label is linked to the input automatically, and it follows the field's required, invalid and disabled states. You do not pass the state props.
+
+<ComponentPreview name="label-in-text-field" />
+
+### States
+
+Outside a field nothing can pass the state down, so set it on the label.
+
+<ComponentPreview name="label-states" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Label className="text-xs tracking-wide uppercase">Email</Label>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .label {
+    @apply font-semibold;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The Label component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/label.css)):
+
+- `.label` - Base label styles
+- `.label--required` - Adds the required indicator
+- `.label--invalid` - Invalid state color
+- `.label--disabled` - Disabled state
+
+### Slots
+
+- `[data-slot="label"]`
+
+### Interactive States
+
+Inside a field, the label is styled from the field root's attributes:
+
+- **Required**: `[data-required]` on the parent, or a `[aria-required="true"]` control inside a `.textfield`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on an ancestor
+- **Disabled**: `[data-disabled]` or `[aria-disabled="true"]` on an ancestor, or an ancestor `<fieldset disabled>`
+
+## API Reference
+
+### Label
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isRequired` | `boolean` | `false` | Shows the required indicator. Not needed inside a `TextField` |
+| `isInvalid` | `boolean` | `false` | Applies the invalid style. Not needed inside a `TextField` |
+| `isDisabled` | `boolean` | `false` | Applies the disabled style. Not needed inside a `TextField` |
+| `htmlFor` | `string` | - | The id of the control the label describes. Set automatically inside a `TextField` |
+| `elementType` | `string` | `'label'` | The element to render |
+| `render` | `DOMRenderFunction<'label', undefined>` | - | Replaces the rendered element with your own |
+| `children` | `React.ReactNode` | - | The label text |
+| `className` | `string` | - | Additional classes |
+
+Every other attribute of a `<label>` is accepted.

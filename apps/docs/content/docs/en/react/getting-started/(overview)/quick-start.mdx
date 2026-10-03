@@ -1,0 +1,94 @@
+---
+title: Quick Start
+description: Install PeakUI, import its styles in the right order and render your first component.
+---
+
+## Requirements
+
+- [React 19](https://react.dev/) or later
+- [Tailwind CSS v4](https://tailwindcss.com/docs/installation)
+
+## Install
+
+Install the two PeakUI packages together with their peer dependencies:
+
+```npm
+npm install @peakui/react @peakui/styles react-aria-components @react-aria/utils
+```
+
+`react-aria-components` and `@react-aria/utils` are peer dependencies of `@peakui/react`. Tailwind CSS is a peer dependency of `@peakui/styles`; if your project does not have it yet, follow the [Tailwind CSS installation guide](https://tailwindcss.com/docs/installation) for your framework first.
+
+## Import Styles
+
+Add both imports to your main CSS file, for example `app/globals.css`:
+
+```css title="globals.css"
+@import "tailwindcss";
+@import "@peakui/styles/css";
+```
+
+Write the subpath `@peakui/styles/css`. The root specifier `@peakui/styles` is the package's TypeScript entry (the variant functions and `tv`); it reaches the stylesheet only through a `style` export condition. Tailwind's own resolver follows that condition, but the supported CSS entry is the explicit `/css` subpath.
+
+<Callout type="warn">
+  The order matters. `@peakui/styles` extends Tailwind and does not import it. If Tailwind comes second, or is missing, the component styles are silently absent: there is no build error.
+</Callout>
+
+## Use Components
+
+Import components from the package root:
+
+```tsx
+import {Button, Input, Label, TextField} from "@peakui/react";
+
+export function SignUp() {
+  return (
+    <form className="flex w-64 flex-col gap-3">
+      <TextField isRequired name="email" type="email">
+        <Label>Email</Label>
+        <Input placeholder="jane@example.com" />
+      </TextField>
+      <Button type="submit">Sign up</Button>
+    </form>
+  );
+}
+```
+
+There is no provider to add. The theme lives in CSS.
+
+## Server Components
+
+Every PeakUI component is a client component, marked with `"use client"`. You can render one from a server component, but you cannot pass it a function from there: React cannot send a function from the server to the client. Props such as `onPress`, a `className` function or children written as a render function need a file that itself starts with `"use client"`. In Next.js, put the component and its event handler together in a client file, and import that file from the server component:
+
+```tsx title="save-button.tsx"
+"use client";
+
+import {Button} from "@peakui/react";
+
+export function SaveButton({id}: {id: string}) {
+  return <Button onPress={() => fetch(`/api/items/${id}`, {method: "POST"})}>Save</Button>;
+}
+```
+
+The directive matters only with React Server Components. In a client-only app, such as one built with Vite, the examples work without it: it has no effect there, and Vite's production build prints a warning that it was ignored.
+
+## Tailwind class detection
+
+Tailwind finds class names by scanning your source files as text. Two consequences:
+
+- Write class names in full. `className={isActive ? "bg-accent" : "bg-default"}` works; a name assembled by interpolation, such as `` `bg-${role}` ``, never reaches the CSS.
+- Files outside your app's own sources are not scanned. Utility classes that come from another package in `node_modules` stay out of the CSS until you point Tailwind at that package with [`@source`](https://tailwindcss.com/docs/detecting-classes-in-source-files) in your CSS entry. The path is relative to the CSS file:
+
+```css title="globals.css"
+@import "tailwindcss";
+@import "@peakui/styles/css";
+@source "../node_modules/@acme/ui";
+```
+
+- To keep specific classes that never appear as whole strings in any scanned file, list them with `@source inline("bg-accent text-sm")`.
+- Tailwind v4 does not read `tailwind.config.js` or `tailwind.config.ts` by itself. A `content` list in it is ignored unless the CSS loads the file with `@config "./tailwind.config.ts";`, and `safelist` is not supported at all: use `@source inline()` instead.
+
+## What's Next?
+
+- [Browse the components](/docs/react/components)
+- [Learn how theming works](/docs/react/getting-started/theming)
+- [Set up dark mode](/docs/react/getting-started/dark-mode)

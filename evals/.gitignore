@@ -1,0 +1,3 @@
+results/**/transcript.jsonl
+results/**/stderr.txt
+results/**/*.log

@@ -28,6 +28,12 @@ jobs:
 
       - run: pnpm test
 
+      # The docs app prerenders its llms files at build time and fails without a site URL; the
+      # value here only has to be obviously not production.
+      - run: pnpm build:docs
+        env:
+          NEXT_PUBLIC_SITE_URL: https://docs.ci.invalid
+
       # Гейты слоя токенов: дрейф, контраст, висящие токены, полнота тем, литеральные цвета.
       - run: pnpm check:tokens
 

@@ -1,0 +1,8 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "typecheck": ["unknown-composition-prop"],
+    "static": ["assembled-field-prop", "field-error-in-each-field"],
+    "render": ["two-required-fields"]
+  }
+}

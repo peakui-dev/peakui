@@ -1,0 +1,167 @@
+---
+title: TextField
+description: A text input with a label, a description and validation, composed from separate parts.
+links:
+  rac: TextField
+  source: textfield/textfield.tsx
+  styles: textfield.css
+---
+
+## Usage
+
+```tsx
+import {Input, Label, TextField} from "@peakui/react";
+```
+
+<ComponentPreview name="text-field-basic" />
+
+### Anatomy
+
+```tsx
+import {Description, FieldError, Input, Label, TextField} from "@peakui/react";
+
+export default () => (
+  <TextField>
+    <Label />
+    <Input /> {/* or <InputGroup /> */}
+    <Description />
+    <FieldError />
+  </TextField>
+);
+```
+
+`TextField` is the root: it owns the value, the validation state and the ids that link the parts. `Label`, `Input`, `Description` and `FieldError` are its children, each a component of its own. There is no assembled form such as `<Input label="Email" />`.
+
+## Examples
+
+### With Description
+
+<ComponentPreview name="text-field-with-description" />
+
+### Required
+
+`isRequired` marks the label and makes the field required for form submission.
+
+<ComponentPreview name="text-field-required" />
+
+### With Error Message
+
+`isInvalid` marks the field as invalid and makes `FieldError` render.
+
+<ComponentPreview name="text-field-with-error" />
+
+### Validation
+
+`validate` receives the current value (an empty string for an empty field) and returns `string | string[] | true | null | undefined`: a message, or several, for an invalid value, and `true`, `null` or `undefined` when the value is valid.
+
+<ComponentPreview name="text-field-validation" />
+
+Which message shows, and when:
+
+- **A constraint and `validate` both fail.** The message from `validate` is shown. The browser's message for `isRequired`, `minLength`, `pattern` or `type` appears only while `validate` returns a valid result, so make `validate` return `null` for an empty value if the browser's "required" message should be the one shown for it.
+- **Native behavior (the default).** Messages appear when the form is submitted, and again when the browser reports a `change` for the input, which is when it loses focus after its value was edited. They do not appear on every keystroke.
+- **`validationBehavior="aria"`.** The message from `validate`, and from `isInvalid`, shows as the value changes. `isRequired` becomes `aria-required` instead of the native `required` attribute, and the constraints produce no message of their own: write them as `validate` or `isInvalid` instead.
+
+### Form
+
+A complete form: two fields, each with a description and a `FieldError`, and a submit button. Submit it empty, then with a username that contains a space, to see each message appear under its own field.
+
+<ComponentPreview name="text-field-form" />
+
+### Controlled
+
+`onChange` receives the value as a string, not an event.
+
+<ComponentPreview name="text-field-controlled" />
+
+### Variants
+
+The field's `variant` is passed down to its `Input` or `InputGroup`.
+
+<ComponentPreview name="text-field-variants" />
+
+### Full Width
+
+<ComponentPreview name="text-field-full-width" />
+
+### Disabled State
+
+<ComponentPreview name="text-field-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<TextField className="gap-2" name="email">
+  <Label className="text-xs uppercase">Email</Label>
+  <Input className="rounded-full" />
+</TextField>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .textfield {
+    @apply gap-2;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The TextField component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/textfield.css)):
+
+- `.textfield` - The field root. The block is one word, `textfield`
+- `.textfield--full-width` - Stretches to the container's width
+
+### Slots
+
+- `[data-slot="textfield"]`
+
+### Interactive States
+
+The root carries the field's state, and its parts are styled from it:
+
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]`
+- **Disabled**: `[data-disabled]`
+- **Required**: `[data-required]`
+- **Read only**: `[data-readonly]`
+
+## API Reference
+
+### TextField
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary'` | `'primary'` | Surface style, passed down to `Input` and `InputGroup` |
+| `fullWidth` | `boolean` | `false` | Whether the field takes the full width of its container |
+| `value` | `string` | - | The controlled value |
+| `defaultValue` | `string` | - | The initial value when uncontrolled |
+| `onChange` | `(value: string) => void` | - | Handler called with the new value |
+| `name` | `string` | - | Name of the field in form submission |
+| `type` | `'text' \| 'search' \| 'url' \| 'tel' \| 'email' \| 'password' \| (string & {})` | `'text'` | The input type |
+| `isRequired` | `boolean` | `false` | Whether a value is required for form submission |
+| `isInvalid` | `boolean` | `false` | Whether the value is invalid |
+| `isDisabled` | `boolean` | `false` | Whether the field is disabled |
+| `isReadOnly` | `boolean` | `false` | Whether the value can be selected but not changed |
+| `validate` | `(value: string) => string \| string[] \| true \| null \| undefined` | - | Returns an error message, or messages, for an invalid value, and `true`, `null` or `undefined` for a valid one |
+| `validationBehavior` | `'native' \| 'aria'` | `'native'` | Whether validation blocks form submission (`native`) or only marks the field (`aria`) |
+| `children` | `React.ReactNode \| (values: TextFieldRenderProps) => React.ReactNode` | - | The parts of the field, or a function of the field's state |
+| `className` | `string \| (values: TextFieldRenderProps) => string` | - | Additional classes, or a function of the field's state |
+
+Every other [React Aria TextField](https://react-aria.adobe.com/TextField) prop is accepted, including `minLength`, `maxLength`, `pattern` and `autoComplete`.
+
+### Render Props
+
+When `children` or `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isDisabled` | `boolean` | Whether the field is disabled |
+| `isInvalid` | `boolean` | Whether the field is invalid |
+| `isReadOnly` | `boolean` | Whether the field is read only |
+| `isRequired` | `boolean` | Whether the field is required |

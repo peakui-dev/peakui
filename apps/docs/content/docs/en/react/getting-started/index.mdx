@@ -1,0 +1,56 @@
+---
+title: Introduction
+description: PeakUI is a React component library built on React Aria Components and Tailwind CSS v4, styled with BEM classes and CSS custom properties.
+---
+
+PeakUI gives you accessible React components whose behavior comes from [React Aria Components](https://react-aria.adobe.com/) and whose styles are plain CSS on top of [Tailwind CSS v4](https://tailwindcss.com/). The library ships <ComponentCount /> components with <ExampleCount /> examples in this documentation, and it is growing.
+
+## Why PeakUI?
+
+- **Accessible behavior** – Focus management, keyboard interaction and ARIA wiring come from React Aria Components. The accessibility floor is WCAG 2.2 AA, including `forced-colors` mode.
+- **Styles you can read** – Every component is a [BEM](https://getbem.com/) block in `@peakui/styles`. There is no runtime styling and nothing hidden in JavaScript.
+- **Themed with CSS variables** – Colors, radius and typography are custom properties. Change one value and every component follows.
+- **Compound components** – A component is a root plus named parts, such as `Fieldset.Legend`. You compose the parts; the library does not assemble them for you.
+- **Typed** – Props, variants and render props are fully typed.
+- **React 19** – `ref` is an ordinary prop, and every component is a client component.
+
+## Packages
+
+| Package | Purpose |
+|---------|---------|
+| `@peakui/react` | The React components. Everything is exported from the package root. |
+| `@peakui/styles` | The stylesheet, the theme tokens and the variant functions. It has no React dependency. |
+
+## How a component is built
+
+Each component is a thin styled composition over a React Aria primitive:
+
+```tsx
+import {Button} from "@peakui/react";
+
+<Button variant="secondary" onPress={() => save()}>
+  Save
+</Button>
+```
+
+- `variant` and `size` pick BEM modifier classes: `.button--secondary`, `.button--md`.
+- `onPress`, `isDisabled` and `isPending` are React Aria props.
+- The rendered element carries `data-slot="button"` and state attributes such as `data-hovered` and `data-pressed`, which the CSS styles against.
+
+## What PeakUI does not have
+
+A few conventions from other libraries do not exist here, and it helps to know that early:
+
+- No provider component. The theme is CSS, so there is nothing to wrap your app in.
+- No `classNames` prop. Style a part by passing `className` to that part.
+- No `as` prop. Polymorphism goes through the `render` prop.
+- No `color` prop on `Button`. The look is chosen with `variant`.
+- No deep imports. `@peakui/react/button` does not resolve; import from `@peakui/react`.
+
+## Next steps
+
+- [Quick Start](/docs/react/getting-started/quick-start) – install the packages and render a component.
+- [Theming](/docs/react/getting-started/theming) – the tokens and how to change them.
+- [Styling](/docs/react/getting-started/styling) – the ways to restyle a component.
+- [Composition](/docs/react/getting-started/composition) – compound parts, the `render` prop and variant functions.
+- [All Components](/docs/react/components)

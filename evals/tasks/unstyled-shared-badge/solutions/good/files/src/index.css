@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+@source "../node_modules/@acme/status";

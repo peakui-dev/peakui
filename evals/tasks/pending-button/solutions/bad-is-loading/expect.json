@@ -1,0 +1,8 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "typecheck": ["unknown-state-prop"],
+    "static": ["dom-state-prop"],
+    "render": ["pending-state"]
+  }
+}

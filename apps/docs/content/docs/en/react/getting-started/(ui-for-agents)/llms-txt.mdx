@@ -1,0 +1,39 @@
+---
+title: LLMs.txt
+description: Machine-readable versions of the PeakUI documentation for AI coding assistants.
+---
+
+The documentation is published in formats that an AI assistant can read directly. Every file below is generated from the same pages you are reading, so it cannot drift from them.
+
+## Available Files
+
+| File | Content |
+|------|---------|
+| [`/llms.txt`](/llms.txt) | An index: one line per page with its title, URL and description. |
+| [`/llms-components.txt`](/llms-components.txt) | Every component page as markdown, concatenated. |
+| [`/llms-patterns.txt`](/llms-patterns.txt) | Every guide as markdown, concatenated. A guide is any documentation page that is not a component page; the components gallery counts as one. |
+| [`/api/components`](/api/components) | A JSON index of all components and all guides, with a `schemaVersion`: the components (name, title, description, page URL, markdown URL, source and style links), the guides (the same fields without links) and the library version. |
+
+## Per-page Markdown
+
+Any documentation page is available as markdown in two ways:
+
+- Append `.md` to its URL: `/docs/react/components/button.md`.
+- Request the page with the header `Accept: text/markdown`.
+
+In the markdown, each live example is replaced by the source code of that example.
+
+## Integration
+
+Most assistants can be pointed at a documentation URL.
+
+**Claude Code** – add to `CLAUDE.md`:
+
+```md
+PeakUI documentation index: <site URL>/llms.txt
+Fetch a component's page as markdown before using it: <site URL>/docs/react/components/<name>.md
+```
+
+**Cursor** – add the `llms.txt` URL under `@Docs`.
+
+**Any agent with a fetch tool** – start from `/llms.txt`, then fetch the `.md` version of the pages it lists.
