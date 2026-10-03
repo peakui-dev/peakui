@@ -58,7 +58,7 @@ export function generateIndexHeader(): string[] {
     '- Import everything from the package root: `import {Button} from "@peakui/react"`. There are no deep imports.',
     '- Import Tailwind before the PeakUI stylesheet: `@import "tailwindcss";` then `@import "@peakui/styles/css";`.',
     "- Components are compound: `TextField` is the root; `Label`, `Input`, `Description` and `FieldError` are its children.",
-    "- Props follow React Aria: `isDisabled`, `isPending`, `onPress`. There is no `classNames`, `as` or `color` prop.",
+    "- Props follow React Aria: `isDisabled`, `isPending`, `onPress`. There is no `classNames` or `as` prop; `Button` has no `color` prop, use `variant`.",
     "- React 19 or later. There is no provider component; the theme is CSS.",
     "",
     "## Machine-readable resources",
