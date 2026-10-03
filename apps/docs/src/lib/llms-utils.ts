@@ -73,3 +73,21 @@ export function generateIndexHeader(): string[] {
     "",
   ];
 }
+
+/**
+ * Clients resolve a page by `name`, components first, so a name shared by two pages would make the
+ * second one unreachable. Throws, which fails the build and the tests, instead of shipping that.
+ */
+export function assertUniqueNames(entries: {name: string; url: string}[]): void {
+  const seen = new Map<string, string>();
+
+  for (const {name, url} of entries) {
+    const first = seen.get(name);
+
+    if (first !== undefined) {
+      throw new Error(`Docs index: the name "${name}" is used by both ${first} and ${url}`);
+    }
+
+    seen.set(name, url);
+  }
+}

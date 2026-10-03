@@ -1,7 +1,7 @@
 import type {Page} from "@/lib/source";
 
 import {siteConfig} from "@/config/site";
-import {JSON_HEADERS, filterPagesByType, markdownUrl} from "@/lib/llms-utils";
+import {JSON_HEADERS, assertUniqueNames, filterPagesByType, markdownUrl} from "@/lib/llms-utils";
 import {absoluteUrl} from "@/lib/seo";
 import {source} from "@/lib/source";
 import {generateComponentLinks} from "@/utils/extract-links";
@@ -45,6 +45,8 @@ export function GET() {
     title: page.data.title,
     url: absoluteUrl(page.url),
   }));
+
+  assertUniqueNames([...components, ...guides]);
 
   const body = {
     components: components.sort((a, b) => a.name.localeCompare(b.name)),

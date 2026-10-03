@@ -4,6 +4,7 @@ import {describe, expect, it} from "vitest";
 import {GET as getIndex} from "@/app/api/components/route";
 import {GET as getPatterns} from "@/app/llms-patterns.txt/route";
 import {GET as getMarkdown} from "@/app/llms.mdx/[...slug]/route";
+import {assertUniqueNames} from "@/lib/llms-utils";
 import {source} from "@/lib/source";
 
 interface Entry {
@@ -77,6 +78,28 @@ describe("/api/components", () => {
 
       expect(new Set(names).size).toBe(names.length);
     }
+  });
+
+  it("names every entry uniquely across components and guides together", async () => {
+    const {components, guides} = await loadIndex();
+    const names = [...components, ...guides].map((entry) => entry.name);
+
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("refuses a name that two pages share", () => {
+    expect(() =>
+      assertUniqueNames([
+        {name: "button", url: "/docs/react/components/button"},
+        {name: "button", url: "/docs/react/guides/button"},
+      ]),
+    ).toThrow(/button/);
+    expect(() =>
+      assertUniqueNames([
+        {name: "a", url: "/a"},
+        {name: "b", url: "/b"},
+      ]),
+    ).not.toThrow();
   });
 
   it("covers every docs page exactly once between components and guides", async () => {
