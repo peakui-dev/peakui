@@ -29,8 +29,9 @@ export function isComponentPage(page: Page): boolean {
   return page.slugs[1] === "components" && page.slugs.length > 2;
 }
 
+/** A guide is every docs page that is not a component page, the components gallery included. */
 export function isPatternPage(page: Page): boolean {
-  return page.slugs[1] === "getting-started";
+  return !isComponentPage(page);
 }
 
 export function filterPagesByType(pages: Page[], type: ContentType): Page[] {

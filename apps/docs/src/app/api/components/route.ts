@@ -1,3 +1,5 @@
+import type {Page} from "@/lib/source";
+
 import {siteConfig} from "@/config/site";
 import {JSON_HEADERS, filterPagesByType, markdownUrl} from "@/lib/llms-utils";
 import {absoluteUrl} from "@/lib/seo";
@@ -7,9 +9,16 @@ import {currentVersion} from "@/utils/version";
 
 export const revalidate = false;
 
+/** Bumped only by a breaking change; additive changes keep it. See docs/ecosystem/docs-site-contract.md. */
+const SCHEMA_VERSION = 1;
+
+function pageName(page: Page): string {
+  return page.slugs[page.slugs.length - 1] ?? "";
+}
+
 /**
- * The components index: one entry per component page, generated from frontmatter. It exists so
- * that a CLI or an MCP server never has to parse `llms.txt` to find a component.
+ * The docs index: one entry per component page and one per guide, generated from frontmatter. It
+ * exists so that a CLI or an MCP server never has to parse `llms.txt` to find a page.
  */
 export function GET() {
   const components = filterPagesByType(source.getPages(), "components").map((page) => {
@@ -23,18 +32,28 @@ export function GET() {
         styles: links?.styles ?? null,
       },
       markdownUrl: markdownUrl(page),
-      name: page.slugs[page.slugs.length - 1] ?? "",
+      name: pageName(page),
       title: page.data.title,
       url: absoluteUrl(page.url),
     };
   });
 
+  const guides = filterPagesByType(source.getPages(), "patterns").map((page) => ({
+    description: page.data.description ?? "",
+    markdownUrl: markdownUrl(page),
+    name: pageName(page),
+    title: page.data.title,
+    url: absoluteUrl(page.url),
+  }));
+
   const body = {
     components: components.sort((a, b) => a.name.localeCompare(b.name)),
+    guides: guides.sort((a, b) => a.name.localeCompare(b.name)),
     library: {
       name: "@peakui/react",
       version: currentVersion,
     },
+    schemaVersion: SCHEMA_VERSION,
     site: siteConfig.siteUrl.origin,
   };
 
