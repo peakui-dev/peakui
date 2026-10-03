@@ -104,14 +104,14 @@ describe("focus ring utilities", () => {
     const body = utility("status-focused");
 
     expect(body).toMatch(/0 0 0 var\(--ring-offset-width\) var\(--color-background\)/);
-    expect(body).toMatch(
-      /0 0 0 calc\(var\(--ring-offset-width\) \+ 2px\) var\(--color-focus\)/,
-    );
+    expect(body).toMatch(/0 0 0 calc\(var\(--ring-offset-width\) \+ 2px\) var\(--color-focus\)/);
   });
 
   /* Кольцо поля сидит вплотную: ровно ring-2 ring-offset-0 у эталона. */
   it("даёт кольцу поля нулевой отступ", () => {
-    expect(utility("status-focused-field")).toMatch(/--focus-ring:\s*0 0 0 2px var\(--color-focus\)/);
+    expect(utility("status-focused-field")).toMatch(
+      /--focus-ring:\s*0 0 0 2px var\(--color-focus\)/,
+    );
   });
 
   /*
