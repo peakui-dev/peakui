@@ -102,6 +102,32 @@ describe("stripCssComments", () => {
   });
 });
 
+describe("stripCssComments in non-node positions", () => {
+  it("removes a comment inside a selector", () => {
+    const out = stripCssComments(".a /* why */ .b, .c /* x */ { color: red; }");
+
+    expect(out).not.toContain("/*");
+    expect(out).toContain("color: red;");
+  });
+
+  it("removes a comment inside a declaration value and at-rule parameters", () => {
+    const out = stripCssComments(
+      "@media /* wide */ (min-width: 10px) { .a { color: red /* c */; margin: 0 /* m */ 1px; } }",
+    );
+
+    expect(out).not.toContain("/*");
+    expect(out).toContain("margin:");
+  });
+
+  it("removes a comment between a property and its colon", () => {
+    expect(stripCssComments(".a { color /* c */ : red; }")).not.toContain("/*");
+  });
+
+  it("fails when a comment opener survives, for example inside a string", () => {
+    expect(() => stripCssComments('.a { content: "/*"; }')).toThrow(/comment/);
+  });
+});
+
 describe("findForbidden", () => {
   it("returns the paths that name the reference library, in any case", () => {
     const hit = ["Hero", "UI"].join("");

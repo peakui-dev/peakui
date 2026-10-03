@@ -68,14 +68,37 @@ export function rewriteStylesManifest(manifest: PackageManifest): PackageManifes
   return out;
 }
 
+const COMMENT = /\/\*[\s\S]*?\*\//g;
+
+function stripRawComments(node: {raws: object}): void {
+  const raws = node.raws as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(raws)) {
+    if (typeof value === "string") raws[key] = value.replace(COMMENT, "");
+    // `{value, raw}`: postcss keeps the raw form (with comments) only when it differs from the
+    // clean one, so dropping it makes the serialiser use the clean value.
+    else if (typeof value === "object" && value !== null && "raw" in value) delete raws[key];
+  }
+}
+
 export function stripCssComments(css: string): string {
   const root = postcss.parse(css);
 
   root.walkComments((comment) => {
     comment.remove();
   });
+  stripRawComments(root);
+  root.walk((node) => {
+    stripRawComments(node);
+  });
 
-  return root.toString();
+  const out = root.toString();
+
+  if (out.includes("/*")) {
+    throw new Error("a CSS comment survived stripping; inspect the stylesheet");
+  }
+
+  return out;
 }
 
 export function findForbidden(files: ProjectFile[]): string[] {
