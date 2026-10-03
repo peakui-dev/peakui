@@ -47,7 +47,6 @@ export function proxy(request: NextRequest) {
 
     url.pathname = "/agent-markdown";
     url.search = "";
-    url.searchParams.set("path", pathname);
 
     const requestHeaders = new Headers(request.headers);
 

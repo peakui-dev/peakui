@@ -15,8 +15,16 @@ function markdownResponse(markdown: string, status = 200): Response {
 }
 
 async function getMarkdownForPath(request: NextRequest): Promise<Response> {
-  const pathname =
-    request.headers.get(MARKDOWN_PATH_HEADER) ?? request.nextUrl.searchParams.get("path") ?? "/";
+  // Only the proxy sets this header. A query string would make the route a public lookup, so it
+  // is not read: a request that did not come through negotiation has no page to serve.
+  const pathname = request.headers.get(MARKDOWN_PATH_HEADER);
+
+  if (pathname === null) {
+    return markdownResponse(
+      "# Not Found\n\nThis route only answers `Accept: text/markdown` requests.\n",
+      404,
+    );
+  }
 
   if (pathname === "/" || pathname === "/en") {
     return markdownResponse(getHomepageMarkdown(request.nextUrl.origin));
