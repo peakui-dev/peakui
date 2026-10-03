@@ -32,4 +32,24 @@ describe("/agent-markdown", () => {
     expect(response.headers.get("x-middleware-rewrite")).toContain("/agent-markdown");
     expect(response.headers.get("x-middleware-rewrite")).not.toContain("path=");
   });
+
+  it("answers 404 when an external client hits /agent-markdown directly, header or not", () => {
+    for (const headers of [{"x-peakui-markdown-path": PAGE}, {}]) {
+      const response = proxy(new NextRequest("http://localhost/agent-markdown", {headers}));
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+    }
+  });
+
+  it("does not let a client-supplied header redirect a negotiated request", () => {
+    const response = proxy(
+      new NextRequest(`http://localhost${PAGE}`, {
+        headers: {accept: "text/markdown", "x-peakui-markdown-path": "/en/docs/react/other"},
+      }),
+    );
+    const forwarded = response.headers.get("x-middleware-request-x-peakui-markdown-path");
+
+    expect(forwarded).toBe(PAGE);
+  });
 });

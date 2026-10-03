@@ -9,7 +9,10 @@ import {i18n} from "@/lib/i18n";
 const MARKDOWN_PATH_HEADER = "x-peakui-markdown-path";
 
 // Paths that never get a markdown representation or a locale prefix.
-const EXCLUDED_PREFIXES = ["/agent-markdown", "/_next", "/api", "/llms"];
+const EXCLUDED_PREFIXES = ["/_next", "/api", "/llms"];
+
+/** Internal rewrite target. Never public: only this proxy's own rewrite may reach it. */
+const AGENT_MARKDOWN_PATH = "/agent-markdown";
 
 const PUBLIC_FILE_PATTERN = /\.[a-z0-9]+$/i;
 const PERMANENT_LOCALIZED_PREFIXES = ["/docs"];
@@ -39,13 +42,19 @@ function shouldPermanentlyRedirect(pathname: string): boolean {
 export function proxy(request: NextRequest) {
   const {pathname} = request.nextUrl;
 
+  // A rewrite does not run the proxy again, so any request seen here for the internal route came
+  // from outside, with or without a forged header.
+  if (pathname === AGENT_MARKDOWN_PATH || pathname.startsWith(`${AGENT_MARKDOWN_PATH}/`)) {
+    return new NextResponse("Not Found", {status: 404});
+  }
+
   if (isExcluded(pathname)) return NextResponse.next();
 
   // The markdown handler runs first, so an agent is served regardless of the locale prefix.
   if ((request.method === "GET" || request.method === "HEAD") && acceptsMarkdown(request)) {
     const url = request.nextUrl.clone();
 
-    url.pathname = "/agent-markdown";
+    url.pathname = AGENT_MARKDOWN_PATH;
     url.search = "";
 
     const requestHeaders = new Headers(request.headers);
