@@ -24,7 +24,14 @@ interface MyButtonProps extends Omit<ButtonProps, "className">, MyButtonVariants
 }
 
 function MyButton({className, radius, size, variant, ...props}: MyButtonProps) {
-  return <Button className={myButtonVariants({className, radius, size, variant})} {...props} />;
+  return (
+    <Button
+      className={myButtonVariants({className, radius, size, variant})}
+      size={size}
+      variant={variant}
+      {...props}
+    />
+  );
 }
 
 export function CustomVariants() {
