@@ -117,8 +117,9 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
 - **Nothing a visitor or an agent reads may name the reference library** — pages, demos, UI text,
   generated markdown. `NOTICE` is the one exception.
 - **Site URL** — `NEXT_PUBLIC_SITE_URL` (see `apps/docs/.env.example`) must be an absolute URL for
-  `pnpm build:docs`: the prerendered llms files and `/api/components` embed it, and the build fails
-  without it. `pnpm dev:docs` falls back to `http://localhost:3000`.
+  `pnpm build:docs` and again when the production server starts (`next start`); both fail without
+  it. The prerendered llms files and `/api/components` embed it, and its value is inlined at build
+  time, so changing it needs a rebuild. `pnpm dev:docs` falls back to `http://localhost:3000`.
 - **Deployment requirement: `Vary: Accept`** — `/en`, `/en/docs/...` and `/` answer markdown or HTML
   depending on `Accept`, but the prerendered HTML pages are served by `next start` with their own
   cache headers: `Vary: Accept` set in `next.config.ts` `headers()` or on the response in `proxy.ts`
