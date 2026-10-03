@@ -69,8 +69,8 @@ ${siteConfig.description}
 
 - [Documentation index](${baseUrl}/llms.txt)
 - [All component pages](${baseUrl}/llms-components.txt)
-- [All guides](${baseUrl}/llms-patterns.txt)
-- [Components index (JSON)](${baseUrl}/api/components)
+- [All guides: every page that is not a component page](${baseUrl}/llms-patterns.txt)
+- [Pages index (JSON): every component and guide, with links to each page](${baseUrl}/api/components)
 `;
 }
 
