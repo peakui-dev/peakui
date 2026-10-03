@@ -1,10 +1,11 @@
-import {mkdirSync, mkdtempSync, writeFileSync} from "node:fs";
+import {mkdirSync, mkdtempSync, symlinkSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 
 import {describe, expect, it} from "vitest";
 
-import {hashFiles, redact, walkFiles} from "../src/files.ts";
+import {hashFiles, readFiles, redact, walkFiles} from "../src/files.ts";
+import {snapshot} from "../src/workspace/workspace.ts";
 
 describe("walkFiles", () => {
   it("lists files sorted, relative, and skips ignored segments and suffixes", () => {
@@ -21,6 +22,61 @@ describe("walkFiles", () => {
       "src/a.ts",
       "src/components/B.tsx",
     ]);
+  });
+});
+
+describe("symlinks are recorded, never followed", () => {
+  function setup() {
+    const base = mkdtempSync(join(tmpdir(), "links-"));
+    const dir = join(base, "app");
+
+    mkdirSync(join(dir, "src"), {recursive: true});
+    mkdirSync(join(base, "elsewhere/deep"), {recursive: true});
+    writeFileSync(join(dir, "src/a.ts"), "a");
+    writeFileSync(join(base, "elsewhere/deep/inner.ts"), "inner");
+    writeFileSync(join(base, "secret.txt"), "TOP SECRET");
+    symlinkSync(join(base, "elsewhere"), join(dir, "to-dir"));
+    symlinkSync(join(base, "missing"), join(dir, "dangling.ts"));
+    symlinkSync(join(base, "secret.txt"), join(dir, "to-outside.txt"));
+
+    return {base, dir};
+  }
+
+  it("lists a link to a directory without descending into it", () => {
+    const {dir} = setup();
+    const paths = walkFiles(dir);
+
+    expect(paths).toContain("to-dir");
+    expect(paths.some((path) => path.startsWith("to-dir/"))).toBe(false);
+    expect(readFiles(dir, paths).find((file) => file.path === "to-dir")?.text).toMatch(
+      /elsewhere$/,
+    );
+  });
+
+  it("reads a dangling link as its target", () => {
+    const {base, dir} = setup();
+    const file = readFiles(dir, walkFiles(dir)).find((entry) => entry.path === "dangling.ts");
+
+    expect(file?.text).toBe(join(base, "missing"));
+  });
+
+  it("does not read the content a link to an outside file points at", () => {
+    const {dir} = setup();
+    const file = readFiles(dir, walkFiles(dir)).find((entry) => entry.path === "to-outside.txt");
+
+    expect(file?.text).not.toContain("TOP SECRET");
+  });
+
+  it("snapshots all of them without throwing and hashes the target string", () => {
+    const {base, dir} = setup();
+    const before = snapshot(dir);
+
+    writeFileSync(join(base, "secret.txt"), "CHANGED");
+    expect([...before.keys()]).toEqual(["dangling.ts", "src/a.ts", "to-dir", "to-outside.txt"]);
+    expect(snapshot(dir).get("to-outside.txt")).toBe(before.get("to-outside.txt"));
+
+    symlinkSync(join(base, "other"), join(dir, "new-link"));
+    expect(snapshot(dir).has("new-link")).toBe(true);
   });
 });
 

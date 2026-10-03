@@ -1,7 +1,15 @@
 import type {ProjectFile} from "./types.ts";
 
 import {createHash} from "node:crypto";
-import {constants, cpSync, readFileSync, readdirSync, realpathSync} from "node:fs";
+import {
+  constants,
+  cpSync,
+  lstatSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  realpathSync,
+} from "node:fs";
 import {join} from "node:path";
 
 function isIgnored(name: string, ignore: readonly string[]): boolean {
@@ -21,8 +29,10 @@ export function walkFiles(dir: string, ignore: readonly string[] = []): string[]
 
       const path = relative ? `${relative}/${entry.name}` : entry.name;
 
+      // `entry` comes from lstat semantics: a link to a directory is not a directory here, and is
+      // recorded as an entry instead of being walked into.
       if (entry.isDirectory()) visit(path);
-      else found.push(path);
+      else if (entry.isFile() || entry.isSymbolicLink()) found.push(path);
     }
   }
 
@@ -31,8 +41,21 @@ export function walkFiles(dir: string, ignore: readonly string[] = []): string[]
   return found.sort();
 }
 
+/**
+ * The bytes that stand for an entry: the content of a regular file, or the target string of a
+ * symlink. A link is never followed, so a dangling link, a link to a directory and a link to a file
+ * outside the directory are all safe to read.
+ */
+export function readEntry(dir: string, path: string): Buffer {
+  const full = join(dir, path);
+
+  return lstatSync(full).isSymbolicLink()
+    ? Buffer.from(readlinkSync(full), "utf8")
+    : readFileSync(full);
+}
+
 export function readFiles(dir: string, paths: string[]): ProjectFile[] {
-  return paths.map((path) => ({path, text: readFileSync(join(dir, path), "utf8")}));
+  return paths.map((path) => ({path, text: readEntry(dir, path).toString("utf8")}));
 }
 
 export function hashFiles(files: ProjectFile[]): string {

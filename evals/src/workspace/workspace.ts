@@ -1,12 +1,12 @@
 import type {FileChanges, ProjectFile, StaticContext, TaskDefinition} from "../types.ts";
 
 import {createHash} from "node:crypto";
-import {existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, rmSync} from "node:fs";
+import {existsSync, lstatSync, mkdirSync, realpathSync, rmSync} from "node:fs";
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from "node:path";
 
 import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
 import {runCommand} from "../exec.ts";
-import {copyDir, readFiles, walkFiles} from "../files.ts";
+import {copyDir, readEntry, readFiles, walkFiles} from "../files.ts";
 import {PACKAGE_DIR, workspacesDir} from "../paths.ts";
 
 export const AGENT_FILES: readonly string[] = [
@@ -165,12 +165,7 @@ export function snapshot(dir: string): Map<string, string> {
   const map = new Map<string, string>();
 
   for (const path of walkFiles(dir, SNAPSHOT_IGNORE)) {
-    map.set(
-      path,
-      createHash("sha256")
-        .update(readFileSync(join(dir, path)))
-        .digest("hex"),
-    );
+    map.set(path, createHash("sha256").update(readEntry(dir, path)).digest("hex"));
   }
 
   return map;
