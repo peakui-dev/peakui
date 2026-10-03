@@ -211,3 +211,58 @@ describe("runCommand process control", () => {
     }
   }, 15_000);
 });
+
+describe("runCommand output", () => {
+  const cwd = process.cwd();
+
+  it("does not split a multi-byte character across chunks", async () => {
+    const script = [
+      "const bytes = Buffer.from('€');",
+      "process.stdout.write(bytes.subarray(0, 1));",
+      "setTimeout(() => process.stdout.write(bytes.subarray(1)), 80);",
+    ].join("");
+    const result = await runCommand([process.execPath, "-e", script], {cwd, timeoutMs: 30_000});
+
+    expect(result.stdout).toBe("€");
+  });
+
+  it("keeps the head and the tail of output that exceeds the cap", async () => {
+    const script =
+      "process.stdout.write('HEAD' + 'x'.repeat(5000) + 'TAIL-ERROR'); process.stderr.write('E-HEAD' + 'y'.repeat(5000) + 'E-TAIL');";
+    const result = await runCommand([process.execPath, "-e", script], {
+      cwd,
+      maxOutputBytes: 1000,
+      timeoutMs: 30_000,
+    });
+
+    expect(result.truncated).toBe(true);
+    expect(result.stdout.startsWith("HEAD")).toBe(true);
+    expect(result.stdout).toContain("TAIL-ERROR");
+    expect(result.stdout).toMatch(/bytes omitted/);
+    expect(result.stderr).toContain("E-TAIL");
+    expect(result.stdout.length).toBeLessThan(1200);
+  });
+
+  it("does not cut a multi-byte character at the cap", async () => {
+    const script = "process.stdout.write('€'.repeat(2000));";
+    const result = await runCommand([process.execPath, "-e", script], {
+      cwd,
+      maxOutputBytes: 1001,
+      timeoutMs: 30_000,
+    });
+
+    expect(result.stdout).not.toContain("�");
+  });
+
+  it("returns output that fits the cap whole, whichever way it was chunked", async () => {
+    const script = "process.stdout.write('€'.repeat(100)); process.stdout.write('end');";
+    const result = await runCommand([process.execPath, "-e", script], {
+      cwd,
+      maxOutputBytes: 1000,
+      timeoutMs: 30_000,
+    });
+
+    expect(result.truncated).toBe(false);
+    expect(result.stdout).toBe(`${"€".repeat(100)}end`);
+  });
+});
