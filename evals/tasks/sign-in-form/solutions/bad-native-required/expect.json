@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {"static": ["field-error-in-each-field"], "render": ["two-required-fields"]}
+}
