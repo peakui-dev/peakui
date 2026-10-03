@@ -4,4 +4,6 @@
  */
 export * from "./button/index.ts";
 export * from "./input/index.ts";
+export * from "./label/index.ts";
 export * from "./spinner/index.ts";
+export * from "./textfield/index.ts";
