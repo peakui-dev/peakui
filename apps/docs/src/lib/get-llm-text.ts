@@ -9,7 +9,7 @@ import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
 
 import {siteConfig} from "@/config/site";
-import {getDemo} from "@/demos";
+import {getComponentCount, getDemo, getExampleCount} from "@/demos";
 import {COMPONENT_GROUPS} from "@/lib/component-groups";
 import {absoluteUrl} from "@/lib/seo";
 import {source} from "@/lib/source";
@@ -142,6 +142,11 @@ async function transformNode(node: MdNode, page: Page): Promise<MdNode[]> {
 
     if (node.name === "br") return [{type: "break"}];
 
+    // Inline counters render live numbers on the site; the markdown states the same numbers.
+    if (node.name === "ComponentCount") return [{type: "text", value: String(getComponentCount())}];
+
+    if (node.name === "ExampleCount") return [{type: "text", value: String(getExampleCount())}];
+
     // Any other component is presentational: keep what it wraps, drop the tag.
     return transformChildren(node.children ?? [], page);
   }
@@ -149,11 +154,31 @@ async function transformNode(node: MdNode, page: Page): Promise<MdNode[]> {
   // An `npm` block renders as package-manager tabs on the site; in markdown it is a shell command.
   if (node.type === "code" && node.lang === "npm") return [{...node, lang: "bash"}];
 
-  if (node.children) {
-    return [{...node, children: await transformChildren(node.children, page)}];
+  // The `[!toc]` suffix hides a heading from the on-page table of contents; it is not content.
+  if (node.type === "heading") return [stripTocMarker(await withChildren(node, page))];
+
+  // A site-relative link is useless outside the site: agents read it detached from the origin.
+  if (node.type === "link" && node.url?.startsWith("/")) {
+    return [{...(await withChildren(node, page)), url: absoluteUrl(node.url)}];
   }
 
+  if (node.children) return [await withChildren(node, page)];
+
   return [node];
+}
+
+async function withChildren(node: MdNode, page: Page): Promise<MdNode> {
+  return {...node, children: await transformChildren(node.children ?? [], page)};
+}
+
+function stripTocMarker(heading: MdNode): MdNode {
+  const children = (heading.children ?? []).map((child) =>
+    child.type === "text" && child.value !== undefined
+      ? {...child, value: child.value.replace(/\s*\[!toc\]/g, "")}
+      : child,
+  );
+
+  return {...heading, children};
 }
 
 async function transformChildren(children: MdNode[], page: Page): Promise<MdNode[]> {
@@ -184,7 +209,12 @@ ${description}
 
 /** The page body as plain markdown: no frontmatter, no MDX, demos inlined as `tsx` code blocks. */
 export async function getPageMarkdown(page: Page): Promise<string> {
-  const {content} = matter(await getRawMDXContent(page.path));
+  return mdxToMarkdown(await getRawMDXContent(page.path), page);
+}
+
+/** The conversion itself, on MDX text instead of a page on disk. */
+export async function mdxToMarkdown(mdx: string, page: Page): Promise<string> {
+  const {content} = matter(mdx);
   const tree = processor.parse(content) as MdNode;
 
   tree.children = await transformChildren(tree.children ?? [], page);
