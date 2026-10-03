@@ -1,14 +1,16 @@
-import {existsSync, mkdirSync, mkdtempSync, writeFileSync} from "node:fs";
+import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 
-import {describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
 
 import {
   classifyBuildOutput,
   classifyDiagnostic,
   cleanBuildOutput,
   parseTscOutput,
+  runBuild,
+  runTypecheck,
 } from "../src/scoring/commands.ts";
 
 const TSC_OUTPUT = [
@@ -167,4 +169,67 @@ describe("cleanBuildOutput", () => {
     expect(existsSync(join(dir, "dist"))).toBe(false);
     expect(existsSync(join(dir, "src/a.ts"))).toBe(true);
   });
+});
+
+describe("the environment of type-check and build commands", () => {
+  let dir: string;
+  let home: string;
+  let previousHome: string | undefined;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), "cmd-env-"));
+    home = mkdtempSync(join(tmpdir(), "cmd-home-"));
+    previousHome = process.env.PEAKUI_EVALS_HOME;
+    process.env.PEAKUI_EVALS_HOME = home;
+  });
+
+  afterEach(() => {
+    if (previousHome === undefined) delete process.env.PEAKUI_EVALS_HOME;
+    else process.env.PEAKUI_EVALS_HOME = previousHome;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+    rmSync(dir, {force: true, recursive: true});
+    rmSync(home, {force: true, recursive: true});
+  });
+
+  const dump = ["node", "-e", "process.stdout.write(JSON.stringify(process.env))"];
+  const fixture = {
+    build: [dump],
+    builtCssDir: "dist",
+    clean: [],
+    dir: "",
+    id: "x",
+    prepare: [],
+    typecheck: [dump],
+  };
+
+  function envOf(logPath: string): Record<string, string> {
+    const text = readFileSync(logPath, "utf8");
+
+    return JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
+  }
+
+  it.each(["typecheck", "build"] as const)(
+    "%s sees an allow-list, not the parent's secrets",
+    async (layer) => {
+      process.env.ANTHROPIC_API_KEY = "sk-ant-secret";
+      process.env.AWS_SECRET_ACCESS_KEY = "aws-secret";
+
+      const logPath = join(dir, `${layer}.log`);
+
+      await (layer === "typecheck" ? runTypecheck : runBuild)(fixture, dir, logPath);
+
+      const env = envOf(logPath);
+
+      expect(env).not.toHaveProperty("ANTHROPIC_API_KEY");
+      expect(env).not.toHaveProperty("AWS_SECRET_ACCESS_KEY");
+      expect(readFileSync(logPath, "utf8")).not.toContain("sk-ant-secret");
+      expect(env.PATH).toBe(process.env.PATH);
+      expect(env.NO_COLOR).toBe("1");
+      expect(env.CI).toBe("1");
+      expect(env.HOME!.startsWith(home)).toBe(true);
+      expect(env.HOME).not.toBe(process.env.HOME);
+      expect(existsSync(env.HOME!)).toBe(true);
+    },
+  );
 });

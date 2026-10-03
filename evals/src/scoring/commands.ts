@@ -1,9 +1,10 @@
 import type {Finding, FixtureDefinition, LayerResult, PitfallId} from "../types.ts";
 
-import {readFileSync, rmSync, writeFileSync} from "node:fs";
+import {mkdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {join} from "node:path";
 
 import {runCommand} from "../exec.ts";
+import {evalsHome} from "../paths.ts";
 
 import {check, layerResult} from "./findings.ts";
 
@@ -139,8 +140,25 @@ export function cleanBuildOutput(fixture: FixtureDefinition, dir: string): void 
   for (const path of fixture.clean) rmSync(join(dir, path), {force: true, recursive: true});
 }
 
-function commandEnv(): NodeJS.ProcessEnv {
-  return {...process.env, CI: "1", NEXT_TELEMETRY_DISABLED: "1"};
+const PASSED_THROUGH = ["PATH", "LANG", "LC_ALL", "TZ", "TMPDIR"];
+
+/**
+ * The environment of the type-check and build commands. They execute configuration files the
+ * agent wrote, so they get an allow-list, never the parent's variables (API keys among them), and
+ * a scratch home inside the harness home instead of the developer's.
+ */
+export function commandEnvironment(): NodeJS.ProcessEnv {
+  const home = join(evalsHome(), "command-home");
+  const env: NodeJS.ProcessEnv = {};
+
+  mkdirSync(home, {recursive: true});
+  for (const name of PASSED_THROUGH) {
+    const value = process.env[name];
+
+    if (value !== undefined) env[name] = value;
+  }
+
+  return {...env, CI: "1", HOME: home, NEXT_TELEMETRY_DISABLED: "1", NO_COLOR: "1"};
 }
 
 function lastLine(output: string): string {
@@ -181,7 +199,7 @@ async function runAll(
   let timedOut = false;
 
   for (const argv of commands) {
-    const result = await runCommand(argv, {cwd: dir, env: commandEnv(), timeoutMs});
+    const result = await runCommand(argv, {cwd: dir, env: commandEnvironment(), timeoutMs});
 
     output += `$ ${argv.join(" ")}\n${result.stdout}${result.stderr}\n`;
     if (result.timedOut) {
