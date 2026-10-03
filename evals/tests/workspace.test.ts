@@ -1,5 +1,7 @@
 import {
+  chmodSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -319,6 +321,61 @@ describe("toolchain tracking", () => {
   });
 });
 
+describe("workspace creation", () => {
+  const options = (templateDir: string, overlayDir?: string) => ({
+    batch: "b",
+    key: "k",
+    overlayDir,
+    templateDir,
+  });
+
+  it("copies node_modules for real: no symlink to the template, and edits never reach it", () => {
+    write(join(root, "template/node_modules/pkg/index.js"), "original");
+
+    const workspace = createWorkspace(options(join(root, "template")));
+    const modules = join(workspace.dir, "node_modules");
+
+    expect(lstatSync(modules).isSymbolicLink()).toBe(false);
+    expect(lstatSync(join(modules, "pkg")).isSymbolicLink()).toBe(false);
+
+    write(join(modules, "pkg/index.js"), "edited");
+
+    expect(readFileSync(join(root, "template/node_modules/pkg/index.js"), "utf8")).toBe("original");
+  });
+
+  it("keeps symlinks inside the template as symlinks", () => {
+    write(join(root, "template/pkg/cli.js"), "cli");
+    mkdirSync(join(root, "template/.bin"), {recursive: true});
+    symlinkSync("../pkg/cli.js", join(root, "template/.bin/tool"));
+
+    const workspace = createWorkspace(options(join(root, "template")));
+
+    expect(lstatSync(join(workspace.dir, ".bin/tool")).isSymbolicLink()).toBe(true);
+  });
+
+  it("removes the partial workspace when the copy fails", () => {
+    write(join(root, "template/src/ok.ts"), "ok");
+    write(join(root, "template/src/unreadable.ts"), "no");
+    chmodSync(join(root, "template/src/unreadable.ts"), 0o000);
+
+    try {
+      expect(() => createWorkspace(options(join(root, "template")))).toThrow();
+      expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+    } finally {
+      chmodSync(join(root, "template/src/unreadable.ts"), 0o644);
+    }
+  });
+
+  it("removes the partial workspace when the overlay is missing", () => {
+    write(join(root, "template/a.ts"), "a");
+
+    expect(() =>
+      createWorkspace(options(join(root, "template"), join(root, "no-overlay"))),
+    ).toThrow();
+    expect(existsSync(join(root, "home/workspaces/b/k"))).toBe(false);
+  });
+});
+
 describe("snapshot and diff", () => {
   it("reports added, modified and deleted files and skips ignored paths", () => {
     const dir = join(root, "app");
@@ -359,6 +416,51 @@ describe("projectFiles and staticContext", () => {
 
     expect(context.file("src/a.tsx")?.text).toBe("a");
     expect(context.file("missing.ts")).toBeUndefined();
+  });
+});
+
+describe("commitInitialState ignores the developer's git setup", () => {
+  it("commits as Acme Dev, unsigned, without running global hooks", async () => {
+    const fakeHome = join(root, "fake-home");
+    const hooks = join(root, "hooks");
+    const marker = join(root, "hook-ran");
+    const saved = {
+      HOME: process.env.HOME,
+      XDG: process.env.XDG_CONFIG_HOME,
+    };
+
+    write(join(hooks, "pre-commit"), `#!/bin/sh\ntouch ${JSON.stringify(marker)}\nexit 1\n`);
+    chmodSync(join(hooks, "pre-commit"), 0o755);
+    write(
+      join(fakeHome, ".gitconfig"),
+      `[user]\n\tname = Real Dev\n\temail = real@example.com\n\tsigningkey = DEADBEEF\n[commit]\n\tgpgsign = true\n[core]\n\thooksPath = ${hooks}\n[gpg]\n\tprogram = /nonexistent-gpg\n`,
+    );
+    process.env.HOME = fakeHome;
+    process.env.XDG_CONFIG_HOME = join(fakeHome, ".config");
+
+    const dir = join(root, "app");
+
+    write(join(dir, "src/a.ts"), "a");
+
+    try {
+      await commitInitialState(dir);
+
+      const log = await runCommand(["git", "log", "--format=%an <%ae> | %cn <%ce> | %G?"], {
+        cwd: dir,
+        env: {...process.env, GIT_CONFIG_GLOBAL: "/dev/null"},
+        timeoutMs: 10_000,
+      });
+
+      expect(log.stdout.trim()).toBe(
+        "Acme Dev <dev@acme.example> | Acme Dev <dev@acme.example> | N",
+      );
+      expect(existsSync(marker)).toBe(false);
+    } finally {
+      if (saved.HOME === undefined) delete process.env.HOME;
+      else process.env.HOME = saved.HOME;
+      if (saved.XDG === undefined) delete process.env.XDG_CONFIG_HOME;
+      else process.env.XDG_CONFIG_HOME = saved.XDG;
+    }
   });
 });
 

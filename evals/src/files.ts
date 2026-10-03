@@ -1,14 +1,17 @@
 import type {ProjectFile} from "./types.ts";
 
+import {spawnSync} from "node:child_process";
 import {createHash} from "node:crypto";
 import {
   constants,
   cpSync,
   lstatSync,
+  mkdirSync,
   readFileSync,
   readdirSync,
   readlinkSync,
   realpathSync,
+  rmSync,
 } from "node:fs";
 import {join} from "node:path";
 
@@ -66,6 +69,31 @@ export function hashFiles(files: ProjectFile[]): string {
   }
 
   return hash.digest("hex");
+}
+
+/**
+ * Copies `from` to a path that does not exist yet, as a copy-on-write clone where the platform
+ * supports it (`cp -c` on macOS, `cp --reflink=auto` on Linux) and as a plain copy otherwise.
+ * Symlinks inside the tree stay symlinks; nothing is ever linked back to `from`. A failed attempt
+ * leaves nothing behind at `to`.
+ */
+export function cloneDir(from: string, to: string): void {
+  const flags =
+    process.platform === "darwin"
+      ? ["-cR"]
+      : process.platform === "linux"
+        ? ["-R", "--reflink=auto"]
+        : [];
+
+  if (flags.length > 0) {
+    const result = spawnSync("cp", [...flags, from, to], {stdio: "ignore"});
+
+    if (result.status === 0) return;
+    rmSync(to, {force: true, recursive: true});
+  }
+
+  mkdirSync(to, {recursive: true});
+  copyDir(from, to);
 }
 
 export function copyDir(from: string, to: string): void {

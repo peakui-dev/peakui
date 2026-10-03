@@ -6,8 +6,8 @@ import {basename, dirname, isAbsolute, join, relative, resolve, sep} from "node:
 
 import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
 import {runCommand} from "../exec.ts";
-import {copyDir, readEntry, readFiles, walkFiles} from "../files.ts";
-import {PACKAGE_DIR, workspacesDir} from "../paths.ts";
+import {cloneDir, copyDir, readEntry, readFiles, walkFiles} from "../files.ts";
+import {PACKAGE_DIR, evalsHome, workspacesDir} from "../paths.ts";
 
 export const AGENT_FILES: readonly string[] = [
   "AGENTS.md",
@@ -125,11 +125,18 @@ export function createWorkspace(options: {
   assertIsolated(dir);
   rmSync(base, {force: true, recursive: true});
   mkdirSync(base, {recursive: true});
-  copyDir(options.templateDir, dir);
-  if (options.overlayDir) copyDir(options.overlayDir, dir);
-  mkdirSync(scratchDir, {recursive: true});
 
-  return {dir, scratchDir, toolchain: toolchainHash(dir)};
+  try {
+    cloneDir(options.templateDir, dir);
+    if (options.overlayDir) copyDir(options.overlayDir, dir);
+    mkdirSync(scratchDir, {recursive: true});
+
+    return {dir, scratchDir, toolchain: toolchainHash(dir)};
+  } catch (error) {
+    // A half-built workspace must not be mistaken for a usable one.
+    rmSync(base, {force: true, recursive: true});
+    throw error;
+  }
 }
 
 const TOOLCHAIN_FILES = ["package.json", "package-lock.json"];
@@ -197,8 +204,52 @@ export function overlayDirOf(task: TaskDefinition): string | undefined {
   return existsSync(dir) ? dir : undefined;
 }
 
+/** Where git looks for configuration, hooks and templates; none of it is the developer's. */
+function gitEnvironment(): NodeJS.ProcessEnv {
+  const home = join(evalsHome(), "git-home");
+  const env: NodeJS.ProcessEnv = {};
+
+  mkdirSync(home, {recursive: true});
+  for (const name of ["PATH", "LANG", "LC_ALL", "TMPDIR"]) {
+    const value = process.env[name];
+
+    if (value !== undefined) env[name] = value;
+  }
+
+  return {
+    ...env,
+    GIT_AUTHOR_EMAIL: "dev@acme.example",
+    GIT_AUTHOR_NAME: "Acme Dev",
+    GIT_COMMITTER_EMAIL: "dev@acme.example",
+    GIT_COMMITTER_NAME: "Acme Dev",
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+    GIT_TERMINAL_PROMPT: "0",
+    HOME: home,
+    XDG_CONFIG_HOME: home,
+  };
+}
+
+// Disables hooks and signing and fixes the author, whatever any config file says.
+const GIT_PINNED = [
+  "-c",
+  "core.hooksPath=/dev/null",
+  "-c",
+  "commit.gpgsign=false",
+  "-c",
+  "tag.gpgsign=false",
+  "-c",
+  "user.name=Acme Dev",
+  "-c",
+  "user.email=dev@acme.example",
+];
+
 async function git(dir: string, args: string[]): Promise<void> {
-  const result = await runCommand(["git", ...args], {cwd: dir, timeoutMs: 60_000});
+  const result = await runCommand(["git", ...GIT_PINNED, ...args], {
+    cwd: dir,
+    env: gitEnvironment(),
+    timeoutMs: 60_000,
+  });
 
   if (result.exitCode !== 0) {
     throw new Error(
@@ -208,18 +259,10 @@ async function git(dir: string, args: string[]): Promise<void> {
 }
 
 export async function commitInitialState(dir: string): Promise<void> {
-  await git(dir, ["init", "-q"]);
+  // An empty template directory: no hooks or info files from a developer's git installation.
+  await git(dir, ["init", "-q", "--template="]);
   await git(dir, ["add", "-A"]);
-  await git(dir, [
-    "-c",
-    "user.name=Acme Dev",
-    "-c",
-    "user.email=dev@acme.example",
-    "commit",
-    "-q",
-    "-m",
-    "Initial commit",
-  ]);
+  await git(dir, ["commit", "-q", "--no-verify", "-m", "Initial commit"]);
 }
 
 export function snapshot(dir: string): Map<string, string> {
