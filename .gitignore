@@ -6,6 +6,7 @@ coverage/
 storybook-static/
 .next/
 .source/
+evals/
 next-env.d.ts
 .turbo/
 .codegraph/
