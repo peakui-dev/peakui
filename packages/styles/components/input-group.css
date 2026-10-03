@@ -55,11 +55,15 @@
     @apply h-auto items-start;
   }
 
-  /* CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу. */
+  /*
+   * CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу.
+   *
+   * Кольца фокуса в списке нет по той же причине, что у .input: outline появляется мгновенно, и
+   * переход на его цвете давал бы мигание рамки вместо плавного появления.
+   */
   transition:
     background-color 150ms var(--ease-smooth),
-    border-color 150ms var(--ease-smooth),
-    outline-color 150ms var(--ease-out);
+    border-color 150ms var(--ease-smooth);
   @apply motion-reduce:transition-none;
 
   @media (hover: hover) {

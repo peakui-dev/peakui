@@ -503,6 +503,12 @@ back.
 1. **One `FieldVariantContext` instead of a context per field root** — section 1.1.
 2. **`outline`-based field focus utilities instead of Tailwind `ring-*`** — section 1.2; an outline
    is not clipped by an ancestor's `overflow: hidden`, and `status-focused` is already an outline.
+   A consequence, decided after a review of the rendered result: **the ring takes no part in the
+   `transition`.** The reference lists `box-shadow` there, which is its ring, and a shadow
+   interpolates. An outline does not: its width appears at once, 0 → 2px, so a transition can only
+   reach the colour — and that reads as the frame's colour flickering rather than the ring fading in.
+   The fill and the border keep their transitions, as in the reference. Verified in the browser:
+   `apps/storybook/e2e/InputGroup.spec.ts`, "кольцо фокуса появляется без перехода".
 3. **`--color-danger-soft-foreground` for every red mark** — the error text, the invalid label and
    the invalid outline — instead of the reference's `text-danger` and its undeclared
    `--color-field-border-invalid`. Measured: section 4.1.

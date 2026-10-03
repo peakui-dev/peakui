@@ -51,13 +51,14 @@
    * CRITICAL: motion-reduce ПОСЛЕ transition. Наоборот специфичность отдаёт победу переходу, и
    * предпочтение пользователя молча игнорируется.
    *
-   * outline-color вместо box-shadow у эталона: его кольцо фокуса — ring, то есть тень, у нас —
-   * outline (utilities/index.css).
+   * Кольца фокуса в списке НЕТ, и это осознанно. У эталона там стоит box-shadow, потому что его
+   * кольцо — ring, то есть тень, и тень интерполируется. Наше кольцо — outline, его ширина
+   * возникает мгновенно (0 → 2px), и переход остался бы только на цвете: это не плавное появление,
+   * а мигание цвета рамки. Фокус обязан читаться сразу — он сообщает состояние, а не украшает.
    */
   transition:
     background-color 150ms var(--ease-smooth),
-    border-color 150ms var(--ease-smooth),
-    outline-color 150ms var(--ease-out);
+    border-color 150ms var(--ease-smooth);
   @apply motion-reduce:transition-none;
 
   /*
@@ -153,7 +154,8 @@
  * 2. Фиксированная высота h-10 md:h-9 вместо набора из py-2. Так поле совпадает по линии с .button.
  *
  * 3. Кольцо фокуса и невалидности — outline-утилиты вместо ring-*: ring это box-shadow, и его
- *    срезает overflow: hidden у предка. Отсюда же переход outline-color вместо box-shadow.
+ *    срезает overflow: hidden у предка. Следствие: кольцо не участвует в transition вовсе, тогда
+ *    как у эталона box-shadow в списке перехода стоит. Причина — в комментарии к transition.
  *
  * 4. Цвет невалидной границы приходит из status-invalid-field и равен --color-danger-soft-foreground.
  *    Эталон красит --color-field-border-invalid, который не объявлен ни в одной его теме, то есть

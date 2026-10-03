@@ -155,6 +155,57 @@ test.describe("Семейство полей — стилевой слой и Re
     });
 
     /*
+     * Кольцо фокуса появляется МГНОВЕННО. У эталона в списке перехода стоит box-shadow, потому что
+     * его кольцо — это ring, то есть тень. У нас кольцо — outline, и его ширина возникает сразу,
+     * 0 → 2px; переход на outline-color при этом не делает появление плавным, а добавляет мигание
+     * цвета рамки. Переход цвета фона и границы остаётся: он у эталона есть и к кольцу не относится.
+     */
+    test("кольцо фокуса появляется без перехода", async ({page}) => {
+      await page.goto(
+        "/iframe.html?id=components-inputgroup--with-prefix&globals=theme:default-light",
+      );
+
+      const shell = page.locator('[data-slot="input-group"]');
+
+      await expect(shell).toBeVisible();
+
+      const measured = await shell.evaluate((el) => {
+        const group = getComputedStyle(el);
+        const input = getComputedStyle(el.querySelector("input")!);
+
+        return {
+          groupProperty: group.transitionProperty,
+          inputDuration: input.transitionDuration,
+          inputProperty: input.transitionProperty,
+        };
+      });
+
+      /* Переход живёт на оболочке: она несёт заливку и границу. Кольца в списке нет. */
+      expect(measured.groupProperty).not.toContain("outline");
+      expect(measured.groupProperty).toContain("background-color");
+
+      /*
+       * У внутреннего контрола перехода нет вовсе: property остаётся начальным "all", а длительность
+       * нулевой. Проверяется длительность, а не имя: "all" формально включает и outline-color, и
+       * только нулевая длительность доказывает, что ничего не анимируется.
+       */
+      expect(measured.inputProperty).toBe("all");
+      expect(measured.inputDuration).toBe("0s");
+
+      /* То же у отдельно стоящего поля: заливка анимируется, кольцо — нет. */
+      await page.goto("/iframe.html?id=components-input--variants&globals=theme:default-light");
+
+      const plain = page.getByLabel("primary");
+
+      await expect(plain).toBeVisible();
+
+      const plainTransition = await plain.evaluate((el) => getComputedStyle(el).transitionProperty);
+
+      expect(plainTransition).not.toContain("outline");
+      expect(plainTransition).toContain("background-color");
+    });
+
+    /*
      * Найдено ревью ветки: кольцо поля рисовалось и тогда, когда фокус стоял на кнопке в суффиксе —
      * оболочка сообщала «поле в фокусе», когда ввода нет. Причина была в [data-focus-within]: RAC
      * ставит его из useFocusRing({within: true}), то есть на фокус где угодно внутри.
