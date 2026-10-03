@@ -34,7 +34,7 @@ describe("/agent-markdown", () => {
   });
 
   it("answers 404 when an external client hits /agent-markdown directly, header or not", () => {
-    for (const headers of [{"x-peakui-markdown-path": PAGE}, {}]) {
+    for (const headers of [{"x-peakui-markdown-path": PAGE} as Record<string, string>, {}]) {
       const response = proxy(new NextRequest("http://localhost/agent-markdown", {headers}));
 
       expect(response.status).toBe(404);
