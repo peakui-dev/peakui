@@ -21,13 +21,15 @@ import {FieldError} from "@peakui/react";
 
 ### Native Validation
 
+A bare `<FieldError />` shows the field's own messages, which for a built-in constraint are the browser's, in the browser's language and wording. To write a message of your own for each kind of error, use the children function and read `validationDetails`, as in the next example.
+
 Without children, `FieldError` shows the field's own validation messages: the browser's messages for constraints such as `isRequired` and `type="email"`, and the strings returned from the field's `validate` function. Submit the form empty to see it.
 
 <ComponentPreview name="field-error-validation" />
 
 ### Render Function
 
-Children can be a function of the validation state, for a message of your own per kind of error.
+Per-error messages need the children function: `<FieldError>{({validationDetails}) => ...}</FieldError>`. `validationDetails` is the control's native `ValidityState`, so `valueMissing`, `tooShort`, `typeMismatch` and the rest say which constraint failed. A static child such as `<FieldError>Invalid</FieldError>` replaces every message with that one text.
 
 <ComponentPreview name="field-error-render-function" />
 

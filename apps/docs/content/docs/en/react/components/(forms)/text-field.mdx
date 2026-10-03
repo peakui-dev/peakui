@@ -52,9 +52,21 @@ export default () => (
 
 ### Validation
 
-`validate` returns an error message, or `null` when the value is valid. With the default `validationBehavior="native"` the message appears when the form is submitted.
+`validate` receives the current value (an empty string for an empty field) and returns `string | string[] | true | null | undefined`: a message, or several, for an invalid value, and `true`, `null` or `undefined` when the value is valid.
 
 <ComponentPreview name="text-field-validation" />
+
+Which message shows, and when:
+
+- **A constraint and `validate` both fail.** The message from `validate` is shown. The browser's message for `isRequired`, `minLength`, `pattern` or `type` appears only while `validate` returns a valid result, so make `validate` return `null` for an empty value if the browser's "required" message should be the one shown for it.
+- **Native behavior (the default).** Messages appear when the form is submitted, and again when the browser reports a `change` for the input, which is when it loses focus after its value was edited. They do not appear on every keystroke.
+- **`validationBehavior="aria"`.** The message from `validate`, and from `isInvalid`, shows as the value changes. `isRequired` becomes `aria-required` instead of the native `required` attribute, and the constraints produce no message of their own: write them as `validate` or `isInvalid` instead.
+
+### Form
+
+A complete form: two fields, each with a description and a `FieldError`, and a submit button. Submit it empty, then with a username that contains a space, to see each message appear under its own field.
+
+<ComponentPreview name="text-field-form" />
 
 ### Controlled
 
@@ -136,7 +148,7 @@ The root carries the field's state, and its parts are styled from it:
 | `isInvalid` | `boolean` | `false` | Whether the value is invalid |
 | `isDisabled` | `boolean` | `false` | Whether the field is disabled |
 | `isReadOnly` | `boolean` | `false` | Whether the value can be selected but not changed |
-| `validate` | `(value: string) => ValidationError \| true \| null \| undefined` | - | Returns an error message for an invalid value |
+| `validate` | `(value: string) => string \| string[] \| true \| null \| undefined` | - | Returns an error message, or messages, for an invalid value, and `true`, `null` or `undefined` for a valid one |
 | `validationBehavior` | `'native' \| 'aria'` | `'native'` | Whether validation blocks form submission (`native`) or only marks the field (`aria`) |
 | `children` | `React.ReactNode \| (values: TextFieldRenderProps) => React.ReactNode` | - | The parts of the field, or a function of the field's state |
 | `className` | `string \| (values: TextFieldRenderProps) => string` | - | Additional classes, or a function of the field's state |

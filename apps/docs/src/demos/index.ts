@@ -196,6 +196,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./text-field/validation").then((m) => m.Validation),
     file: "text-field/validation.tsx",
   },
+  "text-field-form": {
+    loader: () => import("./text-field/form").then((m) => m.Form),
+    file: "text-field/form.tsx",
+  },
   "text-field-controlled": {
     loader: () => import("./text-field/controlled").then((m) => m.Controlled),
     file: "text-field/controlled.tsx",
