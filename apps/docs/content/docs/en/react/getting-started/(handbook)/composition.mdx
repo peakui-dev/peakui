@@ -50,7 +50,7 @@ import {Description, FieldError, Input, Label, TextField} from "@peakui/react";
 ```
 
 - `Label`, `Description` and `FieldError` are connected to the input through `aria-labelledby` and `aria-describedby` without any ids from you.
-- `Description` and `FieldError` render nothing outside a field: they need the field to connect to.
+- Outside a field the two differ. `Description` still renders its `<span>`, but nothing links it to a control. `FieldError` renders nothing: it needs the field's validation state, and it also renders nothing while the field is valid.
 - `variant` on `TextField` flows down to `Input` and `InputGroup`. A nested field resets it rather than inheriting.
 
 Swap `Input` for `InputGroup` when the control needs a prefix or a suffix:
