@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+@source inline("bg-emerald-100 text-emerald-800 ring-emerald-600/20");

@@ -1,0 +1,8 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "typecheck": ["unknown-composition-prop"],
+    "static": ["as-prop"],
+    "render": ["group-is-section", "no-div-group"]
+  }
+}
