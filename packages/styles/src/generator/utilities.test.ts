@@ -44,3 +44,41 @@ describe("concentric nesting utilities", () => {
     expect(css).toMatch(/var\(--concentric-radius,\s*var\(--radius-lg\)\)/);
   });
 });
+
+describe("field focus utilities", () => {
+  const css = readFileSync("utilities/index.css", "utf8");
+
+  it("объявляет оба кольца полей", () => {
+    expect(css).toMatch(/@utility status-focused-field\b/);
+    expect(css).toMatch(/@utility status-invalid-field\b/);
+  });
+
+  it("прижимает кольцо поля вплотную, иначе оно рисуется поверх границы соседнего слота", () => {
+    expect(css).toMatch(/@utility status-focused-field\s*\{[^}]*outline-offset:\s*0\b/);
+  });
+
+  it("оставляет общему кольцу его отступ — два кольца, а не одно", () => {
+    expect(css).toMatch(
+      /@utility status-focused\s*\{[^}]*outline-offset:\s*var\(--ring-offset-width\)/,
+    );
+  });
+
+  it("красит невалидное поле danger-soft-foreground, а не danger: 2.95:1 против заливки в тёмной теме", () => {
+    const invalid = /@utility status-invalid-field\s*\{(?:[^{}]|\{[^{}]*\})*\}/.exec(css)?.[0];
+
+    expect(invalid).toBeDefined();
+    expect(invalid).toContain("var(--color-danger-soft-foreground)");
+    expect(invalid).not.toMatch(/var\(--color-danger\)/);
+  });
+
+  it("утолщает кольцо невалидности и по псевдоклассу, и по data-атрибуту", () => {
+    const invalid = /@utility status-invalid-field\s*\{(?:[^{}]|\{[^{}]*\})*\}/.exec(css)?.[0];
+
+    for (const form of [":focus", ":focus-visible", ":focus-within"]) {
+      expect(invalid, form).toContain(`&${form}`);
+    }
+    for (const form of ["data-focused", "data-focus-visible", "data-focus-within"]) {
+      expect(invalid, form).toContain(`[${form}]`);
+    }
+  });
+});
