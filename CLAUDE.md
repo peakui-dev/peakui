@@ -119,6 +119,12 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
 - **Site URL** — `NEXT_PUBLIC_SITE_URL` (see `apps/docs/.env.example`) must be an absolute URL for
   `pnpm build:docs`: the prerendered llms files and `/api/components` embed it, and the build fails
   without it. `pnpm dev:docs` falls back to `http://localhost:3000`.
+- **Deployment requirement: `Vary: Accept`** — `/en`, `/en/docs/...` and `/` answer markdown or HTML
+  depending on `Accept`, but the prerendered HTML pages are served by `next start` with their own
+  cache headers: `Vary: Accept` set in `next.config.ts` `headers()` or on the response in `proxy.ts`
+  does not reach them (checked against `next start`). The host must vary cached HTML docs pages on
+  `Accept`, or run the proxy before its cache. Without that a shared cache can hand HTML to an agent
+  that asked for markdown, or the reverse.
 - **Storybook stays independent** — docs never import stories, and stories never import demos.
 - The app has no `@heroui/*` dependency: those styles define the same BEM classes as
   `@peakui/styles` and would collide.
