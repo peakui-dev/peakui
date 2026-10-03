@@ -3,10 +3,49 @@
  * контракта наравне с токенами: см. references/css-authoring.md в peakui-component-standards.
  */
 
-/* Видимый фокус. Один источник правды — иначе каждый компонент рисует свой. */
+/*
+ * Видимое состояние фокуса. В системе ДВА кольца, и компонент не рисует третьего:
+ *
+ * - status-focused — общее, с отступом от элемента. Берут отдельно стоящие контролы: кнопка,
+ *   ссылка, чекбокс.
+ * - status-focused-field — прижатое вплотную, outline-offset: 0. Берёт контрол, который сидит в
+ *   общей оболочке: input внутри input-group, где кольцо с отступом нарисовалось бы поверх границы
+ *   соседнего слота — префикса или суффикса.
+ *
+ * Третьего не завести: кольцо, нарисованное внутри компонента, перестаёт быть системным.
+ */
 @utility status-focused {
   outline: var(--ring-offset-width) solid var(--color-focus);
   outline-offset: var(--ring-offset-width);
+}
+
+@utility status-focused-field {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0;
+}
+
+/*
+ * Невалидное поле. В покое — тонкая граница, в фокусе — то же кольцо, что у фокуса, но красное.
+ *
+ * Цвет — --color-danger-soft-foreground, а НЕ --color-danger: измерено генератором, --danger против
+ * заливки поля даёт 2.95:1 в тёмной теме, ниже 3:1, которые должна давать граница состояния
+ * (SC 1.4.11). Спека 2026-10-03-input-field-family-design, раздел 4.1.
+ *
+ * Кольцо через outline, а не через ring-* эталона: ring — это box-shadow, и его срезает
+ * overflow: hidden у любого предка, а outline — нет.
+ */
+@utility status-invalid-field {
+  outline: 1px solid var(--color-danger-soft-foreground);
+  outline-offset: 0;
+
+  &:focus,
+  &:focus-visible,
+  &:focus-within,
+  &[data-focused],
+  &[data-focus-visible],
+  &[data-focus-within] {
+    outline-width: 2px;
+  }
 }
 
 /* Недоступное состояние. */

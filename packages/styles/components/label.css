@@ -1,0 +1,67 @@
+/*
+ * Label. Имена классов приходят из src/components/label/label.styles.ts.
+ *
+ * У каждого состояния ДВЕ формы записи: модификатор класса — для разметки без React, где проп
+ * передать некому, и селектор по состоянию предка — для поля, где состояние знает только корень.
+ * Вторая форма и есть причина, по которой потребителю не приходится дублировать isInvalid на
+ * подписи.
+ *
+ * Сверено с heroui/packages/styles/components/label.css. Расхождения — в конце файла.
+ */
+
+.label {
+  @apply text-sm font-medium text-foreground;
+}
+
+.label--required,
+[data-required] > .label,
+/*
+ * Вторая форма для разметки без React — через :has, а не через [aria-required="true"] > .label:
+ * aria-required не разрешён на обёртке без роли, и axe зовёт это critical (aria-allowed-attr).
+ * Атрибут живёт на самом контроле, то есть на СОСЕДЕ подписи, а не на её предке.
+ */
+.textfield:has([aria-required="true"]) > .label {
+  /*
+   * Звёздочка — content, а не текст в разметке: доступное имя поля её не включает, и скринридер
+   * не читает «звёздочка». Обязательность он берёт из aria-required, которую ставит RAC.
+   */
+  @apply after:ms-0.5 after:content-['*'];
+
+  &::after {
+    color: var(--color-danger-soft-foreground);
+  }
+}
+
+/*
+ * Парный псевдокласс у недоступного состояния — не формальность: подпись гаснет не от своего
+ * атрибута, а от состояния предка, и в разметке без React этим предком бывает нативный
+ * <fieldset disabled>. Без первой строки такая форма гасила контролы и НЕ гасила их подписи.
+ * Найдено ревью ветки.
+ */
+.label--disabled,
+fieldset:disabled .label,
+[aria-disabled="true"] .label,
+[data-disabled] .label {
+  @apply status-disabled;
+}
+
+.label--invalid,
+[aria-invalid="true"] .label,
+[data-invalid] .label {
+  color: var(--color-danger-soft-foreground);
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. Цвет звёздочки и невалидной подписи — --color-danger-soft-foreground, а не --danger: измерено,
+ *    --danger как ТЕКСТ даёт 3.38:1 на фоне страницы и 2.95:1 на поверхности в тёмной теме, ниже
+ *    4.5:1. Спека 2026-10-03-input-field-family-design, раздел 4.1.
+ *
+ * 2. Нет охран :not([role="radiogroup"]):not([data-slot="checkbox"]) и прочих: у эталона они
+ *    держат звёздочку подальше от отдельных опций внутри группы. Ни RadioGroup, ни Checkbox у нас
+ *    не существует — охрана приедет вместе с ними, как у .button исключение для link-icon.
+ *
+ * 3. Добавлена форма .textfield:has([aria-required="true"]) > .label: у эталона только
+ *    data-required, то есть в разметке без React звёздочка не появляется вовсе.
+ */

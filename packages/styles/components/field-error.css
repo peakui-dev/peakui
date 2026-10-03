@@ -1,0 +1,37 @@
+/*
+ * FieldError — сообщение валидации. Имена классов приходят из
+ * src/components/field-error/field-error.styles.ts.
+ *
+ * Сверено с heroui/packages/styles/components/field-error.css. Расхождения — в конце файла.
+ */
+
+.field-error {
+  /*
+   * Схлопнуто по умолчанию и раскрывается по data-visible. RAC рендерит FieldError только у
+   * невалидного поля, поэтому «отрендерен» и «виден» совпадают — атрибут ставит компонент. Смысл
+   * схлопывания не в анимации: без перехода появление сообщения дёргает всё, что ниже него.
+   */
+  @apply h-0 px-1 text-xs wrap-break-word opacity-0;
+  color: var(--color-danger-soft-foreground);
+
+  &[data-visible] {
+    @apply h-auto opacity-100;
+  }
+
+  /* CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу. */
+  transition:
+    opacity 150ms var(--ease-out),
+    height 350ms var(--ease-smooth);
+  @apply motion-reduce:transition-none;
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. Цвет — --color-danger-soft-foreground, а не --danger: измерено, --danger как текст даёт
+ *    3.38:1 на фоне страницы и 2.95:1 на поверхности в тёмной теме, ниже 4.5:1. Спека
+ *    2026-10-03-input-field-family-design, раздел 4.1.
+ *
+ * 2. Нет блока для .checkbox / .switch / .radio: ни одного из этих компонентов не существует.
+ *    У эталона он отключает схлопывание внутри тоглов; правило приедет вместе с ними.
+ */

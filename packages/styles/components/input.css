@@ -1,0 +1,169 @@
+/*
+ * Input. Имена классов приходят из src/components/input/input.styles.ts; здесь живёт весь
+ * Tailwind. Файл самодостаточен: ни одного data-* без парного псевдокласса, поэтому таблица
+ * стилей работает и без React — см. css-authoring.md.
+ *
+ * Сверено построчно с heroui/packages/styles/components/input.css. Расхождения перечислены в конце
+ * файла — каждое с причиной.
+ */
+
+.input {
+  /* Ручки темизации — публичный контракт переопределения, первее чем tv({extend}). */
+  --input-bg: var(--color-field);
+  --input-bg-hover: var(--color-field-hover);
+  --input-bg-focus: var(--color-field-focus);
+  --input-fg: var(--color-field-foreground);
+  --input-placeholder: var(--color-field-placeholder);
+  --input-border: var(--color-field-border);
+  --input-border-hover: var(--color-field-border-hover);
+  --input-border-focus: var(--color-field-border-focus);
+  --input-radius: var(--radius-field);
+  --input-shadow: var(--shadow-field);
+
+  @apply block min-w-0 appearance-none outline-none;
+  /*
+   * 40px до 48rem ширины вьюпорта, 36px от неё — та же форма, что у .button, чтобы поле и кнопка
+   * рядом стояли по одной линии. Это ширина, а НЕ (pointer: coarse): css-authoring.md описывает
+   * эту форму как грубость указателя, и это его ошибка — то же замечание стоит в button.css.
+   * Порог WCAG 2.2 в 24px выдержан в обоих случаях.
+   *
+   * У эталона высоты нет вовсе: она набирается из py-2 и строки текста. Тогда поле и кнопка
+   * расходятся на пиксели при смене размера шрифта.
+   */
+  @apply h-10 px-3 md:h-9;
+  /*
+   * 16px на узком вьюпорте и 14px от sm — у эталона так же. Причина не декоративная: Safari на iOS
+   * зумит страницу при фокусе в поле с текстом мельче 16px.
+   */
+  @apply text-base sm:text-sm;
+
+  border: var(--border-width-field) solid var(--input-border);
+  border-radius: var(--input-radius);
+  background-color: var(--input-bg);
+  box-shadow: var(--input-shadow);
+  color: var(--input-fg);
+
+  &::placeholder {
+    color: var(--input-placeholder);
+  }
+
+  /*
+   * CRITICAL: motion-reduce ПОСЛЕ transition. Наоборот специфичность отдаёт победу переходу, и
+   * предпочтение пользователя молча игнорируется.
+   *
+   * Кольца фокуса в списке НЕТ, и это осознанно. У эталона там стоит box-shadow, потому что его
+   * кольцо — ring, то есть тень, и тень интерполируется. Наше кольцо — outline, его ширина
+   * возникает мгновенно (0 → 2px), и переход остался бы только на цвете: это не плавное появление,
+   * а мигание цвета рамки. Фокус обязан читаться сразу — он сообщает состояние, а не украшает.
+   */
+  transition:
+    background-color 150ms var(--ease-smooth),
+    border-color 150ms var(--ease-smooth);
+  @apply motion-reduce:transition-none;
+
+  /*
+   * :hover под @media (hover: hover) — на тач-устройстве он залипает после тапа. data-hovered вне
+   * условия: его ставит React Aria, которая про природу указателя знает сама.
+   *
+   * :not(:focus) в обеих формах: подсветка наведения не должна перекрывать состояние фокуса.
+   */
+  @media (hover: hover) {
+    &:hover:not(:focus):not([data-focused]) {
+      background-color: var(--input-bg-hover);
+      border-color: var(--input-border-hover);
+    }
+  }
+
+  &[data-hovered]:not(:focus):not([data-focused]) {
+    background-color: var(--input-bg-hover);
+    border-color: var(--input-border-hover);
+  }
+
+  /*
+   * Фокус поля — :focus, а не :focus-visible: в текстовом поле каретка стоит и после клика мышью,
+   * и состояние обязано быть видно. :not([data-focused]) — охрана от двойного применения, когда
+   * фокусом управляет React Aria.
+   */
+  &:focus:not([data-focused]),
+  &[data-focused] {
+    @apply status-focused-field;
+    background-color: var(--input-bg-focus);
+    border-color: var(--input-border-focus);
+  }
+
+  &[aria-invalid="true"],
+  &[data-invalid] {
+    @apply status-invalid-field;
+    background-color: var(--input-bg-focus);
+  }
+
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /*
+   * Структурная половина forced-colors — обязанность компонента: роли переназначает центральный
+   * блок темы, но опознающую границу держит компонент. Здесь это не формальность: у нас
+   * --field-border-width равен 0px, и тема в своём блоке forced-colors его НЕ переопределяет —
+   * она задаёт только --field-border: ButtonBorder, то есть цвет границы нулевой ширины. Без
+   * строки ниже поле в режиме принудительных цветов осталось бы без видимых пределов.
+   *
+   * Правильное место для починки — слой токенов; запись в бэклоге. Пока ширину поднимает компонент.
+   * Граница объявлена и в обычном состоянии, поэтому layout не дёргается.
+   */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
+}
+
+/* ---------- Варианты ---------- */
+
+.input--primary {
+  /* Без стилей: вариант по умолчанию живёт в .input, иначе два источника правды разъедутся. */
+}
+
+/*
+ * Поле на поверхности: заливка нейтральным --default, без тени. Эталон делает ровно это.
+ *
+ * Когда появится Surface, второй и третий уровень поверхности переведут ручку --input-bg на
+ * --color-on-surface-secondary / -tertiary: семейство on-surface существует именно для этого
+ * (спека 2026-10-03-on-surface-tokens-design). Пока уровня у компонента нет — ручка открыта.
+ */
+.input--secondary {
+  --input-bg: var(--color-default);
+  --input-bg-hover: var(--color-default-hover);
+  --input-bg-focus: var(--color-default);
+  --input-shadow: none;
+}
+
+/* ---------- Ширина ---------- */
+
+.input--full-width {
+  @apply w-full;
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. forced-colors. У эталона нет вовсе; решение — docs/superpowers/specs/2026-10-01-design-tokens-design.md.
+ *    Здесь оно поднимает ещё и border-width, потому что наш --field-border-width равен 0px.
+ *
+ * 2. Фиксированная высота h-10 md:h-9 вместо набора из py-2. Так поле совпадает по линии с .button.
+ *
+ * 3. Кольцо фокуса и невалидности — outline-утилиты вместо ring-*: ring это box-shadow, и его
+ *    срезает overflow: hidden у предка. Следствие: кольцо не участвует в transition вовсе, тогда
+ *    как у эталона box-shadow в списке перехода стоит. Причина — в комментарии к transition.
+ *
+ * 4. Цвет невалидной границы приходит из status-invalid-field и равен --color-danger-soft-foreground.
+ *    Эталон красит --color-field-border-invalid, который не объявлен ни в одной его теме, то есть
+ *    не рисует ничего; а --danger дал бы 2.95:1 против заливки поля в тёмной теме. Измерения —
+ *    спека 2026-10-03-input-field-family-design, раздел 4.1.
+ *
+ * 5. Ручки --input-* на все цвета, а не хардкод токенов по месту: тот же контракт, что у .button.
+ *
+ * 6. data-hovered и data-invalid без ="true": значение атрибута React Aria не гарантирует, а
+ *    селектор по наличию ловит оба случая.
+ */
