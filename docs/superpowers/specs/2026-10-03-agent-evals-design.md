@@ -112,8 +112,16 @@ that the consumer supplies the pending indicator), and TypeScript that needs
 6. `@acme/status` — a tiny plain-JS package committed under `evals/fixtures/packages/acme-status/`,
    packed the same way. It exists for the Tailwind scanning task.
 
-The **library hash** is a SHA-256 over the staged files' relative paths and contents. It is stored
-in the batch manifest; two batches with different hashes measured different libraries.
+The **library hash** is a SHA-256 over what the build is made *from*, never over what it emits: the
+source files of both packages that feed the build (`src/`, the manifests, the TypeScript and
+`tsdown` configuration, the stylesheet directories), the Acme package, the text of the staging
+rules (`evals/src/pack/stage.ts`) and the versions of `tsdown`, `rolldown`, `rolldown-plugin-dts` and
+`typescript`. It is computed before anything is built. The emitted `dist` is excluded because the
+declaration emit is not deterministic: it reorders members of
+`styles/dist/components/fieldset/fieldset.styles.d.ts` between runs, so the same library gave two
+hashes under load. The hash is stored in the batch manifest; two batches with different hashes
+measured different libraries. Every pack stages into its own directory, so packs that run at the
+same time do not clear each other's files.
 
 Stripping CSS comments is a decision, not a neutral transformation. Comments are where the
 reference library is named (D6), they are contributor notes in Russian, and `index.css` opens with a
@@ -627,26 +635,51 @@ Compiler and bundler output becomes findings through a classification table:
 
 ### 8.3 Shared detectors
 
-They run on every changed or added `.ts`/`.tsx` file, for every task, and they gate. A "PeakUI
-element" is a JSX element whose tag's root identifier was imported from `@peakui/react`.
+They run on every changed or added source file (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.mts`,
+`.cts`), for every task, and they gate. A "PeakUI element" is a JSX element whose tag's root
+identifier is bound to `@peakui/react`: imported from it, an alias of such a name (`const B =
+Button`), or imported from a local file that re-exports it (`export {Button} from "@peakui/react"`,
+`export *`, an exported alias; one level deep, relative specifiers and `@/`, `~/`). Elements are named
+canonically: `Button.Root`, `ButtonRoot` and an aliased `Btn` are all `Button`; `FieldsetGroup` is
+`Fieldset.Group`. The canonical names and the BEM prefixes below are read from the packages'
+sources, not listed by hand.
 
 | Rule | Pitfall | Fires on |
 | --- | --- | --- |
-| `deep-import` | `imports` | An import from `@peakui/react/…`. |
-| `provider` | `no-provider` | An imported name ending in `Provider` from `@peakui/…`. |
-| `foreign-tv` | `styling` | `tv` imported from `tailwind-variants`. |
+| `deep-import` | `imports` | An import, side-effect import, `export … from`, dynamic `import()` or `require()` of a specifier that the staged package does not export: anything under `@peakui/react/` except `package.json`, and any `@peakui/styles/…` that is not one of its real `exports` (`css`, `base`, `components/*.css`, `themes/*`, `utilities`, `variants`). |
+| `provider` | `no-provider` | An imported or re-exported name ending in `Provider` from `@peakui/…`. |
+| `foreign-tv` | `styling` | `tv` imported or re-exported from `tailwind-variants` or `tailwind-variants/lite`. |
 | `forward-ref` | `composition` | `forwardRef` imported from `react` or used as `React.forwardRef`. |
 | `class-names-prop` | `composition` | `classNames` on a PeakUI element. |
 | `as-prop` | `composition` | `as` on a PeakUI element. |
 | `assembled-field-prop` | `composition` | `label`, `errorMessage`, `description` or `helperText` on `Input` or `TextField`. |
 | `dom-event-on-button` | `rac-props` | `onClick` on a PeakUI `Button`. |
-| `dom-state-prop` | `rac-props` | `disabled`, `loading` or `isLoading` on `Button`; `disabled`, `required` or `readOnly` on `TextField`. |
+| `dom-state-prop` | `rac-props` | `disabled`, `loading` or `isLoading` on `Button`; `disabled`, `required` or `readOnly` on `TextField`. The message names the one React Aria prop to use. |
 | `color-prop` | `variants` | `color` on a PeakUI `Button`. |
-| `interpolated-class` | `tailwind-scanning` | A template literal with a substitution, inside a `className` value or an argument of `tv`, `cn`, `clsx` or `twMerge`, where the text next to the substitution ends or starts with `-`. |
-| `type-escape` | `other` | `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, or `as any`. |
-| `config-weakened` | `other` | `tsconfig.json` is among the changed files. |
+| `interpolated-class` | `tailwind-scanning` | A class value (a `className` attribute, or an argument of `tv`, `cn`, `clsx` or `twMerge`) assembled from pieces: a template literal with a substitution, or a `+` concatenation, where the static text next to the substitution ends with `-`, `[`, `:` or `/` or starts with `-`, `:`, `]` or `/` (`rounded-${r}`, `"rounded-" + r`, `w-[${n}px]`, `${bp}:flex`, `bg-accent/${o}`); and a variable holding such a string that is then used in a class value. Not flagged: an interpolation whose static prefix is a library BEM block or element prefix (`button--${size}`, `input-group__${part}`), because those classes are plain CSS in the package's own stylesheets. |
+| `type-escape` | `other` | A `@ts-ignore`, `@ts-expect-error` or `@ts-nocheck` directive in a real comment (never inside a string, template, regular expression or JSX text); `as any`, `<any>x`, `as unknown as T`; any `any` in a type position (`: any`, `any[]`, `Array<any>`). |
+| `config-weakened` | `other` | A `tsconfig.json`, `tsconfig.*.json` or `jsconfig` file is among the changed files. |
+
+A finding on an attribute carries the line and excerpt of that attribute, not of the element's opening
+tag.
 
 `disabled` on a standalone `Input` and on `Fieldset` is documented API and is not flagged.
+
+#### Known detector gaps
+
+The detectors are syntactic and local. These are known to pass wrong code, and are not chased:
+
+- Class-building libraries and helpers other than `tv`, `cn`, `clsx` and `twMerge`: `cva`, `twJoin`,
+  `classnames`, `cx`, and an aliased import of any of them (`import {clsx as c}`).
+- `createTV` from `tailwind-variants` (only `tv` is recognised).
+- A class name assembled through a function's return value, `[a, b].join("-")`, `.concat()`,
+  `.replace()` or an object key.
+- Wrapper chains longer than one level (a file that re-exports a file that re-exports the library),
+  namespace imports of a wrapper file, and bindings inside a function body.
+- `require()` bindings and `import()` results (their use is not traced; only their specifier is
+  checked).
+- JavaScript files are scanned by the detectors but are not type-checked: `allowJs` is on in the
+  `next-app` fixture and `checkJs` is not.
 
 ### 8.4 Rendered output
 
@@ -655,9 +688,15 @@ A render spec has an optional `ssr` part (module, export name, named cases with 
 and a `check` function that receives the parsed documents and the parsed built CSS.
 
 The SSR runner is a child process started with the workspace as its first argument. It resolves
-Vite, React and `react-dom/server` from the workspace, starts Vite with `configFile: false` so the
-agent's Vite config cannot break scoring, loads the module with `ssrLoadModule` and renders each
-case with `renderToStaticMarkup`.
+Vite, React and `react-dom/server` from the workspace, starts Vite with the workspace's own configuration (plugins and `resolve.alias`) and
+`resolve.tsconfigPaths`, so a solution that builds can render and a path alias such as `@/…`
+resolves; a configuration that cannot load fails the build layer as well. It loads the module with
+`ssrLoadModule`, accepts any React component type (a function, `memo()`, `forwardRef()`, a class)
+and renders each case with `renderToStaticMarkup`. The result goes to a file whose path is the
+runner's last argument, never to stdout, so output from the agent's module cannot corrupt it; the
+runner exits once the result is written, so a module-level timer cannot hold it up. The child
+process gets the same allow-listed environment as the type-check and build commands, not the
+parent's.
 
 **No interaction.** Static markup cannot press a button or submit a form. An interactive jsdom
 render needs testing libraries resolved against the workspace's single React copy; that is a
