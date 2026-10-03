@@ -1,7 +1,7 @@
 import type {FileChanges, ProjectFile, StaticContext, TaskDefinition} from "../types.ts";
 
 import {createHash} from "node:crypto";
-import {existsSync, mkdirSync, readFileSync, rmSync} from "node:fs";
+import {existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, rmSync} from "node:fs";
 import {basename, dirname, isAbsolute, join, relative, resolve, sep} from "node:path";
 
 import {SNAPSHOT_IGNORE} from "../../fixtures/index.ts";
@@ -23,15 +23,48 @@ export interface Workspace {
   scratchDir: string;
 }
 
+function exists(path: string): boolean {
+  try {
+    // lstat: a dangling link named like an agent file still counts.
+    lstatSync(path);
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * An absolute path with every symlink resolved: the real path of the nearest existing ancestor,
+ * then the segments that do not exist yet. This is the chain a process started in `path` sees.
+ */
+export function realResolve(path: string): string {
+  const absolute = resolve(path);
+  const rest: string[] = [];
+  let current = absolute;
+
+  for (;;) {
+    try {
+      return join(realpathSync(current), ...rest);
+    } catch {
+      const parent = dirname(current);
+
+      if (parent === current) return absolute;
+      rest.unshift(basename(current));
+      current = parent;
+    }
+  }
+}
+
 /** Throws when an ancestor of `dir` holds an agent instruction file the agent would inherit. */
 export function assertIsolated(dir: string): void {
-  let current = dirname(dir);
+  let current = dirname(realResolve(dir));
 
   for (;;) {
     for (const name of AGENT_FILES) {
       const found = join(current, name);
 
-      if (existsSync(found)) {
+      if (exists(found)) {
         throw new Error(
           `workspace location is not isolated: ${found} would be inherited by the agent; set PEAKUI_EVALS_HOME to a clean directory`,
         );
@@ -55,9 +88,9 @@ function assertSegment(label: string, value: string): void {
   }
 }
 
-/** True when `path` is strictly inside `root` once both are resolved. */
+/** True when `path` is strictly inside `root` once both are resolved through symlinks. */
 function isStrictlyInside(root: string, path: string): boolean {
-  const rel = relative(resolve(root), resolve(path));
+  const rel = relative(realResolve(root), realResolve(path));
 
   return rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
 }

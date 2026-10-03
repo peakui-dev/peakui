@@ -1,4 +1,13 @@
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 
@@ -44,6 +53,43 @@ describe("assertIsolated", () => {
     mkdirSync(join(root, "a/.claude"), {recursive: true});
 
     expect(() => assertIsolated(join(root, "a/b/app"))).toThrow(".claude");
+  });
+
+  it("walks the ancestors of a relative directory from the current directory", () => {
+    const project = join(realpathSync(root), "project");
+    const previous = process.cwd();
+
+    // Above the working directory: a walk that ends at "." never reaches it.
+    write(join(realpathSync(root), "AGENTS.md"), "x");
+    mkdirSync(join(project, "home"), {recursive: true});
+    process.chdir(project);
+
+    try {
+      expect(() => assertIsolated("home/workspaces/b/k/app")).toThrow("AGENTS.md");
+      process.env.PEAKUI_EVALS_HOME = "home";
+      expect(() =>
+        createWorkspace({batch: "b", key: "k", overlayDir: undefined, templateDir: project}),
+      ).toThrow("AGENTS.md");
+    } finally {
+      process.chdir(previous);
+    }
+  });
+
+  it("walks the real chain behind a symlinked root", () => {
+    const real = join(realpathSync(root), "real");
+
+    write(join(real, "AGENTS.md"), "x");
+    mkdirSync(join(real, "inner"), {recursive: true});
+    symlinkSync(join(real, "inner"), join(root, "link"));
+
+    // Lexically `root/link/app` has no agent file above it; really it sits under `real/`.
+    expect(() => assertIsolated(join(root, "link/app/x"))).toThrow("AGENTS.md");
+  });
+
+  it("counts a dangling link named like an agent file", () => {
+    symlinkSync(join(root, "missing-target"), join(root, "CLAUDE.md"));
+
+    expect(() => assertIsolated(join(root, "a/b/app"))).toThrow("CLAUDE.md");
   });
 
   it("accepts a clean chain and ignores agent files inside the workspace itself", () => {
@@ -137,6 +183,18 @@ describe("workspace path containment", () => {
 
     expect(() => create(batch, key)).toThrow(/invalid workspace/);
 
+    for (const path of paths) expect(existsSync(path), path).toBe(true);
+  });
+
+  it("refuses a batch directory that is a symlink out of the root", () => {
+    const paths = sentinels();
+
+    mkdirSync(join(root, "home/workspaces"), {recursive: true});
+    symlinkSync(join(root, "outside-dir"), join(root, "home/workspaces/linked"));
+    write(join(root, "outside-dir/k/app/precious"), "keep");
+
+    expect(() => create("linked", "k")).toThrow(/invalid workspace location/);
+    expect(existsSync(join(root, "outside-dir/k/app/precious"))).toBe(true);
     for (const path of paths) expect(existsSync(path), path).toBe(true);
   });
 
