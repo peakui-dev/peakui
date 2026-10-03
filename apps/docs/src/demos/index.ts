@@ -40,6 +40,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./button/loading-state").then((m) => m.LoadingState),
     file: "button/loading-state.tsx",
   },
+  "button-pressed-state": {
+    loader: () => import("./button/pressed-state").then((m) => m.PressedState),
+    file: "button/pressed-state.tsx",
+  },
   "button-disabled": {
     loader: () => import("./button/disabled").then((m) => m.Disabled),
     file: "button/disabled.tsx",

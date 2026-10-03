@@ -15,6 +15,20 @@ import {Button} from "@peakui/react";
 
 <ComponentPreview name="button-basic" />
 
+<Callout>
+  The examples start with `"use client"`. The directive is needed only in a framework with React Server Components, such as Next.js, and only in a file that passes a function (like `onPress`) to a component or uses state: a server component cannot hand a function to `Button`. In a Vite or other client-only app it has no effect, and Vite's production build prints a warning that it was ignored, so leave it out there.
+</Callout>
+
+### Handling Presses
+
+`onPress` fires when the press is released over the button. It covers mouse, touch, pen and keyboard (Enter and Space) interactions alike: the event's `pointerType` says which one. Use `onPress`, not `onClick`. React Aria keeps `onClick` only as a compatibility alias and marks it not recommended, because its event is a mouse event and carries no details for other kinds of interaction.
+
+```tsx
+<Button onPress={(event) => console.log(event.pointerType)}>Save</Button>
+```
+
+A button that is pending or disabled does not fire `onPress`.
+
 ## Examples
 
 ### Variants
@@ -39,7 +53,9 @@ An icon-only button has no visible text, so give it an `aria-label`.
 
 ### Loading
 
-`isPending` keeps the button focusable but stops it responding to presses. It does not add a spinner: put a `Spinner` in the children.
+`isPending` keeps the button focusable but stops it responding to presses. It does not add a spinner: put a [`Spinner`](/docs/react/components/spinner) in the children, and see that page for its `size`, `color` and label props.
+
+Keep the button's visible label in place and add the spinner beside it. The words "Saving" and "Loading" below are sample text: use the label the button already has, or a pending variant of it, never a spinner alone.
 
 <ComponentPreview name="button-loading" />
 
@@ -49,6 +65,12 @@ Children can be a function that receives the button's state.
 
 <ComponentPreview name="button-loading-state" />
 
+### Pressed State
+
+The same function receives `isPressed`, which is true from the moment the press starts until it ends, so a label can depend on it.
+
+<ComponentPreview name="button-pressed-state" />
+
 ### Full Width
 
 <ComponentPreview name="button-full-width" />
@@ -57,11 +79,27 @@ Children can be a function that receives the button's state.
 
 <ComponentPreview name="button-disabled" />
 
+### Link Styled as a Button
+
+To give a link the look of a button, apply `buttonVariants` to an `<a>`. Do not try to make `Button` render an `<a>`: its `render` function must still return a `<button>`.
+
+```tsx
+import {buttonVariants} from "@peakui/react";
+
+<a className={buttonVariants({size: "md", variant: "primary"})} href="/dashboard">
+  Open dashboard
+</a>
+```
+
+The [Styling](/docs/react/getting-started/styling#variant-functions) guide covers variant functions and how to extend them, and [Composition](/docs/react/getting-started/composition#styling-another-element) shows the same recipe with a framework link component and with plain HTML classes.
+
 ### Adding Custom Variants
 
 Describe variants of your own with `tv` in a wrapper component. `Button` applies `size` and `variant` itself, so the wrapper adds only its own classes. To give an element other than `Button` the same look, extend `buttonVariants` instead, as described in [Styling](/docs/react/getting-started/styling#adding-variants).
 
 <ComponentPreview name="button-custom-variants" />
+
+If the wrapper adds a `rounded-*` utility, the utility wins over the component's `--button-radius` variable. `.button` reads the variable in the `components` layer (`border-radius: var(--button-radius)`), while Tailwind utilities live in the later `utilities` layer, and a later layer beats an earlier one whatever the selector. Setting the variable through a utility (`[--button-radius:0.25rem]`) works too, for the same reason. Prefer `rounded-*` in a wrapper: it is the shorter form and nothing else on the button depends on the radius. Set `--button-radius` in global CSS when every button should follow, as in the section below.
 
 ## Customization
 
@@ -115,6 +153,8 @@ The Button component uses these CSS classes ([view source styles](https://github
 - `.button--ghost`
 - `.button--danger`
 - `.button--danger-soft`
+
+`danger` is a solid fill: the `danger` color as the background with the `danger-foreground` text on it. `danger-soft` is a tint: the same red at low opacity (15% in the default theme) with the darker `danger-soft-foreground` text, so it sits quietly beside other controls. Use `danger` for the confirming action of a destructive step and `danger-soft` for a destructive option that should not dominate the page.
 
 #### Modifier Classes [!toc]
 
