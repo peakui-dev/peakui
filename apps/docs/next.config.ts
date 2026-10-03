@@ -19,6 +19,11 @@ const machineOnlyPaths = [
 
 // `proxy.ts` answers these URLs with markdown or HTML depending on `Accept`, so a shared cache must
 // key on it, or it serves one representation to clients that asked for the other.
+//
+// This `Vary: Accept` block has NO effect on prerendered pages: `next start` serves them with their
+// own cache headers and never applies it (checked against `next start`). It is kept as the
+// declaration of intent, and for hosts and dynamic responses that do honour it. The real
+// requirement, that the host varies cached HTML on `Accept`, is in the Docs app section of AGENTS.md.
 const negotiatedPaths = ["/", "/:lang(en)", "/:lang(en)/docs/:path*", "/docs/:path*"];
 
 const config: NextConfig = {
