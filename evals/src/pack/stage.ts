@@ -145,6 +145,7 @@ function commentTexts(file: ProjectFile): string[] {
   return [...seen.values()].map((raw) =>
     raw
       .replace(/^\/\/+|^\/\*+|\*+\/$/g, "")
+      .replace(/\n\s*\*(?!\/)/g, "\n")
       .replace(/\s+/g, " ")
       .trim(),
   );
