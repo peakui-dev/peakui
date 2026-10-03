@@ -18,7 +18,7 @@ import {Description} from "@peakui/react";
 `Description` belongs inside a field such as `TextField`. The field links it to the control with `aria-describedby`; you do not set any ids.
 
 <Callout type="warn">
-  Outside a field, `Description` renders nothing. It has no control to describe there. For free-standing helper text, use a plain element with the `description` class: `<p className="description">`.
+  Outside a field, `Description` still renders its `<span>`, but nothing links it to a control, so assistive technology does not read it with one. For free-standing helper text, use a plain element with the `description` class: `<p className="description">`.
 </Callout>
 
 ## Customization
@@ -60,5 +60,6 @@ The Description component uses this CSS class ([view source styles](https://gith
 | `children` | `React.ReactNode` | - | The helper text |
 | `className` | `string` | - | Additional classes |
 | `elementType` | `string` | `'span'` | The element to render |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element with your own |
 
-The `slot` is always `description`; it is what links the text to the field.
+The `slot` defaults to `description`; it is what links the text to the field, so leave it as it is inside a field.

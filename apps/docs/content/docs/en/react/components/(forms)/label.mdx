@@ -66,9 +66,9 @@ The Label component uses these CSS classes ([view source styles](https://github.
 
 Inside a field, the label is styled from the field root's attributes:
 
-- **Required**: `[data-required]` on the field
-- **Invalid**: `[data-invalid]` on the field
-- **Disabled**: `[data-disabled]` on the field
+- **Required**: `[data-required]` on the parent, or a `[aria-required="true"]` control inside a `.textfield`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on an ancestor
+- **Disabled**: `[data-disabled]` or `[aria-disabled="true"]` on an ancestor, or an ancestor `<fieldset disabled>`
 
 ## API Reference
 
@@ -81,6 +81,7 @@ Inside a field, the label is styled from the field root's attributes:
 | `isDisabled` | `boolean` | `false` | Applies the disabled style. Not needed inside a `TextField` |
 | `htmlFor` | `string` | - | The id of the control the label describes. Set automatically inside a `TextField` |
 | `elementType` | `string` | `'label'` | The element to render |
+| `render` | `DOMRenderFunction<'label', undefined>` | - | Replaces the rendered element with your own |
 | `children` | `React.ReactNode` | - | The label text |
 | `className` | `string` | - | Additional classes |
 

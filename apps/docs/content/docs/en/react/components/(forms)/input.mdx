@@ -117,6 +117,7 @@ The Input component uses these CSS classes ([view source styles](https://github.
 | `disabled` | `boolean` | `false` | Whether the input is disabled |
 | `onChange` | `(e: React.ChangeEvent<HTMLInputElement>) => void` | - | Handler called when the value changes |
 | `className` | `string \| (values: InputRenderProps) => string` | - | Additional classes, or a function of the input's state |
+| `render` | `DOMRenderFunction<'input', InputRenderProps>` | - | Replaces the rendered `<input>` with your own element |
 
 Every other attribute of an `<input>` is accepted.
 

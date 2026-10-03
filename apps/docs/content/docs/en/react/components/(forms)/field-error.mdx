@@ -73,6 +73,8 @@ The FieldError component uses this CSS class ([view source styles](https://githu
 |------|------|---------|-------------|
 | `children` | `React.ReactNode \| (values: FieldErrorRenderProps) => React.ReactNode` | - | The message, or a function of the validation state. Defaults to the field's validation messages |
 | `className` | `string \| (values: FieldErrorRenderProps) => string` | - | Additional classes, or a function of the validation state |
+| `elementType` | `string` | `'span'` | The element to render. Use `'div'` for block-level children |
+| `render` | `DOMRenderFunction<'div', FieldErrorRenderProps>` | - | Replaces the rendered element with your own |
 
 ### Render Props
 
