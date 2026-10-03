@@ -88,19 +88,33 @@ for every new field root, and it is recorded in section 9 so it is not "fixed" b
 `useFieldVariant()` returns the context value, not a resolved variant: resolution belongs to the
 part, which is the only place that knows its own prop.
 
-### 1.2 Two focus utilities
+### 1.2 The focus ring utilities
 
-`packages/styles/utilities/index.css` has one focus utility, `status-focused`, and it is
-`outline` with `outline-offset: var(--ring-offset-width)` — 2px of separation. A field cannot use
-it: inside an `InputGroup` the control sits flush against the prefix and suffix borders, so an
-offset ring draws on top of its neighbours. Two utilities are added, matching the reference's
-`focus-field-ring` / `invalid-field-ring` semantics:
+`packages/styles/utilities/index.css` arrived with one focus utility, `status-focused`, written as an
+`outline` with `outline-offset: var(--ring-offset-width)` — 2px of separation. A field cannot use it:
+inside an `InputGroup` the control sits flush against the prefix and suffix borders, so an offset ring
+draws on top of its neighbours. Two utilities are therefore added for fields, and `status-focused`
+itself is rewritten, so that all three match the reference's `focus-ring` / `focus-field-ring` /
+`invalid-field-ring` semantics:
 
 ```css
+@utility status-focused {
+  outline: none;
+
+  --focus-ring:
+    0 0 0 var(--ring-offset-width) var(--color-background),
+    0 0 0 calc(var(--ring-offset-width) + 2px) var(--color-focus);
+
+  @media (forced-colors: active) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: var(--ring-offset-width);
+  }
+}
+
 @utility status-focused-field {
   outline: none;
 
-  --field-ring: 0 0 0 2px var(--color-focus);
+  --focus-ring: 0 0 0 2px var(--color-focus);
 
   @media (forced-colors: active) {
     outline: 2px solid var(--color-focus);
@@ -109,9 +123,8 @@ offset ring draws on top of its neighbours. Two utilities are added, matching th
 }
 
 @utility status-invalid-field {
-  outline: none;
-
-  --field-ring: 0 0 0 1px var(--color-danger-soft-foreground);
+  outline: 1px solid var(--color-danger-soft-foreground);
+  outline-offset: 0;
 
   &:focus,
   &:focus-visible,
@@ -119,54 +132,58 @@ offset ring draws on top of its neighbours. Two utilities are added, matching th
   &[data-focused],
   &[data-focus-visible],
   &[data-focus-within] {
-    --field-ring: 0 0 0 2px var(--color-danger-soft-foreground);
-  }
+    outline: none;
 
-  @media (forced-colors: active) {
-    outline: 1px solid var(--color-danger-soft-foreground);
-    outline-offset: 0;
+    --focus-ring: 0 0 0 2px var(--color-danger-soft-foreground);
+
+    @media (forced-colors: active) {
+      outline: 2px solid var(--color-danger-soft-foreground);
+    }
   }
 }
 ```
 
-The ring is a **shadow**, which is the reference's own form — it builds the ring from `ring-*`, i.e.
-`box-shadow`. The utility does not declare `box-shadow` itself: it publishes the ring's shape as
-`--field-ring`, and each field composes it into its own shadow —
-`box-shadow: var(--field-ring, 0 0 0 0 transparent), var(--input-shadow)`. Declaring the ring
-directly would overwrite the field's own `--shadow-field` instead of layering over it, and the
-transparent fallback keeps the list's length and member shape constant so `box-shadow` interpolates
-without a jump.
+Every ring is a **shadow**, which is the reference's own form: `focus-ring` is
+`ring-2 ring-focus ring-offset-0 ring-offset-background` with the offset taken from
+`--ring-offset-width` — two shadows, the page background first and the ring over it — and
+`focus-field-ring` is `ring-2 ring-offset-0`, flush. `invalid-field-ring` mixes the two techniques on
+purpose: a 1px **outline** at rest, a 2px **shadow** on focus.
 
-Two costs, both accepted deliberately:
+**This changed `status-focused` as well, so it reaches `Button`.** That utility was an offset outline
+before, written when the library had no fields; matching the reference means Button's ring becomes a
+shadow too, and `button.css` now lists `box-shadow 100ms var(--ease-out)` where it listed
+`outline-color`. The transition timings are the reference's: 100ms on the button, 150ms on the field.
+
+None of the utilities declares `box-shadow` itself. Each publishes the ring's shape as `--focus-ring`,
+and the component composes it —
+`box-shadow: var(--focus-ring, 0 0 0 0 transparent), var(--input-shadow)` on a field,
+`box-shadow: var(--focus-ring, 0 0 0 0 transparent, 0 0 0 0 transparent)` on the button, which has no
+shadow of its own. Declaring the ring directly would overwrite `--shadow-field` instead of layering
+over it; the reference avoids the same problem through Tailwind, which composites `--tw-ring-shadow`
+with `--tw-shadow`. The transparent fallback keeps the list's length and member shape constant, so
+`box-shadow` interpolates without a jump.
+
+One deliberate difference from the reference's own code: in its invalid-on-focus branch the outline is
+**not** removed, so the ring comes out doubled — a 1px outline under a 2px shadow. Its comment says
+"remove outline", so what is implemented here is its stated intent rather than its code.
+
+Two costs, both accepted:
 
 - **A shadow is clipped by an ancestor's `overflow: hidden`**, where an outline is not. This is why
   `InputGroup`'s shell must stay `overflow: visible`, which section 2.6 already required for the
-  suffix's own focus ring and which `apps/storybook/e2e/InputGroup.spec.ts` asserts.
+  suffix's own focus ring and which `apps/storybook/e2e/InputGroup.spec.ts` asserts. The invalid
+  ring's resting outline is unaffected, which is part of why the reference keeps it an outline.
 - **Shadows are not painted at all under `forced-colors: active`.** A shadow-only ring would leave
-  every field with no focus indicator in the one mode where colour cannot distinguish it, so both
-  utilities fall back to an outline there — the technique
-  `references/accessibility-and-i18n.md` prescribes. `--color-focus` already resolves to
-  `CanvasText` in that mode.
+  every control with no focus indicator in the one mode where colour cannot distinguish it, so all
+  three utilities fall back to an outline there — the technique
+  `references/accessibility-and-i18n.md` prescribes. `--color-focus` already resolves to `CanvasText`
+  in that mode. The reference has no `forced-colors` support at all, so there is nothing to copy.
 
-`--color-danger-soft-foreground` rather than `--color-danger` is not a detail: section 4.1 measures
-`--color-danger` at 2.95:1 against the field fill in the dark theme, below the 3:1 a boundary owes.
-
-One deliberate difference from the reference's version: its `invalid-field-ring` sets
-`--tw-ring-offset-width: 3px` in the unfocused branch, where nothing reads it — a leftover, not a
-decision, so it is dropped. The ring itself matches: a shadow, flush against the edge.
-
-**An earlier revision of this spec used `outline` here**, reasoning that an outline survives an
-ancestor's clipping. The owner chose the reference's form instead, and the reason that argument lost
-is worth recording: an outline's width appears at once, 0 → 2px, so the only thing a transition can
-reach is its colour — which reads as the frame's colour flickering rather than the ring arriving.
-The reference puts `box-shadow` third in its `transition` list precisely because a shadow
-interpolates.
-
-The doctrine comment above `status-focused` says there is one source of truth for visible focus,
-and this adds a second utility under it. That is why both utilities are written here and not inside
-a component: the field ring is one more source of truth, shared by every field, not a ring a
-component drew for itself. The comment is amended to say the system has two rings and which one a
-component picks.
+The doctrine comment above `status-focused` says there is one source of truth for visible focus, and
+this adds a second utility under it. That is why the utilities are written here and not inside a
+component: the field ring is one more source of truth, shared by every field, not a ring a component
+drew for itself. The comment is amended to say the system has two rings, which one a component picks,
+and why both are shadows.
 
 ### 1.3 `useHasTextSlot` and `packages/react/src/hooks/`
 
@@ -537,14 +554,16 @@ Collected here because `SKILL.md` points at these sections to stop a later reade
 back.
 
 1. **One `FieldVariantContext` instead of a context per field root** — section 1.1.
-2. **The field ring is a shadow, as in the reference, but published as `--field-ring` and composed
-   by the component** — section 1.2. The reference declares its ring through Tailwind's `ring-*`,
-   which composes with `--tw-shadow`; our fields declare `box-shadow` directly, so the utility hands
-   over the ring's shape instead of the declaration. `box-shadow` is third in the `transition` list,
-   as in the reference. Two consequences the reference does not carry: the shell must stay
-   `overflow: visible`, and both utilities fall back to an outline under `forced-colors`, where
-   shadows are not painted. Verified in the browser: `apps/storybook/e2e/InputGroup.spec.ts`,
-   "кольцо фокуса — тень, и она участвует в переходе, как у эталона".
+2. **Every ring is a shadow, as in the reference, but published as `--focus-ring` and composed by
+   the component** — section 1.2. The reference declares its rings through Tailwind's `ring-*`, which
+   composes with `--tw-shadow`; our components declare `box-shadow` directly, so the utility hands
+   over the ring's shape instead of the declaration. `box-shadow` sits in the `transition` list with
+   the reference's own timings. Three things the reference does not carry: the group's shell must stay
+   `overflow: visible`, all three utilities fall back to an outline under `forced-colors`, and the
+   invalid ring's focused branch removes the resting outline — the reference's code leaves it, which
+   doubles the ring, against its own comment. Verified in the browser:
+   `apps/storybook/e2e/InputGroup.spec.ts` ("кольцо фокуса — тень…", "невалидное поле: outline в
+   покое…") and `apps/storybook/e2e/Button.spec.ts` ("кольцо фокуса — тень с отступом…").
 3. **`--color-danger-soft-foreground` for every red mark** — the error text, the invalid label and
    the invalid outline — instead of the reference's `text-danger` and its undeclared
    `--color-field-border-invalid`. Measured: section 4.1.
