@@ -2,8 +2,8 @@ import {NextRequest} from "next/server";
 import {describe, expect, it} from "vitest";
 
 import {GET as getIndex} from "@/app/api/components/route";
-import {GET as getMarkdown} from "@/app/llms.mdx/[...slug]/route";
 import {GET as getPatterns} from "@/app/llms-patterns.txt/route";
+import {GET as getMarkdown} from "@/app/llms.mdx/[...slug]/route";
 import {source} from "@/lib/source";
 
 interface Entry {
