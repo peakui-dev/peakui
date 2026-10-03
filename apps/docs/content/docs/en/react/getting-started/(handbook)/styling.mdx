@@ -175,8 +175,29 @@ export function MyButton({className, radius, ...props}: MyButtonProps) {
 ```
 
 <Callout type="warn">
-  Import `tv` from `@peakui/react` (or `@peakui/styles`), not from your own copy of `tailwind-variants`, so your variants merge with the library's. Do not `extend` `buttonVariants` here: `Button` already applies it, and the size and variant classes would be added twice.
+  Import `tv` from `@peakui/react` (or `@peakui/styles`), not from your own copy of `tailwind-variants`, so that the variant functions and your `tv` are the same instance. Do not `extend` `buttonVariants` in a wrapper around `Button`: `Button` applies `buttonVariants` itself, so the wrapper adds only its own classes, and extending would put the size and variant classes on the element twice.
 </Callout>
+
+`tv({extend: buttonVariants})` is the right tool when the element is not a `Button`, for example an `<a>` that should look like one. The extended function keeps `size` and `variant` and accepts your own variants on top:
+
+```tsx
+import {buttonVariants, tv} from "@peakui/react";
+
+const linkButtonVariants = tv({
+  extend: buttonVariants,
+  variants: {
+    radius: {
+      full: "rounded-full",
+      sm: "rounded-sm",
+    },
+  },
+});
+
+<a className={linkButtonVariants({radius: "full", variant: "secondary"})} href="/pricing">
+  See pricing
+</a>;
+// "button rounded-full button--md button--secondary"
+```
 
 ## Next Steps
 

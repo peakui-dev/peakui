@@ -59,7 +59,7 @@ Children can be a function that receives the button's state.
 
 ### Adding Custom Variants
 
-Describe variants of your own with `tv` in a wrapper component; `Button` keeps `size` and `variant`.
+Describe variants of your own with `tv` in a wrapper component. `Button` applies `size` and `variant` itself, so the wrapper adds only its own classes. To give an element other than `Button` the same look, extend `buttonVariants` instead, as described in [Styling](/docs/react/getting-started/styling#adding-variants).
 
 <ComponentPreview name="button-custom-variants" />
 
