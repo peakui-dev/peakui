@@ -148,15 +148,14 @@ Use it to give another element the look of a component:
 
 ## Adding Variants
 
-Extend a variant function with `tv`, imported from `@peakui/react`:
+Describe the variants of your own with `tv`, imported from `@peakui/react`, and let `Button` keep `size` and `variant`:
 
 ```tsx
 import type {ButtonProps, VariantProps} from "@peakui/react";
 
-import {Button, buttonVariants, tv} from "@peakui/react";
+import {Button, tv} from "@peakui/react";
 
 const myButtonVariants = tv({
-  extend: buttonVariants,
   variants: {
     radius: {
       full: "rounded-full",
@@ -170,20 +169,13 @@ interface MyButtonProps
   className?: string;
 }
 
-export function MyButton({className, radius, size, variant, ...props}: MyButtonProps) {
-  return (
-    <Button
-      className={myButtonVariants({className, radius, size, variant})}
-      size={size}
-      variant={variant}
-      {...props}
-    />
-  );
+export function MyButton({className, radius, ...props}: MyButtonProps) {
+  return <Button className={myButtonVariants({className, radius})} {...props} />;
 }
 ```
 
 <Callout type="warn">
-  Import `tv` from `@peakui/react` (or `@peakui/styles`), not from your own copy of `tailwind-variants`. `extend` needs the same instance the library's variants were built with.
+  Import `tv` from `@peakui/react` (or `@peakui/styles`), not from your own copy of `tailwind-variants`, so your variants merge with the library's. Do not `extend` `buttonVariants` here: `Button` already applies it, and the size and variant classes would be added twice.
 </Callout>
 
 ## Next Steps
