@@ -12,6 +12,7 @@
     "tasks/index.ts",
     "tasks/*/task.ts",
     "fixtures/index.ts",
+    "scripts/*.ts",
     "vitest.config.ts",
     "vitest.solutions.config.ts"
   ]

@@ -90,7 +90,7 @@ export function assertIsolated(dir: string): void {
 
 const SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._=-]{0,127}$/;
 
-function assertSegment(label: string, value: string): void {
+export function assertSegment(label: string, value: string): void {
   if (!SEGMENT.test(value) || value === "." || value === "..") {
     throw new Error(
       `invalid workspace ${label} ${JSON.stringify(value)}: use 1 to 128 letters, digits, ".", "_", "=" or "-", starting with a letter or digit`,
@@ -99,7 +99,7 @@ function assertSegment(label: string, value: string): void {
 }
 
 /** True when `path` is strictly inside `root` once both are resolved through symlinks. */
-function isStrictlyInside(root: string, path: string): boolean {
+export function isStrictlyInside(root: string, path: string): boolean {
   const rel = relative(realResolve(root), realResolve(path));
 
   return rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
