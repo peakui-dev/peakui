@@ -21,7 +21,11 @@ describe("css helpers", () => {
       `@import "tailwindcss";\n@import '@peakui/styles/css';\n@import url("./x.css") layer(base);`,
     )!;
 
-    expect(importTargets(root)).toEqual(["tailwindcss", "@peakui/styles/css", "./x.css"]);
+    expect(importTargets(root).map((entry) => entry.target)).toEqual([
+      "tailwindcss",
+      "@peakui/styles/css",
+      "./x.css",
+    ]);
   });
 
   it("layerOrder is first appearance at the top level", () => {
