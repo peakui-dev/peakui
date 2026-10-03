@@ -1,0 +1,185 @@
+---
+title: Styling
+description: The ways to restyle a PeakUI component - class names, state selectors, BEM classes, component variables and variant functions.
+---
+
+PeakUI components are styled by plain CSS classes. Nothing is generated at runtime, so every technique you already use with CSS and Tailwind works.
+
+## Basic Styling
+
+Pass `className` to any component or part. Your classes are merged with the component's own:
+
+```tsx
+import {Button} from "@peakui/react";
+
+<Button className="rounded-full px-6">Rounded</Button>
+```
+
+`style` works as usual:
+
+```tsx
+<Button style={{letterSpacing: "0.02em"}}>Spaced</Button>
+```
+
+There is no `classNames` prop. To style a part, pass `className` to that part:
+
+```tsx
+<Fieldset className="max-w-sm">
+  <Fieldset.Legend className="text-lg">Profile</Fieldset.Legend>
+</Fieldset>
+```
+
+## State-Based Styling
+
+Components expose their state as data attributes, which you can target from Tailwind or CSS:
+
+```tsx
+<Button className="data-[pressed]:scale-95 data-[hovered]:shadow-md">Press me</Button>
+```
+
+```css
+.button[data-pressed] {
+  transform: scale(0.97);
+}
+```
+
+`@peakui/styles` also registers short variants for the most common states:
+
+| Variant | Matches |
+|---------|---------|
+| `hovered:` | `[data-hovered]` |
+| `pressed:` | `[data-pressed]` |
+| `focus-visible-within:` | `[data-focus-visible]` |
+| `selected:` | `[data-selected]` |
+| `disabled-state:` | `[data-disabled]` |
+| `entering:` | `[data-entering]` |
+| `exiting:` | `[data-exiting]` |
+
+```tsx
+<Button className="pressed:scale-95 hovered:shadow-md">Press me</Button>
+```
+
+## Render Props
+
+For components built on a React Aria primitive, `className` and `children` also accept a function that receives the component's state:
+
+```tsx
+"use client";
+
+import {Button} from "@peakui/react";
+
+<Button className={({isPressed}) => (isPressed ? "scale-95" : "")}>
+  {({isHovered}) => (isHovered ? "Release to confirm" : "Confirm")}
+</Button>
+```
+
+A function prop needs a client component: a server component cannot pass a function to `Button`.
+
+## BEM Classes
+
+Every component is a [BEM](https://getbem.com/) block. Variants are modifiers and parts are elements:
+
+```css
+.button            /* block */
+.button--primary   /* modifier: variant */
+.button--sm        /* modifier: size */
+.fieldset__legend  /* element: a part */
+```
+
+Override them in the `components` layer, after the PeakUI import:
+
+```css title="globals.css"
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+@layer components {
+  .button {
+    @apply font-semibold tracking-wide;
+  }
+
+  .button--sm {
+    @apply px-2;
+  }
+}
+```
+
+## Component Variables
+
+Where a component's colors or radius are meant to change, it reads them from its own custom properties. Setting the variable is safer than overriding the declaration, because hover, pressed and focus styles keep working:
+
+```css
+@layer components {
+  .button--secondary {
+    --button-bg: var(--color-surface);
+    --button-bg-hover: var(--color-surface-hover);
+    --button-fg: var(--color-surface-foreground);
+  }
+}
+```
+
+## Slots
+
+Every rendered element carries a `data-slot` attribute naming the part. It is a stable hook for styling a part from its parent:
+
+```css
+.my-form [data-slot="label"] {
+  @apply text-xs tracking-wide uppercase;
+}
+```
+
+## Variant Functions
+
+Each component's class names come from a variant function exported next to it, such as `buttonVariants`. Calling it returns the class string:
+
+```tsx
+import {buttonVariants} from "@peakui/react";
+
+buttonVariants({size: "sm", variant: "outline"});
+// "button button--sm button--outline"
+```
+
+Use it to give another element the look of a component:
+
+```tsx
+<a className={buttonVariants({variant: "primary"})} href="/pricing">
+  See pricing
+</a>
+```
+
+## Adding Variants
+
+Extend a variant function with `tv`, imported from `@peakui/react`:
+
+```tsx
+import type {ButtonProps, VariantProps} from "@peakui/react";
+
+import {Button, buttonVariants, tv} from "@peakui/react";
+
+const myButtonVariants = tv({
+  extend: buttonVariants,
+  variants: {
+    radius: {
+      full: "rounded-full",
+      sm: "rounded-sm",
+    },
+  },
+});
+
+interface MyButtonProps
+  extends Omit<ButtonProps, "className">, VariantProps<typeof myButtonVariants> {
+  className?: string;
+}
+
+export function MyButton({className, radius, size, variant, ...props}: MyButtonProps) {
+  return <Button className={myButtonVariants({className, radius, size, variant})} {...props} />;
+}
+```
+
+<Callout type="warn">
+  Import `tv` from `@peakui/react` (or `@peakui/styles`), not from your own copy of `tailwind-variants`. `extend` needs the same instance the library's variants were built with.
+</Callout>
+
+## Next Steps
+
+- [Theming](/docs/react/getting-started/theming) – change tokens instead of individual components.
+- [Composition](/docs/react/getting-started/composition) – parts, the `render` prop and custom components.

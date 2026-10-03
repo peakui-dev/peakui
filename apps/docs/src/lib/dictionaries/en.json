@@ -1,0 +1,61 @@
+{
+  "home": {
+    "titleMain": "Accessible by default.",
+    "titleMuted": "Styled with plain CSS.",
+    "description": "PeakUI is a React component library built on React Aria Components and Tailwind CSS v4. Compound parts, BEM class names and CSS custom properties keep every component easy to restyle.",
+    "metaTitle": "PeakUI - Accessible React components, styled with plain CSS.",
+    "metaDescription": "Accessible React components built on React Aria Components and Tailwind CSS v4, styled with BEM classes and CSS custom properties.",
+    "getStarted": "Get started",
+    "viewComponents": "View components",
+    "sourceOnGithub": "Source on GitHub",
+    "overviewTitle": "Build accessible products with PeakUI",
+    "overview": "PeakUI is an open-source component library for React. It combines React Aria Components with Tailwind CSS v4 to provide accessible behavior, typed APIs, compound composition and CSS you can read and override.",
+    "agentsTitle": "Documentation for developers and coding agents",
+    "agents": "The documentation covers installation, component APIs, examples and styling references. Coding agents can read the generated llms.txt indexes, request any documentation page as markdown, and fetch the components index as JSON."
+  },
+  "nav": {
+    "documentation": "Documentation",
+    "gettingStarted": "Getting Started",
+    "components": "Components",
+    "docs": "Docs"
+  },
+  "notFound": {
+    "title": "404",
+    "description": "Sorry, the page you're looking for could not be found.",
+    "returnHome": "Return Home"
+  },
+  "footer": {
+    "tagline": "Built on React Aria Components and Tailwind CSS."
+  },
+  "statusChip": {
+    "new": "New",
+    "preview": "Preview",
+    "updated": "Updated"
+  },
+  "componentLinks": {
+    "source": "Source",
+    "stylesSource": "Styles source",
+    "themeSource": "Theme source"
+  },
+  "pageActions": {
+    "copyMarkdown": "Copy Markdown",
+    "copied": "Copied",
+    "moreOptions": "More options",
+    "askWithUrl": "Read {url}, I want to ask questions about it.",
+    "askFallback": "I want to ask questions about this documentation.",
+    "items": {
+      "markdown": {
+        "title": "View as Markdown",
+        "description": "View page as Markdown format"
+      },
+      "chatgpt": {
+        "title": "Open in ChatGPT",
+        "description": "Ask questions about this page"
+      },
+      "claude": {
+        "title": "Open in Claude",
+        "description": "Ask questions about this page"
+      }
+    }
+  }
+}

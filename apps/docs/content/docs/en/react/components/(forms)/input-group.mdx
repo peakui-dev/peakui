@@ -1,0 +1,184 @@
+---
+title: InputGroup
+description: An input or a text area with a prefix and a suffix inside one shared frame.
+links:
+  rac: Group
+  source: input-group/input-group.tsx
+  styles: input-group.css
+---
+
+## Usage
+
+```tsx
+import {InputGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="input-group-basic" />
+
+### Anatomy
+
+```tsx
+import {InputGroup} from "@peakui/react";
+
+export default () => (
+  <InputGroup>
+    <InputGroup.Prefix />
+    <InputGroup.Input /> {/* or <InputGroup.TextArea /> */}
+    <InputGroup.Suffix />
+  </InputGroup>
+);
+```
+
+The group draws the frame and the focus ring; the control inside it is borderless. Clicking the prefix or the suffix focuses the control, unless the click lands on something interactive of its own, such as a button.
+
+## Examples
+
+### With Prefix
+
+<ComponentPreview name="input-group-with-prefix" />
+
+### With Suffix
+
+<ComponentPreview name="input-group-with-suffix" />
+
+### With Prefix and Suffix
+
+<ComponentPreview name="input-group-with-prefix-and-suffix" />
+
+### With a Button
+
+A button in the suffix keeps its own behavior: pressing it does not move focus to the input.
+
+<ComponentPreview name="input-group-with-button" />
+
+### With TextArea
+
+<ComponentPreview name="input-group-with-text-area" />
+
+### Variants
+
+<ComponentPreview name="input-group-variants" />
+
+### In a TextField
+
+Inside a `TextField` the group takes the field's label, invalid and disabled states, and its `variant`.
+
+<ComponentPreview name="input-group-in-text-field" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<InputGroup className="rounded-full">
+  <InputGroup.Prefix className="text-accent">@</InputGroup.Prefix>
+  <InputGroup.Input aria-label="Username" />
+</InputGroup>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .input-group {
+    --input-group-radius: var(--radius-lg);
+  }
+
+  .input-group__prefix,
+  .input-group__suffix {
+    @apply text-xs uppercase;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The InputGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/input-group.css)):
+
+#### Base & Variant Classes [!toc]
+
+- `.input-group` - The frame around the control and its slots
+- `.input-group--primary` - Primary variant
+- `.input-group--secondary` - Secondary variant
+- `.input-group--full-width` - Stretches to the container's width
+
+#### Element Classes [!toc]
+
+- `.input-group__input` - The control, both the input and the text area
+- `.input-group__prefix` - Content before the control
+- `.input-group__suffix` - Content after the control
+
+### Slots
+
+- `[data-slot="input-group"]`
+- `[data-slot="input-group-input"]`
+- `[data-slot="input-group-textarea"]`
+- `[data-slot="input-group-prefix"]`
+- `[data-slot="input-group-suffix"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--input-group-bg` | Background color |
+| `--input-group-bg-hover` | Background color when hovered |
+| `--input-group-bg-focus` | Background color when the control is focused |
+| `--input-group-fg` | Text color |
+| `--input-group-placeholder` | Placeholder color |
+| `--input-group-border` | Border color |
+| `--input-group-border-hover` | Border color when hovered |
+| `--input-group-border-focus` | Border color when the control is focused |
+| `--input-group-radius` | Corner radius |
+| `--input-group-shadow` | Box shadow |
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Focus within**: `[data-focus-within]`, or the control's `:focus` / `[data-focused]`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]`
+- **Disabled**: `[data-disabled]` or `[aria-disabled="true"]`
+
+## API Reference
+
+### InputGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary'` | `'primary'` | Surface style. Inside a `TextField` it defaults to the field's `variant` |
+| `fullWidth` | `boolean` | `false` | Whether the group takes the full width of its container |
+| `isDisabled` | `boolean` | `false` | Whether the group is disabled. Set by the field when inside a `TextField` |
+| `isInvalid` | `boolean` | `false` | Whether the group is invalid. Set by the field when inside a `TextField` |
+| `children` | `React.ReactNode \| (values: GroupRenderProps) => React.ReactNode` | - | The control and its slots |
+| `className` | `string \| (values: GroupRenderProps) => string` | - | Additional classes, or a function of the group's state |
+
+### InputGroup.Input
+
+Renders an `<input>` and accepts its attributes, such as `type`, `placeholder`, `value`, `defaultValue` and `onChange`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string \| (values: InputRenderProps) => string` | - | Additional classes, or a function of the input's state |
+
+### InputGroup.TextArea
+
+Renders a `<textarea>` and accepts its attributes, such as `rows`, `placeholder`, `value`, `defaultValue` and `onChange`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string \| (values: InputRenderProps) => string` | - | Additional classes, or a function of the text area's state |
+
+### InputGroup.Prefix
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Content shown before the control |
+| `className` | `string` | - | Additional classes |
+
+### InputGroup.Suffix
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Content shown after the control |
+| `className` | `string` | - | Additional classes |

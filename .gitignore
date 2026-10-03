@@ -4,6 +4,9 @@ dist-ssr/
 build/
 coverage/
 storybook-static/
+.next/
+.source/
+next-env.d.ts
 .turbo/
 .codegraph/
 *.tsbuildinfo

@@ -1,0 +1,180 @@
+---
+title: Button
+description: A pressable button with seven visual variants, three sizes, and disabled and pending states.
+links:
+  rac: Button
+  source: button/button.tsx
+  styles: button.css
+---
+
+## Usage
+
+```tsx
+import {Button} from "@peakui/react";
+```
+
+<ComponentPreview name="button-basic" />
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="button-variants" />
+
+### Sizes
+
+<ComponentPreview name="button-sizes" />
+
+### With Icons
+
+Place an icon before or after the label. The button sizes any `svg` child and sets the gap.
+
+<ComponentPreview name="button-with-icons" />
+
+### Icon Only
+
+An icon-only button has no visible text, so give it an `aria-label`.
+
+<ComponentPreview name="button-icon-only" />
+
+### Loading
+
+`isPending` keeps the button focusable but stops it responding to presses. It does not add a spinner: put a `Spinner` in the children.
+
+<ComponentPreview name="button-loading" />
+
+### Loading State
+
+Children can be a function that receives the button's state.
+
+<ComponentPreview name="button-loading-state" />
+
+### Full Width
+
+<ComponentPreview name="button-full-width" />
+
+### Disabled State
+
+<ComponentPreview name="button-disabled" />
+
+### Adding Custom Variants
+
+Extend `buttonVariants` with `tv` to add variants of your own in a wrapper component.
+
+<ComponentPreview name="button-custom-variants" />
+
+## Customization
+
+### Tailwind CSS
+
+Pass utilities through `className`. They are merged with the button's own classes.
+
+```tsx
+<Button className="rounded-full px-6 font-semibold">Rounded</Button>
+```
+
+### Global CSS
+
+Override the button's classes in the `components` layer. Prefer the component variables where one exists: hover and pressed styles derive from them.
+
+```css
+@layer components {
+  .button--primary {
+    --button-bg: var(--color-success);
+    --button-bg-hover: var(--color-success-hover);
+    --button-fg: var(--color-success-foreground);
+  }
+
+  .button--icon-only {
+    @apply rounded-lg;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Button component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/button.css)):
+
+#### Base & Size Classes [!toc]
+
+- `.button` - Base button styles
+- `.button--sm` - Small size
+- `.button--md` - Medium size
+- `.button--lg` - Large size
+
+#### Variant Classes [!toc]
+
+- `.button--primary`
+- `.button--secondary`
+- `.button--tertiary`
+- `.button--outline`
+- `.button--ghost`
+- `.button--danger`
+- `.button--danger-soft`
+
+#### Modifier Classes [!toc]
+
+- `.button--icon-only` - Square button for a single icon
+- `.button--full-width` - Stretches to the container's width
+
+### Slots
+
+- `[data-slot="button"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--button-bg` | Background color |
+| `--button-bg-hover` | Background color when hovered |
+| `--button-bg-pressed` | Background color when pressed |
+| `--button-fg` | Text and icon color |
+| `--button-border` | Border color |
+| `--button-radius` | Corner radius |
+
+### Interactive States
+
+The button supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Pressed**: `:active` or `[data-pressed]`
+- **Focus**: `:focus-visible` or `[data-focus-visible]` (shows the focus ring)
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]`
+- **Pending**: `[data-pending="true"]`
+
+## API Reference
+
+### Button
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary' \| 'tertiary' \| 'outline' \| 'ghost' \| 'danger' \| 'danger-soft'` | `'primary'` | Visual style |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of the button |
+| `fullWidth` | `boolean` | `false` | Whether the button takes the full width of its container |
+| `isIconOnly` | `boolean` | `false` | Whether the button contains only an icon |
+| `isDisabled` | `boolean` | `false` | Whether the button is disabled |
+| `isPending` | `boolean` | `false` | Whether the button is waiting on an action. Presses are ignored; the button stays focusable |
+| `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Behavior of the button inside a form |
+| `onPress` | `(e: PressEvent) => void` | - | Handler called when the button is pressed |
+| `children` | `React.ReactNode \| (values: ButtonRenderProps) => React.ReactNode` | - | Button content, or a function of the button's state |
+| `className` | `string \| (values: ButtonRenderProps) => string` | - | Additional classes, or a function of the button's state |
+| `render` | `DOMRenderFunction<'button', ButtonRenderProps>` | - | Replaces the rendered element. It must still return a `<button>` |
+
+There is no `color` prop: the look is chosen with `variant`. Every other [React Aria Button](https://react-aria.adobe.com/Button) prop is accepted.
+
+### Render Props
+
+When `children` or `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isPending` | `boolean` | Whether the button is waiting on an action |
+| `isPressed` | `boolean` | Whether the button is currently pressed |
+| `isHovered` | `boolean` | Whether the button is hovered |
+| `isFocused` | `boolean` | Whether the button is focused |
+| `isFocusVisible` | `boolean` | Whether the button is focused by keyboard |
+| `isDisabled` | `boolean` | Whether the button is disabled |

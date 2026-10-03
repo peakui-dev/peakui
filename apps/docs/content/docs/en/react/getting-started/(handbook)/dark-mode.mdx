@@ -1,0 +1,136 @@
+---
+title: Dark Mode
+description: Switch PeakUI to its dark theme with a class or a data attribute on any element.
+---
+
+PeakUI ships a light and a dark theme. The light theme applies by default. The dark theme applies inside any element that has the class `default-dark` or the attribute `data-theme="default-dark"`:
+
+```html
+<html class="default-dark">
+  <!-- or -->
+<html data-theme="default-dark">
+```
+
+`default-light` and `data-theme="default-light"` do the opposite, which lets you force a light region inside a dark page.
+
+<Callout type="info">
+  The selector is `default-dark`, not `dark`. PeakUI does not follow `prefers-color-scheme` on its own; you decide when the dark theme applies.
+</Callout>
+
+## Next.js with next-themes
+
+[next-themes](https://github.com/pacocoursey/next-themes) handles the system preference, persistence and the flash on first paint.
+
+### Install next-themes
+
+```npm
+npm install next-themes
+```
+
+### App Router
+
+Map the two themes to PeakUI's selectors with the `value` prop:
+
+```tsx title="app/providers.tsx"
+"use client";
+
+import type {ReactNode} from "react";
+
+import {ThemeProvider} from "next-themes";
+
+export function Providers({children}: {children: ReactNode}) {
+  return (
+    <ThemeProvider
+      attribute="data-theme"
+      defaultTheme="system"
+      value={{dark: "default-dark", light: "default-light"}}
+    >
+      {children}
+    </ThemeProvider>
+  );
+}
+```
+
+```tsx title="app/layout.tsx"
+import type {ReactNode} from "react";
+
+import {Providers} from "./providers";
+
+import "./globals.css";
+
+export default function RootLayout({children}: {children: ReactNode}) {
+  return (
+    <html suppressHydrationWarning lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+### Theme switcher
+
+```tsx title="components/theme-switcher.tsx"
+"use client";
+
+import {Button} from "@peakui/react";
+import {useTheme} from "next-themes";
+
+export function ThemeSwitcher() {
+  const {resolvedTheme, setTheme} = useTheme();
+
+  return (
+    <Button variant="tertiary" onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+      Toggle theme
+    </Button>
+  );
+}
+```
+
+## Without a library
+
+Set the attribute yourself. This follows the system preference:
+
+```tsx
+"use client";
+
+import {useEffect} from "react";
+
+export function useSystemTheme() {
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => {
+      document.documentElement.dataset.theme = media.matches ? "default-dark" : "default-light";
+    };
+
+    apply();
+    media.addEventListener("change", apply);
+
+    return () => media.removeEventListener("change", apply);
+  }, []);
+}
+```
+
+## The `dark:` variant
+
+Tailwind's `dark:` variant follows `prefers-color-scheme` unless you redefine it. To make it follow the PeakUI theme, declare it once in your CSS:
+
+```css title="globals.css"
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+@custom-variant dark (&:where(.default-dark, .default-dark *, [data-theme="default-dark"], [data-theme="default-dark"] *));
+```
+
+## Styling for both themes
+
+You rarely need `dark:` at all. The semantic tokens change with the theme, so one class covers both:
+
+```tsx
+<main className="min-h-screen bg-background text-foreground">
+  <section className="rounded-xl bg-surface p-6 shadow-surface">
+    <p className="text-muted">This text is readable in both themes.</p>
+  </section>
+</main>
+```

@@ -1,0 +1,13 @@
+PeakUI Docs (@peakui/docs)
+
+Portions of this application are derived from the documentation app of HeroUI
+(https://github.com/heroui-inc/heroui, directory apps/docs), which is licensed
+under the Apache License, Version 2.0. A copy of that license is available at
+https://www.apache.org/licenses/LICENSE-2.0.
+
+The derived files have been modified: they were adapted to PeakUI's components
+and styles, rewritten where they depended on packages PeakUI does not use, and
+all original branding, content, analytics and hosted assets were removed. The
+derived portions include, among others, the documentation layout under
+src/components/fumadocs, the component preview and code block components, the
+MDX component map, the global stylesheet and the llms.txt generation code.

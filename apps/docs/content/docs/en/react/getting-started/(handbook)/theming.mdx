@@ -1,0 +1,137 @@
+---
+title: Theming
+description: PeakUI is themed with CSS custom properties. Override a token and every component that uses it follows.
+---
+
+PeakUI has no theme object and no provider. A theme is a set of CSS custom properties, and the components read them through Tailwind utilities such as `bg-accent` and `rounded-field`.
+
+## How It Works
+
+The stylesheet you import has three layers that matter for theming:
+
+1. **Theme values** – custom properties such as `--accent`, `--surface` and `--radius`, declared for the light and the dark theme.
+2. **Tailwind tokens** – an `@theme inline` block that maps each value to a Tailwind token: `--color-accent: var(--accent)`. This is what makes `bg-accent`, `text-muted` or `shadow-surface` available as utilities.
+3. **Component styles** – BEM classes that use those utilities and expose their own variables, such as `--button-bg`.
+
+Because the mapping is `inline`, changing `--accent` at runtime changes every utility and component that uses it.
+
+## Override Tokens
+
+Declare your values after the two imports:
+
+```css title="globals.css"
+@import "tailwindcss";
+@import "@peakui/styles/css";
+
+:root {
+  --accent: oklch(0.6 0.2 250);
+  --accent-foreground: oklch(0.98 0.02 250);
+  --radius: 0.75rem;
+}
+
+.default-dark {
+  --accent: oklch(0.7 0.18 250);
+}
+```
+
+The library's values live in a cascade layer, so a plain rule in your stylesheet always wins over them.
+
+## Colors
+
+Colors are semantic. Each role has a background value and a matching `-foreground` value that is readable on top of it.
+
+| Token | Utility examples | Purpose |
+|-------|------------------|---------|
+| `--background`, `--foreground` | `bg-background`, `text-foreground` | The page and its text |
+| `--surface`, `--surface-foreground` | `bg-surface` | Non-floating containers such as cards |
+| `--overlay`, `--overlay-foreground` | `bg-overlay` | Floating containers such as popovers and menus |
+| `--muted` | `text-muted` | Secondary text |
+| `--default`, `--default-foreground`, `--default-hover` | `bg-default` | Neutral controls |
+| `--accent`, `--accent-foreground`, `--accent-hover` | `bg-accent` | The primary action color |
+| `--success`, `--warning`, `--danger` (each with `-foreground` and `-hover`) | `bg-danger`, `text-success` | Status colors |
+| `--accent-soft`, `--danger-soft` and the other `-soft` roles | `bg-accent-soft` | Low-emphasis tints of a role |
+| `--border`, `--separator` | `border-border`, `border-separator` | Outlines and dividers |
+| `--focus` | `ring-focus` | The focus ring |
+| `--field-background`, `--field-foreground`, `--field-placeholder`, `--field-border` | `bg-field`, `text-field-placeholder` | Form fields |
+
+Surface and background also have `-secondary` and `-tertiary` levels for nested containers.
+
+## Radius
+
+The whole radius scale is derived from one value:
+
+```css
+:root {
+  --radius: 0.5rem; /* rounded-lg; every other step is a multiple of it */
+  --field-radius: 0.75rem; /* rounded-field, used by inputs */
+}
+```
+
+## Typography
+
+```css
+:root {
+  --sans: "Inter", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+```
+
+`--sans` and `--mono` feed Tailwind's `font-sans` and `font-mono`. PeakUI does not load any font files; load the typeface yourself and name it here.
+
+## Other knobs
+
+| Token | Default | Purpose |
+|-------|---------|---------|
+| `--border-width` | `1px` | Border width of bordered components |
+| `--field-border-width` | `0px` | Border width of form fields |
+| `--disabled-opacity` | `0.5` | Opacity of disabled controls |
+| `--cursor-interactive` | `pointer` | Cursor over interactive controls |
+| `--cursor-disabled` | `not-allowed` | Cursor over disabled controls |
+| `--ring-offset-width` | `2px` | Gap between a control and its focus ring |
+
+## Customize Components
+
+Components expose their own variables, so you can restyle one variant without touching the theme:
+
+```css
+@layer components {
+  .button--primary {
+    --button-bg: var(--color-success);
+    --button-bg-hover: var(--color-success-hover);
+    --button-fg: var(--color-success-foreground);
+  }
+
+  .button {
+    --button-radius: var(--radius-lg);
+  }
+}
+```
+
+Each component page lists its classes and variables under **Styling Reference**.
+
+## Import Strategies
+
+`@peakui/styles/css` imports everything. To pick the parts yourself, import them separately, in this order:
+
+```css
+@import "tailwindcss";
+
+@import "@peakui/styles/themes/default";
+@import "@peakui/styles/base" layer(base);
+@import "@peakui/styles/utilities";
+@import "@peakui/styles/variants";
+
+/* Only the components you use */
+@import "@peakui/styles/components/button.css" layer(components);
+@import "@peakui/styles/components/spinner.css" layer(components);
+```
+
+## Using the tokens in your own code
+
+Every token is a Tailwind utility, so your own markup can stay consistent with the components:
+
+```tsx
+<div className="rounded-xl bg-surface p-4 text-surface-foreground shadow-surface">
+  <p className="text-muted">Secondary text</p>
+</div>
+```

@@ -48,6 +48,8 @@ not permission to skip: report it and stop.
 | Set up a clone / diagnose | `pnpm bootstrap` / `pnpm bootstrap --check` |
 | Dev Storybook | `pnpm dev:storybook` (port **6007**) |
 | Build Storybook | `pnpm build:storybook` |
+| Dev Docs | `pnpm dev:docs` (port **3000**) |
+| Build Docs | `pnpm build:docs` |
 | Unit tests | `pnpm test` |
 | Coverage | `pnpm test:coverage` |
 | Build packages | `pnpm build` / `pnpm build:packages` |
@@ -97,6 +99,26 @@ The jsdom setup those tests need, and the `render` / `setupUser` / `ssrSmoke` he
 private `packages/testing` — never published, and not optional: without `installPointerEvent()` and
 its jsdom stubs, RAC tests do not run at all. Import them from `@peakui/testing/helpers`, and take a
 package's vitest defaults from `@peakui/testing/configs/react`.
+
+## Docs app
+
+`apps/docs` is the documentation site (`@peakui/docs`, private): Next.js + Fumadocs, ported from the
+reference's docs app — attribution in `apps/docs/NOTICE`.
+
+- **Pages** — MDX under `apps/docs/content/docs/en/react/`; a component page lives at
+  `components/(category)/<component-name>.mdx` and follows Usage → Examples → Customization →
+  Styling Reference → API Reference. The `links` frontmatter feeds the components index.
+- **Demos** — one file per example in `apps/docs/src/demos/<component-name>/`, registered in
+  `apps/docs/src/demos/index.ts` and shown with `<ComponentPreview name="…" />`. They are
+  type-checked. A demo that passes a function prop starts with `"use client"`.
+- **Agent routes** — `/llms.txt`, `/llms-components.txt`, `/llms-patterns.txt`, `<page>.md` and
+  `/api/components` are generated from the MDX by `apps/docs/src/lib/get-llm-text.ts`. Never write
+  them by hand.
+- **Nothing a visitor or an agent reads may name the reference library** — pages, demos, UI text,
+  generated markdown. `NOTICE` is the one exception.
+- **Storybook stays independent** — docs never import stories, and stories never import demos.
+- The app has no `@heroui/*` dependency: those styles define the same BEM classes as
+  `@peakui/styles` and would collide.
 
 ## Conventions
 
@@ -148,7 +170,6 @@ this section exists to prevent.
 
 ```
 packages/codemodes/    # @peakui/codemodes — jscodeshift migrations
-apps/docs/             # PeakUI Docs
 .claude/agents/        # docs-curator, storybook-debugger, tailwind-v4-css-expert
 .claude/guides/        # styling is covered by the component-standards skill until one exists
 ```

@@ -1,0 +1,129 @@
+---
+title: Fieldset
+description: Groups related form fields under a legend, with a slot for the actions that belong to them.
+links:
+  source: fieldset/fieldset.tsx
+  styles: fieldset.css
+---
+
+## Usage
+
+```tsx
+import {Fieldset} from "@peakui/react";
+```
+
+<ComponentPreview name="fieldset-basic" />
+
+### Anatomy
+
+```tsx
+import {Fieldset} from "@peakui/react";
+
+export default () => (
+  <Fieldset>
+    <Fieldset.Legend />
+    <Fieldset.Group>{/* fields */}</Fieldset.Group>
+    <Fieldset.Actions>{/* buttons */}</Fieldset.Actions>
+  </Fieldset>
+);
+```
+
+`Fieldset` renders a native `<fieldset>`, and `Fieldset.Legend` a native `<legend>`, so the group is announced with its name by assistive technology.
+
+## Examples
+
+### Disabled
+
+`disabled` disables every control inside the group: the native inputs through the browser, and PeakUI buttons through React Aria, so that their state and styles agree.
+
+<ComponentPreview name="fieldset-disabled" />
+
+### Custom Element
+
+Each part accepts a `render` function to change the element it renders. Spread the props it receives onto your element.
+
+<ComponentPreview name="fieldset-render-prop" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Fieldset className="rounded-2xl bg-surface p-6 shadow-surface">
+  <Fieldset.Legend className="text-lg">Profile</Fieldset.Legend>
+  <Fieldset.Group className="gap-6">{/* fields */}</Fieldset.Group>
+</Fieldset>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .fieldset__legend {
+    @apply text-lg font-semibold;
+  }
+
+  .fieldset__actions {
+    @apply justify-end;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The Fieldset component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/fieldset.css)):
+
+- `.fieldset` - The root
+- `.fieldset__legend` - The legend
+- `.fieldset__group` - The container of the fields
+- `.fieldset__actions` - The container of the actions
+
+### Slots
+
+- `[data-slot="fieldset"]`
+- `[data-slot="fieldset-legend"]`
+- `[data-slot="fieldset-group"]`
+- `[data-slot="fieldset-actions"]`
+
+### Interactive States
+
+- **Disabled**: `[data-disabled]` on the root
+
+## API Reference
+
+### Fieldset
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `disabled` | `boolean` | `false` | Disables every control inside the group |
+| `children` | `React.ReactNode` | - | The legend, the group and the actions |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'fieldset', undefined>` | - | Replaces the rendered `<fieldset>` with your own element |
+
+Every other attribute of a `<fieldset>` is accepted.
+
+### Fieldset.Legend
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The name of the group |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'legend', undefined>` | - | Replaces the rendered `<legend>` with your own element |
+
+### Fieldset.Group
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The fields |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+### Fieldset.Actions
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The buttons that act on the group |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |

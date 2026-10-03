@@ -1,0 +1,20 @@
+{
+  "title": "Components",
+  "description": "PeakUI React components",
+  "root": true,
+  "icon": "circles-4-diamond",
+  "pages": [
+    "---Overview---",
+    "index",
+    "---Components---",
+    "(buttons)/button",
+    "(forms)/description",
+    "(forms)/field-error",
+    "(forms)/fieldset",
+    "(forms)/input",
+    "(forms)/input-group",
+    "(forms)/label",
+    "(feedback)/spinner",
+    "(forms)/text-field"
+  ]
+}

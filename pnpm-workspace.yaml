@@ -22,3 +22,9 @@ overrides:
   "@typescript-eslint/typescript-estree": "8.70.0"
   "@typescript-eslint/utils": "8.70.0"
   "@typescript-eslint/visitor-keys": "8.70.0"
+
+  # fumadocs-core 16.9.3 wraps every mdast-util-to-markdown handler and drops the static
+  # `attention` property that 2.1.3 started reading off the `strong` and `emphasis` handlers, so
+  # serializing any bold text recurses until the stack overflows and `next build` of apps/docs
+  # fails. 2.1.2 is the last release without that lookup. Remove once fumadocs-core preserves it.
+  "mdast-util-to-markdown": "2.1.2"
