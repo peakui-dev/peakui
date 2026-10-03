@@ -1,25 +1,33 @@
-const appEnv = process.env["NEXT_PUBLIC_APP_ENV"] ?? "development";
-
-export const __DEV__ = appEnv === "development";
-export const __PREVIEW__ = appEnv === "preview";
-export const __PROD__ = appEnv === "production";
+const DEV_FALLBACK = "http://localhost:3000";
 
 /**
- * The public origin of the docs site. The production host is not decided yet, so it is read from
- * `NEXT_PUBLIC_SITE_URL` and falls back to the local dev server.
+ * Resolves the public origin of the docs site from `NEXT_PUBLIC_SITE_URL`.
+ *
+ * The production build prerenders every absolute URL in the llms files and the JSON index, so a
+ * missing or malformed value there would ship `localhost` links to agents. It fails the build
+ * instead. Development and tests fall back to the local dev server.
  */
-function getBaseURL(): URL {
-  const configured = process.env["NEXT_PUBLIC_SITE_URL"];
-
+export function resolveBaseURL(configured: string | undefined, isProductionBuild: boolean): URL {
   if (configured) {
     try {
       return new URL(configured);
     } catch {
-      // fall through to the default below
+      // handled below: malformed is as unusable as unset
     }
   }
 
-  return new URL("http://localhost:3000");
+  if (isProductionBuild) {
+    throw new Error(
+      `NEXT_PUBLIC_SITE_URL must be set to the absolute public URL of the docs site (for example https://docs.example.com) for a production build. Received: ${
+        configured ? JSON.stringify(configured) : "nothing"
+      }. See apps/docs/.env.example.`,
+    );
+  }
+
+  return new URL(DEV_FALLBACK);
 }
 
-export const __BASE_URL__ = getBaseURL();
+export const __BASE_URL__ = resolveBaseURL(
+  process.env["NEXT_PUBLIC_SITE_URL"],
+  process.env["NEXT_PHASE"] === "phase-production-build",
+);

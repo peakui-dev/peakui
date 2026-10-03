@@ -116,6 +116,9 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
   them by hand.
 - **Nothing a visitor or an agent reads may name the reference library** — pages, demos, UI text,
   generated markdown. `NOTICE` is the one exception.
+- **Site URL** — `NEXT_PUBLIC_SITE_URL` (see `apps/docs/.env.example`) must be an absolute URL for
+  `pnpm build:docs`: the prerendered llms files and `/api/components` embed it, and the build fails
+  without it. `pnpm dev:docs` falls back to `http://localhost:3000`.
 - **Storybook stays independent** — docs never import stories, and stories never import demos.
 - The app has no `@heroui/*` dependency: those styles define the same BEM classes as
   `@peakui/styles` and would collide.
