@@ -1,0 +1,19 @@
+{
+  "name": "@acme/status",
+  "version": "1.4.0",
+  "description": "Shared status badge used across Acme apps.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "peerDependencies": {
+    "react": ">=19.0.0"
+  }
+}
