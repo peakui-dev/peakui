@@ -41,11 +41,11 @@
   border-radius: var(--input-radius);
   background-color: var(--input-bg);
   /*
-   * Кольцо фокуса приходит тенью через --field-ring (utilities/index.css) и ложится ПОВЕРХ
+   * Кольцо фокуса приходит тенью через --focus-ring (utilities/index.css) и ложится ПОВЕРХ
    * собственной тени поля, а не вместо неё. Запасное значение прозрачное и той же формы,
    * поэтому список теней не меняет длину — box-shadow интерполируется без скачка.
    */
-  box-shadow: var(--field-ring, 0 0 0 0 transparent), var(--input-shadow);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent), var(--input-shadow);
   color: var(--input-fg);
 
   &::placeholder {

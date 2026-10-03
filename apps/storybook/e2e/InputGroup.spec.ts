@@ -294,6 +294,43 @@ test.describe("Семейство полей — стилевой слой и Re
     expect(measured.labelOpacity).toBeLessThan(1);
   });
 
+  /*
+   * Невалидное поле: в покое кольцо рисует OUTLINE, в фокусе — тень. Это форма эталона
+   * (invalid-field-ring: outline-1 в покое, ring-2 в фокусе), и она не случайна: outline в покое не
+   * срезается обрезкой предка, а тень в фокусе участвует в переходе.
+   */
+  test("невалидное поле: outline в покое, кольцо-тень в фокусе", async ({page}) => {
+    await page.goto("/iframe.html?id=components-input--invalid&globals=theme:default-light");
+
+    const input = page.getByLabel("Невалидное");
+
+    await expect(input).toBeVisible();
+
+    const idle = await input.evaluate((el) => {
+      const style = getComputedStyle(el);
+
+      return {
+        boxShadow: style.boxShadow,
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+      };
+    });
+
+    expect(idle.outlineStyle).toBe("solid");
+    expect(idle.outlineWidth).toBe(1);
+
+    await input.focus();
+
+    const focused = await input.evaluate((el) => {
+      const style = getComputedStyle(el);
+
+      return {boxShadow: style.boxShadow, outlineStyle: style.outlineStyle};
+    });
+
+    expect(focused.outlineStyle).toBe("none");
+    expect(focused.boxShadow).not.toBe(idle.boxShadow);
+  });
+
   for (const theme of THEMES) {
     for (const id of STORIES) {
       test(`${id} не нарушает WCAG 2.2 AA в теме ${theme}`, async ({page}) => {

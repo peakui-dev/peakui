@@ -111,6 +111,39 @@ test.describe("Button — стилевой слой и React-компонент"
       expect(transition).toContain("background-color");
     });
 
+    /*
+     * Кольцо фокуса — ТЕНЬ, как у эталона: focus-ring собран из ring-2 ring-offset-background, то
+     * есть двух теней — отступ цветом фона, затем само кольцо, — и box-shadow стоит в списке
+     * перехода. Проверяется вычисленный стиль, а не наличие класса.
+     */
+    test("кольцо фокуса — тень с отступом, и она участвует в переходе", async ({page}) => {
+      await page.goto("/iframe.html?id=components-button--variants&globals=theme:default-light");
+
+      const button = page.getByRole("button", {name: "primary"}).first();
+
+      await expect(button).toBeVisible();
+
+      const idle = await button.evaluate((el) => ({
+        boxShadow: getComputedStyle(el).boxShadow,
+        transition: getComputedStyle(el).transitionProperty,
+      }));
+
+      expect(idle.transition).toContain("box-shadow");
+      expect(idle.transition).not.toContain("outline");
+
+      await button.focus();
+
+      const focused = await button.evaluate((el) => ({
+        boxShadow: getComputedStyle(el).boxShadow,
+        outlineStyle: getComputedStyle(el).outlineStyle,
+      }));
+
+      expect(focused.boxShadow).not.toBe(idle.boxShadow);
+      expect(focused.outlineStyle).toBe("none");
+      /* Две тени: отступ и кольцо. Разделитель между ними — запятая. */
+      expect(focused.boxShadow.split(/,(?![^(]*\))/)).toHaveLength(2);
+    });
+
     test("нажатие вжимает кнопку", async ({page}) => {
       await page.goto("/iframe.html?id=components-button--variants&globals=theme:default-light");
 

@@ -7,43 +7,45 @@
  * Видимое состояние фокуса. В системе ДВА кольца, и компонент не рисует третьего:
  *
  * - status-focused — общее, с отступом от элемента. Берут отдельно стоящие контролы: кнопка,
- *   ссылка, чекбокс.
- * - status-focused-field — прижатое вплотную, outline-offset: 0. Берёт контрол, который сидит в
+ *   ссылка, чекбокс. У эталона это focus-ring: ring-2 ring-focus плюс ring-offset-background, то
+ *   есть ДВЕ тени — сначала отступ цветом фона страницы, затем само кольцо.
+ * - status-focused-field — кольцо вплотную к кромке, без отступа. Берёт контрол, который сидит в
  *   общей оболочке: input внутри input-group, где кольцо с отступом нарисовалось бы поверх границы
- *   соседнего слота — префикса или суффикса.
+ *   соседнего слота. У эталона это focus-field-ring: ring-2 ring-offset-0.
  *
- * Третьего не завести: кольцо, нарисованное внутри компонента, перестаёт быть системным.
+ * Оба кольца — ТЕНИ, как у эталона, и обе утилиты не объявляют box-shadow сами: они публикуют форму
+ * кольца в --focus-ring, а компонент подмешивает её в свою тень первым членом списка. Прямое
+ * объявление затёрло бы собственную тень компонента, а не легло поверх неё — у эталона это делает
+ * за него Tailwind, композитя --tw-ring-shadow с --tw-shadow.
+ *
+ * Почему тень, а не outline: она интерполируется, поэтому кольцо появляется плавно и box-shadow
+ * стоит в списке перехода — у эталона 100ms у кнопки и 150ms у поля. У outline ширина возникает
+ * мгновенно, и переход достался бы только цвету, то есть читался бы как мигание рамки.
+ *
+ * Две цены приняты осознанно:
+ * - тень срезает overflow: hidden у предка, поэтому оболочка группы обязана быть overflow: visible;
+ * - в forced-colors тени не рисуются вовсе, поэтому там каждое кольцо падает на outline — технику,
+ *   которую предписывает references/accessibility-and-i18n.md. --color-focus в этом режиме уже
+ *   равен CanvasText.
  */
 @utility status-focused {
-  outline: var(--ring-offset-width) solid var(--color-focus);
-  outline-offset: var(--ring-offset-width);
+  outline: none;
+
+  --focus-ring:
+    0 0 0 var(--ring-offset-width) var(--color-background),
+    0 0 0 calc(var(--ring-offset-width) + 2px) var(--color-focus);
+
+  @media (forced-colors: active) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: var(--ring-offset-width);
+  }
 }
 
 @utility status-focused-field {
-  /*
-   * Кольцо собрано ТЕНЬЮ, как у эталона: там это ring-2 ring-focus с нулевым офсетом, то есть
-   * box-shadow. Две причины держать именно тень:
-   *
-   * - она интерполируется, поэтому появление кольца участвует в transition — у эталона box-shadow
-   *   стоит третьим в списке перехода, и это ровно его поведение;
-   * - она не добавляет внешней геометрии, поэтому контрол внутри общей оболочки не наезжает
-   *   кольцом на границу соседнего слота.
-   *
-   * Компонент подмешивает кольцо в свой box-shadow через --field-ring. Иначе объявление кольца
-   * затёрло бы собственную тень поля (--shadow-field), а не легло поверх неё.
-   *
-   * Цена известна и принята: тень срезает overflow: hidden у предка. Поэтому оболочка группы
-   * обязана оставаться overflow: visible — это закреплено тестом в apps/storybook/e2e.
-   */
   outline: none;
 
-  --field-ring: 0 0 0 2px var(--color-focus);
+  --focus-ring: 0 0 0 2px var(--color-focus);
 
-  /*
-   * В forced-colors тени не рисуются вовсе, и чистое кольцо-тень оставило бы поле без индикатора
-   * фокуса. Там кольцо падает на outline — ровно как предписывает
-   * references/accessibility-and-i18n.md. --color-focus в этом режиме уже равен CanvasText.
-   */
   @media (forced-colors: active) {
     outline: 2px solid var(--color-focus);
     outline-offset: 0;
@@ -51,19 +53,21 @@
 }
 
 /*
- * Невалидное поле. В покое — тонкая граница, в фокусе — то же кольцо, что у фокуса, но красное.
+ * Невалидное поле. Форма эталона целиком: в ПОКОЕ кольцо рисует outline в 1px, в ФОКУСЕ — тень в
+ * 2px. Это не непоследовательность: outline в покое не срезается обрезкой предка и виден в
+ * forced-colors, а тень в фокусе участвует в переходе вместе с остальными цветами.
  *
- * Цвет — --color-danger-soft-foreground, а НЕ --color-danger: измерено генератором, --danger против
- * заливки поля даёт 2.95:1 в тёмной теме, ниже 3:1, которые должна давать граница состояния
- * (SC 1.4.11). Спека 2026-10-03-input-field-family-design, раздел 4.1.
+ * Одно отличие от кода эталона: в его ветке фокуса outline не снимается, поэтому кольцо получается
+ * двойным — 1px outline плюс 2px тень. Его собственный комментарий обещает «remove outline», так что
+ * здесь выполнено обещание, а не код.
  *
- * Кольцо через outline, а не через ring-* эталона: ring — это box-shadow, и его срезает
- * overflow: hidden у любого предка, а outline — нет.
+ * Цвет — --color-danger-soft-foreground, а НЕ --color-danger: измерено, --danger против заливки поля
+ * даёт 2.95:1 в тёмной теме, ниже 3:1, которые должна давать граница состояния (SC 1.4.11). Спека
+ * 2026-10-03-input-field-family-design, раздел 4.1.
  */
 @utility status-invalid-field {
-  outline: none;
-
-  --field-ring: 0 0 0 1px var(--color-danger-soft-foreground);
+  outline: 1px solid var(--color-danger-soft-foreground);
+  outline-offset: 0;
 
   &:focus,
   &:focus-visible,
@@ -71,16 +75,16 @@
   &[data-focused],
   &[data-focus-visible],
   &[data-focus-within] {
-    --field-ring: 0 0 0 2px var(--color-danger-soft-foreground);
-  }
+    outline: none;
 
-  @media (forced-colors: active) {
-    outline: 1px solid var(--color-danger-soft-foreground);
-    outline-offset: 0;
+    --focus-ring: 0 0 0 2px var(--color-danger-soft-foreground);
+
+    @media (forced-colors: active) {
+      outline: 2px solid var(--color-danger-soft-foreground);
+    }
   }
 }
 
-/* Недоступное состояние. */
 @utility status-disabled {
   pointer-events: none;
   opacity: var(--disabled-opacity);

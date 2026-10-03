@@ -47,6 +47,12 @@
   border-radius: var(--button-radius);
   background-color: var(--button-bg);
   color: var(--button-fg);
+  /*
+   * Кольцо фокуса приходит тенью через --focus-ring (utilities/index.css). Своей тени у кнопки нет,
+   * поэтому запас — две прозрачные тени той же формы, что у кольца: так список не меняет длину и
+   * box-shadow интерполируется без скачка.
+   */
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent, 0 0 0 0 transparent);
 
   /*
    * CRITICAL: motion-reduce ПОСЛЕ transition. Наоборот специфичность отдаёт победу переходу,
@@ -55,14 +61,15 @@
    * origin-center выше и transform-gpu здесь — ради scale на нажатии: без origin-center кнопка
    * вжималась бы от левого верхнего угла.
    *
-   * У эталона третьим переходом стоит box-shadow, потому что его фокус-ринг — это ring-*, то есть
-   * тень. У нас фокус рисует outline (utilities/index.css), поэтому анимируется outline-color.
+   * box-shadow третьим — это кольцо фокуса: оно собрано тенью, ровно как у эталона, и тень
+   * интерполируется, поэтому кольцо появляется плавно. Переход border-color — наш: у эталона
+   * граница в вариантах не участвует, у нас участвует.
    */
   transition:
     transform 250ms var(--ease-smooth),
     background-color 100ms var(--ease-out),
     border-color 100ms var(--ease-out),
-    outline-color 100ms var(--ease-out);
+    box-shadow 100ms var(--ease-out);
   @apply transform-gpu motion-reduce:transition-none;
 
   /* Оба вида каждого состояния: data-* ставит React Aria в рантайме, потребителю вне React
@@ -276,8 +283,8 @@
  *    Рукописные производные цвета здесь запрещены: их контраст никто не измеряет. Используется
  *    --color-default, как у --ghost.
  *
- * 5. Переход outline-color вместо box-shadow — следствие того, что фокус рисуется outline, а не
- *    ring. Плюс переход border-color, которого у эталона нет: у нас граница участвует в вариантах.
+ * 5. Переход border-color, которого у эталона нет: у нас граница участвует в вариантах. Кольцо
+ *    фокуса, как и у него, идёт через box-shadow — форма кольца приходит из --focus-ring.
  *
  * 6. [data-hovered] вне @media (hover: hover) — React Aria сама знает природу указателя.
  *
