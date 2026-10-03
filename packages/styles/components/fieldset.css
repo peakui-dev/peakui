@@ -1,0 +1,47 @@
+/*
+ * Fieldset — группа полей с легендой. Имена классов приходят из
+ * src/components/fieldset/fieldset.styles.ts.
+ *
+ * Сверено с heroui/packages/styles/components/fieldset.css. Расхождения — в конце файла.
+ */
+
+.fieldset {
+  /*
+   * Отступ между легендой и группой полей — крупнее, чем между полями внутри группы, и крупнее,
+   * чем внутри одного поля: иерархия близости, см. css-authoring.md. 6 / 4 / 1 шага --spacing.
+   */
+  @apply flex flex-col gap-6;
+  /*
+   * shrink grow basis-0 — обход дефекта Safari: fieldset с legend внутри флекс-контейнера считает
+   * свою базовую ширину по содержимому легенды. Взято у эталона; проверить мы это здесь не можем,
+   * поэтому и не убираем.
+   */
+  @apply shrink grow basis-0;
+
+  /* Своего внутреннего отступа у группы нет: его задаёт поверхность, на которую её положили. */
+}
+
+.fieldset__legend {
+  @apply text-base font-medium text-foreground;
+}
+
+.fieldset__group {
+  @apply flex w-full flex-col gap-4;
+}
+
+.fieldset__actions {
+  @apply flex items-center gap-2 pt-1;
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. Имя слота — fieldset__group, а не fieldset__field-group: оно совпадает с именем части
+ *    (FieldsetGroup) и ключом пространства имён (Fieldset.Group). У эталона часть называется
+ *    FieldGroup, а класс fieldset__field-group — они расходятся между собой.
+ *
+ * 2. Группа полей — flex-колонка с gap, а не space-y-4: отступы выражаются gap на контейнере, а не
+ *    margin на детях, иначе иерархия перестаёт читаться в одном месте.
+ *
+ * 3. Нет правила под слот description: у эталона класс объявлен в рецепте и не существует в CSS.
+ */
