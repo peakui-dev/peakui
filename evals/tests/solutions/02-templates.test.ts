@@ -1,15 +1,18 @@
 import type {TemplateInfo} from "../../src/fixtures/prepare.ts";
 
-import {existsSync, readFileSync} from "node:fs";
+import {existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
 import {join} from "node:path";
 
 import {beforeAll, describe, expect, it} from "vitest";
 
 import {fixtures} from "../../fixtures/index.ts";
+import {copyDir} from "../../src/files.ts";
+import {labelLinked, parseHtml} from "../../src/scoring/dom.ts";
+import {renderSsr} from "../../src/scoring/render.ts";
 import {prepareTemplate} from "../../src/fixtures/prepare.ts";
 import {packLibrary} from "../../src/pack/stage.ts";
 import {templatesDir} from "../../src/paths.ts";
-
 import {useFreshHarnessHome} from "./home.ts";
 
 describe.each(Object.values(fixtures))("template $id", (fixture) => {
@@ -61,4 +64,46 @@ describe.each(Object.values(fixtures))("template $id", (fixture) => {
     ]);
     expect(Object.values(sidecar.peers).filter((version) => version === null)).toEqual([]);
   });
+
+  it.runIf(fixture.id === "vite-app")(
+    "renders a PeakUI component to static markup through the SSR runner",
+    async () => {
+      const dir = mkdtempSync(join(tmpdir(), "peakui-evals-render-"));
+
+      try {
+        copyDir(template.dir, dir);
+        writeFileSync(
+          join(dir, "src/Probe.tsx"),
+          `import {Button, Input, Label, TextField} from "@peakui/react";
+export function Probe({busy}: {busy: boolean}) {
+  return (
+    <TextField isRequired>
+      <Label>Email</Label>
+      <Input />
+      <Button variant="danger" isPending={busy}>Delete</Button>
+    </TextField>
+  );
+}
+`,
+        );
+
+        const result = await renderSsr(dir, {
+          cases: [{name: "idle", props: {busy: false}}],
+          exportName: "Probe",
+          module: "/src/Probe.tsx",
+        });
+
+        expect(result.ok, JSON.stringify(result)).toBe(true);
+
+        if (!result.ok) return;
+
+        const document = parseHtml(result.documents.idle!);
+
+        expect(labelLinked(document.querySelector('[data-slot="textfield"]')!)).toBe(true);
+        expect(document.querySelector("button.button.button--danger")?.textContent).toBe("Delete");
+      } finally {
+        rmSync(dir, {force: true, recursive: true});
+      }
+    },
+  );
 });
