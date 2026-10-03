@@ -4,9 +4,10 @@ import {Button, tv} from "@peakui/react";
 
 // `tv` is imported from @peakui/react so that it is the instance the library's variants use.
 // The wrapper adds only its own variants: `Button` still owns `size` and `variant`, so each
-// modifier reaches the element once.
+// modifier reaches the element once. No `shadow-*` utility here: the focus ring is a box-shadow,
+// and a shadow utility replaces it.
 const myButtonVariants = tv({
-  base: "font-semibold shadow-md",
+  base: "font-semibold tracking-wide",
   defaultVariants: {
     radius: "full",
   },
