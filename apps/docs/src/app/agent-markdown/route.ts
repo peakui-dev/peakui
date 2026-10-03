@@ -1,5 +1,6 @@
 import type {NextRequest} from "next/server";
 
+import {siteConfig} from "@/config/site";
 import {getHomepageMarkdown, resolveDocsPath} from "@/lib/agent-markdown";
 import {getLLMText} from "@/lib/get-llm-text";
 import {MARKDOWN_HEADERS} from "@/lib/llms-utils";
@@ -27,7 +28,7 @@ async function getMarkdownForPath(request: NextRequest): Promise<Response> {
   }
 
   if (pathname === "/" || pathname === "/en") {
-    return markdownResponse(getHomepageMarkdown(request.nextUrl.origin));
+    return markdownResponse(getHomepageMarkdown(siteConfig.siteUrl.origin));
   }
 
   const resolved = resolveDocsPath(pathname);

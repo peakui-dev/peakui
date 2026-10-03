@@ -52,4 +52,16 @@ describe("/agent-markdown", () => {
 
     expect(forwarded).toBe(PAGE);
   });
+
+  it("builds the homepage markdown from the configured site URL, not the request origin", async () => {
+    const response = await GET(
+      new NextRequest("http://internal-host:8080/agent-markdown", {
+        headers: {"x-peakui-markdown-path": "/"},
+      }),
+    );
+    const text = await response.text();
+
+    expect(text).not.toContain("internal-host");
+    expect(text).toContain("](http://localhost:3000/docs/react/getting-started)");
+  });
 });
