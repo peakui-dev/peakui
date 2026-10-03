@@ -130,69 +130,78 @@ test.describe("Семейство полей — стилевой слой и Re
       );
 
       const input = page.getByLabel("Логин");
-
-      await expect(input).toBeVisible();
-      await input.focus();
-
       const shell = page.locator('[data-slot="input-group"]');
 
-      const measured = await shell.evaluate((el) => {
-        const shellStyle = getComputedStyle(el);
-        const control = el.querySelector("input")!;
-        const controlStyle = getComputedStyle(control);
+      await expect(input).toBeVisible();
 
-        return {
-          controlOutline: Number.parseFloat(controlStyle.outlineWidth),
-          controlOutlineStyle: controlStyle.outlineStyle,
-          shellOutline: Number.parseFloat(shellStyle.outlineWidth),
-          shellOverflow: shellStyle.overflowX,
-        };
-      });
+      const read = () =>
+        shell.evaluate((el) => {
+          const control = el.querySelector("input")!;
 
-      expect(measured.shellOutline).toBeGreaterThan(0);
-      expect(measured.controlOutlineStyle).toBe("none");
-      expect(measured.shellOverflow).toBe("visible");
+          return {
+            controlRing: getComputedStyle(control).boxShadow,
+            shellRing: getComputedStyle(el).boxShadow,
+          };
+        });
+
+      const idle = await read();
+
+      await input.focus();
+
+      const focused = await read();
+      const shellStyle = await shell.evaluate((el) => ({
+        overflow: getComputedStyle(el).overflowX,
+      }));
+      const controlOutline = await input.evaluate((el) => getComputedStyle(el).outlineStyle);
+
+      /*
+       * Кольцо приходит тенью на ОБОЛОЧКУ и не приходит на контрол внутри: иначе оно рисовалось бы
+       * внутри и упиралось в границы префикса. Сравниваются состояния до и после фокуса, а не
+       * строка со "none": у контроля shadow-none даёт пятислотный прозрачный список Tailwind.
+       *
+       * overflow: visible здесь критичнее, чем было при outline: тень срезается обрезкой предка.
+       */
+      expect(focused.shellRing).not.toBe(idle.shellRing);
+      expect(focused.controlRing).toBe(idle.controlRing);
+      expect(controlOutline).toBe("none");
+      expect(shellStyle.overflow).toBe("visible");
     });
 
     /*
-     * Кольцо фокуса появляется МГНОВЕННО. У эталона в списке перехода стоит box-shadow, потому что
-     * его кольцо — это ring, то есть тень. У нас кольцо — outline, и его ширина возникает сразу,
-     * 0 → 2px; переход на outline-color при этом не делает появление плавным, а добавляет мигание
-     * цвета рамки. Переход цвета фона и границы остаётся: он у эталона есть и к кольцу не относится.
+     * Кольцо фокуса — ТЕНЬ, и она участвует в переходе: это форма эталона, где кольцо собрано из
+     * ring-* (то есть box-shadow) и box-shadow стоит третьим в списке перехода. Тень в список
+     * попадает, outline из него уходит.
      */
-    test("кольцо фокуса появляется без перехода", async ({page}) => {
+    test("кольцо фокуса — тень, и она участвует в переходе, как у эталона", async ({page}) => {
       await page.goto(
         "/iframe.html?id=components-inputgroup--with-prefix&globals=theme:default-light",
       );
 
       const shell = page.locator('[data-slot="input-group"]');
+      const input = page.getByLabel("Логин");
 
       await expect(shell).toBeVisible();
 
-      const measured = await shell.evaluate((el) => {
-        const group = getComputedStyle(el);
-        const input = getComputedStyle(el.querySelector("input")!);
+      const idle = await shell.evaluate((el) => ({
+        boxShadow: getComputedStyle(el).boxShadow,
+        transition: getComputedStyle(el).transitionProperty,
+      }));
 
-        return {
-          groupProperty: group.transitionProperty,
-          inputDuration: input.transitionDuration,
-          inputProperty: input.transitionProperty,
-        };
-      });
+      expect(idle.transition).toContain("box-shadow");
+      expect(idle.transition).not.toContain("outline");
 
-      /* Переход живёт на оболочке: она несёт заливку и границу. Кольца в списке нет. */
-      expect(measured.groupProperty).not.toContain("outline");
-      expect(measured.groupProperty).toContain("background-color");
+      await input.focus();
 
-      /*
-       * У внутреннего контрола перехода нет вовсе: property остаётся начальным "all", а длительность
-       * нулевой. Проверяется длительность, а не имя: "all" формально включает и outline-color, и
-       * только нулевая длительность доказывает, что ничего не анимируется.
-       */
-      expect(measured.inputProperty).toBe("all");
-      expect(measured.inputDuration).toBe("0s");
+      const focused = await shell.evaluate((el) => ({
+        boxShadow: getComputedStyle(el).boxShadow,
+        outlineStyle: getComputedStyle(el).outlineStyle,
+      }));
 
-      /* То же у отдельно стоящего поля: заливка анимируется, кольцо — нет. */
+      /* Кольцо пришло тенью, а не внешней геометрией. */
+      expect(focused.boxShadow).not.toBe(idle.boxShadow);
+      expect(focused.outlineStyle).toBe("none");
+
+      /* То же у отдельно стоящего поля. */
       await page.goto("/iframe.html?id=components-input--variants&globals=theme:default-light");
 
       const plain = page.getByLabel("primary");
@@ -201,8 +210,8 @@ test.describe("Семейство полей — стилевой слой и Re
 
       const plainTransition = await plain.evaluate((el) => getComputedStyle(el).transitionProperty);
 
+      expect(plainTransition).toContain("box-shadow");
       expect(plainTransition).not.toContain("outline");
-      expect(plainTransition).toContain("background-color");
     });
 
     /*

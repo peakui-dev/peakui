@@ -20,8 +20,34 @@
 }
 
 @utility status-focused-field {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 0;
+  /*
+   * Кольцо собрано ТЕНЬЮ, как у эталона: там это ring-2 ring-focus с нулевым офсетом, то есть
+   * box-shadow. Две причины держать именно тень:
+   *
+   * - она интерполируется, поэтому появление кольца участвует в transition — у эталона box-shadow
+   *   стоит третьим в списке перехода, и это ровно его поведение;
+   * - она не добавляет внешней геометрии, поэтому контрол внутри общей оболочки не наезжает
+   *   кольцом на границу соседнего слота.
+   *
+   * Компонент подмешивает кольцо в свой box-shadow через --field-ring. Иначе объявление кольца
+   * затёрло бы собственную тень поля (--shadow-field), а не легло поверх неё.
+   *
+   * Цена известна и принята: тень срезает overflow: hidden у предка. Поэтому оболочка группы
+   * обязана оставаться overflow: visible — это закреплено тестом в apps/storybook/e2e.
+   */
+  outline: none;
+
+  --field-ring: 0 0 0 2px var(--color-focus);
+
+  /*
+   * В forced-colors тени не рисуются вовсе, и чистое кольцо-тень оставило бы поле без индикатора
+   * фокуса. Там кольцо падает на outline — ровно как предписывает
+   * references/accessibility-and-i18n.md. --color-focus в этом режиме уже равен CanvasText.
+   */
+  @media (forced-colors: active) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 0;
+  }
 }
 
 /*
@@ -35,8 +61,9 @@
  * overflow: hidden у любого предка, а outline — нет.
  */
 @utility status-invalid-field {
-  outline: 1px solid var(--color-danger-soft-foreground);
-  outline-offset: 0;
+  outline: none;
+
+  --field-ring: 0 0 0 1px var(--color-danger-soft-foreground);
 
   &:focus,
   &:focus-visible,
@@ -44,7 +71,12 @@
   &[data-focused],
   &[data-focus-visible],
   &[data-focus-within] {
-    outline-width: 2px;
+    --field-ring: 0 0 0 2px var(--color-danger-soft-foreground);
+  }
+
+  @media (forced-colors: active) {
+    outline: 1px solid var(--color-danger-soft-foreground);
+    outline-offset: 0;
   }
 }
 

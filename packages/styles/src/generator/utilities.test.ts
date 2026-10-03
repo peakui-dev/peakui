@@ -48,31 +48,69 @@ describe("concentric nesting utilities", () => {
 describe("field focus utilities", () => {
   const css = readFileSync("utilities/index.css", "utf8");
 
+  const utility = (name: string): string => {
+    const at = css.indexOf(`@utility ${name} {`);
+
+    expect(at, name).toBeGreaterThan(-1);
+
+    let depth = 0;
+
+    for (let i = css.indexOf("{", at); i < css.length; i += 1) {
+      if (css[i] === "{") depth += 1;
+      if (css[i] === "}") {
+        depth -= 1;
+
+        if (depth === 0) return css.slice(at, i + 1);
+      }
+    }
+
+    return "";
+  };
+
   it("объявляет оба кольца полей", () => {
     expect(css).toMatch(/@utility status-focused-field\b/);
     expect(css).toMatch(/@utility status-invalid-field\b/);
   });
 
-  it("прижимает кольцо поля вплотную, иначе оно рисуется поверх границы соседнего слота", () => {
-    expect(css).toMatch(/@utility status-focused-field\s*\{[^}]*outline-offset:\s*0\b/);
+  /*
+   * Кольцо поля — ТЕНЬ, как у эталона: он собирает его из ring-*, то есть box-shadow. Отсюда два
+   * следствия, которые и проверяются: в обычном состоянии утилита не рисует outline вовсе, а
+   * передаёт форму кольца компоненту через --field-ring, чтобы тот подмешал её в свою тень.
+   */
+  it("отдаёт кольцо тенью через --field-ring, а не рисует outline", () => {
+    const focused = utility("status-focused-field");
+
+    expect(focused).toMatch(/--field-ring:\s*0 0 0 2px var\(--color-focus\)/);
+    expect(focused).toMatch(/outline:\s*none/);
+  });
+
+  /*
+   * В forced-colors тени не рисуются вовсе, поэтому там кольцо обязано падать на outline — иначе
+   * поле остаётся без индикатора фокуса в режиме, где цветом отличить его нельзя.
+   */
+  it("падает на outline в forced-colors, где тень не рисуется", () => {
+    const focused = utility("status-focused-field");
+    const at = focused.indexOf("@media (forced-colors: active)");
+
+    expect(at).toBeGreaterThan(-1);
+    expect(focused.slice(at)).toMatch(/outline:\s*2px solid var\(--color-focus\)/);
   });
 
   it("оставляет общему кольцу его отступ — два кольца, а не одно", () => {
-    expect(css).toMatch(
-      /@utility status-focused\s*\{[^}]*outline-offset:\s*var\(--ring-offset-width\)/,
+    expect(utility("status-focused")).toMatch(
+      /outline-offset:\s*var\(--ring-offset-width\)/,
     );
   });
 
   it("красит невалидное поле danger-soft-foreground, а не danger: 2.95:1 против заливки в тёмной теме", () => {
-    const invalid = /@utility status-invalid-field\s*\{(?:[^{}]|\{[^{}]*\})*\}/.exec(css)?.[0];
+    const invalid = utility("status-invalid-field");
 
-    expect(invalid).toBeDefined();
     expect(invalid).toContain("var(--color-danger-soft-foreground)");
     expect(invalid).not.toMatch(/var\(--color-danger\)/);
   });
 
   it("утолщает кольцо невалидности и по псевдоклассу, и по data-атрибуту", () => {
-    const invalid = /@utility status-invalid-field\s*\{(?:[^{}]|\{[^{}]*\})*\}/.exec(css)?.[0];
+    const invalid = utility("status-invalid-field");
 
     for (const form of [":focus", ":focus-visible", ":focus-within"]) {
       expect(invalid, form).toContain(`&${form}`);
@@ -80,5 +118,7 @@ describe("field focus utilities", () => {
     for (const form of ["data-focused", "data-focus-visible", "data-focus-within"]) {
       expect(invalid, form).toContain(`[${form}]`);
     }
+
+    expect(invalid).toMatch(/--field-ring:\s*0 0 0 2px var\(--color-danger-soft-foreground\)/);
   });
 });
