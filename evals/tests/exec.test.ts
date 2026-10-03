@@ -105,3 +105,109 @@ describe("runCommand output cap", () => {
     expect(result.stdout).toBe("ok");
   });
 });
+
+describe("runCommand process control", () => {
+  function alive(pid: number): boolean {
+    try {
+      process.kill(pid, 0);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function dead(pid: number, withinMs: number): Promise<boolean> {
+    const until = Date.now() + withinMs;
+
+    while (Date.now() < until) {
+      if (!alive(pid)) return true;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+
+    return !alive(pid);
+  }
+
+  const forever = "setInterval(() => {}, 1000)";
+
+  it("kills the whole group on timeout, grandchildren included", async () => {
+    const pidFile = join(home, "grandchild.pid");
+    const parent = `
+      const {spawn} = require("node:child_process");
+      const {writeFileSync} = require("node:fs");
+      const grandchild = spawn(process.execPath, ["-e", ${JSON.stringify(forever)}], {stdio: "ignore"});
+      writeFileSync(${JSON.stringify(pidFile)}, String(grandchild.pid));
+      ${forever};
+    `;
+    const result = await runCommand(["node", "-e", parent], {
+      cwd: home,
+      killGraceMs: 300,
+      timeoutMs: 700,
+    });
+    const grandchild = Number(readFileSync(pidFile, "utf8"));
+
+    try {
+      expect(result.timedOut).toBe(true);
+      expect(await dead(grandchild, 3000)).toBe(true);
+    } finally {
+      if (alive(grandchild)) process.kill(grandchild, "SIGKILL");
+    }
+  });
+
+  it("escalates when the child ignores the first signal", async () => {
+    const pidFile = join(home, "stubborn.pid");
+    const parent = `
+      require("node:fs").writeFileSync(${JSON.stringify(pidFile)}, String(process.pid));
+      process.on("SIGTERM", () => {});
+      ${forever};
+    `;
+    const started = Date.now();
+    const result = await runCommand(["node", "-e", parent], {
+      cwd: home,
+      killGraceMs: 300,
+      timeoutMs: 700,
+    });
+    const pid = Number(readFileSync(pidFile, "utf8"));
+
+    try {
+      expect(result.timedOut).toBe(true);
+      expect(Date.now() - started).toBeLessThan(5000);
+      expect(await dead(pid, 3000)).toBe(true);
+    } finally {
+      if (alive(pid)) process.kill(pid, "SIGKILL");
+    }
+  });
+
+  it("settles on exit although a detached grandchild keeps the pipes open", async () => {
+    const pidFile = join(home, "holder.pid");
+    const parent = `
+      const {spawn} = require("node:child_process");
+      const {writeFileSync} = require("node:fs");
+      const holder = spawn(process.execPath, ["-e", ${JSON.stringify(forever)}], {
+        detached: true,
+        stdio: ["ignore", "inherit", "inherit"],
+      });
+      holder.unref();
+      writeFileSync(${JSON.stringify(pidFile)}, String(holder.pid));
+      process.stdout.write("parent output");
+    `;
+    const started = Date.now();
+
+    try {
+      const result = await runCommand(["node", "-e", parent], {
+        cwd: home,
+        exitGraceMs: 200,
+        timeoutMs: 20_000,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(result.timedOut).toBe(false);
+      expect(result.stdout).toBe("parent output");
+      expect(Date.now() - started).toBeLessThan(5000);
+    } finally {
+      const holder = Number(readFileSync(pidFile, "utf8"));
+
+      if (alive(holder)) process.kill(holder, "SIGKILL");
+    }
+  }, 15_000);
+});
