@@ -1,8 +1,7 @@
 import type {ComponentStatus} from "@/lib/component-status";
 import type {ReactNode} from "react";
 
-import {Chip} from "@peakui/react";
-import LinkRoot from "fumadocs-core/link";
+import {Chip, Link} from "@peakui/react";
 
 import {statusChipProps} from "@/lib/component-status";
 import {cn} from "@/utils/cn";
@@ -30,15 +29,15 @@ export function ComponentItem({className, component, preview, status}: Component
     <div className={cn("flex flex-col gap-[9px]", className)}>
       {/* Title first on mobile, preview first on desktop */}
       <div className="order-1 sm:order-2">
-        <LinkRoot className="link no-underline" href={href}>
+        <Link className="no-underline" href={href}>
           <span className="flex items-center gap-2">
             {title}
             {statusProps ? <Chip {...statusProps} /> : null}
           </span>
-        </LinkRoot>
+        </Link>
       </div>
       <div className="relative order-2 h-[198px] overflow-hidden rounded-xl border border-separator sm:order-1">
-        <LinkRoot
+        <Link
           aria-label={title}
           className="flex h-full w-full items-center justify-center p-6"
           href={href}
@@ -47,7 +46,7 @@ export function ComponentItem({className, component, preview, status}: Component
           <div inert className="pointer-events-none flex max-w-full items-center justify-center">
             {preview}
           </div>
-        </LinkRoot>
+        </Link>
       </div>
     </div>
   );

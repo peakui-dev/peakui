@@ -225,6 +225,30 @@ export const demos: Record<string, DemoItem> = {
   "separator-with-surface": {
     loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
     file: "separator/with-surface.tsx",
+  // link
+  "link-basic": {
+    loader: () => import("./link/basic").then((m) => m.Basic),
+    file: "link/basic.tsx",
+  },
+  "link-button-variants": {
+    loader: () => import("./link/button-variants").then((m) => m.ButtonVariants),
+    file: "link/button-variants.tsx",
+  },
+  "link-custom-icon": {
+    loader: () => import("./link/custom-icon").then((m) => m.CustomIcon),
+    file: "link/custom-icon.tsx",
+  },
+  "link-disabled": {
+    loader: () => import("./link/disabled").then((m) => m.Disabled),
+    file: "link/disabled.tsx",
+  },
+  "link-icon-placement": {
+    loader: () => import("./link/icon-placement").then((m) => m.IconPlacement),
+    file: "link/icon-placement.tsx",
+  },
+  "link-underline": {
+    loader: () => import("./link/underline").then((m) => m.Underline),
+    file: "link/underline.tsx",
   },
   // spinner
   "spinner-basic": {

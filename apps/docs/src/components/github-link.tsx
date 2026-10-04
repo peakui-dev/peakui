@@ -1,3 +1,4 @@
+import {Link} from "@peakui/react";
 import {buttonVariants} from "@peakui/styles";
 
 import {siteConfig} from "@/config/site";
@@ -7,7 +8,7 @@ import {cn} from "@/utils/cn";
 /** Icon-only link to the source repository, used in the docs and home headers. */
 export function GitHubLinkSmall({className}: {className?: string}) {
   return (
-    <a
+    <Link
       aria-label="GitHub repository"
       href={siteConfig.githubUrl}
       rel="noopener noreferrer"
@@ -20,6 +21,6 @@ export function GitHubLinkSmall({className}: {className?: string}) {
       })}
     >
       <GitHubIcon className="size-4" />
-    </a>
+    </Link>
   );
 }

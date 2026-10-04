@@ -12,6 +12,7 @@ export * from "./input-group/index.ts";
 export * from "./input/index.ts";
 export * from "./label/index.ts";
 export * from "./separator/index.ts";
+export * from "./link/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
 export * from "./textfield/index.ts";
