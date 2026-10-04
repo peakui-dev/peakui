@@ -101,30 +101,41 @@ Runs only after Task 1 is merged **and** Task 2's spec is approved. One agent, o
 - Reports category `Layout`, route group `(layout)/surface`, any token needs.
 - Gates: lint, typecheck, test, docs typecheck+test. No Playwright spec expected (no overlay/portal).
 
-### Tasks 4–11: wave 1 fan-out (entries 2–9, parallel, after Task 3 merges)
+### Wave 1 fan-out (entries 2–9, parallel, after Task 3 merges)
 
-Each: one agent, one worktree off the post-`Surface` `main`, branch `roadmap/0<n>-<kebab>`, brief template below. Mutually independent; all can run concurrently.
+Each task below: one agent, one worktree off the post-`Surface` `main`, branch `roadmap/0<n>-<kebab>`, brief template at the end of this plan. Mutually independent; all run concurrently. Common steps for every entry (under TDD): worktree + `pnpm bootstrap` + CodeGraph explore (quote verbatim); read AGENTS.md, both internal skills + references, the spec's wave-1 row; failing jsdom tests → scaffold → implement component + styles → tests pass; stories + SSR suite (+ Playwright spec where marked); docs page + demos (`peakui-docs` shape; `pnpm registries`); P1 sixth stage; gates with pasted output; report category/route-group/token needs; cite skills.
 
-| Task | Entry | Component | Category | RAC primitive (verify against reference) | P1 sixth stage — `apps/docs` migration | Playwright spec |
-| --- | --- | --- | --- | --- | --- | --- |
-| 4 | 2 | `CloseButton` | buttons | `Button` | none (6 later dependents) | no |
-| 5 | 3 | `Chip` | data-display | leaf `div` (verify) | delete `components/status-chip.tsx` + `components/version-badge.tsx`, migrate their consumers | no |
-| 6 | 4 | `Separator` | layout | `Separator` | replace `<hr className="w-full border-separator">` in the docs layout sidebar banner | no |
-| 7 | 5 | `Link` | navigation | `Link` | migrate `components/github-link.tsx`, `components/component-item.tsx`, `not-found.tsx` button-class links | no |
-| 8 | 6 | `Kbd` | typography | plain `<kbd>` leaf | replace raw `<kbd>` in `components/fumadocs/ui/search-toggle.tsx` (`LargeSearchToggle`) | no |
-| 9 | 7 | `Tooltip` | overlays | `Tooltip` + `TooltipTrigger` | replace the `<span title={shortcut}>` wrapper in `search-toggle.tsx` | **yes** (overlay) |
-| 10 | 8 | `Skeleton` | feedback | leaf `div` (verify) | replace `animate-pulse rounded-lg border bg-muted/30` at `components/component-preview.tsx:22` | no |
-| 11 | 9 | `ScrollShadow` | utilities | `ScrollShadow` | sidebar/TOC overflow (verify what the docs app can consume now) | decide per `references/testing.md` (measured geometry) |
+### Task 4: Entry 2 `CloseButton`
 
-Per-entry steps (identical shape, executed inside each agent under TDD):
+**Category** buttons, route group `(buttons)/close-button`. **Scaffold:** `pnpm add:component CloseButton --rac Button --category buttons`. **Reference:** `close-button/` wraps `Button as ButtonPrimitive` from `react-aria-components/Button`; depends on `CloseIcon` from the internal icons module (landed). **Sixth stage:** none (six later dependents). **Playwright:** no.
 
-- [ ] worktree + `pnpm bootstrap` + CodeGraph explore (quote verbatim)
-- [ ] read AGENTS.md, both internal skills + references, the spec's wave-1 row for the entry
-- [ ] failing jsdom tests → scaffold (`pnpm add:component`) → implement component + styles → tests pass
-- [ ] stories; SSR suite; Playwright spec where marked
-- [ ] docs page + demos (`peakui-docs` shape; `pnpm registries`)
-- [ ] P1 sixth stage: migrate the named `apps/docs` file(s), delete the hand-rolled counterparts
-- [ ] gates with pasted output; report category/route-group/token needs; cite skills
+### Task 5: Entry 3 `Chip`
+
+**Category** data-display, route group `(data-display)/chip`. **Scaffold:** `pnpm add:component Chip --category data-display`. **Reference:** `chip/` is a leaf (no RAC import). **Sixth stage:** delete `apps/docs/src/components/status-chip.tsx` and `components/version-badge.tsx` outright, migrating their consumers to `<Chip>` (both files verified present). **Playwright:** no.
+
+### Task 6: Entry 4 `Separator`
+
+**Category** layout, route group `(layout)/separator`. **Scaffold:** `pnpm add:component Separator --rac Separator --category layout`. **Reference:** `separator/` composes RAC `Separator` + `SeparatorContext` + `useSlottedContext`. **Sixth stage:** replace `<hr className="w-full border-separator" />` at `apps/docs/src/app/[lang]/docs/[[...slug]]/layout.tsx:31` (verified current). **Playwright:** no.
+
+### Task 7: Entry 5 `Link`
+
+**Category** navigation, route group `(navigation)/link`. **Scaffold:** `pnpm add:component Link --rac Link --category navigation`. **Reference:** `link/` composes RAC `Link`; depends on `ExternalLinkIcon` from the internal icons module (landed). **Sixth stage:** migrate `apps/docs/src/components/github-link.tsx` and `components/component-item.tsx` to `<Link>`, and the `className="button button--md button--tertiary"` anchor in `app/[lang]/not-found.tsx:27` (all verified current). **Playwright:** no.
+
+### Task 8: Entry 6 `Kbd`
+
+**Category** typography, route group `(typography)/kbd`. **Scaffold:** `pnpm add:component Kbd --category typography`. **Reference:** `kbd/` is a plain `<kbd>` leaf. **Sixth stage:** replace the raw `<kbd className="bg-fd-background rounded-md border px-1.5">` in `apps/docs/src/components/fumadocs/ui/search-toggle.tsx:80` (`LargeSearchToggle`, verified current). **Playwright:** no.
+
+### Task 9: Entry 7 `Tooltip`
+
+**Category** overlays, route group `(overlays)/tooltip`. **Scaffold:** `pnpm add:component Tooltip --rac Tooltip --category overlays`. **Reference:** `tooltip/` composes RAC `Tooltip` (+ `TooltipTrigger`). **Sixth stage:** replace the `<span title={shortcut ? …}>` wrapper in `search-toggle.tsx:32` (verified current). **Playwright:** **yes** (overlay) — `STORYBOOK_PORT=6017`.
+
+### Task 10: Entry 8 `Skeleton`
+
+**Category** feedback, route group `(feedback)/skeleton`. **Scaffold:** `pnpm add:component Skeleton --category feedback`. **Reference:** `skeleton/` is a leaf. **Sixth stage:** replace `ComponentPreviewFallback`'s `animate-pulse rounded-lg border bg-muted/30` at `apps/docs/src/components/component-preview.tsx:22` (verified current). **Playwright:** no.
+
+### Task 11: Entry 9 `ScrollShadow`
+
+**Category** utilities, route group `(utilities)/scroll-shadow`. **Scaffold:** `pnpm add:component ScrollShadow --category utilities`. **Reference:** `scroll-shadow/` has no direct RAC component import — read it and port its actual mechanism. **Sixth stage:** sidebar/TOC overflow — verify what the docs app can actually consume now; if nothing fits without redesigning the fumadocs sidebar, report that boundary rather than forcing it. **Playwright:** decide per `references/testing.md` (measured geometry) — if shipped, `STORYBOOK_PORT=6018`.
 
 ### Task 12: wave 1 join and review
 
