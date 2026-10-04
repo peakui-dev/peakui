@@ -5,6 +5,7 @@ import type {ComponentProps, ReactNode} from "react";
 import React from "react";
 
 import {Button} from "../button/index.ts";
+import {Modal} from "../modal/index.ts";
 
 import {
   DEFAULT_TOAST_TIMEOUT,
@@ -51,6 +52,17 @@ const StarIcon = (props: IconProps) => (
     <path
       clipRule="evenodd"
       d="m9.194 5 .351.873.94.064 3.197.217-2.46 2.055-.722.603.23.914.782 3.108-2.714-1.704L8 10.629l-.798.5-2.714 1.705.782-3.108.23-.914-.723-.603-2.46-2.055 3.198-.217.94-.064.35-.874L8 2.025zm-7.723-.292 3.943-.268L6.886.773C7.29-.231 8.71-.231 9.114.773l1.472 3.667 3.943.268c1.08.073 1.518 1.424.688 2.118L12.185 9.36l.964 3.832c.264 1.05-.886 1.884-1.802 1.31L8 12.4l-3.347 2.101c-.916.575-2.066-.26-1.802-1.309l.964-3.832L.783 6.826c-.83-.694-.391-2.045.688-2.118"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  </svg>
+);
+
+const BellIcon = (props: IconProps) => (
+  <svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <path
+      clipRule="evenodd"
+      d="m4.665 7.822.62-3.096a2.77 2.77 0 0 1 5.43 0l.62 3.096a4.8 4.8 0 0 0 1.305 2.44l.194.193a.567.567 0 0 1-.273.953l-.821.19a16.6 16.6 0 0 1-7.48 0l-.82-.19a.567.567 0 0 1-.274-.953l.194-.193a4.77 4.77 0 0 0 1.305-2.44m-1.47-.294.619-3.096a4.27 4.27 0 0 1 8.372 0l.62 3.096c.126.634.438 1.216.895 1.673l.194.194a2.066 2.066 0 0 1-.997 3.475l-.821.19q-1.053.24-2.12.358a2 2 0 0 1-3.913 0 18 18 0 0 1-2.12-.359l-.822-.19a2.067 2.067 0 0 1-.997-3.474L2.3 9.2c.457-.457.769-1.04.895-1.673"
       fill="currentColor"
       fillRule="evenodd"
     />
@@ -711,4 +723,49 @@ export const CustomQueue: Story = {
       </Showcase>
     );
   },
+};
+
+// Toast in Modal - toasts stay visible above a full-screen overlay (modal)
+export const ToastInModal: Story = {
+  render: () => (
+    <Showcase title="Toast In Modal">
+      <div className="flex h-full flex-col items-center justify-center">
+        <Toast.Provider placement="bottom" />
+        <Modal>
+          <Button size="sm" variant="secondary">
+            Open modal
+          </Button>
+          <Modal.Backdrop>
+            <Modal.Container>
+              <Modal.Dialog className="sm:max-w-[360px]">
+                <Modal.CloseTrigger />
+                <Modal.Header>
+                  <Modal.Icon className="bg-default text-foreground">
+                    <BellIcon className="size-5" />
+                  </Modal.Icon>
+                  <Modal.Heading>Notifications</Modal.Heading>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>Trigger a toast from inside the modal to see it render above the backdrop.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    className="w-full"
+                    variant="secondary"
+                    onPress={() =>
+                      toast.success("Settings saved", {
+                        description: "Your changes have been applied",
+                      })
+                    }
+                  >
+                    Show toast
+                  </Button>
+                </Modal.Footer>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
+      </div>
+    </Showcase>
+  ),
 };
