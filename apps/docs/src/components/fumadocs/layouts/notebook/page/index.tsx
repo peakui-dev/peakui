@@ -2,8 +2,8 @@ import type {BreadcrumbProps, FooterProps} from "./client";
 import type {AnchorProviderProps, TOCItemType} from "fumadocs-core/toc";
 import type {ComponentProps, ReactNode} from "react";
 
+import {buttonVariants} from "@peakui/styles";
 import {TOCProvider} from "fumadocs-ui/components/toc";
-import {buttonVariants} from "fumadocs-ui/components/ui/button";
 import {I18nLabel} from "fumadocs-ui/contexts/i18n";
 
 import {Edit, Text} from "@/components/fumadocs/ui/icons";
@@ -166,9 +166,9 @@ export function EditOnGitHub(props: ComponentProps<"a">) {
       {...props}
       className={cn(
         buttonVariants({
-          className: "not-prose gap-1.5",
-          color: "secondary",
+          class: "not-prose gap-1.5",
           size: "sm",
+          variant: "secondary",
         }),
         props.className,
       )}

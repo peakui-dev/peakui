@@ -7,9 +7,9 @@ import type {SidebarTabWithProps} from "fumadocs-ui/components/sidebar/tabs/drop
 import type {BaseLayoutProps} from "fumadocs-ui/layouts/shared";
 import type {ComponentProps, FC, HTMLAttributes, ReactNode} from "react";
 
+import {buttonVariants} from "@peakui/styles";
 import Link from "fumadocs-core/link";
 import {getSidebarTabs} from "fumadocs-ui/components/sidebar/tabs";
-import {buttonVariants} from "fumadocs-ui/components/ui/button";
 import {TreeContextProvider} from "fumadocs-ui/contexts/tree";
 import {resolveLinkItems} from "fumadocs-ui/layouts/shared";
 import {useMemo} from "react";
@@ -185,9 +185,10 @@ export function DocsLayout(props: DocsLayoutProps) {
                   <SidebarCollapseTrigger
                     className={cn(
                       buttonVariants({
-                        className: "text-fd-muted-foreground mt-px mb-auto",
-                        color: "ghost",
-                        size: "icon-sm",
+                        class: "text-fd-muted-foreground mt-px mb-auto",
+                        isIconOnly: true,
+                        size: "sm",
+                        variant: "ghost",
                       }),
                     )}
                   >
@@ -214,9 +215,10 @@ export function DocsLayout(props: DocsLayoutProps) {
                 item={item}
                 className={cn(
                   buttonVariants({
-                    className: "lg:hidden",
-                    color: "ghost",
-                    size: "icon-sm",
+                    class: "lg:hidden",
+                    isIconOnly: true,
+                    size: "sm",
+                    variant: "ghost",
                   }),
                 )}
               >
@@ -230,9 +232,10 @@ export function DocsLayout(props: DocsLayoutProps) {
             <SidebarTrigger
               className={cn(
                 buttonVariants({
-                  className: "text-fd-muted-foreground ms-auto",
-                  color: "ghost",
-                  size: "icon-sm",
+                  class: "text-fd-muted-foreground ms-auto",
+                  isIconOnly: true,
+                  size: "sm",
+                  variant: "ghost",
                 }),
               )}
             >
@@ -260,8 +263,9 @@ export function DocsLayout(props: DocsLayoutProps) {
                 item={item}
                 className={cn(
                   buttonVariants({
-                    color: "ghost",
-                    size: "icon-sm",
+                    isIconOnly: true,
+                    size: "sm",
+                    variant: "ghost",
                   }),
                   "text-fd-muted-foreground lg:hidden",
                   i === iconLinks.length - 1 && "me-auto",
@@ -342,8 +346,9 @@ function DocsNavbar({
             <SidebarCollapseTrigger
               className={cn(
                 buttonVariants({
-                  color: "ghost",
-                  size: "icon-sm",
+                  isIconOnly: true,
+                  size: "sm",
+                  variant: "ghost",
                 }),
                 "text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden",
               )}
@@ -412,7 +417,7 @@ function DocsNavbar({
                 aria-label={item.label}
                 item={item}
                 className={cn(
-                  buttonVariants({color: "ghost", size: "icon-sm"}),
+                  buttonVariants({isIconOnly: true, size: "sm", variant: "ghost"}),
                   "text-fd-muted-foreground max-lg:hidden",
                 )}
               >
@@ -426,9 +431,10 @@ function DocsNavbar({
             <SidebarTrigger
               className={cn(
                 buttonVariants({
-                  className: "-me-1.5 p-2",
-                  color: "ghost",
-                  size: "icon-sm",
+                  class: "-me-1.5 p-2",
+                  isIconOnly: true,
+                  size: "sm",
+                  variant: "ghost",
                 }),
               )}
             >
@@ -445,8 +451,9 @@ function DocsNavbar({
               <SidebarCollapseTrigger
                 className={cn(
                   buttonVariants({
-                    color: "secondary",
-                    size: "icon-sm",
+                    isIconOnly: true,
+                    size: "sm",
+                    variant: "secondary",
                   }),
                   "text-fd-muted-foreground -me-1.5 rounded-full",
                 )}
