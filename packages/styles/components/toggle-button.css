@@ -1,0 +1,223 @@
+/*
+ * ToggleButton — an interactive toggle control for on/off states. Class names come from
+ * src/components/toggle-button/toggle-button.styles.ts; all the Tailwind lives here. The file is
+ * standalone: every interactive state is written both as a pseudo-class and as a data-*
+ * attribute, so the stylesheet works without React — except `data-selected`, which has no
+ * pseudo-class form and is set by React Aria at runtime.
+ *
+ * Compared line by line against the reference toggle-button.css. The differences that remain are
+ * listed at the end of the file, each with its reason.
+ */
+
+/* Base styles */
+.toggle-button {
+  /*
+   * Theming seam — the public override contract, ahead of any tv({extend}). Default tokens are
+   * the unselected state; the selected state has its own set below.
+   */
+  --toggle-button-bg: var(--color-default);
+  --toggle-button-bg-hover: var(--color-default-hover);
+  --toggle-button-bg-pressed: var(--color-default-hover);
+  --toggle-button-fg: var(--color-default-foreground);
+  --toggle-button-border: transparent;
+  --toggle-button-radius: var(--radius-3xl);
+
+  /* Selected state tokens */
+  --toggle-button-bg-selected: var(--color-accent-soft);
+  --toggle-button-bg-selected-hover: var(--color-accent-soft-hover);
+  --toggle-button-bg-selected-pressed: var(--color-accent-soft-hover);
+  --toggle-button-fg-selected: var(--color-accent-soft-foreground);
+
+  @apply relative isolate inline-flex h-10 w-fit origin-center items-center justify-center gap-2 px-4 text-sm font-medium whitespace-nowrap select-none no-highlight md:h-9;
+  @apply outline-none;
+
+  /* Cursor */
+  cursor: var(--cursor-interactive);
+
+  /* Held transparent in the normal state so the forced-colors border causes no layout shift. */
+  border: 1px solid var(--toggle-button-border);
+  border-radius: var(--toggle-button-radius);
+  background-color: var(--toggle-button-bg);
+  color: var(--toggle-button-fg);
+  /*
+   * The focus ring arrives as a shadow through --focus-ring (utilities/index.css); the two
+   * transparent shadows keep the list length constant so box-shadow interpolates without a jump.
+   */
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent, 0 0 0 0 transparent);
+
+  /*
+   * Transitions
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition:
+    transform 250ms var(--ease-smooth),
+    background-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  /*
+   * Both forms of every state: data-* is set by React Aria at runtime; a consumer outside React
+   * gets only the pseudo-classes.
+   */
+  /* Hover — :hover stays under (hover: hover) so it does not stick after a tap. */
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--toggle-button-bg-hover);
+    }
+  }
+
+  &[data-hovered] {
+    background-color: var(--toggle-button-bg-hover);
+  }
+
+  /* Active / pressed */
+  &:active,
+  &[data-pressed] {
+    background-color: var(--toggle-button-bg-pressed);
+    transform: scale(0.97);
+  }
+
+  /* :not([data-focused]) guards against double application when React Aria owns the focus. */
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible] {
+    @apply status-focused;
+  }
+
+  /* Disabled state */
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /* Selected state — data-selected has no pseudo-class counterpart; only React Aria sets it. */
+  &[data-selected] {
+    background-color: var(--toggle-button-bg-selected);
+    color: var(--toggle-button-fg-selected);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--toggle-button-bg-selected-hover);
+      }
+    }
+
+    &[data-hovered] {
+      background-color: var(--toggle-button-bg-selected-hover);
+    }
+
+    &:active,
+    &[data-pressed] {
+      background-color: var(--toggle-button-bg-selected-pressed);
+    }
+  }
+
+  /* SVG icon styling */
+  & svg {
+    @apply pointer-events-none -mx-0.5 my-0.5 size-5 shrink-0 self-center sm:my-1 sm:size-4;
+  }
+
+  /*
+   * Forced colors: the selected state is carried by the background alone, and forced-colors
+   * flattens backgrounds — the boundary and the system Highlight pair carry it instead.
+   */
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+
+    &[data-selected] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+}
+
+/* ==========================================================================
+   Size variants
+   ========================================================================== */
+
+.toggle-button--sm {
+  @apply h-9 px-3 md:h-8;
+
+  & svg {
+    @apply size-4;
+  }
+
+  /* The larger the button, the less compression the press needs to read. */
+  &:active,
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
+}
+
+.toggle-button--md {
+  /* No styles as this is the default size */
+}
+
+.toggle-button--lg {
+  @apply h-11 text-base md:h-10;
+
+  &:active,
+  &[data-pressed] {
+    transform: scale(0.96);
+  }
+}
+
+/* ==========================================================================
+   Variant styles
+   ========================================================================== */
+
+.toggle-button--default {
+  --toggle-button-bg: var(--color-default);
+  --toggle-button-bg-hover: var(--color-default-hover);
+  --toggle-button-bg-pressed: var(--color-default-hover);
+}
+
+.toggle-button--ghost {
+  --toggle-button-bg: transparent;
+  --toggle-button-bg-hover: var(--color-default);
+  --toggle-button-bg-pressed: var(--color-default);
+  --toggle-button-fg: var(--color-default-foreground);
+}
+
+/* ==========================================================================
+   Icon-only modifier
+   ========================================================================== */
+
+.toggle-button--icon-only {
+  @apply w-10 p-0 md:w-9;
+}
+
+.toggle-button--icon-only.toggle-button--sm {
+  @apply w-9 md:w-8;
+}
+
+.toggle-button--icon-only.toggle-button--lg {
+  @apply w-11 md:w-10;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` prefix on every token: that is how the peakui token layer is built.
+ *
+ * 2. forced-colors block: the reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md; the pattern (transparent border
+ *    held in the normal state, ButtonBorder in forced colors) is the one button.css uses, plus
+ *    the Highlight/HighlightText pair for data-selected, whose meaning the flattened background
+ *    can no longer carry.
+ *
+ * 3. A constant transparent border and the radius through the `--toggle-button-radius` handle
+ *    instead of `rounded-3xl`, for the same reasons as button.css deviations 2–3: no layout
+ *    shift between variants, and forced colors has a boundary to grab.
+ *
+ * 4. `--toggle-button-fg` on the bare `.toggle-button` is `var(--color-default-foreground)`
+ *    where the reference leaves `currentColor`. Reason recorded in button.css, deviation 10:
+ *    standalone CSS inherits the browser default and measured a color-contrast violation in the
+ *    dark theme. The token pairs with the `--color-default` background.
+ *
+ * 5. `[data-hovered]` outside `@media (hover: hover)` — React Aria knows the pointer's nature
+ *    itself (button.css deviation 6); `[data-disabled]` added alongside `:disabled` and
+ *    `[aria-disabled="true"]` (deviation 7); value-less data-* selectors, the house form.
+ *
+ * 6. The focus ring is mixed into the box-shadow list through `--focus-ring`, as in button.css:
+ *    status-focused publishes the ring's shape and the component reserves the shadow slots.
+ */

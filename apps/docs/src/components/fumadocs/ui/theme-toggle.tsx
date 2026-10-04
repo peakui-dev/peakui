@@ -2,22 +2,21 @@
 
 import type {ComponentProps} from "react";
 
+import {ToggleButton, ToggleButtonGroup} from "@peakui/react";
 import {useTheme} from "next-themes";
-import {tv} from "tailwind-variants";
 
 import {Airplay, Moon, Sun} from "@/components/fumadocs/ui/icons";
 import {useIsMounted} from "@/hooks/use-is-mounted";
 import {cn} from "@/utils/cn";
 
-const itemVariants = tv({
-  base: "text-fd-muted-foreground size-6.5 rounded-full p-1.5",
-  variants: {
-    active: {
-      false: "text-fd-muted-foreground",
-      true: "bg-fd-accent text-fd-accent-foreground",
-    },
-  },
-});
+/*
+ * The controls are peakui components; the theme wiring is unchanged: `light-dark` is one
+ * control that flips the resolved theme, `light-dark-system` offers each theme as its own
+ * button. The icon chips of the two-state control stay as plain conditional classes — they
+ * are indicators inside one control, not selected styling the component would own.
+ */
+const itemBase = "text-fd-muted-foreground size-6.5 rounded-full p-1.5";
+const itemActive = "bg-fd-accent text-fd-accent-foreground";
 
 const full = [["light", Sun] as const, ["dark", Moon] as const, ["system", Airplay] as const];
 
@@ -40,11 +39,12 @@ export function ThemeToggle({
     const value = mounted ? resolvedTheme : null;
 
     return (
-      <button
+      <ToggleButton
         aria-label="Toggle Theme"
-        className={container}
+        className={cn(container, "gap-1")}
         data-theme-toggle=""
-        onClick={() => setTheme(value === "light" ? "dark" : "light")}
+        isSelected={value === "dark"}
+        onChange={() => setTheme(value === "light" ? "dark" : "light")}
       >
         {full.map(([key, Icon]) => {
           if (key === "system") return;
@@ -52,29 +52,38 @@ export function ThemeToggle({
           return (
             <Icon
               key={key}
-              className={cn(itemVariants({active: value === key}))}
+              className={cn(itemBase, value === key && itemActive)}
               fill="currentColor"
             />
           );
         })}
-      </button>
+      </ToggleButton>
     );
   }
 
   const value = mounted ? theme : null;
 
   return (
-    <div className={container} data-theme-toggle="" {...props}>
+    <ToggleButtonGroup
+      disallowEmptySelection
+      isDetached
+      aria-label="Select Theme"
+      className={container}
+      data-theme-toggle=""
+      selectedKeys={value ? new Set([value]) : new Set()}
+      selectionMode="single"
+      onSelectionChange={(keys) => {
+        const key = keys.values().next().value;
+
+        if (key !== undefined) setTheme(String(key));
+      }}
+      {...props}
+    >
       {full.map(([key, Icon]) => (
-        <button
-          key={key}
-          aria-label={key}
-          className={cn(itemVariants({active: value === key}))}
-          onClick={() => setTheme(key)}
-        >
-          <Icon className="size-full" fill="currentColor" />
-        </button>
+        <ToggleButton key={key} isIconOnly aria-label={key} id={key} size="sm" variant="ghost">
+          <Icon fill="currentColor" />
+        </ToggleButton>
       ))}
-    </div>
+    </ToggleButtonGroup>
   );
 }

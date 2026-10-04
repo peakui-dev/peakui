@@ -1,0 +1,167 @@
+/*
+ * ToggleButtonGroup — groups multiple ToggleButtons into a unified control. Class names come from
+ * src/components/toggle-button-group/toggle-button-group.styles.ts; all the Tailwind lives here.
+ * The group owns only layout: orientation, edge radii of the attached buttons, the separator and
+ * the detached mode. The buttons' own look lives in toggle-button.css.
+ *
+ * Compared line by line against the reference toggle-button-group.css. The differences that
+ * remain are listed at the end of the file, each with its reason.
+ */
+
+/* Base styles */
+.toggle-button-group {
+  @apply inline-flex h-auto w-fit items-center justify-center gap-0;
+  /*
+   * Visible on purpose: the focus ring of a button inside the group is a shadow
+   * (utilities/index.css), and an clipping ancestor would cut it off.
+   */
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Orientation variants
+   ========================================================================== */
+
+.toggle-button-group--horizontal {
+  @apply flex-row;
+}
+
+.toggle-button-group--vertical {
+  @apply flex-col;
+}
+
+/* ==========================================================================
+   Full width modifier
+   ========================================================================== */
+
+.toggle-button-group--full-width {
+  @apply w-full;
+}
+
+/* ==========================================================================
+   Attached mode (default) - buttons connected with dividers
+   ========================================================================== */
+
+/* Remove border radius from all toggle buttons in attached group */
+.toggle-button-group .toggle-button {
+  @apply rounded-none;
+}
+
+/* Apply border radius to first button (start edge) */
+.toggle-button-group--horizontal .toggle-button:first-child {
+  @apply rounded-s-3xl;
+}
+
+/* Apply border radius to last button (end edge) */
+.toggle-button-group--horizontal .toggle-button:last-child {
+  @apply rounded-e-3xl;
+}
+
+/* If only one button, apply both rounded edges */
+.toggle-button-group--horizontal .toggle-button:first-child:last-child {
+  @apply rounded-3xl;
+}
+
+/* Apply border radius to first button (top edge) in vertical */
+.toggle-button-group--vertical .toggle-button:first-child {
+  @apply rounded-t-3xl;
+}
+
+/* Apply border radius to last button (bottom edge) in vertical */
+.toggle-button-group--vertical .toggle-button:last-child {
+  @apply rounded-b-3xl;
+}
+
+/* If only one button in vertical, apply all rounded edges */
+.toggle-button-group--vertical .toggle-button:first-child:last-child {
+  @apply rounded-3xl;
+}
+
+/* Remove scale transform on active/pressed state for buttons in group */
+.toggle-button-group .toggle-button:active,
+.toggle-button-group .toggle-button[data-pressed] {
+  transform: none;
+}
+
+/*
+ * Focus ring of a joined button: flush with the edge, without the page-coloured offset, so it
+ * does not paint over the neighbouring button. The reference expresses this as
+ * `--tw-ring-offset-width: 0px; @apply ring-inset`; the peakui ring is not a Tailwind ring but a
+ * shadow published in --focus-ring, and collapsing --ring-offset-width to zero produces the
+ * flush form the system already uses for a control inside a joined shell (status-focused-field).
+ */
+.toggle-button-group .toggle-button:focus-visible:not([data-focused]),
+.toggle-button-group .toggle-button[data-focus-visible] {
+  --ring-offset-width: 0px;
+}
+
+/* Full width: stretch each toggle button */
+.toggle-button-group--full-width .toggle-button {
+  @apply flex-1;
+}
+
+/* ==========================================================================
+   Separator (compound component)
+   ========================================================================== */
+
+.toggle-button-group__separator {
+  @apply rounded-sm bg-current opacity-15;
+  position: absolute;
+  pointer-events: none;
+
+  /**
+   * Transitions
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition: opacity 150ms var(--ease-smooth);
+  @apply motion-reduce:transition-none;
+
+  /* Horizontal orientation - vertical divider */
+  .toggle-button-group--horizontal & {
+    inset-inline-start: -1px;
+    top: 25%;
+    width: 1px;
+    height: 50%;
+  }
+
+  /* Vertical orientation - horizontal divider */
+  .toggle-button-group--vertical & {
+    inset-inline-start: 25%;
+    top: -1px;
+    width: 50%;
+    height: 1px;
+  }
+}
+
+/* ==========================================================================
+   Detached mode - buttons separated with gaps
+   ========================================================================== */
+
+.toggle-button-group--detached {
+  @apply gap-1;
+}
+
+/* Restore border radius in detached mode */
+.toggle-button-group--detached .toggle-button {
+  @apply rounded-3xl;
+}
+
+/* Hide separators in detached mode */
+.toggle-button-group--detached .toggle-button-group__separator {
+  display: none;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The inset focus ring of a joined button (`--tw-ring-offset-width: 0px; ring-inset`) is
+ *    expressed as `--ring-offset-width: 0px`. Tailwind v4 removed `ring-inset`, and the peakui
+ *    ring is a shadow in --focus-ring anyway (utilities/index.css); the flush form matches what
+ *    input-group.css gives a control inside a joined shell. The ring is drawn at the edge rather
+ *    than inside it.
+ *
+ * 2. Value-less data-* selectors (`[data-pressed]`, `[data-focus-visible]`), the house form.
+ *
+ * 3. `overflow: visible` is stated explicitly: the button's focus ring is a shadow, and the rule
+ *    documents why the group must never clip it.
+ */

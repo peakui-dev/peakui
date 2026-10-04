@@ -417,6 +417,68 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./text-field/with-error").then((m) => m.WithError),
     file: "text-field/with-error.tsx",
   },
+  // toggle-button
+  "toggle-button-basic": {
+    loader: () => import("./toggle-button/basic").then((m) => m.Basic),
+    file: "toggle-button/basic.tsx",
+  },
+  "toggle-button-controlled": {
+    loader: () => import("./toggle-button/controlled").then((m) => m.Controlled),
+    file: "toggle-button/controlled.tsx",
+  },
+  "toggle-button-disabled": {
+    loader: () => import("./toggle-button/disabled").then((m) => m.Disabled),
+    file: "toggle-button/disabled.tsx",
+  },
+  "toggle-button-icon-only": {
+    loader: () => import("./toggle-button/icon-only").then((m) => m.IconOnly),
+    file: "toggle-button/icon-only.tsx",
+  },
+  "toggle-button-sizes": {
+    loader: () => import("./toggle-button/sizes").then((m) => m.Sizes),
+    file: "toggle-button/sizes.tsx",
+  },
+  "toggle-button-variants": {
+    loader: () => import("./toggle-button/variants").then((m) => m.Variants),
+    file: "toggle-button/variants.tsx",
+  },
+  // toggle-button-group
+  "toggle-button-group-basic": {
+    loader: () => import("./toggle-button-group/basic").then((m) => m.Basic),
+    file: "toggle-button-group/basic.tsx",
+  },
+  "toggle-button-group-controlled": {
+    loader: () => import("./toggle-button-group/controlled").then((m) => m.Controlled),
+    file: "toggle-button-group/controlled.tsx",
+  },
+  "toggle-button-group-detached": {
+    loader: () => import("./toggle-button-group/detached").then((m) => m.Detached),
+    file: "toggle-button-group/detached.tsx",
+  },
+  "toggle-button-group-disabled": {
+    loader: () => import("./toggle-button-group/disabled").then((m) => m.Disabled),
+    file: "toggle-button-group/disabled.tsx",
+  },
+  "toggle-button-group-full-width": {
+    loader: () => import("./toggle-button-group/full-width").then((m) => m.FullWidth),
+    file: "toggle-button-group/full-width.tsx",
+  },
+  "toggle-button-group-orientation": {
+    loader: () => import("./toggle-button-group/orientation").then((m) => m.Orientation),
+    file: "toggle-button-group/orientation.tsx",
+  },
+  "toggle-button-group-selection-mode": {
+    loader: () => import("./toggle-button-group/selection-mode").then((m) => m.SelectionMode),
+    file: "toggle-button-group/selection-mode.tsx",
+  },
+  "toggle-button-group-sizes": {
+    loader: () => import("./toggle-button-group/sizes").then((m) => m.Sizes),
+    file: "toggle-button-group/sizes.tsx",
+  },
+  "toggle-button-group-without-separator": {
+    loader: () => import("./toggle-button-group/without-separator").then((m) => m.WithoutSeparator),
+    file: "toggle-button-group/without-separator.tsx",
+  },
   // tooltip
   "tooltip-basic": {
     loader: () => import("./tooltip/basic").then((m) => m.Basic),

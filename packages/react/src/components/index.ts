@@ -19,4 +19,6 @@ export * from "./skeleton/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
 export * from "./textfield/index.ts";
+export * from "./toggle-button-group/index.ts";
+export * from "./toggle-button/index.ts";
 export * from "./tooltip/index.ts";

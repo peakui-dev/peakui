@@ -24,6 +24,8 @@
     "(feedback)/spinner",
     "(layout)/surface",
     "(forms)/text-field",
+    "(buttons)/toggle-button",
+    "(buttons)/toggle-button-group",
     "(overlays)/tooltip"
   ]
 }
