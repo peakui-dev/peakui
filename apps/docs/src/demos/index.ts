@@ -251,6 +251,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./link/underline").then((m) => m.Underline),
     file: "link/underline.tsx",
   },
+  // popover
+  "popover-basic": {
+    loader: () => import("./popover/basic").then((m) => m.Basic),
+    file: "popover/basic.tsx",
+  },
+  "popover-custom-styles": {
+    loader: () => import("./popover/custom-styles").then((m) => m.CustomStyles),
+    file: "popover/custom-styles.tsx",
+  },
+  "popover-custom-trigger": {
+    loader: () => import("./popover/custom-trigger").then((m) => m.CustomTrigger),
+    file: "popover/custom-trigger.tsx",
+  },
+  "popover-placement": {
+    loader: () => import("./popover/placement").then((m) => m.Placement),
+    file: "popover/placement.tsx",
+  },
+  "popover-with-arrow": {
+    loader: () => import("./popover/with-arrow").then((m) => m.WithArrow),
+    file: "popover/with-arrow.tsx",
+  },
   // scroll-shadow
   "scroll-shadow-basic": {
     loader: () => import("./scroll-shadow/basic").then((m) => m.Basic),

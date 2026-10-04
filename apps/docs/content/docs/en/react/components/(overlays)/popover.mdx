@@ -1,0 +1,174 @@
+---
+title: Popover
+description: Overlay anchored to a trigger
+links:
+  rac: Popover
+  source: popover/popover.tsx
+  styles: popover.css
+---
+
+## Usage
+
+```tsx
+import {Popover} from "@peakui/react";
+```
+
+<ComponentPreview name="popover-basic" />
+
+### Anatomy
+
+```tsx
+import {Button, Popover} from "@peakui/react";
+
+export default () => (
+  <Popover>
+    <Button>Open popover</Button>
+    <Popover.Content>
+      <Popover.Dialog>
+        <Popover.Arrow />
+        <Popover.Heading>Popover heading</Popover.Heading>
+        <p>Popover content</p>
+      </Popover.Dialog>
+    </Popover.Content>
+  </Popover>
+);
+```
+
+## Examples
+
+### With Arrow
+
+<ComponentPreview name="popover-with-arrow" />
+
+### Placement
+
+<ComponentPreview name="popover-placement" />
+
+### Custom Triggers
+
+<ComponentPreview name="popover-custom-trigger" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="popover-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .popover {
+    @apply rounded-lg border border-border/80 shadow-lg;
+  }
+
+  .popover__heading {
+    @apply text-xs uppercase tracking-wide;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Popover component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/popover.css)):
+
+#### Base Classes [!toc]
+
+- `.popover` - Base popover styles with animations
+- `.popover__dialog` - Dialog element styles
+- `.popover__heading` - Heading element styles
+- `.popover__trigger` - Trigger element styles
+
+### Slots
+
+- `[data-slot="popover"]` - The popover content element
+- `[data-slot="popover-trigger"]` - The `Popover.Trigger` element
+- `[data-slot="popover-dialog"]` - The `Popover.Dialog` element
+- `[data-slot="popover-heading"]` - The `Popover.Heading` element
+- `[data-slot="popover-overlay-arrow"]` - The default arrow SVG
+- `[data-slot="popover-overlay-arrow-group"]` - The arrow wrapper
+
+### Interactive States
+
+The popover content carries RAC animation and positioning states:
+
+- **Entering**: `[data-entering="true"]`
+- **Exiting**: `[data-exiting="true"]`
+- **Placement**: `[data-placement="top | bottom | left | right"]`
+
+The trigger supports both pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[aria-disabled="true"]`
+
+## API Reference
+
+### Popover
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The trigger element followed by `Popover.Content` |
+| `isOpen` | `boolean` | - | Controlled open state |
+| `defaultOpen` | `boolean` | `false` | Initially open, without controlling |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Called when the popover opens or closes |
+| `...rest` | `DialogTriggerProps` | - | [React Aria DialogTrigger attributes](https://react-spectrum.adobe.com/react-aria/DialogTrigger.html) |
+
+### Popover.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Content of the popover |
+| `placement` | `Placement` | `'bottom'` | Placement relative to the trigger: `'top'`, `'bottom'`, `'left'`, `'right'` with start/end/top/bottom variants |
+| `offset` | `number` | `8` | Distance from the trigger element |
+| `crossOffset` | `number` | `0` | Cross-axis offset from the trigger |
+| `shouldFlip` | `boolean` | `true` | Whether the popover flips when it does not fit |
+| `containerPadding` | `number` | `12` | Distance the popover keeps from the viewport edge |
+| `arrowBoundaryOffset` | `number` | `0` | Boundary offset for the arrow positioning |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the popover state |
+| `render` | `DOMRenderFunction<'div', PopoverRenderProps>` | - | Replaces the rendered `<div>` with your own element |
+| `...rest` | `PopoverProps` | - | [React Aria Popover attributes](https://react-spectrum.adobe.com/react-aria/Popover.html) |
+
+### Popover.Dialog
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| (({close}) => React.ReactNode)` | - | Dialog content; a function receives a `close` callback |
+| `aria-label` | `string` | - | Accessible name when no `Popover.Heading` is present |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `DialogProps` | - | [React Aria Dialog attributes](https://react-spectrum.adobe.com/react-aria/Dialog.html) |
+
+### Popover.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Non-interactive element to make pressable |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>` with your own element; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Popover.Arrow
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Custom arrow element; defaults to a 12x12 SVG |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `OverlayArrowProps` | - | [React Aria OverlayArrow attributes](https://react-spectrum.adobe.com/react-aria/Popover.html#overlayarrow) |
+
+### Popover.Heading
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Heading text; labels the dialog via `aria-labelledby` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `HeadingProps` | - | [React Aria Heading attributes](https://react-spectrum.adobe.com/react-aria/Heading.html) |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `Popover.Content` `className` | `(renderProps: PopoverRenderProps) => string` | Computes classes from `placement`, `isEntering`, `isExiting`, `trigger` and `state` |
+| `Popover.Dialog` `children` | `(opts: {close: () => void}) => React.ReactNode` | Renders content with a callback that closes the popover |

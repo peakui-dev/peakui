@@ -13,6 +13,7 @@ export * from "./input/index.ts";
 export * from "./kbd/index.ts";
 export * from "./label/index.ts";
 export * from "./link/index.ts";
+export * from "./popover/index.ts";
 export * from "./scroll-shadow/index.ts";
 export * from "./separator/index.ts";
 export * from "./skeleton/index.ts";
