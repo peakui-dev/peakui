@@ -2,11 +2,15 @@
 export const COMPONENT_GROUPS = [
   {
     category: "Buttons",
-    components: ["(buttons)/button"],
+    components: ["(buttons)/button", "(buttons)/close-button"],
+  },
+  {
+    category: "Data Display",
+    components: ["(data-display)/chip"],
   },
   {
     category: "Feedback",
-    components: ["(feedback)/spinner"],
+    components: ["(feedback)/skeleton", "(feedback)/spinner"],
   },
   {
     category: "Forms",
@@ -22,6 +26,22 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Layout",
-    components: ["(layout)/surface"],
+    components: ["(layout)/separator", "(layout)/surface"],
+  },
+  {
+    category: "Navigation",
+    components: ["(navigation)/link"],
+  },
+  {
+    category: "Overlays",
+    components: ["(overlays)/tooltip"],
+  },
+  {
+    category: "Typography",
+    components: ["(typography)/kbd"],
+  },
+  {
+    category: "Utilities",
+    components: ["(utilities)/scroll-shadow"],
   },
 ] as const;
