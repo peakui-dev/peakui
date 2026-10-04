@@ -5,6 +5,7 @@ import type * as PageTree from "fumadocs-core/page-tree";
 import type {ComponentProps} from "react";
 
 import {ChevronDown, ChevronLeft, ChevronRight} from "@gravity-ui/icons";
+import {Breadcrumbs} from "@peakui/react";
 import {getBreadcrumbItemsFromPath} from "fumadocs-core/breadcrumb";
 import {usePathname} from "fumadocs-core/framework";
 import Link from "fumadocs-core/link";
@@ -18,18 +19,10 @@ import {
 import {useI18n} from "fumadocs-ui/contexts/i18n";
 import {useTreeContext, useTreePath} from "fumadocs-ui/contexts/tree";
 import {useFooterItems} from "fumadocs-ui/utils/use-footer-items";
-import {
-  Fragment,
-  createContext,
-  use,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import {createContext, use, useEffect, useEffectEvent, useMemo, useRef, useState} from "react";
 
 import {isActive} from "@/components/fumadocs/utils/urls";
+import {nextLinkRender} from "@/components/next-link-render";
 import {cn} from "@/utils/cn";
 
 import {LayoutContext} from "../client";
@@ -302,7 +295,8 @@ function FooterItem({index, item}: {item: Item; index: 0 | 1}) {
   );
 }
 
-export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<"div">;
+export type BreadcrumbProps = BreadcrumbOptions &
+  Omit<ComponentProps<typeof Breadcrumbs>, "children">;
 
 export function PageBreadcrumb({
   includePage,
@@ -323,29 +317,17 @@ export function PageBreadcrumb({
   if (items.length === 0) return null;
 
   return (
-    <div
-      {...props}
-      className={cn("text-fd-muted-foreground flex items-center gap-1.5 text-sm", props.className)}
-    >
-      {items.map((item, i) => {
-        const className = cn("truncate", i === items.length - 1 && "text-fd-primary font-medium");
-
-        return (
-          <Fragment key={i}>
-            {i !== 0 && <ChevronRight className="size-3.5 shrink-0" />}
-            {item.url ? (
-              <Link
-                className={cn(className, "transition-opacity hover:opacity-80")}
-                href={item.url}
-              >
-                {item.name}
-              </Link>
-            ) : (
-              <span className={className}>{item.name}</span>
-            )}
-          </Fragment>
-        );
-      })}
-    </div>
+    <Breadcrumbs {...props}>
+      {items.map((item, i) => (
+        <Breadcrumbs.Item
+          key={i}
+          className="truncate"
+          href={item.url}
+          render={item.url ? nextLinkRender(item.url) : undefined}
+        >
+          {item.name}
+        </Breadcrumbs.Item>
+      ))}
+    </Breadcrumbs>
   );
 }
