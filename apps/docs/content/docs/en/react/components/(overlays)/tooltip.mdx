@@ -147,11 +147,10 @@ The trigger supports both pseudo-classes and data attributes:
 |------|------|---------|-------------|
 | `children` | `React.ReactNode` | - | Custom arrow element; defaults to a 12x12 SVG |
 | `className` | `string` | - | Additional classes |
-| `render` | `DOMRenderFunction<'svg', OverlayArrowRenderProps>` | - | Replaces the rendered `<svg>` with your own element |
+| `render` | `DOMRenderFunction<'div', OverlayArrowRenderProps>` | - | Replaces the rendered wrapper `<div>` with your own element; the arrow SVG stays as its child |
 
 ### Render Props
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `Tooltip.Content` `children` | `(renderProps: TooltipRenderProps) => ReactNode` | Reads `placement`, `isEntering`, `isExiting` and `state` |
-| `Tooltip.Content` `className` | `(renderProps: TooltipRenderProps) => string` | Computes classes from the tooltip state |
+| `Tooltip.Content` `className` | `(renderProps: TooltipRenderProps) => string` | Computes classes from `placement`, `isEntering`, `isExiting` and `state` |

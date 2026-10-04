@@ -120,9 +120,10 @@ const TooltipContent = ({
 
   return (
     <TooltipPrimitive
-      {...props}
       className={composeTwRenderProps(className, slots?.base())}
+      data-slot="tooltip"
       offset={offset}
+      {...props}
     >
       {children}
     </TooltipPrimitive>

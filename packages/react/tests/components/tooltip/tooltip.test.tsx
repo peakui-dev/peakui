@@ -67,6 +67,7 @@ describe("Tooltip", () => {
 
     expect(tooltip).toHaveTextContent("Hover tip");
     expect(tooltip.className).toEqual(expect.stringContaining("tooltip"));
+    expect(tooltip).toHaveAttribute("data-slot", "tooltip");
   });
 
   it("показывает содержимое по фокусу и связывает триггер с подсказкой", async () => {

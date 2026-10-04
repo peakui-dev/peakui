@@ -4,7 +4,7 @@ import {Button} from "@/components/button";
 import {Tooltip} from "@/components/tooltip";
 
 describe("Tooltip SSR", () => {
-  it("renders without hydration mismatch when closed", async () => {
+  it("рендерится без расхождения гидратации в закрытом состоянии", async () => {
     await ssrSmoke(
       <Tooltip delay={0}>
         <Button>Hover me</Button>
@@ -13,7 +13,7 @@ describe("Tooltip SSR", () => {
     );
   });
 
-  it("renders without hydration mismatch when defaultOpen with an arrow", async () => {
+  it("рендерится без расхождения гидратации при defaultOpen со стрелкой", async () => {
     await ssrSmoke(
       <Tooltip defaultOpen delay={0}>
         <Button>Hover me</Button>
