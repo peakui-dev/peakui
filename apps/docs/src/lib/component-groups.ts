@@ -2,7 +2,13 @@
 export const COMPONENT_GROUPS = [
   {
     category: "Buttons",
-    components: ["(buttons)/button", "(buttons)/close-button"],
+    components: [
+      "(buttons)/button",
+      "(buttons)/button-group",
+      "(buttons)/close-button",
+      "(buttons)/toggle-button",
+      "(buttons)/toggle-button-group",
+    ],
   },
   {
     category: "Data Display",
@@ -10,7 +16,12 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Feedback",
-    components: ["(feedback)/skeleton", "(feedback)/spinner"],
+    components: [
+      "(feedback)/alert",
+      "(feedback)/empty-state",
+      "(feedback)/skeleton",
+      "(feedback)/spinner",
+    ],
   },
   {
     category: "Forms",
@@ -26,15 +37,21 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Layout",
-    components: ["(layout)/separator", "(layout)/surface"],
+    components: ["(layout)/card", "(layout)/separator", "(layout)/surface"],
   },
   {
     category: "Navigation",
-    components: ["(navigation)/link"],
+    components: [
+      "(navigation)/breadcrumbs",
+      "(navigation)/disclosure",
+      "(navigation)/disclosure-group",
+      "(navigation)/link",
+      "(navigation)/tabs",
+    ],
   },
   {
     category: "Overlays",
-    components: ["(overlays)/tooltip"],
+    components: ["(overlays)/popover", "(overlays)/tooltip"],
   },
   {
     category: "Typography",
