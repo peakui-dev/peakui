@@ -41,7 +41,7 @@ describe("interpolated-class", () => {
   it.each([
     ["a prefix that only ends like a block", "my-button--${size}"],
     ["a Tailwind utility prefix", "bg-${role}"],
-    ["a block name that is not in the library", "card--${size}"],
+    ["a block name that is not in the library", "accordion--${size}"],
   ])("still fires for %s", (_name, template) => {
     const source = `${IMPORT}export const a = (size: string, role: string) => <Button className={\`${template}\`}>x</Button>;`;
 

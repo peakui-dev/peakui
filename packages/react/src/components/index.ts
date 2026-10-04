@@ -3,6 +3,7 @@
  * never edited by hand. tests/components/index.test.ts gates completeness.
  */
 export * from "./button/index.ts";
+export * from "./card/index.ts";
 export * from "./chip/index.ts";
 export * from "./close-button/index.ts";
 export * from "./description/index.ts";

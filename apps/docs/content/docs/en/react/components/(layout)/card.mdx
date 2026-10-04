@@ -1,0 +1,177 @@
+---
+title: Card
+description: A content container with header, body and footer
+links:
+  source: card/card.tsx
+  styles: card.css
+---
+
+## Usage
+
+```tsx
+import {Card} from "@peakui/react";
+```
+
+<ComponentPreview name="card-basic" />
+
+### Anatomy
+
+```tsx
+import {Card} from "@peakui/react";
+
+export default () => (
+  <Card>
+    <Card.Header>
+      <Card.Title>Title</Card.Title>
+      <Card.Description>Description</Card.Description>
+    </Card.Header>
+    <Card.Content>Content</Card.Content>
+    <Card.Footer>Footer</Card.Footer>
+  </Card>
+);
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="card-variants" />
+
+### Horizontal Layout
+
+Width and direction come from the consumer.
+
+<ComponentPreview name="card-horizontal" />
+
+### Compact Cards
+
+<ComponentPreview name="card-compact" />
+
+### Gallery
+
+<ComponentPreview name="card-gallery" />
+
+### With Form
+
+`Card.Content` is the body region; the form wraps it without breaking the card's padding.
+
+<ComponentPreview name="card-with-form" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Card className="w-[400px] gap-4 md:flex-row">Content</Card>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .card {
+    border-radius: min(16px, var(--radius-2xl));
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Card component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/card.css)):
+
+#### Base Class [!toc]
+
+- `.card` - Base card styles: flex column, gap, padding, surface shadow and radius
+
+#### Variant Classes [!toc]
+
+- `.card--default` - `bg-surface`
+- `.card--secondary` - `bg-surface-secondary`
+- `.card--tertiary` - `bg-surface-tertiary`
+- `.card--transparent` - No background, border or shadow
+
+#### Element Classes [!toc]
+
+- `.card__header` - Header region: flex column
+- `.card__title` - Title: `h3` text styles
+- `.card__description` - Description: `p` text styles
+- `.card__content` - Body region: flex column, takes the remaining space
+- `.card__footer` - Footer region: flex row, centered
+
+### Slots
+
+- `[data-slot="card"]` - The root element
+- `[data-slot="card-header"]` - The header region
+- `[data-slot="card-title"]` - The title
+- `[data-slot="card-description"]` - The description
+- `[data-slot="card-content"]` - The body region
+- `[data-slot="card-footer"]` - The footer region
+
+## API Reference
+
+### Card
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The card content (required) |
+| `variant` | `'default' \| 'secondary' \| 'tertiary' \| 'transparent'` | `'default'` | Surface level the card paints |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+Every variant except `transparent` provides `SurfaceContext`, so nested controls re-base their fills on the card's level.
+
+### Card.Header
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The header content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+### Card.Title
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The title text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'h3', undefined>` | - | Replaces the rendered `<h3>` with your own element |
+
+Every other attribute of an `<h3>` is accepted.
+
+### Card.Description
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The description text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'p', undefined>` | - | Replaces the rendered `<p>` with your own element |
+
+Every other attribute of a `<p>` is accepted.
+
+### Card.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The body content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+### Card.Footer
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The footer content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
