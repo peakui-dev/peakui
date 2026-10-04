@@ -75,7 +75,7 @@ Combining with the `button` classes turns the link into a tertiary button-shaped
 ```css
 @layer components {
   .link {
-    --link-color: var(--color-accent);
+    --color-link: var(--color-accent);
   }
 }
 ```
@@ -126,7 +126,7 @@ The component supports both CSS pseudo-classes and data attributes:
 | `href` | `string` | - | The URL the link navigates to |
 | `isDisabled` | `boolean` | - | Sets `aria-disabled="true"` and blocks navigation |
 | `className` | `string \| ((values: LinkRenderProps) => string)` | - | Additional classes, or a function of the render props |
-| `render` | `LinkDOMRenderProps` | - | Replaces the rendered `<a>` with your own element |
+| `render` | `PossibleLinkDOMRenderProps<'span', LinkRenderProps>` | - | Replaces the rendered `<a>` with your own element |
 
 Every other attribute of an `<a>` is accepted.
 
