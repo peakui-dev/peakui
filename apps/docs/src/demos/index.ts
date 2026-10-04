@@ -159,6 +159,31 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./label/states").then((m) => m.States),
     file: "label/states.tsx",
   },
+  // separator
+  "separator-basic": {
+    loader: () => import("./separator/basic").then((m) => m.Basic),
+    file: "separator/basic.tsx",
+  },
+  "separator-render-function": {
+    loader: () => import("./separator/render-function").then((m) => m.RenderFunction),
+    file: "separator/render-function.tsx",
+  },
+  "separator-variants": {
+    loader: () => import("./separator/variants").then((m) => m.Variants),
+    file: "separator/variants.tsx",
+  },
+  "separator-vertical": {
+    loader: () => import("./separator/vertical").then((m) => m.Vertical),
+    file: "separator/vertical.tsx",
+  },
+  "separator-with-content": {
+    loader: () => import("./separator/with-content").then((m) => m.WithContent),
+    file: "separator/with-content.tsx",
+  },
+  "separator-with-surface": {
+    loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
+    file: "separator/with-surface.tsx",
+  },
   // spinner
   "spinner-basic": {
     loader: () => import("./spinner/basic").then((m) => m.Basic),

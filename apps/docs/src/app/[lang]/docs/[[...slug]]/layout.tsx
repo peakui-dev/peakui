@@ -1,5 +1,7 @@
 import type {ReactNode} from "react";
 
+import {Separator} from "@peakui/react";
+
 import {baseOptions} from "@/app/[lang]/layout.config";
 import {DocsLayout} from "@/components/fumadocs/layouts/notebook";
 import {ThemeToggle} from "@/components/fumadocs/ui/theme-toggle";
@@ -28,7 +30,7 @@ export default async function Layout({
               <PeakUILogo />
               <ThemeToggle mode="light-dark-system" />
             </div>
-            <hr className="w-full border-separator" />
+            <Separator className="w-full" />
           </div>
         ),
         collapsible: false,

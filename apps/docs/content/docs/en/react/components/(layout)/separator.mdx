@@ -1,0 +1,109 @@
+---
+title: Separator
+description: Visually divide content sections
+links:
+  rac: Separator
+  source: separator/separator.tsx
+  styles: separator.css
+---
+
+## Usage
+
+```tsx
+import {Separator} from "@peakui/react";
+```
+
+<ComponentPreview name="separator-basic" />
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="separator-variants" />
+
+### With Surface
+
+The separator variants track the surface levels they sit on.
+
+<ComponentPreview name="separator-with-surface" />
+
+### Vertical
+
+Vertical separators stretch to the height of their flex container.
+
+<ComponentPreview name="separator-vertical" />
+
+### With Content
+
+<ComponentPreview name="separator-with-content" />
+
+### Render Function
+
+<ComponentPreview name="separator-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+Size and margins are consumer-side through `className`.
+
+```tsx
+<div className="flex items-center gap-3 text-sm">
+  <span>Profile</span>
+  <Separator className="h-4" orientation="vertical" />
+  <span>Billing</span>
+  <Separator className="h-4" orientation="vertical" />
+  <span>Security</span>
+</div>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .separator {
+    @apply bg-accent h-[2px];
+  }
+
+  .separator--vertical {
+    @apply bg-accent w-[2px];
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Separator component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/separator.css)):
+
+#### Base & Orientation Classes [!toc]
+
+- `.separator` - Base separator styles with the default horizontal orientation
+- `.separator--horizontal` - Horizontal orientation (full width, 1px height); the default lives in the base class
+- `.separator--vertical` - Vertical orientation (full height, 1px width)
+
+#### Variant Classes [!toc]
+
+- `.separator--default` - Default variant with standard contrast
+- `.separator--secondary` - Secondary variant with medium contrast
+- `.separator--tertiary` - Tertiary variant with subtle contrast
+
+### Slots
+
+- `[data-slot="separator"]` - The separator element
+
+## API Reference
+
+### Separator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | The orientation of the separator; an explicit prop wins over the value inherited from a parent separator context |
+| `variant` | `'default' \| 'secondary' \| 'tertiary'` | `'default'` | The visual variant of the separator |
+| `className` | `string` | - | Additional CSS classes |
+| `render` | `DOMRenderFunction<'hr' \| 'div', undefined>` | - | Overrides the default DOM element with a custom render function |
+
+Every other attribute of an `<hr>` (horizontal) or `<div>` (vertical) is accepted.
