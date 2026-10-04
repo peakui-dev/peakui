@@ -20,4 +20,8 @@ export const COMPONENT_GROUPS = [
       "(forms)/text-field",
     ],
   },
+  {
+    category: "Layout",
+    components: ["(layout)/surface"],
+  },
 ] as const;
