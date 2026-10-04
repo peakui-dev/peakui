@@ -59,8 +59,8 @@ const TooltipAnimationScope = ({children, shouldSkipAnimation}: TooltipAnimation
  * -----------------------------------------------------------------------------------------------*/
 type TooltipRootProps = ComponentPropsWithRef<typeof TooltipTriggerPrimitive> & {
   /**
-   * Разрешить React Aria пропускать анимации входа и выхода, пока активен её глобальный
-   * warmup-таймер — то есть при быстром переходе от одной подсказки к другой.
+   * Let React Aria skip the enter and exit animations when moving quickly from
+   * one tooltip to another.
    *
    * @default false
    */
