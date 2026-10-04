@@ -9,6 +9,7 @@
     "---Components---",
     "(navigation)/breadcrumbs",
     "(buttons)/button",
+    "(layout)/card",
     "(data-display)/chip",
     "(buttons)/close-button",
     "(forms)/description",

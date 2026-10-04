@@ -1,9 +1,8 @@
 import type {MDXComponents} from "mdx/types";
 import type {ComponentProps, ReactNode} from "react";
 
-import {Surface} from "@peakui/react";
+import {Card, Surface} from "@peakui/react";
 import {Callout as FDCallout} from "fumadocs-ui/components/callout";
-import {Card, Cards} from "fumadocs-ui/components/card";
 import {Pre} from "fumadocs-ui/components/codeblock";
 import * as TabsComponents from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -42,6 +41,18 @@ function Callout({className, ...props}: ComponentProps<typeof FDCallout>) {
     <Surface className={cn("shadow-surface", className)}>
       <FDCallout {...props} />
     </Surface>
+  );
+}
+
+/*
+ * The `Cards` grouping wrapper for MDX card grids. PeakUI's Card ships no plural wrapper, so
+ * this is a plain list container: it lays the cards out and styles nothing else.
+ */
+function Cards({children, ...props}: ComponentProps<"div">) {
+  return (
+    <div className="grid grid-cols-2 gap-3 @container" {...props}>
+      {children}
+    </div>
   );
 }
 
