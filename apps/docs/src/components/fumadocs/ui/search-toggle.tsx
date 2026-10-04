@@ -3,7 +3,7 @@
 import type {ButtonProps} from "@peakui/react";
 import type {ComponentProps} from "react";
 
-import {Button} from "@peakui/react";
+import {Button, Kbd} from "@peakui/react";
 import {useI18n} from "fumadocs-ui/contexts/i18n";
 import {useSearchContext} from "fumadocs-ui/contexts/search";
 
@@ -77,9 +77,7 @@ export function LargeSearchToggle({
       {text.search}
       <div className="ms-auto inline-flex gap-0.5">
         {hotKey.map((k, i) => (
-          <kbd key={i} className="bg-fd-background rounded-md border px-1.5">
-            {k.display}
-          </kbd>
+          <Kbd key={i}>{k.display}</Kbd>
         ))}
       </div>
     </button>

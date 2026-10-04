@@ -10,6 +10,7 @@ export * from "./field-error/index.ts";
 export * from "./fieldset/index.ts";
 export * from "./input-group/index.ts";
 export * from "./input/index.ts";
+export * from "./kbd/index.ts";
 export * from "./label/index.ts";
 export * from "./separator/index.ts";
 export * from "./link/index.ts";

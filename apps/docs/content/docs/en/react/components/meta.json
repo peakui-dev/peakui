@@ -15,6 +15,7 @@
     "(forms)/fieldset",
     "(forms)/input",
     "(forms)/input-group",
+    "(typography)/kbd",
     "(forms)/label",
     "(layout)/separator",
     "(navigation)/link",

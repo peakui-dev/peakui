@@ -188,6 +188,31 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./input-group/with-text-area").then((m) => m.WithTextArea),
     file: "input-group/with-text-area.tsx",
   },
+  // kbd
+  "kbd-basic": {
+    loader: () => import("./kbd/basic").then((m) => m.Basic),
+    file: "kbd/basic.tsx",
+  },
+  "kbd-inline-usage": {
+    loader: () => import("./kbd/inline-usage").then((m) => m.InlineUsage),
+    file: "kbd/inline-usage.tsx",
+  },
+  "kbd-key-combinations": {
+    loader: () => import("./kbd/key-combinations").then((m) => m.KeyCombinations),
+    file: "kbd/key-combinations.tsx",
+  },
+  "kbd-navigation-keys": {
+    loader: () => import("./kbd/navigation-keys").then((m) => m.NavigationKeys),
+    file: "kbd/navigation-keys.tsx",
+  },
+  "kbd-special-keys": {
+    loader: () => import("./kbd/special-keys").then((m) => m.SpecialKeys),
+    file: "kbd/special-keys.tsx",
+  },
+  "kbd-variants": {
+    loader: () => import("./kbd/variants").then((m) => m.Variants),
+    file: "kbd/variants.tsx",
+  },
   // label
   "label-basic": {
     loader: () => import("./label/basic").then((m) => m.Basic),
