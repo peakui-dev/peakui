@@ -5,11 +5,11 @@ import type {SidebarTabWithProps} from "fumadocs-ui/components/sidebar/tabs/drop
 import type {ComponentProps, HTMLAttributes, PointerEvent, ReactNode} from "react";
 
 import {ChevronDown} from "@gravity-ui/icons";
+import {Popover} from "@peakui/react";
 import {usePathname} from "fumadocs-core/framework";
 import Link from "fumadocs-core/link";
 import {useSidebar} from "fumadocs-ui/components/sidebar/base";
 import {SidebarTabsDropdown, isTabActive} from "fumadocs-ui/components/sidebar/tabs/dropdown";
-import {Popover, PopoverContent, PopoverTrigger} from "fumadocs-ui/components/ui/popover";
 import {useIsScrollTop} from "fumadocs-ui/utils/use-is-scroll-top";
 import {Fragment, createContext, useContext, useMemo, useRef, useState} from "react";
 
@@ -297,15 +297,20 @@ function NavbarLinkItemMenu({
   }
 
   return (
+    /*
+     * PeakUI Popover compound replaces the fumadocs shim: RAC owns positioning and dismissal.
+     * Radix's data-state=open becomes aria-expanded (set by RAC on the trigger), and the menu
+     * padding moves onto Popover.Dialog, which is the padded container in our compound.
+     */
     <Popover
-      open={open}
+      isOpen={open}
       onOpenChange={(value) => {
         if (freezeUntil.current === null || Date.now() >= freezeUntil.current) setOpen(value);
       }}
     >
-      <PopoverTrigger
+      <Popover.Trigger
         className={cn(
-          "text-fd-muted-foreground has-data-[active=true]:text-fd-primary data-[state=open]:text-fd-accent-foreground inline-flex items-center gap-1.5 p-1 text-sm transition-colors focus-visible:outline-none",
+          "text-fd-muted-foreground has-data-[active=true]:text-fd-primary aria-expanded:text-fd-accent-foreground inline-flex items-center gap-1.5 p-1 text-sm transition-colors",
           className,
         )}
         onPointerEnter={onPointerEnter}
@@ -314,30 +319,28 @@ function NavbarLinkItemMenu({
       >
         {item.url ? <LinkItem item={item as {url: string}}>{item.text}</LinkItem> : item.text}
         <ChevronDown className="size-3" />
-      </PopoverTrigger>
-      <PopoverContent
-        className="text-fd-muted-foreground flex flex-col p-1 text-start"
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
-      >
-        {item.items.map((child, i) => {
-          if (child.type === "custom") return <Fragment key={i}>{child.children}</Fragment>;
+      </Popover.Trigger>
+      <Popover.Content onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave}>
+        <Popover.Dialog className="text-fd-muted-foreground flex flex-col p-1 text-start">
+          {item.items.map((child, i) => {
+            if (child.type === "custom") return <Fragment key={i}>{child.children}</Fragment>;
 
-          return (
-            <LinkItem
-              key={i}
-              className="hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary inline-flex items-center gap-2 rounded-md p-2 transition-colors [&_svg]:size-4"
-              item={child}
-              onClick={() => {
-                if (isTouchDevice()) setOpen(false);
-              }}
-            >
-              {child.icon}
-              {child.text}
-            </LinkItem>
-          );
-        })}
-      </PopoverContent>
+            return (
+              <LinkItem
+                key={i}
+                className="hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary inline-flex items-center gap-2 rounded-md p-2 transition-colors [&_svg]:size-4"
+                item={child}
+                onClick={() => {
+                  if (isTouchDevice()) setOpen(false);
+                }}
+              >
+                {child.icon}
+                {child.text}
+              </LinkItem>
+            );
+          })}
+        </Popover.Dialog>
+      </Popover.Content>
     </Popover>
   );
 }

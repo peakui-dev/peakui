@@ -22,6 +22,7 @@
     "(typography)/kbd",
     "(forms)/label",
     "(navigation)/link",
+    "(overlays)/popover",
     "(utilities)/scroll-shadow",
     "(layout)/separator",
     "(feedback)/skeleton",
