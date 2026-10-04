@@ -11,6 +11,8 @@
     "(data-display)/chip",
     "(buttons)/close-button",
     "(forms)/description",
+    "(navigation)/disclosure",
+    "(navigation)/disclosure-group",
     "(forms)/field-error",
     "(forms)/fieldset",
     "(forms)/input",

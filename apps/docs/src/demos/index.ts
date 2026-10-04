@@ -104,6 +104,32 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./description/basic").then((m) => m.Basic),
     file: "description/basic.tsx",
   },
+  // disclosure
+  "disclosure-basic": {
+    loader: () => import("./disclosure/basic").then((m) => m.Basic),
+    file: "disclosure/basic.tsx",
+  },
+  "disclosure-custom-styles": {
+    loader: () => import("./disclosure/custom-styles").then((m) => m.CustomStyles),
+    file: "disclosure/custom-styles.tsx",
+  },
+  "disclosure-render-function": {
+    loader: () => import("./disclosure/render-function").then((m) => m.RenderFunction),
+    file: "disclosure/render-function.tsx",
+  },
+  // disclosure-group
+  "disclosure-group-basic": {
+    loader: () => import("./disclosure-group/basic").then((m) => m.Basic),
+    file: "disclosure-group/basic.tsx",
+  },
+  "disclosure-group-controlled": {
+    loader: () => import("./disclosure-group/controlled").then((m) => m.Controlled),
+    file: "disclosure-group/controlled.tsx",
+  },
+  "disclosure-group-custom-styles": {
+    loader: () => import("./disclosure-group/custom-styles").then((m) => m.CustomStyles),
+    file: "disclosure-group/custom-styles.tsx",
+  },
   // field-error
   "field-error-basic": {
     loader: () => import("./field-error/basic").then((m) => m.Basic),
