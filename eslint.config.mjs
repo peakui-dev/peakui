@@ -10,12 +10,17 @@ import {defineConfig} from "eslint/config";
 const config = defineConfig([
   {
     // Consumer code the evals show to an agent, known-bad reference solutions and agent output:
-    // none of it is this repository's source.
+    // none of it is this repository's source. Agent worktrees and the SDD workspace are full
+    // copies of this repository, not source either — without these entries a root lint run
+    // during a parallel wave scans every worktree copy and fails on files the per-path ignores
+    // below no longer match.
     ignores: [
       "evals/fixtures/*/**",
       "evals/tasks/*/overlay/**",
       "evals/tasks/*/solutions/**",
       "evals/results/**",
+      ".worktrees/**",
+      ".superpowers/**",
     ],
   },
   ...reactConfig,
