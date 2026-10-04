@@ -14,6 +14,8 @@
 
 Copied from `AGENTS.md` and the roadmap spec; every task implicitly includes all of them.
 
+- **Reference similarity is the default posture (human directive, 2026-10-04):** every component is ported from the vendored reference as closely as possible — same public API (props, parts, variants), same BEM classes, same CSS, stories/demos adapted from its stories. The deliberate PeakUI divergences stay as recorded in the specs and the component-standards skill (icons internal, `InputOtp` casing, `forced-colors`, `--color-` token prefix, no data fetching, test location, English docs). Where neither a recorded divergence nor the roadmap spec answers a detail, the reference wins and any remaining difference is reported, not silently invented.
+
 - Stage 5 (changesets/codemods) is **switched off** — write no changeset, no codemod; a task is done at the end of stage 4. (The roadmap's "definition of done" lists a changeset; `AGENTS.md` suspends it and `AGENTS.md` is authoritative inside this repo.)
 - Every entry starts from `pnpm add:component <Name> [--rac <Primitive>] [--category <category>]`; no hand-created component directory.
 - Never hand-edit the five files `pnpm registries` generates: `packages/react/src/components/index.ts`, `packages/styles/src/components/index.ts`, `packages/styles/components/index.css`, `apps/docs/src/demos/index.ts`, `apps/docs/content/docs/en/react/components/meta.json`.
@@ -61,7 +63,7 @@ Branch naming: `roadmap/<entry>-<kebab-name>` (e.g. `roadmap/02-close-button`), 
 - Does **not** touch any barrel, any generated file, or any styles file.
 
 **Interfaces:**
-- Produces: named arrow-function icon components, one per glyph: `chevron-down`, `chevron-up`, `chevron-left`, `chevron-right`, `xmark`, `plus`, `minus`, `magnifier`, `calendar`, `arrow-up-right-from-square`, `circle-info`, `triangle-exclamation`, `circle-xmark`, `circle-check`, `circle-dashed` (15 total). Naming follows a single consistent pattern (agent picks `Icon<Name>` or `<Name>Icon` and applies it uniformly; consumers are later entries in this repo only).
+- Produces: named arrow-function icon components, one per glyph, **named exactly as the reference names them** (`IconChevronDown`, `IconChevronUp`, `IconChevronLeft`, `IconChevronRight`, `CloseIcon`, `IconPlus`, `IconMinus`, `IconSearch`, `IconCalendar`, `ExternalLinkIcon`, `InfoIcon`, `WarningIcon`, `DangerIcon`, `SuccessIcon`, `CircleDashedIcon` — verify each against `../heroui/packages/react/src/components/icons.tsx`), so later ported components import them by the reference's own names. Path data is inlined from `@gravity-ui/icons` per the spec's licensing decision (human-confirmed 2026-10-04): the glyph set maps `xmark`→`CloseIcon`, `magnifier`→`IconSearch`, `arrow-up-right-from-square`→`ExternalLinkIcon`, `circle-info`→`InfoIcon`, `triangle-exclamation`→`WarningIcon`, `circle-xmark`→`DangerIcon`, `circle-check`→`SuccessIcon`, `circle-dashed`→`CircleDashedIcon`; the reference's `ExternalLinkIcon` defaults `width={9} height={9}` — copy that default.
 - Each glyph: `viewBox="0 0 16 16"`, `width={16}`, `height={16}`, `fill="none"` on the `svg`, `fill="currentColor"` + `fillRule="evenodd"`/`clipRule="evenodd"` on the path, `aria-hidden="true"`, `role="presentation"`, props spread last. Path data inlined verbatim from `@gravity-ui/icons@2.22.0` `svgs/` at `node_modules/.pnpm/@gravity-ui+icons@2.22.0_react@19.3.0/node_modules/@gravity-ui/icons/svgs/`.
 - Not exported from `packages/react/src/components/index.ts` — internal module, verified by a test.
 
@@ -162,8 +164,12 @@ Do NOT edit: apps/docs/src/lib/component-groups.ts, packages/styles/themes/defau
 packages/styles/presets/default.ts, or any of the five files `pnpm registries` generates. If you
 need a change in one of them, report the change you need and stop at that boundary.
 
-Reference: ../heroui/packages/react/src/components/<name>/ is read-only; verify the primitive and
-API there, write nothing there. Nothing you ship may name the reference library.
+Reference: ../heroui/packages/react/src/components/<name>/ is read-only; port from it as closely as
+possible — same public API (props, parts, variants), same BEM classes, same CSS, stories/demos
+adapted from its stories. The recorded PeakUI divergences (component-standards skill, specs) still
+apply; where neither a recorded divergence nor the roadmap spec answers a detail, the reference
+wins and you report any remaining difference instead of inventing one. Write nothing there.
+Nothing you ship may name the reference library.
 
 Gates before you return, with output pasted: pnpm lint, pnpm typecheck, pnpm test, and
 STORYBOOK_PORT=<port> pnpm test:e2e if you shipped a Playwright spec; plus
