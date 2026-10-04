@@ -1,0 +1,112 @@
+---
+title: Skeleton
+description: A placeholder showing the shape of content that is still loading
+links:
+  source: skeleton/skeleton.tsx
+  styles: skeleton.css
+---
+
+## Usage
+
+```tsx
+import {Skeleton} from "@peakui/react";
+```
+
+<ComponentPreview name="skeleton-basic" />
+
+Skeletons are decorative: the component sets no role, so hide them from assistive technology with `aria-hidden` when they stand alone.
+
+## Examples
+
+### Text Content
+
+<ComponentPreview name="skeleton-text-content" />
+
+### User Profile
+
+<ComponentPreview name="skeleton-user-profile" />
+
+### List Items
+
+<ComponentPreview name="skeleton-list" />
+
+### Grid
+
+<ComponentPreview name="skeleton-grid" />
+
+### Single Shimmer
+
+Put the `skeleton--shimmer` class on a parent and `animationType="none"` on the children for one synchronized shimmer passing over all of them.
+
+<ComponentPreview name="skeleton-single-shimmer" />
+
+### Animation Types
+
+`animationType` picks the animation per component; `shimmer` is the default.
+
+<ComponentPreview name="skeleton-animation-types" />
+
+## Customization
+
+### Tailwind CSS
+
+Size and shape come from the consumer — the block itself ships with no dimensions.
+
+```tsx
+<Skeleton className="h-32 w-full rounded-xl" />
+```
+
+### Global CSS
+
+Set `--skeleton-animation` on `:root` to change the default animation type for every Skeleton at once; the `animationType` prop still wins per component.
+
+```css
+@layer components {
+  .skeleton {
+    @apply bg-surface-secondary/70;
+  }
+
+  .skeleton--pulse {
+    @apply animate-pulse;
+  }
+}
+
+:root {
+  /* Possible values: shimmer, pulse, none */
+  --skeleton-animation: pulse;
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Skeleton component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/skeleton.css)):
+
+#### Base Class [!toc]
+
+- `.skeleton` - Base skeleton styles with background and rounded corners
+
+#### Animation Variant Classes [!toc]
+
+- `.skeleton--shimmer` - Shimmer animation with a moving gradient (default)
+- `.skeleton--pulse` - Pulse animation
+- `.skeleton--none` - Static placeholder without animation
+
+### Slots
+
+- `[data-slot="skeleton"]` - The root element
+
+## API Reference
+
+### Skeleton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `animationType` | `'shimmer' \| 'pulse' \| 'none'` | `'shimmer'` or `--skeleton-animation` | Animation type; the CSS variable sets the app-wide default |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.

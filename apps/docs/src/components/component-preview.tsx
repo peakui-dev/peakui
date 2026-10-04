@@ -1,3 +1,4 @@
+import {Skeleton} from "@peakui/react";
 import * as React from "react";
 
 import {getDemo} from "@/demos";
@@ -16,12 +17,7 @@ interface ComponentPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ComponentPreviewFallback() {
-  return (
-    <div
-      aria-hidden="true"
-      className="component-preview-container my-4 h-[200px] animate-pulse rounded-lg border bg-muted/30"
-    />
-  );
+  return <Skeleton aria-hidden="true" className="component-preview-container my-4 h-[200px]" />;
 }
 
 export async function ComponentPreview({

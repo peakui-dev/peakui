@@ -1,0 +1,74 @@
+/*
+ * Skeleton. Class names come from src/components/skeleton/skeleton.styles.ts; all Tailwind
+ * lives here. The keyframes behind --animate-skeleton are declared once in
+ * themes/shared/theme.css — a hand-written @keyframes here would be a second source of truth.
+ */
+
+.skeleton {
+  @apply pointer-events-none relative overflow-hidden rounded-sm bg-surface-tertiary/70;
+  /*
+   * Held transparent in the normal state so nothing shifts when the forced-colors border
+   * appears: a fill is all a skeleton has, and forced colors flatten fills — the boundary
+   * is what keeps the placeholder visible there. The reference ships none of this; it is a
+   * recorded peakui decision (docs/superpowers/specs/2026-10-01-design-tokens-design.md).
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+}
+
+/* ---------- Animation types ---------- */
+
+.skeleton--shimmer {
+  &::after {
+    @apply absolute inset-0 -translate-x-full animate-skeleton bg-linear-to-r from-transparent via-surface-tertiary to-transparent content-[''];
+    /* motion-reduce AFTER animate: in the other order specificity hands the win back to the
+       animation and the preference is silently ignored. */
+    @apply motion-reduce:animate-none;
+  }
+
+  /* When the modifier sits on a parent that itself contains skeletons */
+  &:has(.skeleton) {
+    &::after {
+      content: none;
+    }
+
+    /* Single synchronized shimmer that passes over all children */
+    &::before {
+      @apply absolute inset-0 -translate-x-full animate-skeleton content-[''];
+      /*
+       * The reference writes rgba(255, 255, 255, 0.5) here; component CSS may not carry raw
+       * colours (check-tokens gate 5), so the same white at the same 50% comes from the
+       * theme token through an oklab mix.
+       */
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in oklab, var(--color-white) 50%, transparent) 50%,
+        transparent 100%
+      );
+      z-index: 10;
+      pointer-events: none;
+      /* Use mix-blend-mode to only show over skeleton elements */
+      mix-blend-mode: overlay;
+      @apply motion-reduce:animate-none;
+    }
+
+    /* Ensure children don't have their own shimmer */
+    & .skeleton {
+      &::after {
+        content: none;
+      }
+    }
+  }
+}
+
+.skeleton--pulse {
+  @apply animate-pulse motion-reduce:animate-none;
+}
+
+.skeleton--none {
+  /* No styles: this is the static variant. */
+}

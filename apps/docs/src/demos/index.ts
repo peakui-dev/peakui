@@ -274,6 +274,34 @@ export const demos: Record<string, DemoItem> = {
   "link-underline": {
     loader: () => import("./link/underline").then((m) => m.Underline),
     file: "link/underline.tsx",
+  // skeleton
+  "skeleton-animation-types": {
+    loader: () => import("./skeleton/animation-types").then((m) => m.AnimationTypes),
+    file: "skeleton/animation-types.tsx",
+  },
+  "skeleton-basic": {
+    loader: () => import("./skeleton/basic").then((m) => m.Basic),
+    file: "skeleton/basic.tsx",
+  },
+  "skeleton-grid": {
+    loader: () => import("./skeleton/grid").then((m) => m.Grid),
+    file: "skeleton/grid.tsx",
+  },
+  "skeleton-list": {
+    loader: () => import("./skeleton/list").then((m) => m.List),
+    file: "skeleton/list.tsx",
+  },
+  "skeleton-single-shimmer": {
+    loader: () => import("./skeleton/single-shimmer").then((m) => m.SingleShimmer),
+    file: "skeleton/single-shimmer.tsx",
+  },
+  "skeleton-text-content": {
+    loader: () => import("./skeleton/text-content").then((m) => m.TextContent),
+    file: "skeleton/text-content.tsx",
+  },
+  "skeleton-user-profile": {
+    loader: () => import("./skeleton/user-profile").then((m) => m.UserProfile),
+    file: "skeleton/user-profile.tsx",
   },
   // spinner
   "spinner-basic": {

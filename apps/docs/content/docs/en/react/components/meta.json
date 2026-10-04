@@ -19,6 +19,7 @@
     "(forms)/label",
     "(layout)/separator",
     "(navigation)/link",
+    "(feedback)/skeleton",
     "(feedback)/spinner",
     "(layout)/surface",
     "(forms)/text-field",

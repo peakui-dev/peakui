@@ -14,7 +14,7 @@
     --radius: 0.5rem;
     --ring-offset-width: 2px;
     --sans: Inter, system-ui, sans-serif;
-    --skeleton-animation: skeleton;
+    --skeleton-animation: shimmer;
     --spacing: 0.25rem;
     --tooltip-close-delay: 500ms;
     --tooltip-delay: 1500ms;

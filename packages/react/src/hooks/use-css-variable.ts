@@ -3,21 +3,17 @@
 import {useIsSSR} from "@react-aria/ssr";
 import {useMemo} from "react";
 
-/*
- * Кеш значений CSS-переменных: чтение через getComputedStyle — это обращение к DOM, а значения
- * вроде --tooltip-delay читаются при каждом рендере Root'а. Ключ — имя переменной; тема меняется
- * перезаписью значения на :root, и кеш хранит последнее прочитанное.
- */
+/* Cache for CSS variable values to avoid repeated DOM queries. */
 const cssVariableCache = new Map<string, string | undefined>();
 
 /**
- * Читает значение CSS-свойства с `document.documentElement`: безопасно на SSR (вернёт undefined),
- * умеет закешировать и уступить место override, если тот передан.
+ * Reads a CSS custom property from the document element with SSR support and an optional
+ * override that takes precedence over the variable.
  *
- * @param variableName - имя переменной, например `--tooltip-delay`
- * @param override - значение, которое перебивает переменную, если задано
- * @param cache - кешировать ли чтение (по умолчанию да)
- * @returns значение переменной, override или undefined
+ * @param variableName - The CSS custom property name, e.g. `'--skeleton-animation'`
+ * @param override - When defined, returned instead of reading the variable
+ * @param cache - Cache the read value for the lifetime of the module (default `true`)
+ * @returns The variable value, the override, or `undefined`
  */
 export function useCSSVariable(
   variableName: string,
@@ -28,6 +24,7 @@ export function useCSSVariable(
 
   return useMemo(() => {
     if (override !== undefined) return override;
+
     if (isSSR) return undefined;
 
     if (cache && cssVariableCache.has(variableName)) {
@@ -44,7 +41,6 @@ export function useCSSVariable(
 
       return value;
     } catch {
-      // document недоступен — возвращаем undefined, потребитель обязан иметь fallback.
       return undefined;
     }
   }, [variableName, override, isSSR, cache]);
