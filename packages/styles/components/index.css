@@ -35,6 +35,8 @@
 @import "./spinner.css";
 @import "./surface.css";
 @import "./tabs.css";
+@import "./tag-group.css";
+@import "./tag.css";
 @import "./textfield.css";
 @import "./toggle-button-group.css";
 @import "./toggle-button.css";

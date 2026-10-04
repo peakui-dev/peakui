@@ -1,0 +1,233 @@
+---
+title: TagGroup
+description: A focusable list of selectable and removable tags
+links:
+  rac: TagGroup
+  source: tag-group/tag-group.tsx
+  styles: tag-group.css
+---
+
+## Usage
+
+```tsx
+import {TagGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="tag-group-basic" />
+
+### Anatomy
+
+```tsx
+import {Description, Label, Tag, TagGroup} from "@peakui/react";
+
+export default () => (
+  <TagGroup selectionMode="single">
+    <Label>Amenities</Label>
+    <TagGroup.List>
+      <Tag>
+        Tag label
+        <Tag.RemoveButton />
+      </Tag>
+    </TagGroup.List>
+    <Description>Optional hint</Description>
+  </TagGroup>
+);
+```
+
+## Examples
+
+### Sizes
+
+`size` on the group scales every tag.
+
+<ComponentPreview name="tag-group-sizes" />
+
+### Variants
+
+`variant` switches the tag background between default and surface.
+
+<ComponentPreview name="tag-group-variants" />
+
+### Disabled State
+
+`isDisabled` disables one tag; `disabledKeys` disables tags by id.
+
+<ComponentPreview name="tag-group-disabled" />
+
+### Selection Modes
+
+`selectionMode` allows a single or multiple selected tags.
+
+<ComponentPreview name="tag-group-selection-modes" />
+
+### Controlled Selection
+
+`selectedKeys` with `onSelectionChange` controls the selection from state.
+
+<ComponentPreview name="tag-group-controlled" />
+
+### With Icons
+
+Any element prefix renders before the label.
+
+<ComponentPreview name="tag-group-with-prefix" />
+
+### With Remove Button
+
+`onRemove` renders a remove button in every tag automatically.
+
+<ComponentPreview name="tag-group-with-remove-button" />
+
+### Render Function
+
+`render` on the root replaces the rendered element.
+
+<ComponentPreview name="tag-group-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="tag-group-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .tag-group {
+    @apply flex flex-col gap-2;
+  }
+
+  .tag-group__list {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .tag {
+    @apply rounded-full px-3 py-1;
+  }
+
+  .tag__remove-button {
+    @apply ml-1;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The TagGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/tag-group.css) and [tag.css](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/tag.css)):
+
+#### Base Classes [!toc]
+
+- `.tag-group` - Base tag group container
+- `.tag-group__list` - Container for the list of tags
+- `.tag` - Base tag styles
+- `.tag__remove-button` - Remove button trigger
+
+#### Size Classes [!toc]
+
+- `.tag--sm` - Small size tag
+- `.tag--md` - Medium size tag (default)
+- `.tag--lg` - Large size tag
+
+#### Variant Classes [!toc]
+
+- `.tag--default` - Default variant
+- `.tag--surface` - Surface variant with surface background
+
+#### Field Slot Classes [!toc]
+
+- `.tag-group [slot="description"]` - Description slot styles
+- `.tag-group [data-slot="description"]` - Description slot styles, data-attribute form
+- `.tag-group [slot="errorMessage"]` - Error message slot styles
+- `.tag-group [data-slot="error-message"]` - Error message slot styles, data-attribute form
+
+### Slots
+
+- `[data-slot="tag-group"]` - The tag group root
+- `[data-slot="tag-group-list"]` - The list of tags
+- `[data-slot="tag"]` - A single tag
+- `[data-slot="tag-remove-button"]` - The remove button inside a tag
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered="true"]` on the tag
+- **Focus**: `:focus-visible` or `[data-focus-visible]` on the tag
+- **Selected**: `[data-selected="true"]` or `[aria-selected="true"]` on the tag
+- **Disabled**: `[data-disabled="true"]` or `[aria-disabled="true"]` on the tag
+
+## API Reference
+
+### TagGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectionMode` | `"none" \| "single" \| "multiple"` | `"none"` | The type of selection that is allowed |
+| `selectedKeys` | `Selection` | - | The currently selected keys (controlled) |
+| `defaultSelectedKeys` | `Selection` | - | The initial selected keys (uncontrolled) |
+| `onSelectionChange` | `(keys: Selection) => void` | - | Handler called when the selection changes |
+| `disabledKeys` | `Iterable<Key>` | - | Keys of disabled tags |
+| `isDisabled` | `boolean` | - | Whether the tag group is disabled |
+| `onRemove` | `(keys: Set<Key>) => void` | - | Handler called when tags are removed |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Size of the tags in the group |
+| `variant` | `"default" \| "surface"` | `"default"` | Visual variant of the tags |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | TagGroup content |
+| `render` | `DOMRenderFunction<"div", undefined>` | - | Replaces the rendered `<div>` with a custom render function |
+| `...rest` | `React Aria TagGroup attributes` | - | Focus, keyboard navigation and DOM attributes of the underlying [React Aria TagGroup](https://react-spectrum.adobe.com/react-aria-components/TagGroup.html) |
+
+### TagGroup.List
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `Iterable<T>` | - | The items to display in the tag list |
+| `renderEmptyState` | `(props: TagListRenderProps) => ReactNode` | - | Function to render when the list is empty |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| ((item: T) => ReactElement)` | - | TagList content or item render function |
+| `render` | `DOMRenderFunction<"div", TagListRenderProps>` | - | Replaces the rendered `<div>` with a custom render function |
+| `...rest` | `React Aria TagList attributes` | - | Collection and DOM attributes of the underlying React Aria TagList |
+
+Name the group with `aria-label` or a `Label`; without one the grid has no accessible name.
+
+### Tag
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | The unique identifier for the tag |
+| `textValue` | `string` | - | A string representation of the tag's content, used for accessibility; falls back to the first string child |
+| `isDisabled` | `boolean` | - | Whether the tag is disabled |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| ((renderProps: TagRenderProps) => ReactNode)` | - | Tag content or render function |
+| `render` | `DOMRenderFunction<"div", undefined>` | - | Replaces the rendered `<div>` with a custom render function |
+| `...rest` | `React Aria Tag attributes` | - | Selection, hover, focus and press attributes of the underlying React Aria Tag |
+
+`size` and `variant` are inherited from the parent `TagGroup` and cannot be set on individual tags.
+
+### Tag.RemoveButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Custom remove button content (defaults to close icon) |
+| `...rest` | `React Aria Button attributes` | - | Press and DOM attributes of the underlying React Aria Button |
+
+When `onRemove` is provided to `TagGroup`, a remove button renders automatically; a `Tag.RemoveButton` passed as a child of `Tag` replaces it.
+
+### Render Props
+
+When the `Tag` children is a function, it receives these values:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isSelected` | `boolean` | Whether the tag is selected |
+| `isDisabled` | `boolean` | Whether the tag is disabled |
+| `isHovered` | `boolean` | Whether the tag is hovered |
+| `isPressed` | `boolean` | Whether the tag is pressed |
+| `isFocused` | `boolean` | Whether the tag is focused |
+| `isFocusVisible` | `boolean` | Whether the tag has keyboard focus |
+| `allowsRemoving` | `boolean` | Whether the tag group allows the tag to be removed |
