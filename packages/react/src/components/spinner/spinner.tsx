@@ -25,7 +25,7 @@ const SpinnerPrimitive = ({...props}: SpinnerPrimitiveProps) => {
   const id = useId();
 
   return (
-    <svg data-slot="spinner-icon" viewBox="0 0 24 24" {...props}>
+    <svg viewBox="0 0 24 24" {...props} data-slot="spinner-icon">
       <defs>
         <linearGradient id={`spinner-grad-1-${id}`} x1="50%" x2="50%" y1="5.271%" y2="91.793%">
           <stop offset="0%" stopColor="currentColor" />
@@ -75,7 +75,6 @@ const SpinnerRoot = <E extends keyof JSX.IntrinsicElements = "span">({
   return (
     <dom.span
       aria-label="Loading"
-      data-slot="spinner"
       role="status"
       /*
        * props разливаются ПОСЛЕ aria-label, и это не косметика: именно так переданная
@@ -85,6 +84,7 @@ const SpinnerRoot = <E extends keyof JSX.IntrinsicElements = "span">({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
       className={spinnerVariants({className, color, size})}
+      data-slot="spinner"
     >
       <SpinnerPrimitive aria-hidden />
     </dom.span>

@@ -40,11 +40,11 @@ const CloseButtonRoot = ({
        */
       aria-label="Close"
       className={composeTwRenderProps(className, styles)}
-      data-slot="close-button"
       slot={slot}
       style={style}
       type="button"
       {...rest}
+      data-slot="close-button"
     >
       {(renderProps) =>
         typeof children === "function"

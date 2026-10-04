@@ -31,9 +31,9 @@ const DescriptionRoot = ({children, className, ...rest}: DescriptionRootProps) =
   return (
     <Text
       className={descriptionVariants({className})}
-      data-slot="description"
       slot="description"
       {...rest}
+      data-slot="description"
     >
       {children}
     </Text>

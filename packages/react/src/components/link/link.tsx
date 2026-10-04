@@ -34,9 +34,9 @@ const LinkRoot = ({children, className, ...props}: LinkRootProps) => {
   return (
     <LinkContext value={contextValue}>
       <LinkPrimitive
-        data-slot="link"
         {...props}
         className={composeTwRenderProps(className, slots?.base())}
+        data-slot="link"
       >
         {(values) => <>{typeof children === "function" ? children(values) : children}</>}
       </LinkPrimitive>
@@ -65,10 +65,10 @@ const LinkIcon = <E extends keyof React.JSX.IntrinsicElements = "span">({
     <dom.span
       className={composeSlotClassName(slots?.icon, className)}
       data-default-icon={dataAttr(!children)}
-      data-slot="link-icon"
       /* The permitted `any`: the element type is a parameter, and the spread has erased it. */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(rest as any)}
+      data-slot="link-icon"
     >
       {children ?? <ExternalLinkIcon data-slot="link-default-icon" />}
     </dom.span>

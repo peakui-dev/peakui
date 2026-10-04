@@ -120,9 +120,9 @@ export const ScrollShadowRoot = ({
       // attribute-driven, matching what the hook does for the same combination of props.
       data-scroll-shadow-mode={isEnabled && visibility === "auto" ? "auto" : "manual"}
       data-scroll-shadow-size={size}
-      data-slot="scroll-shadow"
       style={style}
       {...props}
+      data-slot="scroll-shadow"
     >
       {children}
     </div>

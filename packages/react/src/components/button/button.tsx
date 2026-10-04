@@ -38,8 +38,8 @@ const ButtonRoot = ({
   return (
     <ButtonPrimitive
       className={composeTwRenderProps(className, styles)}
-      data-slot="button"
       {...rest}
+      data-slot="button"
     >
       {(renderProps) => (typeof children === "function" ? children(renderProps) : children)}
     </ButtonPrimitive>

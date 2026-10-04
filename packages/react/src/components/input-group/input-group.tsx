@@ -132,8 +132,8 @@ const InputGroupInput = ({className, ...rest}: InputGroupInputProps) => {
   return (
     <InputPrimitive
       className={composeTwRenderProps(className, slots?.input())}
-      data-slot="input-group-input"
       {...rest}
+      data-slot="input-group-input"
     />
   );
 };
@@ -151,8 +151,8 @@ const InputGroupTextArea = ({className, ...rest}: InputGroupTextAreaProps) => {
   return (
     <TextAreaPrimitive
       className={composeTwRenderProps(className, slots?.input())}
-      data-slot="input-group-textarea"
       {...rest}
+      data-slot="input-group-textarea"
     />
   );
 };
@@ -171,8 +171,8 @@ const InputGroupPrefix = ({children, className, ...rest}: InputGroupPrefixProps)
   return (
     <div
       className={composeSlotClassName(slots?.prefix, className)}
-      data-slot="input-group-prefix"
       {...rest}
+      data-slot="input-group-prefix"
     >
       {children}
     </div>
@@ -190,8 +190,8 @@ const InputGroupSuffix = ({children, className, ...rest}: InputGroupSuffixProps)
   return (
     <div
       className={composeSlotClassName(slots?.suffix, className)}
-      data-slot="input-group-suffix"
       {...rest}
+      data-slot="input-group-suffix"
     >
       {children}
     </div>

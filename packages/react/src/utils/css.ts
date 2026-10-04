@@ -1,6 +1,6 @@
 /**
- * Разбирает CSS-время (`1500ms`, `1.5s`, `1500`) в миллисекунды для пропов RAC.
- * Возвращает undefined для пустой строки или неразбираемого значения.
+ * Parses a CSS time (`1500ms`, `1.5s`, `1500`) into milliseconds for RAC props.
+ * Returns undefined for an empty string or an unparseable value.
  */
 export const parseCSSTime = (value: string | undefined): number | undefined => {
   if (!value) return undefined;

@@ -1,6 +1,6 @@
 /*
- * Портировано из utils/assertion.ts эталона — только то, что потребляют компоненты. Приведение
- * условий к значениям data-атрибутов: true — «true», false/undefined — атрибут отсутствует.
+ * Ported from the reference's utils/assertion.ts — only what the components consume. Coerces a
+ * condition to a data-attribute value: true — "true", false/undefined — the attribute is absent.
  */
 export type Booleanish = boolean | "true" | "false";
 

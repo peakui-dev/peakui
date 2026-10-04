@@ -30,9 +30,9 @@ export function SearchToggle({
 
   return (
     /*
-     * Была обёртка <span title="Search (⌘K)">: её title и давал подсказку по ховеру. Тот же текст
-     * теперь содержимое Tooltip; доступное имя кнопки задаёт её собственный aria-label, и путь с
-     * нативным атрибутом больше не нужен.
+     * This used to be a <span title="Search (⌘K)"> wrapper: its title provided the hover hint.
+     * That same text is now the Tooltip's content; the button's accessible name comes from its
+     * own aria-label, so the native attribute is no longer needed.
      */
     <Tooltip>
       <Button

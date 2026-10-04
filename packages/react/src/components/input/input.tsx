@@ -28,8 +28,8 @@ const InputRoot = ({className, fullWidth, variant, ...rest}: InputRootProps) => 
   return (
     <InputPrimitive
       className={composeTwRenderProps(className, styles)}
-      data-slot="input"
       {...rest}
+      data-slot="input"
     />
   );
 };

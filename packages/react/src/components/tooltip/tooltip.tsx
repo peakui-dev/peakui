@@ -38,9 +38,10 @@ type TooltipAnimationScopeProps = {
 };
 
 /*
- * RAC выставляет shouldSkipAnimation, пока активен её глобальный warmup-таймер, и из-за этого
- * Tooltip теряет data-entering / data-exiting, когда одна подсказка сменяет другую. Обе фазы
- * здесь ведут CSS-кейфреймы, поэтому флаг сбрасывается для потомков — фейд при смене сохраняется.
+ * RAC sets shouldSkipAnimation while its global warmup timer is active, and because of it
+ * Tooltip loses data-entering / data-exiting when one tooltip replaces another. Both phases
+ * drive the CSS keyframes here, so the flag is reset for descendants — the fade on switch is
+ * preserved.
  */
 const TooltipAnimationScope = ({children, shouldSkipAnimation}: TooltipAnimationScopeProps) => {
   const state = use(TooltipTriggerStateContext);
@@ -87,9 +88,9 @@ const TooltipRoot = ({
     <TooltipContext value={contextValue}>
       <TooltipTriggerPrimitive
         closeDelay={resolvedCloseDelay}
-        data-slot="tooltip-root"
         delay={resolvedDelay}
         {...props}
+        data-slot="tooltip-root"
       >
         <TooltipAnimationScope shouldSkipAnimation={shouldSkipAnimation}>
           {children}
@@ -121,9 +122,9 @@ const TooltipContent = ({
   return (
     <TooltipPrimitive
       className={composeTwRenderProps(className, slots?.base())}
-      data-slot="tooltip"
       offset={offset}
       {...props}
+      data-slot="tooltip"
     >
       {children}
     </TooltipPrimitive>
@@ -164,7 +165,7 @@ const TooltipArrow = ({children, className, ...props}: TooltipArrowProps) => {
     : defaultArrow;
 
   return (
-    <OverlayArrow data-slot="tooltip-arrow" {...props} className={className}>
+    <OverlayArrow {...props} className={className} data-slot="tooltip-arrow">
       {arrow}
     </OverlayArrow>
   );
@@ -188,12 +189,13 @@ const TooltipTrigger = <E extends keyof React.JSX.IntrinsicElements = "div">({
   const {slots} = use(TooltipContext);
   const triggerRef = useRef<HTMLElement | null>(null);
   /*
-   * Хук useFocusable напрямую, а не обёртка <Focusable>. Оба читают FocusableContext, который
-   * разворачивает TooltipTriggerPrimitive через свой <FocusableProvider> (там лежат пропы
-   * триггера и triggerRef), и дают одинаковые focusableProps (tabIndex, focus, обработчики
-   * клавиатуры). Но обёртка гоняет dev-only проверку isFocusable(el) в useEffect — она поднимается
-   * по предкам в поисках inert, и когда Tooltip монтирован в inert-поддереве (например, за открытым
-   * Drawer/Modal), проверка даёт ложное срабатывание: "<Focusable> child must be focusable…".
+   * The useFocusable hook directly, not the <Focusable> wrapper. Both read FocusableContext,
+   * which TooltipTriggerPrimitive provides through its <FocusableProvider> (the trigger's props
+   * and triggerRef live there), and both yield the same focusableProps (tabIndex, focus,
+   * keyboard handlers). But the wrapper runs a dev-only isFocusable(el) check in useEffect —
+   * it walks the ancestors looking for inert, and when the Tooltip is mounted in an inert
+   * subtree (behind an open Drawer/Modal, say), the check fires spuriously:
+   * "<Focusable> child must be focusable…".
    */
   const {focusableProps} = useFocusable({}, triggerRef);
 
@@ -201,14 +203,14 @@ const TooltipTrigger = <E extends keyof React.JSX.IntrinsicElements = "div">({
     <dom.div
       ref={triggerRef}
       className={composeSlotClassName(slots?.trigger, className)}
-      data-slot="tooltip-trigger"
       role="button"
       /*
-       * Разрешённое место для any: тип элемента здесь параметр, который spread уже стёр, и
-       * выразимой аннотации для него не существует. references/typescript.md.
+       * The permitted `any`: the element type is a parameter the spread has already erased, and
+       * no expressible annotation exists for it. references/typescript.md.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...mergeProps(focusableProps, props as any)}
+      data-slot="tooltip-trigger"
     >
       {children}
     </dom.div>
