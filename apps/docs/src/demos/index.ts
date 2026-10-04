@@ -163,22 +163,6 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./description/basic").then((m) => m.Basic),
     file: "description/basic.tsx",
   },
-  // empty-state
-  "empty-state-basic": {
-    loader: () => import("./empty-state/basic").then((m) => m.Basic),
-    file: "empty-state/basic.tsx",
-  },
-  "empty-state-custom-message": {
-    loader: () => import("./empty-state/custom-message").then((m) => m.CustomMessage),
-    file: "empty-state/custom-message.tsx",
-  },
-  "empty-state-with-action": {
-    loader: () => import("./empty-state/with-action").then((m) => m.WithAction),
-    file: "empty-state/with-action.tsx",
-  },
-  "empty-state-with-icon": {
-    loader: () => import("./empty-state/with-icon").then((m) => m.WithIcon),
-    file: "empty-state/with-icon.tsx",
   // disclosure
   "disclosure-basic": {
     loader: () => import("./disclosure/basic").then((m) => m.Basic),
@@ -204,6 +188,23 @@ export const demos: Record<string, DemoItem> = {
   "disclosure-group-custom-styles": {
     loader: () => import("./disclosure-group/custom-styles").then((m) => m.CustomStyles),
     file: "disclosure-group/custom-styles.tsx",
+  },
+  // empty-state
+  "empty-state-basic": {
+    loader: () => import("./empty-state/basic").then((m) => m.Basic),
+    file: "empty-state/basic.tsx",
+  },
+  "empty-state-custom-message": {
+    loader: () => import("./empty-state/custom-message").then((m) => m.CustomMessage),
+    file: "empty-state/custom-message.tsx",
+  },
+  "empty-state-with-action": {
+    loader: () => import("./empty-state/with-action").then((m) => m.WithAction),
+    file: "empty-state/with-action.tsx",
+  },
+  "empty-state-with-icon": {
+    loader: () => import("./empty-state/with-icon").then((m) => m.WithIcon),
+    file: "empty-state/with-icon.tsx",
   },
   // field-error
   "field-error-basic": {
