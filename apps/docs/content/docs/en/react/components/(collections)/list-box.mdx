@@ -1,0 +1,189 @@
+---
+title: ListBox
+description: A listbox displays selectable options
+links:
+  rac: ListBox
+  source: list-box/list-box.tsx
+  styles: list-box.css
+---
+
+## Usage
+
+```tsx
+import { ListBox } from "@peakui/react";
+```
+
+<ComponentPreview name="list-box-basic" />
+
+### Anatomy
+
+```tsx
+import { Description, Label, ListBox } from "@peakui/react";
+
+export default () => (
+  <ListBox>
+    <ListBox.Item textValue="Option">
+      <Label />
+      <Description />
+      <ListBox.ItemIndicator />
+    </ListBox.Item>
+    <ListBox.Section>
+      <ListBox.Item textValue="Grouped option">
+        <Label />
+      </ListBox.Item>
+    </ListBox.Section>
+  </ListBox>
+);
+```
+
+## Examples
+
+### With Sections
+
+<ComponentPreview name="list-box-with-sections" />
+
+### With Disabled Items
+
+<ComponentPreview name="list-box-with-disabled-items" />
+
+### Multi Select
+
+<ComponentPreview name="list-box-multi-select" />
+
+### Controlled
+
+<ComponentPreview name="list-box-controlled" />
+
+### Custom Check Icon
+
+<ComponentPreview name="list-box-custom-check-icon" />
+
+### Render Function
+
+<ComponentPreview name="list-box-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="list-box-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .list-box {
+    @apply rounded-lg border border-border bg-surface p-2;
+  }
+
+  .list-box-item {
+    @apply rounded px-2 py-1 cursor-pointer;
+  }
+
+  .list-box-item--danger {
+    @apply text-danger;
+  }
+
+  .list-box-item__indicator {
+    @apply text-accent;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ListBox component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/list-box.css)):
+
+#### Base Classes [!toc]
+
+- `.list-box` - Base listbox container
+- `.list-box-item` - Individual listbox item
+- `.list-box-item__indicator` - Selection indicator icon
+- `.list-box-section` - Section container for grouping items
+
+#### Variant Classes [!toc]
+
+- `.list-box--default` - Default variant
+- `.list-box--danger` - Danger variant
+- `.list-box-item--default` - Default item variant
+- `.list-box-item--danger` - Danger item variant
+
+### Slots
+
+- `[data-slot="list-box"]` - The listbox root
+- `[data-slot="list-box-item"]` - A listbox item
+- `[data-slot="list-box-item-indicator"]` - The selection indicator
+- `[data-slot="list-box-item-indicator--checkmark"]` - The default checkmark glyph
+- `[data-slot="list-box-section"]` - A section
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered="true"]` on item
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on item
+- **Pressed**: `:active` or `[data-pressed="true"]` on item
+- **Selected**: `[aria-selected="true"]` or `[data-selected="true"]` on item
+- **Disabled**: `[data-disabled="true"]` on item
+- **Indicator visible**: `[data-visible="true"]` on the indicator
+
+## API Reference
+
+### ListBox
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `aria-label` | `string` | - | Accessibility label for the listbox |
+| `aria-labelledby` | `string` | - | ID of element that labels the listbox |
+| `selectionMode` | `"none" \| "single" \| "multiple"` | `"single"` | Selection behavior |
+| `selectedKeys` | `Selection` | - | Controlled selected keys |
+| `defaultSelectedKeys` | `Selection` | - | Initial selected keys |
+| `onSelectionChange` | `(keys: Selection) => void` | - | Handler called when selection changes |
+| `disabledKeys` | `Iterable<Key>` | - | Keys of disabled items |
+| `onAction` | `(key: Key) => void` | - | Handler called when an item is activated |
+| `variant` | `"default" \| "danger"` | `"default"` | Visual variant |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | ListBox items and sections |
+| `render` | `DOMRenderFunction<keyof React.JSX.IntrinsicElements, ListBoxRenderProps>` | - | Overrides the default DOM element with a custom render function |
+
+### ListBox.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | Unique identifier for the item |
+| `textValue` | `string` | - | Text value for accessibility and typeahead |
+| `isDisabled` | `boolean` | `false` | Whether this item is disabled |
+| `variant` | `"default" \| "danger"` | `"default"` | Visual variant |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| ((renderProps: ListBoxItemRenderProps) => ReactNode)` | - | Item content or render function |
+| `render` | `(props, renderProps: ListBoxItemRenderProps) => ReactElement` | - | Overrides the default DOM element with a custom render function |
+
+### ListBox.ItemIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| ((renderProps: ListBoxItemRenderProps) => ReactNode)` | - | Custom indicator content or render function |
+
+### ListBox.Section
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `aria-label` | `string` | - | Accessibility label for the group |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Section content: a heading, then items |
+
+### Render Props
+
+When using render functions with `ListBox.Item` or `ListBox.ItemIndicator`, these values are provided:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isSelected` | `boolean` | Whether the item is selected |
+| `isFocused` | `boolean` | Whether the item is focused |
+| `isDisabled` | `boolean` | Whether the item is disabled |
+| `isPressed` | `boolean` | Whether the item is being pressed |

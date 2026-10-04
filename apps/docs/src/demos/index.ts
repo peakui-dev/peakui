@@ -386,6 +386,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./link/underline").then((m) => m.Underline),
     file: "link/underline.tsx",
   },
+  // list-box
+  "list-box-basic": {
+    loader: () => import("./list-box/basic").then((m) => m.Basic),
+    file: "list-box/basic.tsx",
+  },
+  "list-box-controlled": {
+    loader: () => import("./list-box/controlled").then((m) => m.Controlled),
+    file: "list-box/controlled.tsx",
+  },
+  "list-box-custom-check-icon": {
+    loader: () => import("./list-box/custom-check-icon").then((m) => m.CustomCheckIcon),
+    file: "list-box/custom-check-icon.tsx",
+  },
+  "list-box-custom-styles": {
+    loader: () => import("./list-box/custom-styles").then((m) => m.CustomStyles),
+    file: "list-box/custom-styles.tsx",
+  },
+  "list-box-multi-select": {
+    loader: () => import("./list-box/multi-select").then((m) => m.MultiSelect),
+    file: "list-box/multi-select.tsx",
+  },
+  "list-box-render-function": {
+    loader: () => import("./list-box/render-function").then((m) => m.RenderFunction),
+    file: "list-box/render-function.tsx",
+  },
+  "list-box-with-disabled-items": {
+    loader: () => import("./list-box/with-disabled-items").then((m) => m.WithDisabledItems),
+    file: "list-box/with-disabled-items.tsx",
+  },
+  "list-box-with-sections": {
+    loader: () => import("./list-box/with-sections").then((m) => m.WithSections),
+    file: "list-box/with-sections.tsx",
+  },
   // popover
   "popover-basic": {
     loader: () => import("./popover/basic").then((m) => m.Basic),

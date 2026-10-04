@@ -1,0 +1,8 @@
+/*
+ * ListBoxSection. Class names come from src/components/list-box-section/list-box-section.styles.ts.
+ */
+
+/* Base list-box section styles */
+.list-box-section {
+  @apply flex flex-col items-start gap-0;
+}
