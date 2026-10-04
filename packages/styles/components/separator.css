@@ -1,0 +1,36 @@
+/*
+ * Separator. Class names come from src/components/separator/separator.styles.ts.
+ */
+
+.separator {
+  /*
+   * The horizontal default lives here, not in .separator--horizontal: two sources of truth
+   * drift apart. border-t-0/border-b-0 cancel the preflight border of the rendered <hr> — the
+   * line is the background, not the border.
+   */
+  @apply h-px w-full shrink-0 rounded-sm border-t-0 border-b-0;
+}
+
+/* ---------- Orientation ---------- */
+
+.separator--horizontal {
+  /* No styles: the default orientation lives in .separator. */
+}
+
+.separator--vertical {
+  @apply h-auto min-h-2 w-px self-stretch;
+}
+
+/* ---------- Variants ---------- */
+
+.separator--default {
+  @apply bg-separator;
+}
+
+.separator--secondary {
+  @apply bg-separator-secondary;
+}
+
+.separator--tertiary {
+  @apply bg-separator-tertiary;
+}
