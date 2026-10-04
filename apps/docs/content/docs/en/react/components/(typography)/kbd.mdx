@@ -1,0 +1,137 @@
+---
+title: Kbd
+description: Display keyboard shortcuts and key combinations
+links:
+  source: kbd/kbd.tsx
+  styles: kbd.css
+---
+
+## Usage
+
+```tsx
+import {Kbd} from "@peakui/react";
+```
+
+<ComponentPreview name="kbd-basic" />
+
+### Anatomy
+
+```tsx
+import {Kbd} from "@peakui/react";
+
+export default () => (
+  <Kbd>
+    <Kbd.Abbr keyValue="command" />
+    <Kbd.Content>K</Kbd.Content>
+  </Kbd>
+);
+```
+
+## Examples
+
+### Variants
+
+`light` drops the background for keys shown on an already contrasted surface.
+
+<ComponentPreview name="kbd-variants" />
+
+### Key Combinations
+
+<ComponentPreview name="kbd-key-combinations" />
+
+### Navigation Keys
+
+<ComponentPreview name="kbd-navigation-keys" />
+
+### Special Keys
+
+Each `<Kbd.Abbr>` carries its full key name in the `title` attribute.
+
+<ComponentPreview name="kbd-special-keys" />
+
+### Inline Usage
+
+<ComponentPreview name="kbd-inline-usage" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Kbd className="rounded-full px-3">
+  <Kbd.Abbr keyValue="command" />
+  <Kbd.Content>K</Kbd.Content>
+</Kbd>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .kbd {
+    @apply bg-surface text-surface-foreground;
+  }
+
+  .kbd__abbr {
+    @apply font-bold;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Kbd component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/kbd.css)):
+
+#### Base Classes [!toc]
+
+- `.kbd` - Base key styles: background, spacing, radius, typography
+- `.kbd__abbr` - The `<abbr>` element for a key symbol
+- `.kbd__content` - The content wrapper for key text
+
+#### Variant Classes [!toc]
+
+- `.kbd--default` - Default variant; no additional styles
+- `.kbd--light` - Transparent background
+
+### Slots
+
+- `[data-slot="kbd"]` - The root `<kbd>` element
+- `[data-slot="kbd-abbr"]` - The key abbreviation element
+- `[data-slot="kbd-content"]` - The content wrapper element
+
+## API Reference
+
+### Kbd
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The key content (required) |
+| `variant` | `'default' \| 'light'` | - | Visual variant |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'kbd', undefined>` | - | Replaces the rendered `<kbd>` with your own element |
+
+Every other attribute of a `<kbd>` is accepted.
+
+### Kbd.Abbr
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `keyValue` | `KbdKey` | - | Required. The key to display, with its full name in `title`. One of `command`, `shift`, `ctrl`, `option`, `alt`, `win`, `enter`, `delete`, `escape`, `tab`, `capslock`, `space`, `up`, `down`, `left`, `right`, `pageup`, `pagedown`, `home`, `end`, `help`, `fn` |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'abbr', undefined>` | - | Replaces the rendered `<abbr>` with your own element |
+
+Every other attribute of an `<abbr>` is accepted. The symbol and title come from `kbdKeysMap` and `kbdKeysLabelMap`, exported from `@peakui/react`.
+
+### Kbd.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The content to display (required) |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.

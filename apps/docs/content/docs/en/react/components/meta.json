@@ -13,6 +13,7 @@
     "(forms)/fieldset",
     "(forms)/input",
     "(forms)/input-group",
+    "(typography)/kbd",
     "(forms)/label",
     "(feedback)/spinner",
     "(layout)/surface",
