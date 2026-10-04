@@ -456,7 +456,12 @@ export function deriveTheme(preset: ThemePreset): {
     "cursor-disabled": "not-allowed",
     radius: RADIUS_BASE[preset.radius],
     "field-radius": RADIUS_BASE[preset.formRadius],
-    "skeleton-animation": "skeleton",
+    /*
+     * The value is the Skeleton variant the theme defaults to (shimmer | pulse | none). The
+     * reference theme documents the same contract for the same variable; a value outside the
+     * variant set resolves to no modifier at all, silently disabling the animation.
+     */
+    "skeleton-animation": "shimmer",
     "tooltip-delay": "1500ms",
     "tooltip-close-delay": "500ms",
     sans: (preset.typography?.sans ?? DEFAULT_SANS).join(", "),

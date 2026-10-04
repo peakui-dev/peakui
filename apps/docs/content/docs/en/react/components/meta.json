@@ -14,6 +14,7 @@
     "(forms)/input",
     "(forms)/input-group",
     "(forms)/label",
+    "(feedback)/skeleton",
     "(feedback)/spinner",
     "(layout)/surface",
     "(forms)/text-field"
