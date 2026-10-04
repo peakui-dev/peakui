@@ -1,0 +1,114 @@
+---
+title: CloseButton
+description: An icon-only dismiss control with a built-in glyph and label
+links:
+  rac: Button
+  source: close-button/close-button.tsx
+  styles: close-button.css
+---
+
+## Usage
+
+Renders an icon-only dismiss button: the X glyph and the accessible name `Close` are built in.
+
+```tsx
+import {CloseButton} from "@peakui/react";
+```
+
+<ComponentPreview name="close-button-basic" />
+
+## Examples
+
+### With a Custom Icon
+
+Children replace the default glyph; the name still comes from `aria-label`.
+
+<ComponentPreview name="close-button-with-custom-icon" />
+
+### Interactive
+
+`onPress` fires on click and on Enter and Space alike.
+
+<ComponentPreview name="close-button-interactive" />
+
+### Disabled State
+
+<ComponentPreview name="close-button-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+Pass utilities through `className`. They are merged with the button's own classes.
+
+```tsx
+<CloseButton className="rounded-full" />
+```
+
+### Global CSS
+
+Override the button's classes in the `components` layer.
+
+```css
+@layer components {
+  .close-button--default {
+    @apply bg-danger-soft text-danger-soft-foreground;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The CloseButton component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/close-button.css)):
+
+#### Base Classes [!toc]
+
+- `.close-button` - Base styles: a 24px square icon-only button
+
+#### Variant Classes [!toc]
+
+- `.close-button--default` - Default fill: `bg-default` background with a muted glyph
+
+### Slots
+
+- `[data-slot="close-button"]` - The button element
+- `[data-slot="close-button-icon"]` - The default X glyph, an `svg`
+
+### Interactive States
+
+The button supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Pressed**: `:active` or `[data-pressed]`
+- **Focus**: `:focus-visible` or `[data-focus-visible]` (shows the focus ring)
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]`
+- **Pending**: `[data-pending="true"]`
+
+## API Reference
+
+### CloseButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'default'` | `'default'` | Visual variant |
+| `children` | `ReactNode \| (values: ButtonRenderProps) => ReactNode` | built-in X glyph | Button content, or a function of the button's state |
+| `className` | `string \| (values: ButtonRenderProps) => string` | - | Additional classes, or a function of the button's state |
+
+`aria-label` defaults to `Close` and a consumer value overrides it. `type` defaults to `button`. Every other [React Aria Button](https://react-aria.adobe.com/Button) prop is accepted.
+
+### Render Props
+
+When `children` or `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isPending` | `boolean` | Whether the button is waiting on an action |
+| `isPressed` | `boolean` | Whether the button is currently pressed |
+| `isHovered` | `boolean` | Whether the button is hovered |
+| `isFocused` | `boolean` | Whether the button is focused |
+| `isFocusVisible` | `boolean` | Whether the button is focused by keyboard |
+| `isDisabled` | `boolean` | Whether the button is disabled |

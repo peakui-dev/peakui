@@ -1,0 +1,115 @@
+/*
+ * CloseButton. Class names come from src/components/close-button/close-button.styles.ts; all the
+ * Tailwind lives here. The file is standalone: every interactive state is written both as a
+ * pseudo-class and as a data-* attribute, so the stylesheet works without React. The one
+ * exception, data-pending, is explained at the rule.
+ *
+ * Compared line by line against the reference close-button.css. The differences that remain are
+ * listed at the end of the file, each with its reason.
+ */
+
+/* Base close button styles */
+.close-button {
+  @apply relative isolate inline-flex h-6 w-6 shrink-0 origin-center items-center justify-center rounded-xl p-1 select-none no-highlight;
+
+  /* Held transparent in the normal state so the forced-colors border causes no layout shift. */
+  border: 1px solid transparent;
+
+  /* Cursor */
+  cursor: var(--cursor-interactive);
+
+  /*
+   * Transitions
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition:
+    transform 250ms var(--ease-out),
+    color 150ms var(--ease-out),
+    background-color 100ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  /*
+   * Focus visible state. :not([data-focused]) guards against double application: when React Aria
+   * owns the focus, it sets its attribute and both selectors would match the same element.
+   */
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  /* Disabled state */
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /*
+   * data-pending has no pseudo-class twin — the one exception in this file, deliberate: the
+   * pending state does not exist outside React, the RAC primitive sets it, and a bare-CSS
+   * consumer has nothing that could turn it on.
+   */
+  &[data-pending="true"] {
+    @apply status-pending;
+  }
+
+  /*
+   * Structural half of forced-colors: the control's identity is a background fill, which forced
+   * colors flatten; the boundary carries it instead. The central theme block remaps the glyph.
+   */
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+
+  /* SVG icon styling */
+  & svg {
+    @apply pointer-events-none size-4 shrink-0 self-center -mx-0.5 my-0.5;
+  }
+}
+
+/* Variants */
+.close-button--default {
+  @apply bg-default text-muted;
+
+  /*
+   * :hover under (hover: hover) — on touch it sticks after a tap and the button stays lit.
+   * data-hovered outside the query: React Aria sets it and knows the pointer nature itself.
+   */
+  @media (hover: hover) {
+    &:hover {
+      @apply bg-default-hover;
+    }
+  }
+
+  &[data-hovered="true"] {
+    @apply bg-default-hover;
+  }
+
+  &:active,
+  &[data-pressed="true"] {
+    transform: scale(0.93);
+  }
+}
+
+/*
+ * ---------- What stays different from the reference, and why ----------
+ *
+ * 1. forced-colors. The reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md, which added forced-colors
+ *    support; the transparent border + ButtonBorder follows the landed button.css precedent.
+ *
+ * 2. --ease-out-quart does not exist in the PeakUI token scale. Motion must use --ease-* tokens,
+ *    never an inline cubic-bezier, so the transform transition takes --ease-out. No new token was
+ *    requested for one transition.
+ *
+ * 3. [data-disabled] added to the disabled rule: RAC sets it alongside aria-disabled.
+ *
+ * 4. [data-hovered] outside @media (hover: hover), with :hover inside it. The reference keeps
+ *    both inside the query; the landed button.css records why the pair is split.
+ *
+ * 5. The reference's empty `&:active, &[data-pressed="true"] {}` block (a duplicated selector
+ *    with no declarations) is dropped; the pressed transform keeps the single selector pair.
+ *
+ * 6. The svg rule's three @apply lines are grouped into one, per css-authoring.md.
+ */
