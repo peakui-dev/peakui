@@ -57,22 +57,6 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./button/with-icons").then((m) => m.WithIcons),
     file: "button/with-icons.tsx",
   },
-  // close-button
-  "close-button-basic": {
-    loader: () => import("./close-button/basic").then((m) => m.Basic),
-    file: "close-button/basic.tsx",
-  },
-  "close-button-disabled": {
-    loader: () => import("./close-button/disabled").then((m) => m.Disabled),
-    file: "close-button/disabled.tsx",
-  },
-  "close-button-interactive": {
-    loader: () => import("./close-button/interactive").then((m) => m.Interactive),
-    file: "close-button/interactive.tsx",
-  },
-  "close-button-with-custom-icon": {
-    loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
-    file: "close-button/with-custom-icon.tsx",
   // chip
   "chip-basic": {
     loader: () => import("./chip/basic").then((m) => m.Basic),
@@ -97,6 +81,23 @@ export const demos: Record<string, DemoItem> = {
   "chip-with-icons": {
     loader: () => import("./chip/with-icons").then((m) => m.WithIcons),
     file: "chip/with-icons.tsx",
+  },
+  // close-button
+  "close-button-basic": {
+    loader: () => import("./close-button/basic").then((m) => m.Basic),
+    file: "close-button/basic.tsx",
+  },
+  "close-button-disabled": {
+    loader: () => import("./close-button/disabled").then((m) => m.Disabled),
+    file: "close-button/disabled.tsx",
+  },
+  "close-button-interactive": {
+    loader: () => import("./close-button/interactive").then((m) => m.Interactive),
+    file: "close-button/interactive.tsx",
+  },
+  "close-button-with-custom-icon": {
+    loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
+    file: "close-button/with-custom-icon.tsx",
   },
   // description
   "description-basic": {

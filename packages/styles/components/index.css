@@ -4,8 +4,8 @@
  */
 
 @import "./button.css";
-@import "./close-button.css";
 @import "./chip.css";
+@import "./close-button.css";
 @import "./description.css";
 @import "./field-error.css";
 @import "./fieldset.css";
