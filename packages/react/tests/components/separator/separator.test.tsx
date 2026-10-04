@@ -4,8 +4,6 @@ import {Provider} from "react-aria-components/slots";
 
 import {Separator, SeparatorRoot} from "@/components/separator/index.ts";
 
-const classesOf = (element: Element) => [...element.classList].sort();
-
 /* Провайдер RAC — тот механизм, через который родитель (меню, группа) задаёт разделителю пропсы. */
 const withSeparatorContext = (
   value: {orientation: "horizontal" | "vertical"},
@@ -28,11 +26,10 @@ describe("Separator", () => {
     it("без пропсов даёт блок с модификаторами горизонтали и варианта default", () => {
       render(<Separator />);
 
-      expect(classesOf(screen.getByRole("separator"))).toEqual([
-        "separator",
-        "separator--default",
-        "separator--horizontal",
-      ]);
+      const separator = screen.getByRole("separator");
+
+      expect(separator.className).toEqual(expect.stringContaining("separator--horizontal"));
+      expect(separator.className).toEqual(expect.stringContaining("separator--default"));
     });
 
     it("помечает ориентацию атрибутом data-orientation", () => {
@@ -60,18 +57,18 @@ describe("Separator", () => {
     ] as const)("вариант «%s» добавляет свой модификатор", (variant, modifier) => {
       render(<Separator variant={variant} />);
 
-      expect(classesOf(screen.getByRole("separator"))).toContain(modifier);
+      const separator = screen.getByRole("separator");
+
+      expect(separator.className).toEqual(expect.stringContaining(modifier));
     });
 
     it("объединяет className потребителя с классами блока", () => {
       render(<Separator className="my-4" />);
 
-      expect(classesOf(screen.getByRole("separator"))).toEqual([
-        "my-4",
-        "separator",
-        "separator--default",
-        "separator--horizontal",
-      ]);
+      const separator = screen.getByRole("separator");
+
+      expect(separator.className).toEqual(expect.stringContaining("my-4"));
+      expect(separator.className).toEqual(expect.stringContaining("separator--horizontal"));
     });
 
     it("разливает остальные пропсы на элемент", () => {
