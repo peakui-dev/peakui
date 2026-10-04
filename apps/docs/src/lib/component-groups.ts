@@ -12,11 +12,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Collections",
-    components: [
-      "(collections)/dropdown",
-      "(collections)/list-box",
-      "(collections)/tag-group",
-    ],
+    components: ["(collections)/dropdown", "(collections)/list-box", "(collections)/tag-group"],
   },
   {
     category: "Data Display",
@@ -60,7 +56,12 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Overlays",
-    components: ["(overlays)/modal", "(overlays)/popover", "(overlays)/toast", "(overlays)/tooltip"],
+    components: [
+      "(overlays)/modal",
+      "(overlays)/popover",
+      "(overlays)/toast",
+      "(overlays)/tooltip",
+    ],
   },
   {
     category: "Typography",
