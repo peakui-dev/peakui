@@ -179,6 +179,31 @@ export const demos: Record<string, DemoItem> = {
   "empty-state-with-icon": {
     loader: () => import("./empty-state/with-icon").then((m) => m.WithIcon),
     file: "empty-state/with-icon.tsx",
+  // disclosure
+  "disclosure-basic": {
+    loader: () => import("./disclosure/basic").then((m) => m.Basic),
+    file: "disclosure/basic.tsx",
+  },
+  "disclosure-custom-styles": {
+    loader: () => import("./disclosure/custom-styles").then((m) => m.CustomStyles),
+    file: "disclosure/custom-styles.tsx",
+  },
+  "disclosure-render-function": {
+    loader: () => import("./disclosure/render-function").then((m) => m.RenderFunction),
+    file: "disclosure/render-function.tsx",
+  },
+  // disclosure-group
+  "disclosure-group-basic": {
+    loader: () => import("./disclosure-group/basic").then((m) => m.Basic),
+    file: "disclosure-group/basic.tsx",
+  },
+  "disclosure-group-controlled": {
+    loader: () => import("./disclosure-group/controlled").then((m) => m.Controlled),
+    file: "disclosure-group/controlled.tsx",
+  },
+  "disclosure-group-custom-styles": {
+    loader: () => import("./disclosure-group/custom-styles").then((m) => m.CustomStyles),
+    file: "disclosure-group/custom-styles.tsx",
   },
   // field-error
   "field-error-basic": {

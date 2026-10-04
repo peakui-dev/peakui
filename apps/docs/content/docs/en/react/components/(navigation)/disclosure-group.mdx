@@ -1,0 +1,126 @@
+---
+title: DisclosureGroup
+description: Container coordinating multiple expanded disclosures
+links:
+  rac: DisclosureGroup
+  source: disclosure-group/disclosure-group.tsx
+  styles: disclosure-group.css
+---
+
+## Usage
+
+```tsx
+import {Disclosure, DisclosureGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="disclosure-group-basic" />
+
+### Anatomy
+
+```tsx
+import {Disclosure, DisclosureGroup} from "@peakui/react";
+
+export default () => (
+  <DisclosureGroup>
+    <Disclosure id="item1">
+      <Disclosure.Heading>
+        <Disclosure.Trigger>
+          <Disclosure.Indicator />
+        </Disclosure.Trigger>
+      </Disclosure.Heading>
+      <Disclosure.Content>
+        <Disclosure.Body>Panel content</Disclosure.Body>
+      </Disclosure.Content>
+    </Disclosure>
+  </DisclosureGroup>
+);
+```
+
+## Examples
+
+### Controlled
+
+`expandedKeys` with `onExpandedChange` gives external control; `useDisclosureGroupNavigation` drives prev/next movement over the item ids.
+
+<ComponentPreview name="disclosure-group-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<DisclosureGroup className="w-full max-w-sm rounded-xl bg-surface-secondary p-2">
+  <Disclosure id="billing"><!-- … --></Disclosure>
+</DisclosureGroup>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .disclosure-group {
+    @apply w-full;
+
+    /* Performance optimization */
+    contain: layout style;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The DisclosureGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/disclosure-group.css)):
+
+#### Base Classes [!toc]
+
+- `.disclosure-group` - Base container styles with layout containment
+
+### Slots
+
+- `[data-slot="disclosure-group"]` - The group container
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Disabled**: `[data-disabled]` on the group disables every item
+- **Expanded**: each child `Disclosure` carries `[data-expanded]`
+
+## API Reference
+
+### DisclosureGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `expandedKeys` | `Iterable<Key>` | - | The currently expanded items (controlled) |
+| `defaultExpandedKeys` | `Iterable<Key>` | - | The initially expanded items (uncontrolled) |
+| `onExpandedChange` | `(keys: Set<Key>) => void` | - | Handler called when the expanded items change |
+| `allowsMultipleExpanded` | `boolean` | `false` | Whether multiple items can be expanded simultaneously |
+| `isDisabled` | `boolean` | `false` | Whether all disclosures in the group are disabled |
+| `children` | `ReactNode \| ((values: DisclosureGroupRenderProps) => ReactNode)` | - | Disclosure items to render, or a function of the render props |
+| `className` | `string \| ((values: DisclosureGroupRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `render` | `DOMRenderFunction<'div', DisclosureGroupRenderProps>` | - | Replaces the rendered element with your own |
+
+Every other attribute of a `<div>` is accepted.
+
+### useDisclosureGroupNavigation
+
+| Argument | Type | Description |
+|------|------|-------------|
+| `expandedKeys` | `Set<string \| number>` | The group's expanded keys |
+| `itemIds` | `string[]` | The disclosure ids in group order |
+| `onExpandedChange` | `(keys: Set<string \| number>) => void` | The group's state setter |
+| `allowsMultipleExpanded` | `boolean` | Keeps previous items expanded while moving |
+
+Returns `{currentIndex, isPrevDisabled, isNextDisabled, onPrevious, onNext}`.
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: DisclosureGroupRenderProps) => ReactNode` | Receives `isDisabled`, `state` |
+| `className` | `(values: DisclosureGroupRenderProps) => string` | Same values as `children` |

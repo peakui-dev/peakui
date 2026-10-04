@@ -5,17 +5,12 @@ import type * as PageTree from "fumadocs-core/page-tree";
 import type {ComponentProps} from "react";
 
 import {ChevronDown, ChevronLeft, ChevronRight} from "@gravity-ui/icons";
-import {Breadcrumbs} from "@peakui/react";
+import {Breadcrumbs, Disclosure} from "@peakui/react";
 import {getBreadcrumbItemsFromPath} from "fumadocs-core/breadcrumb";
 import {usePathname} from "fumadocs-core/framework";
 import Link from "fumadocs-core/link";
 import {useActiveAnchor} from "fumadocs-core/toc";
 import {useTOCItems} from "fumadocs-ui/components/toc";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "fumadocs-ui/components/ui/collapsible";
 import {useI18n} from "fumadocs-ui/contexts/i18n";
 import {useTreeContext, useTreePath} from "fumadocs-ui/contexts/tree";
 import {useFooterItems} from "fumadocs-ui/utils/use-footer-items";
@@ -61,14 +56,14 @@ export function PageTOCPopover({children, className, ...rest}: ComponentProps<"d
         [setOpen, open],
       )}
     >
-      <Collapsible
+      <Disclosure
         data-toc-popover=""
-        open={open}
+        isExpanded={open}
         className={cn(
           "max-xl:layout:[--fd-toc-popover-height:--spacing(10)] sticky top-(--fd-docs-row-2) z-10 h-(--fd-toc-popover-height) [grid-area:toc-popover] xl:hidden",
           className,
         )}
-        onOpenChange={setOpen}
+        onExpandedChange={setOpen}
         {...rest}
       >
         <header
@@ -81,12 +76,15 @@ export function PageTOCPopover({children, className, ...rest}: ComponentProps<"d
         >
           {children}
         </header>
-      </Collapsible>
+      </Disclosure>
     </TocPopoverContext>
   );
 }
 
-export function PageTOCPopoverTrigger({className, ...props}: ComponentProps<"button">) {
+export function PageTOCPopoverTrigger({
+  className,
+  ...props
+}: ComponentProps<typeof Disclosure.Trigger>) {
   const {text} = useI18n();
   const {open} = use(TocPopoverContext)!;
   const items = useTOCItems();
@@ -99,7 +97,7 @@ export function PageTOCPopoverTrigger({className, ...props}: ComponentProps<"but
   const showItem = selected !== -1 && !open;
 
   return (
-    <CollapsibleTrigger
+    <Disclosure.Trigger
       data-toc-popover-trigger=""
       className={cn(
         "text-fd-muted-foreground flex h-10 w-full items-center gap-2.5 px-4 py-2.5 text-start text-sm focus-visible:outline-none md:px-6 [&_svg]:size-4",
@@ -132,7 +130,7 @@ export function PageTOCPopoverTrigger({className, ...props}: ComponentProps<"but
         </span>
       </span>
       <ChevronDown className={cn("mx-0.5 shrink-0 transition-transform", open && "rotate-180")} />
-    </CollapsibleTrigger>
+    </Disclosure.Trigger>
   );
 }
 
@@ -194,15 +192,15 @@ function ProgressCircle({
   );
 }
 
-export function PageTOCPopoverContent(props: ComponentProps<"div">) {
+export function PageTOCPopoverContent(props: ComponentProps<typeof Disclosure.Content>) {
   return (
-    <CollapsibleContent
+    <Disclosure.Content
       data-toc-popover-content=""
       {...props}
       className={cn("flex max-h-[50vh] flex-col px-4 md:px-6", props.className)}
     >
       {props.children}
-    </CollapsibleContent>
+    </Disclosure.Content>
   );
 }
 

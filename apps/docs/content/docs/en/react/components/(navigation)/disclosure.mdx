@@ -1,0 +1,187 @@
+---
+title: Disclosure
+description: A collapsible section with a heading and a trigger
+links:
+  rac: Disclosure
+  source: disclosure/disclosure.tsx
+  styles: disclosure.css
+---
+
+## Usage
+
+```tsx
+import {Disclosure} from "@peakui/react";
+```
+
+<ComponentPreview name="disclosure-basic" />
+
+### Anatomy
+
+```tsx
+import {Disclosure} from "@peakui/react";
+
+export default () => (
+  <Disclosure>
+    <Disclosure.Heading>
+      <Disclosure.Trigger>
+        <Disclosure.Indicator />
+      </Disclosure.Trigger>
+    </Disclosure.Heading>
+    <Disclosure.Content>
+      <Disclosure.Body>Panel content</Disclosure.Body>
+    </Disclosure.Content>
+  </Disclosure>
+);
+```
+
+## Examples
+
+### Render Function
+
+`render` on the root and on `Disclosure.Content` replaces the rendered element while keeping the disclosure contract.
+
+<ComponentPreview name="disclosure-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+Utilities on `className` restyle each part; the trigger keeps its focus and disabled states.
+
+```tsx
+<Disclosure.Trigger className="flex w-full items-center justify-between rounded-md border px-4 py-2 text-start hover:bg-gray-50">
+  <span>Toggle content</span>
+  <Disclosure.Indicator />
+</Disclosure.Trigger>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .disclosure {
+    @apply relative;
+  }
+
+  .disclosure__trigger {
+    @apply cursor-pointer;
+  }
+
+  .disclosure__indicator {
+    @apply transition-transform duration-300;
+  }
+
+  .disclosure__content {
+    @apply overflow-hidden transition-all;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Disclosure component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/disclosure.css)):
+
+#### Base Classes [!toc]
+
+- `.disclosure` - Base container styles
+- `.disclosure__heading` - Heading wrapper
+- `.disclosure__trigger` - Trigger button styles
+- `.disclosure__indicator` - Chevron indicator styles
+- `.disclosure__content` - Content container with animations
+- `.disclosure__body` - Panel body padding
+- `.disclosure__body-inner` - Inner wrapper receiving the consumer `className`
+
+### Slots
+
+- `[data-slot="disclosure"]` - The root element
+- `[data-slot="disclosure-heading"]` - The heading element
+- `[data-slot="disclosure-trigger"]` - The trigger button
+- `[data-slot="disclosure-content"]` - The collapsible panel
+- `[data-slot="disclosure-body"]` - The body wrapper
+- `[data-slot="disclosure-body-inner"]` - The inner body wrapper
+- `[data-slot="disclosure-indicator"]` - The chevron indicator
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Expanded**: `[data-expanded="true"]` on the root, the panel and the indicator
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the trigger
+- **Disabled**: `:disabled` or `[aria-disabled="true"]` on the trigger
+- **Hidden**: `hidden="until-found"` on the collapsed panel, set by React Aria
+
+## API Reference
+
+### Disclosure
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isExpanded` | `boolean` | - | Controls the expanded state |
+| `defaultExpanded` | `boolean` | - | Expands the panel on first render |
+| `onExpandedChange` | `(isExpanded: boolean) => void` | - | Callback when the expanded state changes |
+| `isDisabled` | `boolean` | `false` | Whether the disclosure is disabled |
+| `id` | `Key` | - | The id used for group membership in a `DisclosureGroup` |
+| `children` | `ReactNode \| ((values: DisclosureRenderProps) => ReactNode)` | - | Content to render, or a function of the render props |
+| `className` | `string \| ((values: DisclosureRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `render` | `DOMRenderFunction<'div', DisclosureRenderProps>` | - | Replaces the rendered element with your own |
+
+Every other attribute of a `<div>` is accepted.
+
+### Disclosure.Heading
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `level` | `number` | `3` | The heading level |
+| `children` | `ReactNode` | - | The heading content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'h1', undefined>` | - | Replaces the rendered heading with your own |
+
+Every other attribute of an `<h3>` is accepted.
+
+### Disclosure.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | - | Trigger content, or a function of the render props |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | - | Additional classes, or a function of the render props |
+
+Every React Aria `Button` attribute is accepted.
+
+### Disclosure.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Content to show and hide |
+| `className` | `string \| ((values: DisclosurePanelRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `render` | `DOMRenderFunction<'div', DisclosurePanelRenderProps>` | - | Replaces the rendered panel with your own |
+
+Every other attribute of a `<div>` is accepted.
+
+### Disclosure.Body
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The body content |
+| `className` | `string` | - | Additional classes, applied to the inner wrapper |
+
+Every other attribute of a `<div>` is accepted.
+
+### Disclosure.Indicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Replaces the built-in chevron `<svg>` |
+| `className` | `string` | - | Additional classes |
+
+Every other attribute of an `<svg>` is accepted.
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: DisclosureRenderProps) => ReactNode` | Receives `isExpanded`, `isDisabled`, `isFocusVisibleWithin`, `state` |
+| `className` | `(values: DisclosureRenderProps) => string` | Same values as `children` |

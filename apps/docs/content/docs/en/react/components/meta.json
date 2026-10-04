@@ -15,6 +15,8 @@
     "(buttons)/close-button",
     "(forms)/description",
     "(feedback)/empty-state",
+    "(navigation)/disclosure",
+    "(navigation)/disclosure-group",
     "(forms)/field-error",
     "(forms)/fieldset",
     "(forms)/input",
