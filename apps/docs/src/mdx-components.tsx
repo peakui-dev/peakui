@@ -62,10 +62,10 @@ function Callout({children, className, icon, title, type = "info", ...props}: Ca
   return (
     <Alert className={cn("my-4", className)} status={CALLOUT_STATUS[type]} {...props}>
       <Alert.Indicator>{icon}</Alert.Indicator>
-      {/* MDX children arrive as <p> flow content; prose-no-margin keeps the old spacing. */}
       <Alert.Content>
         {title ? <Alert.Title>{title}</Alert.Title> : null}
-        <Alert.Description className="prose-no-margin">{children}</Alert.Description>
+        {/* MDX children arrive as <p> flow content, so the container is a plain div — Alert.Description's span is phrasing-only. The BEM class carries the same muted styling. */}
+        <div className="alert__description prose-no-margin">{children}</div>
       </Alert.Content>
     </Alert>
   );
