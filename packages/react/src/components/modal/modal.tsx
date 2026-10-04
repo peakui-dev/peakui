@@ -88,7 +88,6 @@ const ModalTrigger = <E extends keyof React.JSX.IntrinsicElements = "div">({
     <PressablePrimitive>
       <dom.div
         className={composeSlotClassName(slots?.trigger, className)}
-        data-slot="modal-trigger"
         role="button"
         /*
          * The permitted `any`: the element type is a parameter the spread has already erased, and
@@ -96,6 +95,7 @@ const ModalTrigger = <E extends keyof React.JSX.IntrinsicElements = "div">({
          */
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...(props as any)}
+        data-slot="modal-trigger"
       >
         {children}
       </dom.div>
@@ -239,13 +239,13 @@ const ModalHeader = <E extends keyof React.JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.header, className)}
-      data-slot="modal-header"
       /*
        * The permitted `any`: the element type is a parameter the spread has already erased, and
        * no expressible annotation exists for it. references/typescript.md.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="modal-header"
     >
       {children}
     </dom.div>
@@ -272,13 +272,13 @@ const ModalBody = <E extends keyof React.JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.body, className)}
-      data-slot="modal-body"
       /*
        * The permitted `any`: the element type is a parameter the spread has already erased, and
        * no expressible annotation exists for it. references/typescript.md.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="modal-body"
     >
       {children}
     </dom.div>
@@ -305,13 +305,13 @@ const ModalFooter = <E extends keyof React.JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.footer, className)}
-      data-slot="modal-footer"
       /*
        * The permitted `any`: the element type is a parameter the spread has already erased, and
        * no expressible annotation exists for it. references/typescript.md.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="modal-footer"
     >
       {children}
     </dom.div>
@@ -329,9 +329,9 @@ const ModalHeading = ({children, className, ...props}: ModalHeadingProps) => {
   return (
     <HeadingPrimitive
       className={composeSlotClassName(slots?.heading, className)}
-      data-slot="modal-heading"
       slot="title"
       {...props}
+      data-slot="modal-heading"
     >
       {children}
     </HeadingPrimitive>
@@ -358,13 +358,13 @@ const ModalIcon = <E extends keyof React.JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.icon, className)}
-      data-slot="modal-icon"
       /*
        * The permitted `any`: the element type is a parameter the spread has already erased, and
        * no expressible annotation exists for it. references/typescript.md.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="modal-icon"
     >
       {children}
     </dom.div>
