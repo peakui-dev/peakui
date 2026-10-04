@@ -2,7 +2,7 @@ import type {ComponentProps} from "react";
 
 import {Button, ButtonGroup} from "@peakui/react";
 
-const VARIANTS: ComponentProps<typeof Button>["variant"][] = [
+const VARIANTS: ComponentProps<typeof ButtonGroup>["variant"][] = [
   "primary",
   "secondary",
   "tertiary",
@@ -11,20 +11,17 @@ const VARIANTS: ComponentProps<typeof Button>["variant"][] = [
   "danger",
 ];
 
-/*
- * `variant` is set on each button, not once on the group: `Button` does not inherit group props.
- */
 export function Variants() {
   return (
     <div className="flex flex-col items-start gap-4">
       {VARIANTS.map((variant) => (
-        <ButtonGroup key={variant}>
-          <Button variant={variant}>First</Button>
-          <Button variant={variant}>
+        <ButtonGroup key={variant} variant={variant}>
+          <Button>First</Button>
+          <Button>
             <ButtonGroup.Separator />
             Second
           </Button>
-          <Button variant={variant}>
+          <Button>
             <ButtonGroup.Separator />
             Third
           </Button>

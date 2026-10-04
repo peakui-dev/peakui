@@ -43,13 +43,12 @@ interface ButtonGroupRootProps
  * A thin styled composition over the RAC Group primitive: behavior and ARIA are the primitive's,
  * this adds the class names and the context the parts share.
  *
- * Recorded divergence (docs/superpowers/specs/2026-10-02-react-package-button-design.md, section
- * 12): our Button has no ButtonGroup hook points, so the `size`, `variant`, `isDisabled` and
- * `fullWidth` values published here are not consumed by it — set them on each button instead.
- * They stay on the context for parts that do read it, exactly as the reference's button-group
- * provides. The reference also clones its direct children to mark them with BUTTON_GROUP_CHILD;
- * the marker is dropped because no component consumes it, and the cloning would leak it as a
- * stray DOM attribute onto children that do not destructure it out.
+ * `Button` consumes this context and merges `size`, `variant`, `isDisabled` and `fullWidth` with
+ * its own props, direct props winning — the plain context-merge pattern of toggle-button.tsx.
+ * The divergence recorded in docs/superpowers/specs/2026-10-02-react-package-button-design.md
+ * section 12 was resolved on 2026-10-04 (wave-2 ledger). The reference's BUTTON_GROUP_CHILD
+ * cloning stays dropped: the marker leaks a stray DOM attribute onto children that do not
+ * destructure it out, so the merge is depth-blind instead.
  */
 const ButtonGroupRoot = ({
   children,

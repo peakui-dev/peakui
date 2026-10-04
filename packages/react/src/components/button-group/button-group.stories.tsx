@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from "@storybook/react-vite";
-import type {ComponentProps, ReactNode} from "react";
+import type {ReactNode} from "react";
 
 import {Menu, MenuItem, MenuTrigger} from "react-aria-components/Menu";
 import {Popover} from "react-aria-components/Popover";
@@ -13,10 +13,8 @@ import {Label} from "../label/index.ts";
 import {ButtonGroup} from "./index.ts";
 
 /*
- * Размер и вариант повторяются на каждой кнопке, а не задаются один раз на группе: у нашей Button
- * нет точек подключения к ButtonGroup (расхождение, записанное в
- * docs/superpowers/specs/2026-10-02-react-package-button-design.md, раздел 12), и наследование
- * сверху вниз здесь не работает.
+ * `size`, `variant`, `isDisabled` and `fullWidth` are set once on the group and inherited by
+ * every button (the toggle-button.tsx context merge); a button's own prop wins.
  */
 
 const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
@@ -116,22 +114,14 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const Three = ({
-  size,
-  variant,
-}: {
-  size?: ComponentProps<typeof Button>["size"];
-  variant?: ComponentProps<typeof Button>["variant"];
-} = {}) => (
+const Three = () => (
   <>
-    <Button size={size} variant={variant}>
-      Первый
-    </Button>
-    <Button size={size} variant={variant}>
+    <Button>Первый</Button>
+    <Button>
       <ButtonGroup.Separator />
       Второй
     </Button>
-    <Button size={size} variant={variant}>
+    <Button>
       <ButtonGroup.Separator />
       Третий
     </Button>
@@ -155,20 +145,20 @@ export const Sizes: Story = {
     <Showcase title="Размеры">
       <div className="flex flex-col gap-2">
         <SectionLabel>Маленький</SectionLabel>
-        <ButtonGroup>
-          <Three size="sm" />
+        <ButtonGroup size="sm">
+          <Three />
         </ButtonGroup>
       </div>
       <div className="flex flex-col gap-2">
         <SectionLabel>Средний (по умолчанию)</SectionLabel>
-        <ButtonGroup>
-          <Three size="md" />
+        <ButtonGroup size="md">
+          <Three />
         </ButtonGroup>
       </div>
       <div className="flex flex-col gap-2">
         <SectionLabel>Большой</SectionLabel>
-        <ButtonGroup>
-          <Three size="lg" />
+        <ButtonGroup size="lg">
+          <Three />
         </ButtonGroup>
       </div>
     </Showcase>
@@ -183,8 +173,8 @@ export const Variants: Story = {
         (variant) => (
           <div key={variant} className="flex flex-col gap-2">
             <SectionLabel>{variant}</SectionLabel>
-            <ButtonGroup>
-              <Three variant={variant} />
+            <ButtonGroup variant={variant}>
+              <Three />
             </ButtonGroup>
           </div>
         ),
@@ -225,32 +215,29 @@ export const Disabled: Story = {
     <Showcase title="Недоступные кнопки">
       <div className="flex flex-col gap-2">
         <SectionLabel>Все кнопки недоступны</SectionLabel>
-        <ButtonGroup>
-          <Button isDisabled>
+        <ButtonGroup isDisabled>
+          <Button>Первый</Button>
+          <Button>
             <ButtonGroup.Separator />
-            Первый
+            Вторый
           </Button>
-          <Button isDisabled>
-            <ButtonGroup.Separator />
-            Второй
-          </Button>
-          <Button isDisabled>
+          <Button>
             <ButtonGroup.Separator />
             Третий
           </Button>
         </ButtonGroup>
       </div>
       <div className="flex flex-col gap-2">
-        <SectionLabel>Недоступна одна кнопка</SectionLabel>
-        <ButtonGroup>
+        <SectionLabel>Группа недоступна, одна кнопка перекрывает</SectionLabel>
+        <ButtonGroup isDisabled>
           <Button>Первый</Button>
           <Button>
             <ButtonGroup.Separator />
-            Второй
+            Вторый
           </Button>
-          <Button isDisabled>
+          <Button isDisabled={false}>
             <ButtonGroup.Separator />
-            Третий (недоступен)
+            Третий (доступен)
           </Button>
         </ButtonGroup>
       </div>

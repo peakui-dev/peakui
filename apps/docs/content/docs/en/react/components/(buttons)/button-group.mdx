@@ -17,9 +17,7 @@ import {Button, ButtonGroup} from "@peakui/react";
 
 Put `<ButtonGroup.Separator />` inside each button after the first to draw the divider between neighbors.
 
-<Callout type="warn">
-Set `variant`, `size` and `isDisabled` on each button, not on the group: `Button` does not inherit the group's values.
-</Callout>
+Buttons inherit `size`, `variant`, `isDisabled` and `fullWidth` from the group; a button's own prop wins.
 
 ## Examples
 
@@ -124,10 +122,10 @@ The group itself has no interactive states; it restyles the states of the button
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Arranges the buttons in a row or a column |
-| `fullWidth` | `boolean` | `false` | Whether the group takes the full width of its container |
-| `isDisabled` | `boolean` | - | Marks the group with `data-disabled`; the buttons inside do not inherit it |
-| `variant` | `'primary' \| 'secondary' \| 'tertiary' \| 'outline' \| 'ghost' \| 'danger' \| 'danger-soft'` | - | Published on `ButtonGroupContext`; `Button` does not consume it — set `variant` on each button |
-| `size` | `'sm' \| 'md' \| 'lg'` | - | Published on `ButtonGroupContext`; `Button` does not consume it — set `size` on each button |
+| `fullWidth` | `boolean` | `false` | Stretches the group and every button inside to the container's width |
+| `isDisabled` | `boolean` | - | Disables the group; every button inside inherits it, and a button's own `isDisabled` wins |
+| `variant` | `'primary' \| 'secondary' \| 'tertiary' \| 'outline' \| 'ghost' \| 'danger' \| 'danger-soft'` | - | Inherited by every button inside; a button's own `variant` wins |
+| `size` | `'sm' \| 'md' \| 'lg'` | - | Inherited by every button inside; a button's own `size` wins |
 | `children` | `React.ReactNode` | - | Buttons to group together |
 | `className` | `string \| (values: GroupRenderProps) => string` | - | Additional classes, or a function of the group's state |
 | `render` | `DOMRenderFunction<'div', GroupRenderProps>` | - | Replaces the rendered element. It must still return a `<div>` |
