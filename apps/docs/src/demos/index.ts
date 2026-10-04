@@ -57,6 +57,31 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./button/with-icons").then((m) => m.WithIcons),
     file: "button/with-icons.tsx",
   },
+  // chip
+  "chip-basic": {
+    loader: () => import("./chip/basic").then((m) => m.Basic),
+    file: "chip/basic.tsx",
+  },
+  "chip-colors": {
+    loader: () => import("./chip/colors").then((m) => m.Colors),
+    file: "chip/colors.tsx",
+  },
+  "chip-sizes": {
+    loader: () => import("./chip/sizes").then((m) => m.Sizes),
+    file: "chip/sizes.tsx",
+  },
+  "chip-statuses": {
+    loader: () => import("./chip/statuses").then((m) => m.Statuses),
+    file: "chip/statuses.tsx",
+  },
+  "chip-variants": {
+    loader: () => import("./chip/variants").then((m) => m.Variants),
+    file: "chip/variants.tsx",
+  },
+  "chip-with-icons": {
+    loader: () => import("./chip/with-icons").then((m) => m.WithIcons),
+    file: "chip/with-icons.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

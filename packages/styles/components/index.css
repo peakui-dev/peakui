@@ -4,6 +4,7 @@
  */
 
 @import "./button.css";
+@import "./chip.css";
 @import "./description.css";
 @import "./field-error.css";
 @import "./fieldset.css";

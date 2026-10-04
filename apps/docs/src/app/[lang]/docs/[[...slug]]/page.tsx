@@ -1,6 +1,7 @@
-import type {StatusChipStatus} from "@/components/status-chip";
+import type {ComponentStatus} from "@/lib/component-status";
 import type {Metadata} from "next";
 
+import {Chip} from "@peakui/react";
 import {createRelativeLink} from "fumadocs-ui/mdx";
 import {notFound} from "next/navigation";
 
@@ -14,8 +15,8 @@ import {
   DocsTitle,
 } from "@/components/fumadocs/layouts/notebook/page";
 import {LocaleLink} from "@/components/locale-link";
-import {StatusChip} from "@/components/status-chip";
 import {siteConfig} from "@/config/site";
+import {statusChipProps} from "@/lib/component-status";
 import {source} from "@/lib/source";
 import {getMDXComponents} from "@/mdx-components";
 
@@ -29,7 +30,10 @@ export default async function Page(props: {params: Promise<{lang: string; slug?:
   if (!page) notFound();
 
   const MDXContent = page.data.body;
-  const isComponentStatusIcon = page.data.icon && componentStatusIcons.includes(page.data.icon);
+  const statusProps =
+    page.data.icon && componentStatusIcons.includes(page.data.icon)
+      ? statusChipProps(page.data.icon as ComponentStatus)
+      : undefined;
 
   return (
     <DocsPage
@@ -43,9 +47,7 @@ export default async function Page(props: {params: Promise<{lang: string; slug?:
         <div className="flex flex-wrap items-center justify-between gap-2">
           <DocsTitle className="flex items-center gap-2">
             {page.data.title}
-            {!!isComponentStatusIcon && (
-              <StatusChip className="w-fit" status={page.data.icon as StatusChipStatus} />
-            )}
+            {!!statusProps && <Chip {...statusProps} />}
           </DocsTitle>
           {page.data.toc.length > 0 && (
             <div className="flex flex-wrap items-center justify-start gap-2">
