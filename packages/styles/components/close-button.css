@@ -23,7 +23,7 @@
    * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
    */
   transition:
-    transform 250ms var(--ease-out),
+    transform 250ms var(--ease-out-quart),
     color 150ms var(--ease-out),
     background-color 100ms var(--ease-out),
     box-shadow 150ms var(--ease-out);
@@ -99,9 +99,8 @@
  *    docs/superpowers/specs/2026-10-01-design-tokens-design.md, which added forced-colors
  *    support; the transparent border + ButtonBorder follows the landed button.css precedent.
  *
- * 2. --ease-out-quart does not exist in the PeakUI token scale. Motion must use --ease-* tokens,
- *    never an inline cubic-bezier, so the transform transition takes --ease-out. No new token was
- *    requested for one transition.
+ * 2. Resolved at wave join: --ease-out-quart was added to the shared theme (the reference's own
+ *    value), and the transform transition now takes it — this entry no longer diverges here.
  *
  * 3. [data-disabled] added to the disabled rule: RAC sets it alongside aria-disabled.
  *

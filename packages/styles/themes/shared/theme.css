@@ -177,6 +177,7 @@
   --ease-linear: linear;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
   --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
   --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
 
