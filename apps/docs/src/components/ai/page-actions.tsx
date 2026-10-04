@@ -2,11 +2,7 @@
 
 import type {ReactNode} from "react";
 
-<<<<<<< HEAD
-import {Button, ButtonGroup, toast} from "@peakui/react";
-=======
-import {Button, ButtonGroup, Description, Dropdown, Label} from "@peakui/react";
->>>>>>> roadmap/20-dropdown
+import {Button, ButtonGroup, Description, Dropdown, Label, toast} from "@peakui/react";
 import {useMemo, useState} from "react";
 
 import {ChevronDown} from "@/components/fumadocs/ui/icons";
