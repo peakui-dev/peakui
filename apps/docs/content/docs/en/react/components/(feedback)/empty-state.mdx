@@ -1,0 +1,79 @@
+---
+title: EmptyState
+description: A placeholder for content with nothing to show
+links:
+  source: empty-state/empty-state.tsx
+  styles: empty-state.css
+---
+
+## Usage
+
+```tsx
+import {EmptyState} from "@peakui/react";
+```
+
+<ComponentPreview name="empty-state-basic" />
+
+Omitted or empty children render the component's own default message, `No results found`.
+
+## Examples
+
+### Custom Message
+
+<ComponentPreview name="empty-state-custom-message" />
+
+### With Icon
+
+<ComponentPreview name="empty-state-with-icon" />
+
+### With Action
+
+<ComponentPreview name="empty-state-with-action" />
+
+## Customization
+
+### Tailwind CSS
+
+The block ships no layout of its own: width, centering and gaps come from the consumer.
+
+```tsx
+<EmptyState className="flex max-w-sm flex-col items-center gap-1 py-8 text-center">
+  Nothing here yet
+</EmptyState>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .empty-state {
+    @apply py-8 text-center;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The EmptyState component uses this CSS class ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/empty-state.css)):
+
+- `.empty-state` - Base styles with compact padding and muted text
+
+### Slots
+
+- `[data-slot="empty-state"]` - The root element
+
+## API Reference
+
+### EmptyState
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | `"No results found"` | Content; the default message renders when children is omitted or empty |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.

@@ -1,3 +1,4 @@
+import {EmptyState} from "@peakui/react";
 import {HomeLayout} from "fumadocs-ui/layouts/home";
 
 import {Footer} from "@/components/footer";
@@ -20,11 +21,15 @@ export default async function NotFound() {
         mode: "light-dark-system",
       }}
     >
-      <div className="mt-12 flex h-full flex-col items-center justify-center text-center md:mt-24">
+      {/*
+       * EmptyState is a client component; the children below are server-rendered elements,
+       * which cross the boundary safely as a ReactNode prop.
+       */}
+      <EmptyState className="mt-12 flex h-full flex-col items-center justify-center text-center md:mt-24">
         <h2 className="text-4xl font-bold">{notFound.title}</h2>
         <p className="mt-2 max-w-sm text-balance text-muted">{notFound.description}</p>
         <NotFoundActions href={`/${i18n.defaultLanguage}`} label={notFound.returnHome} />
-      </div>
+      </EmptyState>
       <Footer dict={dict.footer} />
     </HomeLayout>
   );
