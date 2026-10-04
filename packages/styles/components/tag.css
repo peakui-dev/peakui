@@ -1,0 +1,140 @@
+/*
+ * Tag. Class names come from src/components/tag/tag.styles.ts; all the Tailwind lives here.
+ * Ported line by line from the vendored reference styles/components/tag.css. The differences
+ * that remain are listed at the end of the file, each with its reason.
+ */
+
+/* Tag component styles */
+.tag {
+  --optical-offset: 0.031em;
+
+  @apply relative inline-flex items-center gap-1 rounded-xl font-medium select-none no-highlight;
+
+  /* Default size - matches .tag--md */
+  @apply px-2 py-1 text-xs;
+
+  /**
+   * Transitions
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition:
+    color 100ms var(--ease-smooth),
+    scale 100ms var(--ease-smooth),
+    opacity 100ms var(--ease-smooth),
+    background-color 100ms var(--ease-smooth),
+    box-shadow 100ms var(--ease-out);
+  @apply origin-center transform-gpu motion-reduce:transition-none;
+
+  /* Cursor */
+  cursor: var(--cursor-interactive);
+
+  /*
+   * Forced colors: the selected state and the variant identity are carried by the background
+   * alone, and forced-colors flattens backgrounds — the boundary and the system Highlight pair
+   * carry them instead. The border is held transparent in the normal state so the layout does
+   * not shift when it appears (the pattern button.css and toggle-button.css use).
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+
+    &:is([data-selected="true"], [aria-selected="true"]) {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+
+  /* SVG icon styling */
+  & svg {
+    @apply pointer-events-none size-3 shrink-0 self-center text-current;
+  }
+}
+
+/* Disabled state */
+.tag:is([data-disabled="true"], [aria-disabled="true"]) {
+  @apply status-disabled;
+}
+
+/* Focus visible state (keyboard focus only) */
+.tag:is(:focus-visible, [data-focus-visible]) {
+  @apply status-focused;
+}
+
+/* Selected state */
+.tag:is([data-selected="true"], [aria-selected="true"]) {
+  @apply bg-accent-soft text-accent-soft-foreground;
+
+  /* Selected + Hover state */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]) {
+      @apply bg-accent-soft-hover;
+    }
+  }
+}
+
+/* Size */
+.tag--sm {
+  @apply px-2 py-0.5 text-xs;
+}
+
+.tag--md {
+  /* No styles as this is the default size */
+}
+
+.tag--lg {
+  @apply rounded-2xl px-2.5 py-1.5 text-sm;
+}
+
+/* Variant */
+.tag--default {
+  @apply bg-default text-default-foreground;
+
+  /* Hover state (when not selected or disabled) */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not([data-selected="true"]):not([data-disabled="true"]) {
+      @apply bg-default-hover;
+    }
+  }
+}
+
+.tag--surface {
+  @apply bg-surface text-surface-foreground;
+
+  /* Hover state (when not selected or disabled) */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not([data-selected="true"]):not([data-disabled="true"]) {
+      @apply bg-surface-hover;
+    }
+  }
+}
+
+/* Remove Button  */
+.tag__remove-button {
+  /**
+   * The glyph is 12px, half the minimum target size. A finger tap that misses it lands on the
+   * tag body, which consumes the press without removing anything, so removing a tag by touch
+   * takes several attempts. `touch-target` widens the pressable area to 24px. On `--sm` the
+   * overlay reaches ~2px past the tag box, which the 6px list gap absorbs, so it never
+   * overlaps a neighbouring tag.
+   */
+  @apply touch-target size-3 text-inherit;
+
+  /* SVG icon styling */
+  & svg {
+    @apply size-[inherit] shrink-0 self-center text-current;
+  }
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. forced-colors block: the reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md; the pattern (transparent border
+ *    held in the normal state, ButtonBorder in forced colors, plus the Highlight/HighlightText
+ *    pair for the selected state) is the one toggle-button.css uses — the selected state's
+ *    meaning is carried by the flattened background there too.
+ *
+ * 2. The reference's empty `.tag:is(:active, [data-pressed="true"]) {}` block is not carried:
+ *    it styles nothing, and both pressed-state forms stay reachable through the rules above.
+ */

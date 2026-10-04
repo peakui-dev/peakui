@@ -565,6 +565,47 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./tabs/with-separator").then((m) => m.WithSeparator),
     file: "tabs/with-separator.tsx",
   },
+  // tag-group
+  "tag-group-basic": {
+    loader: () => import("./tag-group/basic").then((m) => m.Basic),
+    file: "tag-group/basic.tsx",
+  },
+  "tag-group-controlled": {
+    loader: () => import("./tag-group/controlled").then((m) => m.Controlled),
+    file: "tag-group/controlled.tsx",
+  },
+  "tag-group-custom-styles": {
+    loader: () => import("./tag-group/custom-styles").then((m) => m.CustomStyles),
+    file: "tag-group/custom-styles.tsx",
+  },
+  "tag-group-disabled": {
+    loader: () => import("./tag-group/disabled").then((m) => m.Disabled),
+    file: "tag-group/disabled.tsx",
+  },
+  "tag-group-render-function": {
+    loader: () => import("./tag-group/render-function").then((m) => m.RenderFunction),
+    file: "tag-group/render-function.tsx",
+  },
+  "tag-group-selection-modes": {
+    loader: () => import("./tag-group/selection-modes").then((m) => m.SelectionModes),
+    file: "tag-group/selection-modes.tsx",
+  },
+  "tag-group-sizes": {
+    loader: () => import("./tag-group/sizes").then((m) => m.Sizes),
+    file: "tag-group/sizes.tsx",
+  },
+  "tag-group-variants": {
+    loader: () => import("./tag-group/variants").then((m) => m.Variants),
+    file: "tag-group/variants.tsx",
+  },
+  "tag-group-with-prefix": {
+    loader: () => import("./tag-group/with-prefix").then((m) => m.WithPrefix),
+    file: "tag-group/with-prefix.tsx",
+  },
+  "tag-group-with-remove-button": {
+    loader: () => import("./tag-group/with-remove-button").then((m) => m.WithRemoveButton),
+    file: "tag-group/with-remove-button.tsx",
+  },
   // text-field
   "text-field-basic": {
     loader: () => import("./text-field/basic").then((m) => m.Basic),

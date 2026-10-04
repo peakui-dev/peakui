@@ -19,11 +19,19 @@ import {CloseIcon} from "../icons.tsx";
  * composes the RAC primitive directly, and a close button wants none of Button's variants.
  * -----------------------------------------------------------------------------------------------*/
 interface CloseButtonRootProps
-  extends ComponentPropsWithRef<typeof ButtonPrimitive>, CloseButtonVariants {}
+  extends ComponentPropsWithRef<typeof ButtonPrimitive>, CloseButtonVariants {
+  /**
+   * A deliberate, typed slot-name override for a part that renders CloseButton under its own
+   * name — Tag.RemoveButton is the pattern. The default is not clobberable by accident: the
+   * attribute is only replaced when a consumer names the slot explicitly.
+   */
+  "data-slot"?: string;
+}
 
 const CloseButtonRoot = ({
   children,
   className,
+  "data-slot": dataSlot = "close-button",
   slot,
   style,
   variant,
@@ -44,7 +52,7 @@ const CloseButtonRoot = ({
       style={style}
       type="button"
       {...rest}
-      data-slot="close-button"
+      data-slot={dataSlot}
     >
       {(renderProps) =>
         typeof children === "function"

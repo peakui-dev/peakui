@@ -32,6 +32,7 @@
     "(feedback)/spinner",
     "(layout)/surface",
     "(navigation)/tabs",
+    "(collections)/tag-group",
     "(forms)/text-field",
     "(buttons)/toggle-button",
     "(buttons)/toggle-button-group",
