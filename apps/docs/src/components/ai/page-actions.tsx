@@ -2,7 +2,7 @@
 
 import type {ReactNode} from "react";
 
-import {Button} from "@peakui/react";
+import {Button, ButtonGroup} from "@peakui/react";
 import {useMemo, useState} from "react";
 import {Menu, MenuItem, MenuTrigger, Popover, Text} from "react-aria-components";
 
@@ -96,9 +96,9 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
   };
 
   return (
-    <div className="flex items-center">
+    <ButtonGroup>
       <Button
-        className={cn("rounded-e-none", isLoading && "animate-pulse")}
+        className={cn(isLoading && "animate-pulse")}
         isDisabled={isLoading}
         size="md"
         variant="tertiary"
@@ -108,13 +108,8 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
         {checked ? dict.copied : dict.copyMarkdown}
       </Button>
       <MenuTrigger isOpen={isOpen} onOpenChange={setOpen}>
-        <Button
-          isIconOnly
-          aria-label={dict.moreOptions}
-          className="rounded-s-none border-s border-separator"
-          size="md"
-          variant="tertiary"
-        >
+        <Button isIconOnly aria-label={dict.moreOptions} size="md" variant="tertiary">
+          <ButtonGroup.Separator />
           <ChevronDown
             className={cn(
               "text-fd-muted-foreground size-3.5 transition-transform",
@@ -154,6 +149,6 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
           </Menu>
         </Popover>
       </MenuTrigger>
-    </div>
+    </ButtonGroup>
   );
 }

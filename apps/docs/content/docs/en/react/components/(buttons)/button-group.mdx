@@ -1,0 +1,157 @@
+---
+title: ButtonGroup
+description: Groups related buttons into one connected control
+links:
+  rac: Group
+  source: button-group/button-group.tsx
+  styles: button-group.css
+---
+
+## Usage
+
+```tsx
+import {Button, ButtonGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="button-group-basic" />
+
+Put `<ButtonGroup.Separator />` inside each button after the first to draw the divider between neighbors.
+
+<Callout type="warn">
+Set `variant`, `size` and `isDisabled` on each button, not on the group: `Button` does not inherit the group's values.
+</Callout>
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="button-group-variants" />
+
+### Sizes
+
+<ComponentPreview name="button-group-sizes" />
+
+### Orientation
+
+The `orientation` prop arranges the buttons in a row or a column, and the group reads it from an enclosing React Aria toggle button group provider when the prop is omitted.
+
+<ComponentPreview name="button-group-orientation" />
+
+### With Icons
+
+<ComponentPreview name="button-group-with-icons" />
+
+### Full Width
+
+<ComponentPreview name="button-group-full-width" />
+
+### Disabled State
+
+<ComponentPreview name="button-group-disabled" />
+
+### Without Separator
+
+Omit `<ButtonGroup.Separator />` and the buttons sit flush without dividers.
+
+<ComponentPreview name="button-group-without-separator" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ButtonGroup className="gap-2">
+  <Button>First</Button>
+  <Button>
+    <ButtonGroup.Separator />
+    Second
+  </Button>
+</ButtonGroup>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .button-group {
+    @apply gap-2 rounded-lg;
+  }
+
+  .button-group__separator {
+    @apply opacity-25;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ButtonGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/button-group.css)):
+
+#### Base & Orientation Classes [!toc]
+
+- `.button-group` - Base group styles
+- `.button-group--horizontal` - Buttons in a row (default)
+- `.button-group--vertical` - Buttons in a column
+
+#### Modifier Classes [!toc]
+
+- `.button-group--full-width` - Stretches the group to the container's width
+
+#### Element Classes [!toc]
+
+- `.button-group__separator` - Divider between adjacent buttons
+
+### Slots
+
+- `[data-slot="button-group"]`
+- `[data-slot="button-group-separator"]`
+
+### Interactive States
+
+The group itself has no interactive states; it restyles the states of the buttons inside it:
+
+- **Pressed**: `:active` or `[data-pressed]` (the pressed scale is removed for a cohesive group)
+- **Focus**: `:focus-visible` or `[data-focus-visible]` (the focused button is raised above its neighbors)
+
+## API Reference
+
+### ButtonGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Arranges the buttons in a row or a column |
+| `fullWidth` | `boolean` | `false` | Whether the group takes the full width of its container |
+| `isDisabled` | `boolean` | - | Marks the group with `data-disabled`; the buttons inside do not inherit it |
+| `variant` | `'primary' \| 'secondary' \| 'tertiary' \| 'outline' \| 'ghost' \| 'danger' \| 'danger-soft'` | - | Published on `ButtonGroupContext`; `Button` does not consume it — set `variant` on each button |
+| `size` | `'sm' \| 'md' \| 'lg'` | - | Published on `ButtonGroupContext`; `Button` does not consume it — set `size` on each button |
+| `children` | `React.ReactNode` | - | Buttons to group together |
+| `className` | `string \| (values: GroupRenderProps) => string` | - | Additional classes, or a function of the group's state |
+| `render` | `DOMRenderFunction<'div', GroupRenderProps>` | - | Replaces the rendered element. It must still return a `<div>` |
+
+Every other [React Aria Group](https://react-spectrum.adobe.com/react-aria/Group.html) prop is accepted.
+
+### ButtonGroup.Separator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Separator content; renders nothing by default |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element. It must still return a `<span>` |
+
+The separator is `aria-hidden="true"`: it decorates the boundary and carries no meaning on its own.
+
+### Render Props
+
+When `children` or `className` of the group is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isHovered` | `boolean` | Whether the group is hovered |
+| `isFocusWithin` | `boolean` | Whether any button inside is focused |
+| `isFocusVisible` | `boolean` | Whether the focus inside was moved by keyboard |
+| `isDisabled` | `boolean` | Whether the group is disabled |
+| `isInvalid` | `boolean` | Whether the group is marked invalid |

@@ -4,6 +4,7 @@
  */
 export * from "./alert/index.ts";
 export * from "./breadcrumbs/index.ts";
+export * from "./button-group/index.ts";
 export * from "./button/index.ts";
 export * from "./card/index.ts";
 export * from "./chip/index.ts";

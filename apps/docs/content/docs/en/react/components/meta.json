@@ -11,6 +11,7 @@
     "(navigation)/breadcrumbs",
     "(buttons)/button",
     "(layout)/card",
+    "(buttons)/button-group",
     "(data-display)/chip",
     "(buttons)/close-button",
     "(forms)/description",

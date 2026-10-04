@@ -115,6 +115,38 @@ export const demos: Record<string, DemoItem> = {
   "card-with-form": {
     loader: () => import("./card/with-form").then((m) => m.WithForm),
     file: "card/with-form.tsx",
+  // button-group
+  "button-group-basic": {
+    loader: () => import("./button-group/basic").then((m) => m.Basic),
+    file: "button-group/basic.tsx",
+  },
+  "button-group-disabled": {
+    loader: () => import("./button-group/disabled").then((m) => m.Disabled),
+    file: "button-group/disabled.tsx",
+  },
+  "button-group-full-width": {
+    loader: () => import("./button-group/full-width").then((m) => m.FullWidth),
+    file: "button-group/full-width.tsx",
+  },
+  "button-group-orientation": {
+    loader: () => import("./button-group/orientation").then((m) => m.Orientation),
+    file: "button-group/orientation.tsx",
+  },
+  "button-group-sizes": {
+    loader: () => import("./button-group/sizes").then((m) => m.Sizes),
+    file: "button-group/sizes.tsx",
+  },
+  "button-group-variants": {
+    loader: () => import("./button-group/variants").then((m) => m.Variants),
+    file: "button-group/variants.tsx",
+  },
+  "button-group-with-icons": {
+    loader: () => import("./button-group/with-icons").then((m) => m.WithIcons),
+    file: "button-group/with-icons.tsx",
+  },
+  "button-group-without-separator": {
+    loader: () => import("./button-group/without-separator").then((m) => m.WithoutSeparator),
+    file: "button-group/without-separator.tsx",
   },
   // chip
   "chip-basic": {
