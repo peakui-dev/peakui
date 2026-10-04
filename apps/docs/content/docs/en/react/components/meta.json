@@ -26,6 +26,7 @@
     "(forms)/label",
     "(navigation)/link",
     "(collections)/list-box",
+    "(overlays)/modal",
     "(overlays)/popover",
     "(utilities)/scroll-shadow",
     "(layout)/separator",

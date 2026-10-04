@@ -25,6 +25,7 @@ export * from "./list-box-section/index.ts";
 export * from "./list-box/index.ts";
 export * from "./menu-item/index.ts";
 export * from "./menu-section/index.ts";
+export * from "./modal/index.ts";
 export * from "./popover/index.ts";
 export * from "./scroll-shadow/index.ts";
 export * from "./separator/index.ts";

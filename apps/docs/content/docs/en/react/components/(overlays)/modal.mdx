@@ -1,0 +1,319 @@
+---
+title: Modal
+description: Modal dialog overlay for focused interactions
+links:
+  rac: Modal
+  source: modal/modal.tsx
+  styles: modal.css
+---
+
+## Usage
+
+```tsx
+import {Modal} from "@peakui/react";
+```
+
+<ComponentPreview name="modal-basic" />
+
+### Anatomy
+
+```tsx
+import {Button, Modal} from "@peakui/react";
+
+export default () => (
+  <Modal>
+    <Button>Open modal</Button>
+    <Modal.Backdrop>
+      <Modal.Container>
+        <Modal.Dialog>
+          <Modal.CloseTrigger /> {/* Optional: close button */}
+          <Modal.Header>
+            <Modal.Icon /> {/* Optional: icon */}
+            <Modal.Heading />
+          </Modal.Header>
+          <Modal.Body />
+          <Modal.Footer />
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
+  </Modal>
+);
+```
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="modal-sizes" />
+
+### Placement
+
+<ComponentPreview name="modal-placements" />
+
+### Scroll Behavior
+
+<ComponentPreview name="modal-scroll" />
+
+### Controlled State
+
+<ComponentPreview name="modal-controlled" />
+
+### With Form
+
+<ComponentPreview name="modal-with-form" />
+
+### Custom Triggers
+
+<ComponentPreview name="modal-custom-trigger" />
+
+### Backdrop Variants
+
+<ComponentPreview name="modal-backdrop-variants" />
+
+### Custom Backdrop
+
+<ComponentPreview name="modal-custom-backdrop" />
+
+### Dismiss Behavior
+
+<ComponentPreview name="modal-dismiss-behavior" />
+
+### Close Methods
+
+<ComponentPreview name="modal-close-methods" />
+
+### Custom Animations
+
+<ComponentPreview name="modal-custom-animations" />
+
+### Custom Portal
+
+<ComponentPreview name="modal-custom-portal" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="modal-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .modal__backdrop {
+    @apply bg-linear-to-br from-black/50 to-black/70;
+  }
+
+  .modal__dialog {
+    @apply rounded-2xl border border-white/10 shadow-2xl;
+  }
+
+  .modal__header {
+    @apply text-center;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Modal component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/modal.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.modal__trigger` - Trigger element that opens the modal
+- `.modal__backdrop` - Overlay backdrop behind the modal
+- `.modal__container` - Positioning wrapper with placement support
+- `.modal__dialog` - Modal content container
+- `.modal__header` - Header section for titles and icons
+- `.modal__heading` - Heading element styles
+- `.modal__icon` - Optional icon indicator
+- `.modal__body` - Main content area
+- `.modal__footer` - Footer section for actions
+- `.modal__close-trigger` - Close button position styles
+
+#### Backdrop Variant Classes [!toc]
+
+- `.modal__backdrop--opaque` - Opaque dimmed backdrop (default)
+- `.modal__backdrop--blur` - Blurred backdrop
+- `.modal__backdrop--transparent` - Transparent backdrop
+
+#### Scroll Variant Classes [!toc]
+
+- `.modal__dialog--scroll-inside` - Constrains the dialog for body scrolling
+- `.modal__dialog--scroll-outside` - Lets the backdrop scroll the dialog
+- `.modal__container--scroll-outside` - Moves scrolling to the backdrop
+- `.modal__body--scroll-inside` - Makes only the body scrollable
+- `.modal__body--scroll-outside` - Allows full-page scrolling
+
+#### Size Classes [!toc]
+
+- `.modal__dialog--xs`
+- `.modal__dialog--sm`
+- `.modal__dialog--md`
+- `.modal__dialog--lg`
+- `.modal__dialog--cover` - Full screen with margins
+- `.modal__container--full` - Fullscreen container without padding
+- `.modal__dialog--full` - Fullscreen dialog without radius or shadow
+
+### Slots
+
+- `[data-slot="modal-trigger"]` - The `Modal.Trigger` element
+- `[data-slot="modal-backdrop"]` - The `Modal.Backdrop` overlay
+- `[data-slot="modal-container"]` - The `Modal.Container` positioning wrapper
+- `[data-slot="modal-dialog"]` - The `Modal.Dialog` element
+- `[data-slot="modal-header"]` - The `Modal.Header` element
+- `[data-slot="modal-icon"]` - The `Modal.Icon` element
+- `[data-slot="modal-heading"]` - The `Modal.Heading` element
+- `[data-slot="modal-body"]` - The `Modal.Body` element
+- `[data-slot="modal-footer"]` - The `Modal.Footer` element
+- `[data-slot="close-button"]` - The `Modal.CloseTrigger` element; it renders the CloseButton, which keeps its own slot
+
+### Interactive States
+
+The overlay parts carry React Aria animation states:
+
+- **Entering**: `[data-entering="true"]`
+- **Exiting**: `[data-exiting="true"]`
+- **Placement**: `[data-placement="auto | top | center | bottom"]` on container and dialog
+
+The trigger supports both pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[aria-disabled="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+
+## API Reference
+
+### Modal
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The trigger element followed by the overlay |
+| `state` | `UseOverlayStateReturn` | - | Overlay state from `useOverlayState()` |
+| `...rest` | `DialogTriggerProps` | - | [React Aria DialogTrigger attributes](https://react-spectrum.adobe.com/react-aria/DialogTrigger.html) |
+
+### Modal.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Non-interactive element to make pressable |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Modal.Backdrop
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"opaque" \| "blur" \| "transparent"` | `"opaque"` | Backdrop overlay style |
+| `isDismissable` | `boolean` | `true` | Close on backdrop interaction |
+| `isKeyboardDismissDisabled` | `boolean` | `false` | Disable the Escape key |
+| `isOpen` | `boolean` | - | Controlled open state |
+| `defaultOpen` | `boolean` | `false` | Initially open, without controlling |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Open state change handler |
+| `UNSTABLE_portalContainer` | `HTMLElement` | - | Custom portal container |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ModalOverlayProps` | - | [React Aria ModalOverlay attributes](https://react-spectrum.adobe.com/react-aria/Modal.html) |
+
+### Modal.Container
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placement` | `"auto" \| "top" \| "center" \| "bottom"` | `"auto"` | Position on screen |
+| `scroll` | `"inside" \| "outside"` | `"inside"` | Scroll behavior |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "cover" \| "full"` | `"md"` | Size variant |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ModalProps` | - | [React Aria Modal attributes](https://react-spectrum.adobe.com/react-aria/Modal.html) |
+
+### Modal.Dialog
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| (({close}) => React.ReactNode)` | - | Content, or a function receiving `close` |
+| `role` | `"dialog" \| "alertdialog"` | `"dialog"` | ARIA role |
+| `aria-label` | `string` | - | Accessible name when no `Modal.Heading` is present |
+| `aria-labelledby` | `string` | - | ID of the labelling element; set from `Modal.Heading` |
+| `aria-describedby` | `string` | - | ID of the describing element |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `DialogProps` | - | [React Aria Dialog attributes](https://react-spectrum.adobe.com/react-aria/Dialog.html) |
+
+### Modal.Header
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Header content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Modal.Icon
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Icon content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Modal.Heading
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Heading text; labels the dialog via `aria-labelledby` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `HeadingProps` | - | [React Aria Heading attributes](https://react-spectrum.adobe.com/react-aria/Heading.html) |
+
+### Modal.Body
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Body content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Modal.Footer
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Footer content, usually buttons |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Modal.CloseTrigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Custom close button content; defaults to the cross glyph |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ButtonProps` | - | [React Aria Button attributes](https://react-spectrum.adobe.com/react-aria/Button.html); `slot` defaults to `"close"` |
+
+### useOverlayState
+
+```tsx
+import {useOverlayState} from "@peakui/react";
+
+const state = useOverlayState({
+  defaultOpen: false,
+  onOpenChange: (isOpen) => console.log(isOpen),
+});
+
+state.isOpen; // current state
+state.open(); // open the overlay
+state.close(); // close the overlay
+state.toggle(); // toggle the state
+state.setOpen(true); // set the state directly
+```
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `Modal.Backdrop` `className` | `(renderProps: ModalOverlayRenderProps) => string` | Computes classes from `isEntering`, `isExiting` and `state` |
+| `Modal.Container` `className` | `(renderProps: ModalRenderProps) => string` | Computes classes from `isEntering`, `isExiting` and `state` |
+| `Modal.Dialog` `children` | `(opts: {close: () => void}) => React.ReactNode` | Renders content with a callback that closes the modal |

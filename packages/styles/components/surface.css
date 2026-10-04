@@ -5,11 +5,25 @@
 /* Block */
 .surface {
   @apply relative text-foreground;
+
+  /*
+   * Forced colors, the overlay-family policy: the levels flatten to Canvas through the theme
+   * block, so the boundary must carry the surface. The border is held transparent in the normal
+   * state so the geometry never shifts between modes — the pattern button.css set.
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
 }
 
 /* Modifier - variant */
 .surface--transparent {
   @apply bg-transparent;
+  /* Stays invisible in forced colors: this variant's meaning is "not a surface". Later in the
+     file, so it wins over the block's media query without needing one of its own. */
+  border-color: transparent;
 }
 
 .surface--default {
