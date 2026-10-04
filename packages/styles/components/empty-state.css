@@ -1,0 +1,8 @@
+/*
+ * EmptyState. Class names come from src/components/empty-state/empty-state.styles.ts;
+ * all Tailwind lives here.
+ */
+
+.empty-state {
+  @apply p-2 text-sm text-muted;
+}
