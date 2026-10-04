@@ -16,6 +16,7 @@
     "(forms)/label",
     "(feedback)/spinner",
     "(layout)/surface",
-    "(forms)/text-field"
+    "(forms)/text-field",
+    "(overlays)/tooltip"
   ]
 }

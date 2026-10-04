@@ -3,7 +3,7 @@
 import type {ButtonProps} from "@peakui/react";
 import type {ComponentProps} from "react";
 
-import {Button} from "@peakui/react";
+import {Button, Tooltip} from "@peakui/react";
 import {useI18n} from "fumadocs-ui/contexts/i18n";
 import {useSearchContext} from "fumadocs-ui/contexts/search";
 
@@ -29,7 +29,12 @@ export function SearchToggle({
   const shortcut = hotKey.map((key) => key.display).join("");
 
   return (
-    <span title={shortcut ? `Search (${shortcut})` : "Search"}>
+    /*
+     * Была обёртка <span title="Search (⌘K)">: её title и давал подсказку по ховеру. Тот же текст
+     * теперь содержимое Tooltip; доступное имя кнопки задаёт её собственный aria-label, и путь с
+     * нативным атрибутом больше не нужен.
+     */
+    <Tooltip>
       <Button
         {...props}
         isIconOnly
@@ -45,7 +50,8 @@ export function SearchToggle({
       >
         <Search />
       </Button>
-    </span>
+      <Tooltip.Content>{shortcut ? `Search (${shortcut})` : "Search"}</Tooltip.Content>
+    </Tooltip>
   );
 }
 

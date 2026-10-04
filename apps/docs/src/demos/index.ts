@@ -230,6 +230,31 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./text-field/with-error").then((m) => m.WithError),
     file: "text-field/with-error.tsx",
   },
+  // tooltip
+  "tooltip-basic": {
+    loader: () => import("./tooltip/basic").then((m) => m.Basic),
+    file: "tooltip/basic.tsx",
+  },
+  "tooltip-custom-styles": {
+    loader: () => import("./tooltip/custom-styles").then((m) => m.CustomStyles),
+    file: "tooltip/custom-styles.tsx",
+  },
+  "tooltip-custom-trigger": {
+    loader: () => import("./tooltip/custom-trigger").then((m) => m.CustomTrigger),
+    file: "tooltip/custom-trigger.tsx",
+  },
+  "tooltip-placement": {
+    loader: () => import("./tooltip/placement").then((m) => m.Placement),
+    file: "tooltip/placement.tsx",
+  },
+  "tooltip-render-function": {
+    loader: () => import("./tooltip/render-function").then((m) => m.RenderFunction),
+    file: "tooltip/render-function.tsx",
+  },
+  "tooltip-with-arrow": {
+    loader: () => import("./tooltip/with-arrow").then((m) => m.WithArrow),
+    file: "tooltip/with-arrow.tsx",
+  },
 };
 
 export function getDemo(name: string): DemoItem | undefined {
