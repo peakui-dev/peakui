@@ -1,0 +1,334 @@
+---
+title: Toast
+description: Temporary notifications with auto-dismiss and stacking
+links:
+  rac: Toast
+  source: toast/toast.tsx
+  styles: toast.css
+---
+
+## Usage
+
+Mount `<Toast.Provider />` once at the app root; the `toast` helper then works anywhere.
+
+```tsx
+import {Button, Toast, toast} from "@peakui/react";
+
+export default () => (
+  <>
+    <Toast.Provider />
+    <Button onPress={() => toast("Simple message")}>Show toast</Button>
+  </>
+);
+```
+
+<ComponentPreview name="toast-basic" />
+
+### Anatomy
+
+```tsx
+import {Toast} from "@peakui/react";
+
+export default () => (
+  <Toast.Provider>
+    <Toast toast={{key: "..."}}>
+      <Toast.Indicator />
+      <Toast.Content>
+        <Toast.Title />
+        <Toast.Description />
+      </Toast.Content>
+      <Toast.ActionButton />
+      <Toast.CloseButton />
+    </Toast>
+  </Toast.Provider>
+);
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="toast-variants" />
+
+### Placements
+
+<ComponentPreview name="toast-placements" />
+
+### Expanded Stack
+
+<ComponentPreview name="toast-expanded" />
+
+### Simple Toasts
+
+<ComponentPreview name="toast-simple" />
+
+### Custom Indicator
+
+<ComponentPreview name="toast-custom-indicator" />
+
+### Custom Toast Rendering
+
+<ComponentPreview name="toast-custom-toast" />
+
+### Promise and Loading
+
+<ComponentPreview name="toast-promise" />
+
+### Callbacks
+
+<ComponentPreview name="toast-callbacks" />
+
+### Custom Queues
+
+<ComponentPreview name="toast-custom-queue" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="toast-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .toast {
+    @apply rounded-xl shadow-lg;
+  }
+
+  .toast__content {
+    @apply gap-2;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Toast component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/toast.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.toast` - Base toast styles with stacking and motion
+- `.toast-region` - Fixed region container, rendered when the queue is non-empty
+- `.toast__content` - Content wrapper for title and description
+- `.toast__indicator` - Icon or spinner container
+- `.toast__title` - Toast title text
+- `.toast__description` - Toast description text
+- `.toast__action` - Action button wrapper
+- `.toast__close-button` - Close button, revealed on toast hover
+
+#### Variant Classes [!toc]
+
+- `.toast--default`
+- `.toast--accent`
+- `.toast--success`
+- `.toast--warning`
+- `.toast--danger`
+
+#### Placement Classes [!toc]
+
+- `.toast-region--top`, `.toast--top`
+- `.toast-region--top-start`, `.toast--top-start`
+- `.toast-region--top-end`, `.toast--top-end`
+- `.toast-region--bottom`, `.toast--bottom`
+- `.toast-region--bottom-start`, `.toast--bottom-start`
+- `.toast-region--bottom-end`, `.toast--bottom-end`
+
+### Slots
+
+- `[data-slot="toast-region"]` - The region landmark
+- `[data-slot="toast"]` - A single toast
+- `[data-slot="toast-content"]` - The content wrapper
+- `[data-slot="toast-indicator"]` - The indicator
+- `[data-slot="toast-default-icon"]` - The variant's default status icon
+- `[data-slot="toast-title"]` - The title
+- `[data-slot="toast-description"]` - The description
+- `[data-slot="toast-action-button"]` - The action button
+- `[data-slot="toast-close"]` - The close button
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Frontmost**: `[data-frontmost="true"]` - The topmost visible toast
+- **Index**: `[data-index]` - Position in the stack, `0` is frontmost
+- **Placement**: `[data-placement]` - Region placement
+- **Entering**: `[data-entering="true"]` - First paint of a new toast
+- **Exiting**: `[data-exiting="true"]` - Exit animation is playing
+- **Expanded**: `[data-expanded="true"]` - The stack is expanded
+- **Hidden**: `[data-hidden="true"]` - Beyond `maxVisibleToasts`
+- **Focus**: `:focus-visible` on `.toast` and `.toast-region`
+- **Swapped**: `[data-swapped="true"]` on `.toast__indicator` when its content is replaced
+
+## API Reference
+
+### Toast.Provider
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placement` | `"top start" \| "top" \| "top end" \| "bottom start" \| "bottom" \| "bottom end"` | `"bottom"` | Placement of the toast region |
+| `gap` | `number` | `12` | The gap between toasts in pixels |
+| `isExpanded` | `boolean` | `false` | Force the stack into its expanded layout; does not pause timers |
+| `maxVisibleToasts` | `number` | `3` | Maximum number of toasts to display at once (visual only) |
+| `hotkey` | `string[]` | `["altKey", "KeyT"]` | Hotkey that moves focus to the region and expands the stack. Modifiers match `KeyboardEvent` boolean properties, other keys match `event.code`. Modifiers left out must be up. Pass `[]` to disable |
+| `scaleFactor` | `number` | `0.05` | How much each toast behind the front one scales down |
+| `width` | `number \| string` | `460` | Width of the toast; numbers are pixels |
+| `queue` | `ToastQueue<T>` | shared queue | Custom toast queue instance |
+| `children` | `ReactNode \| ((props) => ReactNode)` | default layout | Custom render function or children replacing the default toast layout |
+| `aria-label` | `string` | localized count | Accessible name of the region landmark |
+| `...rest` | `ToastRegionProps` | - | [React Aria ToastRegion attributes](https://react-spectrum.adobe.com/react-aria/Toast.html) |
+
+### Toast
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `toast` | `QueuedToast<T>` | - | Toast data from the queue, required |
+| `variant` | `"default" \| "accent" \| "success" \| "warning" \| "danger"` | `"default"` | Visual variant of the toast |
+| `placement` | `ToastVariants["placement"]` | from Provider | Stacking direction of the toast |
+| `scaleFactor` | `number` | from Provider | How much each toast behind the front one scales down |
+| `...rest` | `ToastProps` | - | [React Aria Toast attributes](https://react-spectrum.adobe.com/react-aria/Toast.html) |
+
+### Toast.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Content, typically `Toast.Title` and `Toast.Description` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `ToastContentProps` | - | React Aria ToastContent attributes |
+
+### Toast.Indicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `ToastVariants["variant"]` | - | Selects the default status icon |
+| `children` | `ReactNode` | default icon | Custom indicator; `null` in queue content hides the slot |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Toast.Title
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Title text; labels the toast via `aria-labelledby` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `TextProps` | - | [React Aria Text attributes](https://react-spectrum.adobe.com/react-aria/Text.html) |
+
+### Toast.Description
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Description text, linked as `aria-describedby` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `TextProps` | - | [React Aria Text attributes](https://react-spectrum.adobe.com/react-aria/Text.html) |
+
+### Toast.ActionButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Action button content |
+| `...rest` | `ButtonProps` | - | All Button component props |
+
+### Toast.CloseButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `...rest` | `CloseButtonProps` | - | All CloseButton component props; closes the toast |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `Toast.Provider` `children` | `(props: {toast: QueuedToast<T>, isLoading: boolean}) => ReactNode` | Renders a custom toast layout; `isLoading` reads the queued content |
+| `Toast` `className` | `string \| ((renderProps) => string)` | Additional classes, or a function of the toast state |
+| `Toast` `style` | `CSSProperties \| ((renderProps) => CSSProperties)` | Merged after the computed stacking variables |
+
+### ToastQueue
+
+A `ToastQueue` manages the state for a `<Toast.Provider>`. The state is stored outside React, so you can trigger toasts from anywhere.
+
+#### Constructor Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `exitDuration` | `number` | `300` | How long a closing toast stays mounted for its exit animation; `0` removes immediately |
+| `maxVisibleToasts` | `number` | `3` | Maximum number of toasts to display at once (visual only); used when the provider omits its own |
+| `wrapUpdate` | `(fn: () => void) => void` | - | Wraps state updates, e.g. `document.startViewTransition` |
+
+#### Methods
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `add` | `(content: T, options?: ToastOptions)` | `string` | Add a toast to the queue, returns its key |
+| `update` | `(key: string, content: T, options?: {timeout?: number; onClose?: () => void})` | `boolean` | Update a toast in place, preserving its stack position; `timeout` restarts the countdown (`0` keeps it open), omitting it keeps the current countdown. Returns `false` if the toast no longer exists |
+| `close` | `(key: string)` | `void` | Close a toast by its key |
+| `pauseAll` | `()` | `void` | Pause all toast timers |
+| `resumeAll` | `()` | `void` | Resume all toast timers |
+| `clear` | `()` | `void` | Close all toasts; each animates out and fires its `onClose` |
+| `subscribe` | `(fn: () => void)` | `() => void` | Subscribe to queue changes |
+| `destroy` | `()` | `void` | Release pending timeouts and timers, for HMR and test teardown |
+
+### toast
+
+The default `toast` function is bound to the shared queue used by `<Toast.Provider>`:
+
+```tsx
+import {toast} from "@peakui/react";
+
+// Basic toast (auto-dismisses after 4 seconds by default)
+toast("Event has been created");
+
+// Variant methods
+toast.success("File saved");
+toast.info("New update available");
+toast.warning("Please check your settings");
+toast.danger("Something went wrong");
+
+// With options. The returned id lets the action close its own toast.
+const eventId = toast("Event has been created", {
+  description: "Your event has been scheduled for tomorrow",
+  timeout: 5000,
+  onClose: () => console.log("Closed"),
+  actionProps: {children: "View", onPress: () => toast.close(eventId)},
+});
+
+// Update in place (same toast, same stack position).
+const id = toast("Saving…", {timeout: 0});
+toast.update(id, "Saved", {variant: "success", timeout: 4000});
+
+// Promise support: a persistent loading toast settles in place.
+toast.promise(uploadFile(), {
+  loading: "Uploading file...",
+  success: (data) => `File ${data.filename} uploaded`,
+  error: "Failed to upload file",
+});
+
+// Queue methods
+toast.close(key);
+toast.clear();
+toast.pauseAll();
+toast.resumeAll();
+```
+
+#### toast Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `description` | `ReactNode` | - | Description text below the title |
+| `indicator` | `ReactNode` | variant icon | Custom indicator icon; `null` hides the indicator |
+| `variant` | `"default" \| "accent" \| "success" \| "warning" \| "danger"` | `"default"` | Visual variant |
+| `actionProps` | `ButtonProps` | - | Props for the action button |
+| `isLoading` | `boolean` | `false` | Show a spinner in place of the indicator |
+| `timeout` | `number` | `4000` | Auto-dismiss timeout in milliseconds; `0` keeps the toast open |
+| `onClose` | `() => void` | - | Called when the toast is dismissed, as its exit animation starts |
+
+#### toast.promise Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `loading` | `ReactNode` | - | Message shown while the promise is pending |
+| `success` | `ReactNode \| ((data: T) => ReactNode)` | - | Message shown on success |
+| `error` | `ReactNode \| ((error: Error) => ReactNode)` | - | Message shown on rejection |

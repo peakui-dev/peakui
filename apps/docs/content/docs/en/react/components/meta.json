@@ -37,6 +37,7 @@
     "(navigation)/tabs",
     "(collections)/tag-group",
     "(forms)/text-field",
+    "(overlays)/toast",
     "(buttons)/toggle-button",
     "(buttons)/toggle-button-group",
     "(overlays)/tooltip"

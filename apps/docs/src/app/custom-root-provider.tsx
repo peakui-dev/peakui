@@ -3,6 +3,7 @@
 import type {Dictionary} from "@/lib/dictionaries";
 import type {ReactNode} from "react";
 
+import {Toast} from "@peakui/react";
 import {i18nProvider} from "fumadocs-ui/i18n";
 import {RootProvider} from "fumadocs-ui/provider/next";
 
@@ -23,6 +24,8 @@ export function CustomRootProvider({
     <DictionaryProvider dict={dict}>
       <RootProvider components={{Link: LocaleLink}} i18n={i18nProvider(translations, lang)}>
         {children}
+        {/* The toast region: renders nothing until a toast is queued (e.g. by page actions). */}
+        <Toast.Provider />
       </RootProvider>
     </DictionaryProvider>
   );
