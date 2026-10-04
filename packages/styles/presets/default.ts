@@ -6,13 +6,14 @@ import type {ThemePreset} from "../src/generator/preset.ts";
  * `accent` is the one value a designer is expected to replace. Changing it is a one-line edit —
  * that is the point of generating themes rather than authoring them.
  *
- * The lightness is not a matter of taste: at c=0.20 the band L 0.56–0.60 is a dead zone where
- * neither a light nor a dark foreground reaches 4.5:1. Below it a light foreground wins, above it a
- * dark one. 0.52 gives white text 5.5:1.
+ * The lightness is not a matter of taste. It is squeezed from both sides: from L 0.565 up the
+ * light foreground no longer reaches 4.5:1 without a contrast fix, and from L 0.545 down the focus
+ * ring drops below 3:1 on the deepest dark surface. 0.555 gives the foreground 4.66:1 and keeps the
+ * ring at 3.02:1 or better on every surface level in both schemes.
  */
 export const defaultPreset: ThemePreset = {
   id: "default",
-  accent: "oklch(0.52 0.20 275)",
+  accent: "oklch(0.555 0.215 262)",
   grayChroma: 0.006,
   radius: "medium",
   formRadius: "large",

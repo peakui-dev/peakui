@@ -1,0 +1,8 @@
+# Generated registries (`pnpm registries`). A union merge keeps both sides' lines instead of
+# stopping on a conflict; the generator reads none of them back, so running it after the merge
+# restores order and removes duplicates. `pnpm test:ai` fails until it has been run.
+packages/react/src/components/index.ts merge=union
+packages/styles/src/components/index.ts merge=union
+packages/styles/components/index.css merge=union
+apps/docs/src/demos/index.ts merge=union
+apps/docs/content/docs/en/react/components/meta.json merge=union

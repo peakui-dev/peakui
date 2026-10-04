@@ -38,14 +38,24 @@ where this lives"; "Grep is faster here"; "I'll run it after I look around".
 | "Grep already found it" | Grep finds text. `impact` finds the blast radius you did not grep for. |
 | "The index may be stale" | `pnpm codegraph:sync`, then query. Staleness is a sync, not an exemption. |
 
-If the index is missing, the CLI refuses and tells you not to index. That is a setup failure,
-not permission to skip: report it and stop.
+**Keeping the index current is your job, not the owner's.** Run `pnpm codegraph:sync` yourself, without
+asking, at these moments:
+
+- at the start of a task, before the first query;
+- after you create, move or delete files — `pnpm add:component` included;
+- when a query finds nothing for something that exists on disk.
+
+Sync updates an index that exists. If the index is missing, the CLI refuses and tells you not to
+index. That is a setup failure, not permission to skip, and not something sync repairs: report it
+and stop.
 
 ## Commands
 
 | Action | Command |
 | --- | --- |
 | Set up a clone / diagnose | `pnpm bootstrap` / `pnpm bootstrap --check` |
+| Scaffold a component | `pnpm add:component <Name> [--rac <Primitive>] [--category <category>]` |
+| Rebuild the generated registries | `pnpm registries` (`--check` to verify only) |
 | Dev Storybook | `pnpm dev:storybook` (port **6007**) |
 | Build Storybook | `pnpm build:storybook` |
 | Dev Docs | `pnpm dev:docs` (port **3000**) |
@@ -100,16 +110,65 @@ private `packages/testing` — never published, and not optional: without `insta
 its jsdom stubs, RAC tests do not run at all. Import them from `@peakui/testing/helpers`, and take a
 package's vitest defaults from `@peakui/testing/configs/react`.
 
+## Pipeline
+
+A component change moves through these stages in order. Each stage goes through its skill, and
+the task summary cites every skill it used.
+
+| Stage | Output | Skill |
+| --- | --- | --- |
+| 0. Design | A spec in `docs/superpowers/specs/`, then a plan in `docs/superpowers/plans/` | `superpowers:brainstorming`, then `superpowers:writing-plans` |
+| 1. Component | `pnpm add:component`, then `packages/react/src/components/<name>/` and its styles in `@peakui/styles` | `peakui-component-standards` |
+| 2. Stories | `<name>.stories.tsx` beside the component | `peakui-component-standards` |
+| 3. Tests | `<name>.test.tsx`, `<name>.ssr.test.tsx`; a Playwright spec for an overlay or portal | `peakui-component-standards`, `playwright-e2e` |
+| 4. Docs | The page under `apps/docs/content/` and its demos in `apps/docs/src/demos/` | `peakui-docs` |
+| 5. Release | **Switched off** — see below | `changeset-release` |
+
+**Stage 0 opens every change to what a consumer can use**: a new component, a new compound part,
+or a change to a public prop, variant, export or class name. No code before the spec is approved.
+A bug fix that leaves the public API alone, a docs-only task and a release enter at their own
+stage.
+
+**Stage 4 is not optional.** A new component, or a change to a prop, default, variant, compound
+part, CSS class, `data-slot`, CSS variable or state, is not done until its docs page and demos
+match the source — in the same PR. Docs come after stories, because demos are adapted from them.
+A docs-only task enters at stage 4.
+
+Red flags — stop and run stage 4: "the docs can follow in another PR"; "it is a small prop";
+"the page is close enough"; "I updated the API table" with the demos untouched.
+
+**Stage 5 is switched off.** Work is local and nothing is released yet: write no changeset and no
+codemod, and do not stop on their absence — for these two the Planned rule below is suspended. A
+task is done at the end of stage 4.
+
+### Registries are generated
+
+Five files list every component, and `pnpm registries` writes them from the file system:
+`packages/react/src/components/index.ts`, `packages/styles/src/components/index.ts`,
+`packages/styles/components/index.css`, `apps/docs/src/demos/index.ts` and
+`apps/docs/content/docs/en/react/components/meta.json`.
+
+- **Never edit one by hand** — the edit hook rejects it. Add, rename or delete the component's own
+  files, then run `pnpm registries`.
+- **Start a component with `pnpm add:component`.** It creates the files in both packages, the
+  stories and both test suites, and runs `pnpm registries` for you.
+- **After every merge or rebase, run `pnpm registries`.** `.gitattributes` merges these files with
+  `merge=union`, so two branches that each added a component merge without a conflict but leave
+  the lists unsorted; the generator restores them, and `pnpm test:ai` fails until it has run.
+
 ## Docs app
 
 `apps/docs` is the documentation site (`@peakui/docs`, private): Next.js + Fumadocs, ported from the
 reference's docs app — attribution in `apps/docs/NOTICE`.
 
+**Mandatory standard:** writing, updating or reviewing a page or a demo goes through the
+[`peakui-docs`](.agents/skills/peakui-docs/SKILL.md) skill.
+
 - **Pages** — MDX under `apps/docs/content/docs/en/react/`; a component page lives at
   `components/(category)/<component-name>.mdx` and follows Usage → Examples → Customization →
   Styling Reference → API Reference. The `links` frontmatter feeds the components index.
 - **Demos** — one file per example in `apps/docs/src/demos/<component-name>/`, registered in
-  `apps/docs/src/demos/index.ts` and shown with `<ComponentPreview name="…" />`. They are
+  `apps/docs/src/demos/index.ts` by `pnpm registries` and shown with `<ComponentPreview name="…" />`. They are
   type-checked. A demo that passes a function prop starts with `"use client"`.
 - **Agent routes** — `/llms.txt`, `/llms-components.txt`, `/llms-patterns.txt`, `<page>.md` and
   `/api/components` are generated from the MDX by `apps/docs/src/lib/get-llm-text.ts`. Never write
@@ -155,7 +214,7 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
   portals, not one per component
 - A breaking change to a component's public API ships with a codemod in the same PR: an automated
   transform where possible, a manifest entry with manual instructions where not. Protocol in the
-  `changeset-release` skill
+  `changeset-release` skill. Suspended while stage 5 of the Pipeline is switched off
 
 ## AI Resources
 
@@ -165,8 +224,9 @@ and the plan or task summary cites it. Process skills come from the superpowers 
 **Rules** (`.agents/rules/`) — `onboarding`: set up a clone, diagnose the harness.
 
 **Skills** (`.agents/skills/`) — `peakui-component-standards` (the bar for UI components),
-`playwright-e2e` (E2E for Storybook), `changeset-release` (changesets, release branches, bumps),
-`karpathy-guidelines` (surgical diffs, minimum code, explicit assumptions).
+`peakui-docs` (writing and curating docs pages and demos), `playwright-e2e` (E2E for Storybook),
+`changeset-release` (changesets, release branches, bumps), `karpathy-guidelines` (surgical diffs,
+minimum code, explicit assumptions).
 
 ## Planned
 
@@ -180,7 +240,7 @@ this section exists to prevent.
 
 ```
 packages/codemodes/    # @peakui/codemodes — jscodeshift migrations
-.claude/agents/        # docs-curator, storybook-debugger, tailwind-v4-css-expert
+.claude/agents/        # storybook-debugger, tailwind-v4-css-expert
 .claude/guides/        # styling is covered by the component-standards skill until one exists
 ```
 

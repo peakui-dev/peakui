@@ -6,6 +6,7 @@
     "node": ">=22.18"
   },
   "scripts": {
+    "add:component": "node scripts/add-component.mjs",
     "bootstrap": "node scripts/bootstrap.mjs",
     "build": "pnpm build:packages",
     "build:packages": "pnpm -r --filter './packages/*' build",
@@ -21,6 +22,7 @@
     "format:fix": "prettier --write .",
     "lint": "eslint . --max-warnings=0",
     "lint:package": "pnpm -r lint:package",
+    "registries": "node scripts/registries.mjs",
     "test": "pnpm -r test",
     "test:ai": "node --test \"scripts/**/*.test.mjs\"",
     "test:coverage": "pnpm -r test:coverage",

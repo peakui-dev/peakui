@@ -15,6 +15,24 @@ const PROTECTED_PATTERNS = [
   /(^|\/)dist(-ssr)?\//,
 ];
 
+/*
+ * Generated registries: `pnpm registries` rebuilds them from the file system. A hand edit is how
+ * parallel branches collide on them, so the hook refuses one and names the command.
+ */
+const GENERATED_PATTERNS = [
+  /(^|\/)packages\/react\/src\/components\/index\.ts$/,
+  /(^|\/)packages\/styles\/src\/components\/index\.ts$/,
+  /(^|\/)packages\/styles\/components\/index\.css$/,
+  /(^|\/)apps\/docs\/src\/demos\/index\.ts$/,
+  /(^|\/)apps\/docs\/content\/docs\/en\/react\/components\/meta\.json$/,
+];
+
+export function isGenerated(filePath) {
+  if (!filePath || typeof filePath !== "string") return false;
+
+  return GENERATED_PATTERNS.some((re) => re.test(filePath));
+}
+
 export function isProtected(filePath) {
   if (!filePath || typeof filePath !== "string") return false;
   if (/(^|\/)\.env\.example$/.test(filePath)) return false;
@@ -32,6 +50,13 @@ function main() {
   }
   const file = payload?.tool_input?.file_path;
 
+  if (isGenerated(file)) {
+    process.stderr.write(
+      `REJECTED: "${file}" is a generated registry. Add or remove the component's own files, ` +
+        "then run `pnpm registries`.",
+    );
+    process.exit(2);
+  }
   if (isProtected(file)) {
     process.stderr.write(
       `ОТКЛОНЕНО: «${file}» — защищённый файл (env/lock/parity-снапшоты/heroui/индекс). ` +
