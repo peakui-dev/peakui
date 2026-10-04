@@ -201,7 +201,9 @@ The Tailwind lives in `chip.css` behind those names, with per-component CSS cust
 theming seam (`--chip-bg`, `--chip-fg`). Full pattern: `references/styling.md`.
 
 - **Every rendered element carries `data-slot="<component>-<part>"`.** That is the public contract
-  for both styling and test queries.
+  for both styling and test queries. The attribute goes **after** the props spread — a consumer
+  cannot clobber the contract attribute by accident. (Decided at the wave-1 review: the reference
+  is inconsistent here, so this is PeakUI's own rule, not ported.)
 - **State is styled through `data-*`** (`data-disabled`, `data-focus-visible`), never `is-*` classes.
 - Compose with `composeTwRenderProps` / `composeSlotClassName`, never a hand-built `cn`.
 
@@ -313,7 +315,7 @@ Public API changes are **additive only**, and any breaking change ships a codemo
 - [ ] `index.ts` has all three sections; namespace is `Object.assign` onto the Root; no assembled wrapper
 - [ ] `sideEffects: false` holds for the package
 - [ ] `tv()` emits BEM names only; every Tailwind utility is in the `.css`
-- [ ] `data-slot` on every rendered element; states via `data-*`, not `is-*`
+- [ ] `data-slot` on every rendered element, placed after the props spread; states via `data-*`, not `is-*`
 - [ ] Base class carries the default (`md`) size; the `--md` modifier exists but is empty
 - [ ] Every interactive state written in both forms — pseudo-class **and** `data-*` — so the standalone CSS works without React
 - [ ] Per-component CSS custom properties exposed for theming

@@ -219,7 +219,10 @@ which therefore do not appear in that reconciliation: `empty-state` (entry 18), 
 `input-otp` (entry 34), `@internationalized/date` (3.4), `@react-types/color` (3.5),
 `@tanstack/react-table` + `react-virtual` (3.6), `@radix-ui/react-avatar` (3.1). All five are
 already named in `AGENTS.md` as binding library choices for the core, so none is a new decision.
-`@peakui/react` keeps its two dependencies through all of P1.
+`@peakui/react` was to keep its two dependencies through all of P1; entry 7 (Tooltip) amended
+that once, at wave-1 review: `react-aria` and `@react-aria/ssr` became required peers (the
+reference's own declarations, identical versions), and `@peakui/styles` took `tw-animate-css`.
+Both additions are the reference's own dependency set, not new decisions.
 
 ## Definition of done
 
