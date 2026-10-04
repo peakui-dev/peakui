@@ -302,6 +302,46 @@ export const demos: Record<string, DemoItem> = {
   "skeleton-user-profile": {
     loader: () => import("./skeleton/user-profile").then((m) => m.UserProfile),
     file: "skeleton/user-profile.tsx",
+  // scroll-shadow
+  "scroll-shadow-basic": {
+    loader: () => import("./scroll-shadow/basic").then((m) => m.Basic),
+    file: "scroll-shadow/basic.tsx",
+  },
+  "scroll-shadow-controlled": {
+    loader: () => import("./scroll-shadow/controlled").then((m) => m.Controlled),
+    file: "scroll-shadow/controlled.tsx",
+  },
+  "scroll-shadow-hide-scroll-bar": {
+    loader: () => import("./scroll-shadow/hide-scroll-bar").then((m) => m.HideScrollBar),
+    file: "scroll-shadow/hide-scroll-bar.tsx",
+  },
+  "scroll-shadow-offset": {
+    loader: () => import("./scroll-shadow/offset").then((m) => m.Offset),
+    file: "scroll-shadow/offset.tsx",
+  },
+  "scroll-shadow-orientation": {
+    loader: () => import("./scroll-shadow/orientation").then((m) => m.Orientation),
+    file: "scroll-shadow/orientation.tsx",
+  },
+  "scroll-shadow-rtl": {
+    loader: () => import("./scroll-shadow/rtl").then((m) => m.Rtl),
+    file: "scroll-shadow/rtl.tsx",
+  },
+  "scroll-shadow-size": {
+    loader: () => import("./scroll-shadow/size").then((m) => m.Size),
+    file: "scroll-shadow/size.tsx",
+  },
+  "scroll-shadow-visibility-change": {
+    loader: () => import("./scroll-shadow/visibility-change").then((m) => m.VisibilityChange),
+    file: "scroll-shadow/visibility-change.tsx",
+  },
+  "scroll-shadow-with-surface": {
+    loader: () => import("./scroll-shadow/with-surface").then((m) => m.WithSurface),
+    file: "scroll-shadow/with-surface.tsx",
+  },
+  "scroll-shadow-without-overflow": {
+    loader: () => import("./scroll-shadow/without-overflow").then((m) => m.WithoutOverflow),
+    file: "scroll-shadow/without-overflow.tsx",
   },
   // spinner
   "spinner-basic": {

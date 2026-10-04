@@ -20,6 +20,7 @@
     "(layout)/separator",
     "(navigation)/link",
     "(feedback)/skeleton",
+    "(utilities)/scroll-shadow",
     "(feedback)/spinner",
     "(layout)/surface",
     "(forms)/text-field",

@@ -15,6 +15,7 @@ export * from "./label/index.ts";
 export * from "./separator/index.ts";
 export * from "./link/index.ts";
 export * from "./skeleton/index.ts";
+export * from "./scroll-shadow/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
 export * from "./textfield/index.ts";

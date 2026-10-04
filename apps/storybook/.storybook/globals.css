@@ -10,8 +10,4 @@
 
 /* Классы, которые Tailwind должен увидеть. node_modules за пределами автодетекта. */
 @source "../src";
-
-/*
- * Когда появится packages/react — раскомментировать, иначе утилиты компонентов не скомпилируются:
- * @source "../../../packages/react/src";
- */
+@source "../../../packages/react/src";
