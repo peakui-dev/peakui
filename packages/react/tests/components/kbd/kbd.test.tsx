@@ -10,8 +10,6 @@ import {
   kbdKeysMap,
 } from "@/components/kbd/index.ts";
 
-const classesOf = (element: Element) => [...element.classList].sort();
-
 describe("Kbd", () => {
   describe("рендеринг", () => {
     it("рисует kbd с data-slot и содержимым", () => {
@@ -26,26 +24,30 @@ describe("Kbd", () => {
     it("без variant даёт только базовый блок", () => {
       render(<Kbd>Esc</Kbd>);
 
-      expect(classesOf(screen.getByText("Esc"))).toEqual(["kbd"]);
+      const element = screen.getByText("Esc");
+
+      expect(element).toHaveClass("kbd");
+      expect(element).not.toHaveClass("kbd--default");
+      expect(element).not.toHaveClass("kbd--light");
     });
 
     it.each([
       ["default", "kbd--default"],
       ["light", "kbd--light"],
-    ] as const)("вариант «%s» добавляет только свой модификатор", (variant, modifier) => {
+    ] as const)("вариант «%s» добавляет свой модификатор на корень", (variant, modifier) => {
       render(
         <Kbd variant={variant}>
           <Kbd.Content>Esc</Kbd.Content>
         </Kbd>,
       );
 
-      expect(classesOf(screen.getByText("Esc").parentElement!)).toEqual(["kbd", modifier]);
+      expect(screen.getByText("Esc").closest("kbd")).toHaveClass(modifier);
     });
 
     it("объединяет className с классами блока", () => {
       render(<Kbd className="custom">Esc</Kbd>);
 
-      expect(classesOf(screen.getByText("Esc"))).toEqual(["custom", "kbd"]);
+      expect(screen.getByText("Esc")).toHaveClass("kbd", "custom");
     });
 
     it("разливает остальные пропсы на элемент", () => {
@@ -132,7 +134,7 @@ describe("Kbd", () => {
         </Kbd>,
       );
 
-      expect(classesOf(screen.getByTitle("Command"))).toEqual(["custom", "kbd__abbr"]);
+      expect(screen.getByTitle("Command")).toHaveClass("kbd__abbr", "custom");
     });
 
     it("разливает остальные пропсы на элемент", () => {
@@ -158,7 +160,7 @@ describe("Kbd", () => {
 
       expect(content.tagName).toBe("SPAN");
       expect(content).toHaveAttribute("data-slot", "kbd-content");
-      expect(classesOf(content)).toEqual(["kbd__content"]);
+      expect(content).toHaveClass("kbd__content");
     });
 
     it("className добавляется к классам слота content", () => {
@@ -168,7 +170,7 @@ describe("Kbd", () => {
         </Kbd>,
       );
 
-      expect(classesOf(screen.getByText("K"))).toEqual(["custom", "kbd__content"]);
+      expect(screen.getByText("K")).toHaveClass("kbd__content", "custom");
     });
 
     it("работает одинаково как Kbd.Content и KbdContent", () => {

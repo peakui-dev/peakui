@@ -89,6 +89,9 @@ The Kbd component uses these CSS classes ([view source styles](https://github.co
 #### Base Classes [!toc]
 
 - `.kbd` - Base key styles: background, spacing, radius, typography
+
+#### Element Classes [!toc]
+
 - `.kbd__abbr` - The `<abbr>` element for a key symbol
 - `.kbd__content` - The content wrapper for key text
 
@@ -120,11 +123,11 @@ Every other attribute of a `<kbd>` is accepted.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `keyValue` | `KbdKey` | - | Required. The key to display, with its full name in `title`. One of `command`, `shift`, `ctrl`, `option`, `alt`, `win`, `enter`, `delete`, `escape`, `tab`, `capslock`, `space`, `up`, `down`, `left`, `right`, `pageup`, `pagedown`, `home`, `end`, `help`, `fn` |
+| `keyValue` | `KbdKey` | - | Required. The key to display, with its full name in `title`; both come from `kbdKeysMap` and `kbdKeysLabelMap`, exported from `@peakui/react`. One of `command`, `shift`, `ctrl`, `option`, `alt`, `win`, `enter`, `delete`, `escape`, `tab`, `capslock`, `space`, `up`, `down`, `left`, `right`, `pageup`, `pagedown`, `home`, `end`, `help`, `fn` |
 | `className` | `string` | - | Additional classes |
 | `render` | `DOMRenderFunction<'abbr', undefined>` | - | Replaces the rendered `<abbr>` with your own element |
 
-Every other attribute of an `<abbr>` is accepted. The symbol and title come from `kbdKeysMap` and `kbdKeysLabelMap`, exported from `@peakui/react`.
+Every other attribute of an `<abbr>` is accepted.
 
 ### Kbd.Content
 
