@@ -176,6 +176,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./spinner/sizes").then((m) => m.Sizes),
     file: "spinner/sizes.tsx",
   },
+  // surface
+  "surface-basic": {
+    loader: () => import("./surface/basic").then((m) => m.Basic),
+    file: "surface/basic.tsx",
+  },
   // text-field
   "text-field-basic": {
     loader: () => import("./text-field/basic").then((m) => m.Basic),
