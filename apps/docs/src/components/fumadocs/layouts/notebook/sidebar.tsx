@@ -2,6 +2,7 @@
 
 import type {ComponentProps} from "react";
 
+import {ScrollShadow} from "@peakui/react";
 import * as Base from "fumadocs-ui/components/sidebar/base";
 import {createLinkItemRenderer} from "fumadocs-ui/components/sidebar/link-item";
 import {createPageTreeRenderer} from "fumadocs-ui/components/sidebar/page-tree";
@@ -38,20 +39,26 @@ export const {
   SidebarTrigger,
 } = Base;
 
-/** Native overflow — Radix ScrollArea's overlay thumb lags behind the scroll offset. */
-export function SidebarViewport({children, className, ...props}: ComponentProps<"div">) {
+/*
+ * The scroll region is our ScrollShadow: the edge fade follows the real scroll position
+ * instead of a static always-on mask. The native scrollbar stays — global.css keeps it
+ * hidden until hover/focus, which the Radix overlay thumb never matched.
+ */
+export function SidebarViewport({
+  children,
+  className,
+  ...props
+}: ComponentProps<typeof ScrollShadow>) {
   return (
-    <div
+    <ScrollShadow
+      className={cn("min-h-0 flex-1 overscroll-contain p-4", className)}
       data-docs-sidebar-viewport=""
-      className={cn(
-        "min-h-0 flex-1 overflow-y-auto overscroll-contain p-4",
-        "mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]",
-        className,
-      )}
+      orientation="vertical"
+      size={12}
       {...props}
     >
       <div className="flex w-full flex-col gap-0.5">{children}</div>
-    </div>
+    </ScrollShadow>
   );
 }
 

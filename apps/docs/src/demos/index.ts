@@ -451,6 +451,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./surface/variants").then((m) => m.Variants),
     file: "surface/variants.tsx",
   },
+  // tabs
+  "tabs-basic": {
+    loader: () => import("./tabs/basic").then((m) => m.Basic),
+    file: "tabs/basic.tsx",
+  },
+  "tabs-controlled": {
+    loader: () => import("./tabs/controlled").then((m) => m.Controlled),
+    file: "tabs/controlled.tsx",
+  },
+  "tabs-default-selected": {
+    loader: () => import("./tabs/default-selected").then((m) => m.DefaultSelected),
+    file: "tabs/default-selected.tsx",
+  },
+  "tabs-disabled": {
+    loader: () => import("./tabs/disabled").then((m) => m.Disabled),
+    file: "tabs/disabled.tsx",
+  },
+  "tabs-overflow": {
+    loader: () => import("./tabs/overflow").then((m) => m.Overflow),
+    file: "tabs/overflow.tsx",
+  },
+  "tabs-variants": {
+    loader: () => import("./tabs/variants").then((m) => m.Variants),
+    file: "tabs/variants.tsx",
+  },
+  "tabs-vertical": {
+    loader: () => import("./tabs/vertical").then((m) => m.Vertical),
+    file: "tabs/vertical.tsx",
+  },
+  "tabs-with-separator": {
+    loader: () => import("./tabs/with-separator").then((m) => m.WithSeparator),
+    file: "tabs/with-separator.tsx",
+  },
   // text-field
   "text-field-basic": {
     loader: () => import("./text-field/basic").then((m) => m.Basic),

@@ -27,6 +27,7 @@
     "(feedback)/skeleton",
     "(feedback)/spinner",
     "(layout)/surface",
+    "(navigation)/tabs",
     "(forms)/text-field",
     "(overlays)/tooltip"
   ]

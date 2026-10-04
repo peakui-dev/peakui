@@ -3,6 +3,7 @@
 import type {TOCItemType} from "fumadocs-core/toc";
 import type {ComponentProps, RefObject} from "react";
 
+import {ScrollShadow} from "@peakui/react";
 import * as Primitive from "fumadocs-core/toc";
 import {useTOCItems} from "fumadocs-ui/components/toc";
 import {useCallback, useEffect, useRef} from "react";
@@ -114,5 +115,29 @@ export function TOCItems({className, ref, ...props}: TOCItemsProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+/*
+ * The TOC scroll region on our ScrollShadow instead of the layout library's. The anchor
+ * observer is engine territory and stays: fumadocs-core's ScrollProvider is fed the same
+ * element, so active-anchor tracking keeps working against the element that scrolls.
+ */
+export function TOCScrollArea({children, className, ref, ...props}: ComponentProps<"div">) {
+  const viewRef = useRef<HTMLDivElement | null>(null);
+
+  return (
+    <ScrollShadow
+      ref={mergeRefs(ref, viewRef)}
+      hideScrollBar
+      className={cn("relative min-h-0 text-sm ms-px py-3", className)}
+      orientation="vertical"
+      size={16}
+      {...props}
+    >
+      <Primitive.ScrollProvider containerRef={viewRef as RefObject<HTMLElement | null>}>
+        {children}
+      </Primitive.ScrollProvider>
+    </ScrollShadow>
   );
 }

@@ -1,0 +1,232 @@
+---
+title: Tabs
+description: Tabbed sections with a scrolling tab list
+links:
+  rac: Tabs
+  source: tabs/tabs.tsx
+  styles: tabs.css
+---
+
+## Usage
+
+```tsx
+import {Tabs} from "@peakui/react";
+```
+
+<ComponentPreview name="tabs-basic" />
+
+### Anatomy
+
+```tsx
+import {Tabs} from "@peakui/react";
+
+export default () => (
+  <Tabs>
+    <Tabs.ListContainer>
+      <Tabs.List aria-label="Sections">
+        <Tabs.Tab id="overview">
+          Overview
+          <Tabs.Indicator />
+        </Tabs.Tab>
+      </Tabs.List>
+    </Tabs.ListContainer>
+    <Tabs.Panel id="overview">Overview content</Tabs.Panel>
+  </Tabs>
+);
+```
+
+## Examples
+
+### Vertical Orientation
+
+`orientation="vertical"` lays the list out as a column beside the panels.
+
+<ComponentPreview name="tabs-vertical" />
+
+### Overflow Scrolling
+
+`Tabs.ListContainer` wraps the list in a scroll area with chevron buttons that appear only when the list overflows.
+
+<ComponentPreview name="tabs-overflow" />
+
+### Variants
+
+`variant="secondary"` renders an underline indicator instead of the pill.
+
+<ComponentPreview name="tabs-variants" />
+
+### With Separator
+
+Place `Tabs.Separator` inside a tab to divide it from its neighbour.
+
+<ComponentPreview name="tabs-with-separator" />
+
+### Disabled State
+
+`isDisabled` on a tab removes it from selection and keyboard focus order.
+
+<ComponentPreview name="tabs-disabled" />
+
+### Default Selected
+
+`defaultSelectedKey` picks the initially selected tab.
+
+<ComponentPreview name="tabs-default-selected" />
+
+### Controlled Selection
+
+`selectedKey` with `onSelectionChange` controls the selection from state.
+
+<ComponentPreview name="tabs-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Tabs.List className="w-fit *:h-6 *:px-3" aria-label="Sections">
+  <Tabs.Tab id="daily">
+    Daily
+    <Tabs.Indicator className="bg-accent" />
+  </Tabs.Tab>
+</Tabs.List>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .tabs__tab {
+    font-weight: normal;
+  }
+
+  .tabs--secondary {
+    --color-accent: var(--color-success);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Tabs component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/tabs.css)):
+
+#### Base Classes [!toc]
+
+- `.tabs` - Base component styles: flex column in horizontal orientation, row in vertical
+
+#### Element Classes [!toc]
+
+- `.tabs__list-container` - The scroll container around the list: background, radius, chevron buttons
+- `.tabs__list-container__scroller` - The scrollable area between the chevrons
+- `.tabs__list-container__scroll-prev` - The backward scroll chevron button
+- `.tabs__list-container__scroll-next` - The forward scroll chevron button
+- `.tabs__list` - The tab list itself
+- `.tabs__tab` - A single tab
+- `.tabs__indicator` - The selection indicator rendered inside the selected tab
+- `.tabs__separator` - The divider between neighbouring tabs
+- `.tabs__panel` - A tab panel
+
+#### Modifier Classes [!toc]
+
+- `.tabs--align-start` - Tab content aligned to the start edge
+- `.tabs--align-end` - Tab content aligned to the end edge
+- `.tabs--secondary` - Underline variant: border on the container, line indicator
+
+### Slots
+
+- `[data-slot="tabs"]` - The root element
+- `[data-slot="tabs-list-container"]` - The scroll container around the list
+- `[data-slot="tabs-list"]` - The tab list
+- `[data-slot="tabs-tab"]` - A single tab
+- `[data-slot="tabs-indicator"]` - The selection indicator
+- `[data-slot="tabs-separator"]` - The divider between tabs
+- `[data-slot="tabs-panel"]` - A tab panel
+- `[data-slot="tabs-scroll-prev"]` - The backward scroll chevron button
+- `[data-slot="tabs-scroll-next"]` - The forward scroll chevron button
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Pressed**: `:active` or `[data-pressed]`
+- **Focus**: `:focus-visible` or `[data-focus-visible]`
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]`
+- **Selected**: `[data-selected="true"]`
+
+## API Reference
+
+### Tabs
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `align` | `"start" \| "center" \| "end"` | `"center"` | Alignment of the tab content |
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Pill indicator or underline indicator |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Layout of the list relative to the panels |
+| `selectedKey` | `Key \| null` | - | The currently selected tab id, controlled |
+| `defaultSelectedKey` | `Key` | - | The initially selected tab id |
+| `onSelectionChange` | `(key: Key) => void` | - | Called when the selection changes |
+| `isDisabled` | `boolean` | - | Disables every tab |
+| `children` | `ReactNode` | - | The list and panels |
+| `className` | `string` | - | Additional classes for the root |
+| `...rest` | `React Aria Tabs attributes` | - | Focus, keyboard activation and DOM attributes of the underlying [React Aria Tabs](https://react-spectrum.adobe.com/react-aria/Tabs.html) |
+
+### Tabs.ListContainer
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The tab list |
+| `className` | `string` | - | Additional classes for the container |
+| `render` | `DOMRenderFunction<"div", undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Without it, `Tabs.List` stays a plain React Aria tab list with no scroll area or chevron buttons.
+
+### Tabs.List
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `aria-label` | `string` | - | Accessible name of the tab list |
+| `children` | `ReactNode` | - | The tabs |
+| `className` | `string` | - | Additional classes for the list |
+| `...rest` | `React Aria TabList attributes` | - | Attributes of the underlying React Aria TabList |
+
+### Tabs.Tab
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | The tab id, matched with the panel id |
+| `isDisabled` | `boolean` | - | Removes the tab from selection and focus order |
+| `children` | `ReactNode` | - | The tab label, usually with a `Tabs.Indicator` |
+| `className` | `string` | - | Additional classes for the tab |
+| `...rest` | `React Aria Tab attributes` | - | Attributes of the underlying React Aria Tab |
+
+### Tabs.Indicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional classes for the indicator |
+| `...rest` | `React Aria SelectionIndicator attributes` | - | Attributes of the underlying React Aria SelectionIndicator |
+
+Render it inside each tab; the indicator animates from the previously selected tab on change.
+
+### Tabs.Separator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional classes for the separator |
+| `render` | `DOMRenderFunction<"span", undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Hidden in the `secondary` variant and next to the selected tab.
+
+### Tabs.Panel
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | The panel id, matched with the tab id |
+| `children` | `ReactNode` | - | The panel content |
+| `className` | `string` | - | Additional classes for the panel |
+| `...rest` | `React Aria TabPanel attributes` | - | Attributes of the underlying React Aria TabPanel |

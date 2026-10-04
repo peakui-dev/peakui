@@ -1,11 +1,10 @@
 "use client";
 
 import {CodeBlock, Pre} from "fumadocs-ui/components/codeblock";
-import * as TabsComponents from "fumadocs-ui/components/tabs";
 
 import {BunIcon, NpmSmallIcon, PnpmIcon, YarnIcon} from "@/icons/dev";
 
-const {Tabs, TabsContent, TabsList, TabsTrigger} = TabsComponents;
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "./tabs";
 
 type PackageManagerName = "npm" | "yarn" | "pnpm" | "bun";
 
@@ -44,34 +43,29 @@ export const PackageManagers = ({commands}: PackageManagersProps) => {
   const defaultValue = availableManagers[0]?.name || "npm";
 
   return (
-    <>
-      <Tabs
-        className="mt-4 w-full min-w-[300px] border-none bg-transparent"
-        defaultValue={defaultValue}
-      >
-        <TabsList className="mb-1 h-10 overflow-x-auto">
-          {packageManagers.map(({label, name}) => {
-            if (!commands[name]) return null;
-
-            return (
-              <TabsTrigger key={name} className="flex items-center gap-2" value={name}>
-                <span>{label || name}</span>
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-        {packageManagers.map(({name}) => {
+    <Tabs className="mt-4 w-full min-w-[300px]" defaultValue={defaultValue}>
+      <TabsList aria-label="Package manager" className="overflow-x-auto">
+        {packageManagers.map(({label, name}) => {
           if (!commands[name]) return null;
 
           return (
-            <TabsContent key={name} className="bg-transparent" value={name}>
-              <CodeBlock lang="bash">
-                <Pre className="px-3">{commands[name]}</Pre>
-              </CodeBlock>
-            </TabsContent>
+            <TabsTrigger key={name} className="flex items-center gap-2" value={name}>
+              <span>{label || name}</span>
+            </TabsTrigger>
           );
         })}
-      </Tabs>
-    </>
+      </TabsList>
+      {packageManagers.map(({name}) => {
+        if (!commands[name]) return null;
+
+        return (
+          <TabsContent key={name} value={name}>
+            <CodeBlock lang="bash">
+              <Pre className="px-3">{commands[name]}</Pre>
+            </CodeBlock>
+          </TabsContent>
+        );
+      })}
+    </Tabs>
   );
 };
