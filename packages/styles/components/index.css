@@ -21,6 +21,8 @@
 @import "./kbd.css";
 @import "./label.css";
 @import "./link.css";
+@import "./menu-item.css";
+@import "./menu-section.css";
 @import "./popover.css";
 @import "./scroll-shadow.css";
 @import "./separator.css";
