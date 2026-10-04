@@ -47,7 +47,6 @@ const KbdRoot = <E extends keyof JSX.IntrinsicElements = "kbd">({
   return (
     <KbdContext value={contextValue}>
       <dom.kbd
-        data-slot="kbd"
         /*
          * The permitted `any`: the element type is a parameter, and the spread has erased it.
          * references/typescript.md, the polymorphic spread boundary.
@@ -55,6 +54,7 @@ const KbdRoot = <E extends keyof JSX.IntrinsicElements = "kbd">({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...(props as any)}
         className={slots.base({className})}
+        data-slot="kbd"
       >
         {children}
       </dom.kbd>
@@ -84,7 +84,6 @@ const KbdAbbr = <E extends keyof JSX.IntrinsicElements = "abbr">({
   return (
     <dom.abbr
       className={composeSlotClassName(slots?.abbr, className)}
-      data-slot="kbd-abbr"
       title={kbdKeysLabelMap[keyValue]}
       /*
        * The permitted `any`: the element type is a parameter, and the spread has erased it.
@@ -92,6 +91,7 @@ const KbdAbbr = <E extends keyof JSX.IntrinsicElements = "abbr">({
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="kbd-abbr"
     >
       {kbdKeysMap[keyValue]}
     </dom.abbr>
@@ -119,13 +119,13 @@ const KbdContent = <E extends keyof JSX.IntrinsicElements = "span">({
   return (
     <dom.span
       className={composeSlotClassName(slots?.content, className)}
-      data-slot="kbd-content"
       /*
        * The permitted `any`: the element type is a parameter, and the spread has erased it.
        * references/typescript.md, the polymorphic spread boundary.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="kbd-content"
     >
       {children}
     </dom.span>

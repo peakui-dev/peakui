@@ -26,8 +26,8 @@ const LabelRoot = ({
   return (
     <LabelPrimitive
       className={labelVariants({className, isDisabled, isInvalid, isRequired})}
-      data-slot="label"
       {...rest}
+      data-slot="label"
     >
       {children}
     </LabelPrimitive>

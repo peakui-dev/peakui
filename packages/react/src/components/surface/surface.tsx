@@ -46,13 +46,13 @@ const SurfaceRoot = <E extends keyof JSX.IntrinsicElements = "div">({
     <SurfaceContext value={contextValue}>
       <dom.div
         className={surfaceVariants({variant, className})}
-        data-slot="surface"
         /*
          * The permitted `any`: the element type is a parameter, and the spread has erased it.
          * references/typescript.md, the polymorphic spread boundary.
          */
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...(rest as any)}
+        data-slot="surface"
       >
         {children}
       </dom.div>

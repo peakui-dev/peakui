@@ -95,13 +95,13 @@ const ChipLabel = <E extends keyof JSX.IntrinsicElements = "span">({
   return (
     <dom.span
       className={composeSlotClassName(slots?.label, className)}
-      data-slot="chip-label"
       /*
        * The permitted `any`: the element type is a parameter, and the spread has erased it.
        * references/typescript.md, the polymorphic spread boundary.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="chip-label"
     >
       {children}
     </dom.span>

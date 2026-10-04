@@ -88,6 +88,18 @@ describe("внутренний модуль иконок", () => {
     expect(screen.getByTestId("glyph")).toHaveAttribute("height", "9");
   });
 
+  it("ExternalLinkIcon по умолчанию 9×9, а явные width и height их переопределяют", () => {
+    const {rerender} = render(<ExternalLinkIcon data-testid="glyph" />);
+
+    expect(screen.getByTestId("glyph")).toHaveAttribute("width", "9");
+    expect(screen.getByTestId("glyph")).toHaveAttribute("height", "9");
+
+    rerender(<ExternalLinkIcon data-testid="glyph" height={24} width={24} />);
+
+    expect(screen.getByTestId("glyph")).toHaveAttribute("width", "24");
+    expect(screen.getByTestId("glyph")).toHaveAttribute("height", "24");
+  });
+
   it("распространяет пропсы поверх значений по умолчанию", () => {
     render(<IconPlus aria-label="plus" data-testid="glyph" height={32} width={32} />);
 

@@ -74,13 +74,13 @@ const FieldsetRoot = <E extends keyof JSX.IntrinsicElements = "fieldset">({
       <dom.fieldset
         className={slots.base({className})}
         data-disabled={isDisabled || undefined}
-        data-slot="fieldset"
         /*
          * Единственный разрешённый в пакете any — граница полиморфного spread'а: тип элемента здесь
          * параметр, который spread уже стёр. Условия исключения — references/typescript.md.
          */
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...(rest as any)}
+        data-slot="fieldset"
       >
         {isDisabled ? (
           <Provider
@@ -116,9 +116,9 @@ const FieldsetLegend = <E extends keyof JSX.IntrinsicElements = "legend">({
   return (
     <dom.legend
       className={composeSlotClassName(slots?.legend, className)}
-      data-slot="fieldset-legend"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(rest as any)}
+      data-slot="fieldset-legend"
     />
   );
 };
@@ -139,9 +139,9 @@ const FieldsetGroup = <E extends keyof JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.group, className)}
-      data-slot="fieldset-group"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(rest as any)}
+      data-slot="fieldset-group"
     />
   );
 };
@@ -158,9 +158,9 @@ const FieldsetActions = <E extends keyof JSX.IntrinsicElements = "div">({
   return (
     <dom.div
       className={composeSlotClassName(slots?.actions, className)}
-      data-slot="fieldset-actions"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(rest as any)}
+      data-slot="fieldset-actions"
     />
   );
 };

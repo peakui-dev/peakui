@@ -20,7 +20,6 @@ const SeparatorRoot = ({className, orientation, variant, ...props}: SeparatorRoo
   return (
     <SeparatorPrimitive
       data-orientation={resolvedOrientation}
-      data-slot="separator"
       orientation={resolvedOrientation}
       className={separatorVariants({
         orientation: resolvedOrientation,
@@ -28,6 +27,7 @@ const SeparatorRoot = ({className, orientation, variant, ...props}: SeparatorRoo
         className,
       })}
       {...props}
+      data-slot="separator"
     />
   );
 };

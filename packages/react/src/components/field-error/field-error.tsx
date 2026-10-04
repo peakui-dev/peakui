@@ -23,8 +23,8 @@ const FieldErrorRoot = ({children, className, ...rest}: FieldErrorRootProps) => 
     <FieldErrorPrimitive
       data-visible
       className={composeTwRenderProps(className, fieldErrorVariants())}
-      data-slot="field-error"
       {...rest}
+      data-slot="field-error"
     >
       {(renderProps) => (typeof children === "function" ? children(renderProps) : children)}
     </FieldErrorPrimitive>

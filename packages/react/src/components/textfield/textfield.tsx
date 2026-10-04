@@ -37,8 +37,8 @@ const TextFieldRoot = ({children, className, fullWidth, variant, ...rest}: TextF
   return (
     <TextFieldPrimitive
       className={composeTwRenderProps(className, styles)}
-      data-slot="textfield"
       {...rest}
+      data-slot="textfield"
     >
       {(renderProps) => (
         /*

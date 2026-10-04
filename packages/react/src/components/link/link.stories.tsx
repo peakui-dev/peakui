@@ -32,7 +32,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const DefaultTemplate = (_props: Link["RootProps"]) => (
-  <Showcase title="Default">
+  <Showcase title="По умолчанию">
     <div className="flex items-center gap-4">
       <Link href="#">
         Call to action
@@ -60,7 +60,7 @@ const DefaultTemplate = (_props: Link["RootProps"]) => (
 );
 
 const CustomIconTemplate = (_props: Link["RootProps"]) => (
-  <Showcase title="Custom Icon">
+  <Showcase title="Своя иконка">
     <div className="flex items-center gap-4">
       <Link href="#">
         External Link
@@ -81,7 +81,7 @@ const CustomIconTemplate = (_props: Link["RootProps"]) => (
 );
 
 const IconPlacementTemplate = (_props: Link["RootProps"]) => (
-  <Showcase title="Icon Placement">
+  <Showcase title="Расположение иконки">
     <div className="flex flex-col gap-4">
       <Link href="#">
         Icon at end (default)
@@ -96,7 +96,7 @@ const IconPlacementTemplate = (_props: Link["RootProps"]) => (
 );
 
 const UnderlineVariantsTemplate = (_props: LinkProps) => (
-  <Showcase title="Underline Variants">
+  <Showcase title="Варианты подчёркивания">
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <p className="text-sm text-muted">Default hover underline</p>
@@ -148,17 +148,21 @@ const UnderlineVariantsTemplate = (_props: LinkProps) => (
 );
 
 export const Default: Story = {
+  name: "По умолчанию",
   render: DefaultTemplate,
 };
 
 export const CustomIcon: Story = {
+  name: "Своя иконка",
   render: CustomIconTemplate,
 };
 
 export const IconPlacement: Story = {
+  name: "Расположение иконки",
   render: IconPlacementTemplate,
 };
 
 export const UnderlineVariants: Story = {
+  name: "Варианты подчёркивания",
   render: UnderlineVariantsTemplate,
 };

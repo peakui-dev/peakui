@@ -3,8 +3,9 @@ import type {VariantProps} from "tailwind-variants";
 import {tv} from "tailwind-variants";
 
 /*
- * BEM-имена и ничего больше: Tailwind живёт в components/tooltip.css. У подсказки нет вариантов —
- * только блок и элемент триггера; смещение до триггера и положение задают пропы RAC.
+ * BEM names and nothing else: the Tailwind lives in components/tooltip.css. The tooltip has no
+ * variants — only the block and the trigger element; the offset from the trigger and the
+ * placement come from RAC props.
  */
 export const tooltipVariants = tv({
   slots: {

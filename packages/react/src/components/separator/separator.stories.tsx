@@ -14,7 +14,7 @@ const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
   </div>
 );
 
-/* Строка с вертикальными разделителями — повторяющийся блок двух историй. */
+/* A row of vertical separators — a block repeated across two stories. */
 const BreadcrumbRow = () => (
   <div className="flex h-5 items-center space-x-4 text-sm">
     <div>Blog</div>

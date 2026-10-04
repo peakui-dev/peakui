@@ -43,7 +43,6 @@ const SkeletonRoot = <E extends keyof JSX.IntrinsicElements = "div">({
 
   return (
     <dom.div
-      data-slot="skeleton"
       /*
        * The permitted `any`: the element type is a parameter, and the spread has erased it.
        * references/typescript.md, the polymorphic spread boundary.
@@ -51,6 +50,7 @@ const SkeletonRoot = <E extends keyof JSX.IntrinsicElements = "div">({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
       className={slots.base({className})}
+      data-slot="skeleton"
     />
   );
 };

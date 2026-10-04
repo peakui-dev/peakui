@@ -42,8 +42,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {children: null},
+  name: "По умолчанию",
   render: () => (
-    <Showcase title="Default">
+    <Showcase title="По умолчанию">
       <Kbd>
         <Kbd.Abbr keyValue="command" />
         <Kbd.Content>K</Kbd.Content>
@@ -54,8 +55,9 @@ export const Default: Story = {
 
 export const WithMultipleKeys: Story = {
   args: {children: null},
+  name: "Несколько клавиш",
   render: () => (
-    <Showcase title="With Multiple Keys">
+    <Showcase title="Несколько клавиш">
       <Kbd>
         <Kbd.Abbr keyValue="command" />
         <Kbd.Abbr keyValue="shift" />
@@ -67,8 +69,9 @@ export const WithMultipleKeys: Story = {
 
 export const KeyCombinations: Story = {
   args: {children: null},
+  name: "Сочетания клавиш",
   render: () => (
-    <Showcase title="Key Combinations">
+    <Showcase title="Сочетания клавиш">
       <div className="flex flex-col gap-4">
         <Row label="Copy">
           <Kbd>
@@ -108,8 +111,9 @@ export const KeyCombinations: Story = {
 
 export const LightVariant: Story = {
   args: {children: null},
+  name: "Светлый вариант",
   render: () => (
-    <Showcase title="Light Variant">
+    <Showcase title="Светлый вариант">
       <div className="flex flex-col gap-4">
         <Row label="Copy">
           <Kbd variant="light">
@@ -149,8 +153,9 @@ export const LightVariant: Story = {
 
 export const NavigationKeys: Story = {
   args: {children: null},
+  name: "Клавиши навигации",
   render: () => (
-    <Showcase title="Navigation Keys">
+    <Showcase title="Клавиши навигации">
       <div className="flex items-center gap-4">
         <Kbd>
           <Kbd.Abbr keyValue="up" />
@@ -171,8 +176,9 @@ export const NavigationKeys: Story = {
 
 export const SpecialKeys: Story = {
   args: {children: null},
+  name: "Специальные клавиши",
   render: () => (
-    <Showcase title="Special Keys">
+    <Showcase title="Специальные клавиши">
       <div className="grid grid-cols-4 gap-4">
         <Kbd>
           <Kbd.Abbr keyValue="enter" />
@@ -217,8 +223,9 @@ export const SpecialKeys: Story = {
 
 export const ComplexShortcuts: Story = {
   args: {children: null},
+  name: "Сложные сочетания",
   render: () => (
-    <Showcase title="Complex Shortcuts">
+    <Showcase title="Сложные сочетания">
       <div className="flex flex-col gap-4">
         <Row label="Open Spotlight">
           <Kbd>
@@ -253,8 +260,9 @@ export const ComplexShortcuts: Story = {
 
 export const InlineUsage: Story = {
   args: {children: null},
+  name: "В строке текста",
   render: () => (
-    <Showcase title="Inline Usage">
+    <Showcase title="В строке текста">
       <div className="space-y-2">
         <p className="text-sm">
           Press{" "}
@@ -289,8 +297,9 @@ export const InlineUsage: Story = {
 
 export const CustomContent: Story = {
   args: {children: null},
+  name: "Своё содержимое",
   render: () => (
-    <Showcase title="Custom Content">
+    <Showcase title="Своё содержимое">
       <div className="flex flex-col gap-4">
         <Row label="Select word">
           <Kbd>
