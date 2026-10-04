@@ -222,6 +222,78 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./disclosure-group/custom-styles").then((m) => m.CustomStyles),
     file: "disclosure-group/custom-styles.tsx",
   },
+  // dropdown
+  "dropdown-basic": {
+    loader: () => import("./dropdown/basic").then((m) => m.Basic),
+    file: "dropdown/basic.tsx",
+  },
+  "dropdown-controlled": {
+    loader: () => import("./dropdown/controlled").then((m) => m.Controlled),
+    file: "dropdown/controlled.tsx",
+  },
+  "dropdown-controlled-open-state": {
+    loader: () => import("./dropdown/controlled-open-state").then((m) => m.ControlledOpenState),
+    file: "dropdown/controlled-open-state.tsx",
+  },
+  "dropdown-custom-styles": {
+    loader: () => import("./dropdown/custom-styles").then((m) => m.CustomStyles),
+    file: "dropdown/custom-styles.tsx",
+  },
+  "dropdown-custom-trigger": {
+    loader: () => import("./dropdown/custom-trigger").then((m) => m.CustomTrigger),
+    file: "dropdown/custom-trigger.tsx",
+  },
+  "dropdown-long-press-trigger": {
+    loader: () => import("./dropdown/long-press-trigger").then((m) => m.LongPressTrigger),
+    file: "dropdown/long-press-trigger.tsx",
+  },
+  "dropdown-single-with-custom-indicator": {
+    loader: () =>
+      import("./dropdown/single-with-custom-indicator").then((m) => m.SingleWithCustomIndicator),
+    file: "dropdown/single-with-custom-indicator.tsx",
+  },
+  "dropdown-with-custom-submenu-indicator": {
+    loader: () =>
+      import("./dropdown/with-custom-submenu-indicator").then((m) => m.WithCustomSubmenuIndicator),
+    file: "dropdown/with-custom-submenu-indicator.tsx",
+  },
+  "dropdown-with-descriptions": {
+    loader: () => import("./dropdown/with-descriptions").then((m) => m.WithDescriptions),
+    file: "dropdown/with-descriptions.tsx",
+  },
+  "dropdown-with-disabled-items": {
+    loader: () => import("./dropdown/with-disabled-items").then((m) => m.WithDisabledItems),
+    file: "dropdown/with-disabled-items.tsx",
+  },
+  "dropdown-with-icons": {
+    loader: () => import("./dropdown/with-icons").then((m) => m.WithIcons),
+    file: "dropdown/with-icons.tsx",
+  },
+  "dropdown-with-keyboard-shortcuts": {
+    loader: () => import("./dropdown/with-keyboard-shortcuts").then((m) => m.WithKeyboardShortcuts),
+    file: "dropdown/with-keyboard-shortcuts.tsx",
+  },
+  "dropdown-with-multiple-selection": {
+    loader: () => import("./dropdown/with-multiple-selection").then((m) => m.WithMultipleSelection),
+    file: "dropdown/with-multiple-selection.tsx",
+  },
+  "dropdown-with-section-level-selection": {
+    loader: () =>
+      import("./dropdown/with-section-level-selection").then((m) => m.WithSectionLevelSelection),
+    file: "dropdown/with-section-level-selection.tsx",
+  },
+  "dropdown-with-sections": {
+    loader: () => import("./dropdown/with-sections").then((m) => m.WithSections),
+    file: "dropdown/with-sections.tsx",
+  },
+  "dropdown-with-single-selection": {
+    loader: () => import("./dropdown/with-single-selection").then((m) => m.WithSingleSelection),
+    file: "dropdown/with-single-selection.tsx",
+  },
+  "dropdown-with-submenus": {
+    loader: () => import("./dropdown/with-submenus").then((m) => m.WithSubmenus),
+    file: "dropdown/with-submenus.tsx",
+  },
   // empty-state
   "empty-state-basic": {
     loader: () => import("./empty-state/basic").then((m) => m.Basic),
