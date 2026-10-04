@@ -386,6 +386,63 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./link/underline").then((m) => m.Underline),
     file: "link/underline.tsx",
   },
+  // modal
+  "modal-backdrop-variants": {
+    loader: () => import("./modal/backdrop-variants").then((m) => m.BackdropVariants),
+    file: "modal/backdrop-variants.tsx",
+  },
+  "modal-basic": {
+    loader: () => import("./modal/basic").then((m) => m.Basic),
+    file: "modal/basic.tsx",
+  },
+  "modal-close-methods": {
+    loader: () => import("./modal/close-methods").then((m) => m.CloseMethods),
+    file: "modal/close-methods.tsx",
+  },
+  "modal-controlled": {
+    loader: () => import("./modal/controlled").then((m) => m.Controlled),
+    file: "modal/controlled.tsx",
+  },
+  "modal-custom-animations": {
+    loader: () => import("./modal/custom-animations").then((m) => m.CustomAnimations),
+    file: "modal/custom-animations.tsx",
+  },
+  "modal-custom-backdrop": {
+    loader: () => import("./modal/custom-backdrop").then((m) => m.CustomBackdrop),
+    file: "modal/custom-backdrop.tsx",
+  },
+  "modal-custom-portal": {
+    loader: () => import("./modal/custom-portal").then((m) => m.CustomPortal),
+    file: "modal/custom-portal.tsx",
+  },
+  "modal-custom-styles": {
+    loader: () => import("./modal/custom-styles").then((m) => m.CustomStyles),
+    file: "modal/custom-styles.tsx",
+  },
+  "modal-custom-trigger": {
+    loader: () => import("./modal/custom-trigger").then((m) => m.CustomTrigger),
+    file: "modal/custom-trigger.tsx",
+  },
+  "modal-dismiss-behavior": {
+    loader: () => import("./modal/dismiss-behavior").then((m) => m.DismissBehavior),
+    file: "modal/dismiss-behavior.tsx",
+  },
+  "modal-placements": {
+    loader: () => import("./modal/placements").then((m) => m.Placements),
+    file: "modal/placements.tsx",
+  },
+  "modal-scroll": {
+    loader: () => import("./modal/scroll").then((m) => m.Scroll),
+    file: "modal/scroll.tsx",
+  },
+  "modal-sizes": {
+    loader: () => import("./modal/sizes").then((m) => m.Sizes),
+    file: "modal/sizes.tsx",
+  },
+  "modal-with-form": {
+    loader: () => import("./modal/with-form").then((m) => m.WithForm),
+    file: "modal/with-form.tsx",
+  },
   // popover
   "popover-basic": {
     loader: () => import("./popover/basic").then((m) => m.Basic),
