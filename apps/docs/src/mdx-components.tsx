@@ -3,7 +3,7 @@ import type {CalloutType} from "fumadocs-ui/components/callout";
 import type {MDXComponents} from "mdx/types";
 import type {ComponentProps, ReactNode} from "react";
 
-import {Alert, Card, Surface} from "@peakui/react";
+import {Alert, Card} from "@peakui/react";
 import {Pre} from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import {Children, Suspense, isValidElement} from "react";
