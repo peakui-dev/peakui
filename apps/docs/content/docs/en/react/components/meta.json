@@ -8,6 +8,7 @@
     "index",
     "---Components---",
     "(navigation)/breadcrumbs",
+    "(feedback)/alert",
     "(buttons)/button",
     "(layout)/card",
     "(data-display)/chip",

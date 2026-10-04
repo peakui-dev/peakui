@@ -1,8 +1,9 @@
+import type {AlertProps} from "@peakui/react";
+import type {CalloutType} from "fumadocs-ui/components/callout";
 import type {MDXComponents} from "mdx/types";
 import type {ComponentProps, ReactNode} from "react";
 
-import {Card, Surface} from "@peakui/react";
-import {Callout as FDCallout} from "fumadocs-ui/components/callout";
+import {Alert, Card, Surface} from "@peakui/react";
 import {Pre} from "fumadocs-ui/components/codeblock";
 import * as TabsComponents from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -36,11 +37,36 @@ function ComponentPreviewWithSuspense(props: ComponentProps<typeof ComponentPrev
   );
 }
 
-function Callout({className, ...props}: ComponentProps<typeof FDCallout>) {
+/*
+ * MDX `Callout` on Alert. Each fumadocs type maps to the closest Alert status; `idea` has no
+ * Alert equivalent and falls back to the informational accent.
+ */
+const CALLOUT_STATUS = {
+  info: "accent",
+  warning: "warning",
+  warn: "warning",
+  error: "danger",
+  success: "success",
+  idea: "accent",
+} as const satisfies Record<CalloutType, AlertProps["status"]>;
+
+interface CalloutProps extends Omit<ComponentProps<typeof Alert>, "status"> {
+  type?: CalloutType;
+  title?: ReactNode;
+  /** Replaces the status icon. */
+  icon?: ReactNode;
+}
+
+function Callout({children, className, icon, title, type = "info", ...props}: CalloutProps) {
   return (
-    <Surface className={cn("shadow-surface", className)}>
-      <FDCallout {...props} />
-    </Surface>
+    <Alert className={cn("my-4", className)} status={CALLOUT_STATUS[type]} {...props}>
+      <Alert.Indicator>{icon}</Alert.Indicator>
+      <Alert.Content>
+        {title ? <Alert.Title>{title}</Alert.Title> : null}
+        {/* MDX children arrive as <p> flow content, so the container is a plain div — Alert.Description's span is phrasing-only. The BEM class carries the same muted styling. */}
+        <div className="alert__description prose-no-margin">{children}</div>
+      </Alert.Content>
+    </Alert>
   );
 }
 

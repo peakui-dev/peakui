@@ -24,6 +24,26 @@ export const demos: Record<string, DemoItem> = {
   "breadcrumbs-disabled": {
     loader: () => import("./breadcrumbs/disabled").then((m) => m.Disabled),
     file: "breadcrumbs/disabled.tsx",
+  // alert
+  "alert-basic": {
+    loader: () => import("./alert/basic").then((m) => m.Basic),
+    file: "alert/basic.tsx",
+  },
+  "alert-custom-indicator": {
+    loader: () => import("./alert/custom-indicator").then((m) => m.CustomIndicator),
+    file: "alert/custom-indicator.tsx",
+  },
+  "alert-statuses": {
+    loader: () => import("./alert/statuses").then((m) => m.Statuses),
+    file: "alert/statuses.tsx",
+  },
+  "alert-with-actions": {
+    loader: () => import("./alert/with-actions").then((m) => m.WithActions),
+    file: "alert/with-actions.tsx",
+  },
+  "alert-without-description": {
+    loader: () => import("./alert/without-description").then((m) => m.WithoutDescription),
+    file: "alert/without-description.tsx",
   },
   // button
   "button-basic": {

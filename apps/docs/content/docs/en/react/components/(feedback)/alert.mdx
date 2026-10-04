@@ -1,0 +1,160 @@
+---
+title: Alert
+description: A status message with an icon, title and description
+links:
+  source: alert/alert.tsx
+  styles: alert.css
+---
+
+## Usage
+
+```tsx
+import {Alert} from "@peakui/react";
+```
+
+<ComponentPreview name="alert-basic" />
+
+Content inside an Alert reads the default surface level, even when the Alert sits on a raised `Surface`.
+
+### Anatomy
+
+```tsx
+import {Alert} from "@peakui/react";
+
+export default () => (
+  <Alert>
+    <Alert.Indicator />
+    <Alert.Content>
+      <Alert.Title>Title</Alert.Title>
+      <Alert.Description>Description</Alert.Description>
+    </Alert.Content>
+  </Alert>
+);
+```
+
+## Examples
+
+### Statuses
+
+<ComponentPreview name="alert-statuses" />
+
+### With Actions
+
+<ComponentPreview name="alert-with-actions" />
+
+### Without Description
+
+<ComponentPreview name="alert-without-description" />
+
+### Custom Indicator
+
+`Alert.Indicator` shows the status icon by default; children replace it.
+
+<ComponentPreview name="alert-custom-indicator" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Alert className="max-w-md">…</Alert>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .alert {
+    @apply rounded-2xl;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Alert component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/alert.css)):
+
+#### Base Class [!toc]
+
+- `.alert` - Base alert styles
+
+#### Status Classes [!toc]
+
+- `.alert--default`
+- `.alert--accent`
+- `.alert--success`
+- `.alert--warning`
+- `.alert--danger`
+
+#### Element Classes [!toc]
+
+- `.alert__indicator` - The status icon slot
+- `.alert__content` - The text container
+- `.alert__title` - The title element
+- `.alert__description` - The description element
+
+### Slots
+
+- `[data-slot="alert-root"]` - The root element
+- `[data-slot="alert-indicator"]` - The status icon slot
+- `[data-slot="alert-content"]` - The text container
+- `[data-slot="alert-title"]` - The title element
+- `[data-slot="alert-description"]` - The description element
+- `[data-slot="alert-default-icon"]` - The icon the indicator renders by default
+
+## API Reference
+
+### Alert
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Alert content (required) |
+| `status` | `'accent' \| 'danger' \| 'default' \| 'success' \| 'warning'` | `'default'` | Alert status; sets the indicator and title color |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+### Alert.Indicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Custom indicator; replaces the default status icon |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+### Alert.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Content children |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.
+
+### Alert.Title
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Title text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'p', undefined>` | - | Replaces the rendered `<p>` with your own element |
+
+Every other attribute of a `<p>` is accepted.
+
+### Alert.Description
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Description text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.
