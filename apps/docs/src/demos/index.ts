@@ -91,30 +91,6 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./button/with-icons").then((m) => m.WithIcons),
     file: "button/with-icons.tsx",
   },
-  // card
-  "card-basic": {
-    loader: () => import("./card/basic").then((m) => m.Basic),
-    file: "card/basic.tsx",
-  },
-  "card-compact": {
-    loader: () => import("./card/compact").then((m) => m.Compact),
-    file: "card/compact.tsx",
-  },
-  "card-gallery": {
-    loader: () => import("./card/gallery").then((m) => m.Gallery),
-    file: "card/gallery.tsx",
-  },
-  "card-horizontal": {
-    loader: () => import("./card/horizontal").then((m) => m.Horizontal),
-    file: "card/horizontal.tsx",
-  },
-  "card-variants": {
-    loader: () => import("./card/variants").then((m) => m.Variants),
-    file: "card/variants.tsx",
-  },
-  "card-with-form": {
-    loader: () => import("./card/with-form").then((m) => m.WithForm),
-    file: "card/with-form.tsx",
   // button-group
   "button-group-basic": {
     loader: () => import("./button-group/basic").then((m) => m.Basic),
@@ -147,6 +123,31 @@ export const demos: Record<string, DemoItem> = {
   "button-group-without-separator": {
     loader: () => import("./button-group/without-separator").then((m) => m.WithoutSeparator),
     file: "button-group/without-separator.tsx",
+  },
+  // card
+  "card-basic": {
+    loader: () => import("./card/basic").then((m) => m.Basic),
+    file: "card/basic.tsx",
+  },
+  "card-compact": {
+    loader: () => import("./card/compact").then((m) => m.Compact),
+    file: "card/compact.tsx",
+  },
+  "card-gallery": {
+    loader: () => import("./card/gallery").then((m) => m.Gallery),
+    file: "card/gallery.tsx",
+  },
+  "card-horizontal": {
+    loader: () => import("./card/horizontal").then((m) => m.Horizontal),
+    file: "card/horizontal.tsx",
+  },
+  "card-variants": {
+    loader: () => import("./card/variants").then((m) => m.Variants),
+    file: "card/variants.tsx",
+  },
+  "card-with-form": {
+    loader: () => import("./card/with-form").then((m) => m.WithForm),
+    file: "card/with-form.tsx",
   },
   // chip
   "chip-basic": {
