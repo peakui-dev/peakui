@@ -96,6 +96,21 @@ describe("Modal", () => {
     }
   });
 
+  it("переименовывает слот CloseButton на modal-close-trigger", async () => {
+    render(<ModalExample />);
+
+    await openModal(user);
+
+    /*
+     * Часть передаёт слот типизированным data-slot CloseButton: атрибут после спреда в
+     * CloseButton перетирает дефолт «close-button», и стили модалки находят свою кнопку.
+     */
+    expect(screen.getByRole("button", {name: "Close"})).toHaveAttribute(
+      "data-slot",
+      "modal-close-trigger",
+    );
+  });
+
   it("связывает диалог с заголовком через aria-labelledby", async () => {
     render(<ModalExample />);
 

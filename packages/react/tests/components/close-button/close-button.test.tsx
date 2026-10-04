@@ -53,6 +53,22 @@ describe("CloseButton", () => {
       expect(button.className).toEqual(expect.stringContaining("close-button--default"));
     });
 
+    it("переименовывает слот типизированным data-slot для составной части", () => {
+      render(<CloseButton data-slot="tag-remove-button" />);
+
+      const button = screen.getByRole("button", {name: "Close"});
+
+      expect(button).toHaveAttribute("data-slot", "tag-remove-button");
+    });
+
+    it("оставляет слот close-button, когда data-slot не передан", () => {
+      render(<CloseButton />);
+
+      const button = screen.getByRole("button", {name: "Close"});
+
+      expect(button).toHaveAttribute("data-slot", "close-button");
+    });
+
     it("рисует внутреннюю иконку крестика, когда children не заданы", () => {
       render(<CloseButton />);
 
