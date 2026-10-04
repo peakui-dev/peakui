@@ -68,8 +68,8 @@ const ${pascal}Root = ({children, className, ...rest}: ${pascal}RootProps) => {
   return (
     <${rac}Primitive
       className={composeTwRenderProps(className, ${camel}Variants())}
-      data-slot="${kebab}"
       {...rest}
+      data-slot="${kebab}"
     >
       {children}
     </${rac}Primitive>
@@ -107,13 +107,13 @@ const ${pascal}Root = <E extends keyof JSX.IntrinsicElements = "div">({
 }: ${pascal}RootProps<E> & Omit<JSX.IntrinsicElements[E], keyof ${pascal}RootProps<E>>) => {
   return (
     <dom.div
-      data-slot="${kebab}"
       /*
        * The permitted \`any\`: the element type is a parameter, and the spread has erased it.
        * references/typescript.md, the polymorphic spread boundary.
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      data-slot="${kebab}"
       className={${camel}Variants({className})}
     >
       {children}
