@@ -2,7 +2,7 @@
 
 import type {ReactNode} from "react";
 
-import {Button, ButtonGroup} from "@peakui/react";
+import {Button, ButtonGroup, toast} from "@peakui/react";
 import {useMemo, useState} from "react";
 import {Menu, MenuItem, MenuTrigger, Popover, Text} from "react-aria-components";
 
@@ -22,7 +22,6 @@ interface PageAction {
   title: string;
 }
 
-const COPIED_FEEDBACK_MS = 1500;
 const cache = new Map<string, string>();
 
 /**
@@ -34,7 +33,6 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
   const dict = useDictionary().pageActions;
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setOpen] = useState(false);
-  const [checked, setChecked] = useState(false);
 
   const items = useMemo<PageAction[]>(() => {
     const fullMarkdownUrl =
@@ -86,8 +84,7 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
       }
 
       await navigator.clipboard.writeText(content);
-      setChecked(true);
-      setTimeout(() => setChecked(false), COPIED_FEEDBACK_MS);
+      toast.success(dict.copied);
     } catch (error) {
       console.error("Failed to copy markdown:", error);
     } finally {
@@ -104,8 +101,8 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
         variant="tertiary"
         onPress={() => void handleCopy()}
       >
-        <Iconify icon={checked ? "check" : "copy"} />
-        {checked ? dict.copied : dict.copyMarkdown}
+        <Iconify icon="copy" />
+        {dict.copyMarkdown}
       </Button>
       <MenuTrigger isOpen={isOpen} onOpenChange={setOpen}>
         <Button isIconOnly aria-label={dict.moreOptions} size="md" variant="tertiary">

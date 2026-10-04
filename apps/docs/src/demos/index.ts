@@ -606,6 +606,51 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./text-field/with-error").then((m) => m.WithError),
     file: "text-field/with-error.tsx",
   },
+  // toast
+  "toast-basic": {
+    loader: () => import("./toast/basic").then((m) => m.Basic),
+    file: "toast/basic.tsx",
+  },
+  "toast-callbacks": {
+    loader: () => import("./toast/callbacks").then((m) => m.Callbacks),
+    file: "toast/callbacks.tsx",
+  },
+  "toast-custom-indicator": {
+    loader: () => import("./toast/custom-indicator").then((m) => m.CustomIndicator),
+    file: "toast/custom-indicator.tsx",
+  },
+  "toast-custom-queue": {
+    loader: () => import("./toast/custom-queue").then((m) => m.CustomQueue),
+    file: "toast/custom-queue.tsx",
+  },
+  "toast-custom-styles": {
+    loader: () => import("./toast/custom-styles").then((m) => m.CustomStyles),
+    file: "toast/custom-styles.tsx",
+  },
+  "toast-custom-toast": {
+    loader: () => import("./toast/custom-toast").then((m) => m.CustomToast),
+    file: "toast/custom-toast.tsx",
+  },
+  "toast-expanded": {
+    loader: () => import("./toast/expanded").then((m) => m.Expanded),
+    file: "toast/expanded.tsx",
+  },
+  "toast-placements": {
+    loader: () => import("./toast/placements").then((m) => m.Placements),
+    file: "toast/placements.tsx",
+  },
+  "toast-promise": {
+    loader: () => import("./toast/promise").then((m) => m.PromiseDemo),
+    file: "toast/promise.tsx",
+  },
+  "toast-simple": {
+    loader: () => import("./toast/simple").then((m) => m.Simple),
+    file: "toast/simple.tsx",
+  },
+  "toast-variants": {
+    loader: () => import("./toast/variants").then((m) => m.Variants),
+    file: "toast/variants.tsx",
+  },
   // toggle-button
   "toggle-button-basic": {
     loader: () => import("./toggle-button/basic").then((m) => m.Basic),

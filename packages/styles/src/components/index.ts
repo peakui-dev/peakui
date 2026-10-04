@@ -28,6 +28,7 @@ export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
 export * from "./tabs/index.ts";
 export * from "./textfield/index.ts";
+export * from "./toast/index.ts";
 export * from "./toggle-button-group/index.ts";
 export * from "./toggle-button/index.ts";
 export * from "./tooltip/index.ts";
