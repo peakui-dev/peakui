@@ -1,0 +1,155 @@
+---
+title: ScrollShadow
+description: Shadows that reveal scrollable overflow at container edges
+links:
+  source: scroll-shadow/scroll-shadow.tsx
+  styles: scroll-shadow.css
+---
+
+## Usage
+
+```tsx
+import {ScrollShadow} from "@peakui/react";
+```
+
+<ComponentPreview name="scroll-shadow-basic" />
+
+## Examples
+
+### Orientation
+
+`orientation` picks the scroll axis; the fade follows it.
+
+<ComponentPreview name="scroll-shadow-orientation" />
+
+### Hide Scroll Bar
+
+<ComponentPreview name="scroll-shadow-hide-scroll-bar" />
+
+### Shadow Size
+
+`size` sets the fade gradient length in pixels.
+
+<ComponentPreview name="scroll-shadow-size" />
+
+### Visibility Change
+
+`onVisibilityChange` reports the current edge state while the user scrolls.
+
+<ComponentPreview name="scroll-shadow-visibility-change" />
+
+### Without Overflow
+
+Content that fits keeps both fades at zero.
+
+<ComponentPreview name="scroll-shadow-without-overflow" />
+
+### Controlled Visibility
+
+`visibility` pins the shadows; `isEnabled={false}` turns detection off.
+
+<ComponentPreview name="scroll-shadow-controlled" />
+
+### RTL
+
+In a right-to-left context the horizontal fade flips to the matching edge.
+
+<ComponentPreview name="scroll-shadow-rtl" />
+
+### On A Surface
+
+<ComponentPreview name="scroll-shadow-with-surface" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+{/* In auto mode the root owns the `animation` property for the scroll-driven fade.
+    An `animate-*` utility on the same element would replace it and kill the fade —
+    animate a wrapper instead. */}
+<ScrollShadow className="max-h-[240px] rounded-xl border p-4">Content</ScrollShadow>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .scroll-shadow {
+    @apply rounded-xl border;
+  }
+
+  .scroll-shadow--hide-scrollbar {
+    --scroll-shadow-scrollbar-size: 0px;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ScrollShadow component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/scroll-shadow.css)):
+
+#### Base Classes [!toc]
+
+- `.scroll-shadow` - Base component styles
+
+#### Orientation Classes [!toc]
+
+- `.scroll-shadow--vertical` - Vertical scrolling (default)
+- `.scroll-shadow--horizontal` - Horizontal scrolling
+
+#### Variant Classes [!toc]
+
+- `.scroll-shadow--fade` - Fade mask effect (default)
+
+#### Modifier Classes [!toc]
+
+- `.scroll-shadow--hide-scrollbar` - Hides the native scrollbar
+
+### Slots
+
+- `[data-slot="scroll-shadow"]` - The root element
+
+### CSS Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `--scroll-shadow-size` | `40px` | Fade gradient size; set from the `size` prop |
+| `--scroll-shadow-offset` | `0px` | Scroll distance before the fade starts; set from the `offset` prop |
+| `--scroll-shadow-scrollbar-size` | `10px` (`0px` when `hideScrollBar`) | Solid mask gutter reserving space for the native scrollbar |
+
+### Interactive States
+
+The component communicates scroll position through data attributes, styled by the CSS above:
+
+- **Top overflow**: `[data-top-scroll="true"]`
+- **Bottom overflow**: `[data-bottom-scroll="true"]`
+- **Both vertical edges**: `[data-top-bottom-scroll="true"]`
+- **Left overflow**: `[data-left-scroll="true"]`
+- **Right overflow**: `[data-right-scroll="true"]`
+- **Both horizontal edges**: `[data-left-right-scroll="true"]`
+- **Orientation**: `[data-orientation="vertical" | "horizontal"]`
+- **Shadow mode**: `[data-scroll-shadow-mode="auto" | "manual"]` — `"manual"` when `visibility` is controlled or `isEnabled` is `false`
+
+## API Reference
+
+### ScrollShadow
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `"vertical" \| "horizontal"` | `"vertical"` | The scroll direction |
+| `variant` | `"fade"` | `"fade"` | The visual shadow effect |
+| `size` | `number` | `40` | The shadow gradient size in pixels |
+| `offset` | `number` | `0` | The scroll offset before showing shadows, in pixels |
+| `hideScrollBar` | `boolean` | `false` | Whether to hide the native scrollbar |
+| `isEnabled` | `boolean` | `true` | Whether scroll shadow detection is enabled |
+| `visibility` | `"auto" \| "both" \| "top" \| "bottom" \| "left" \| "right" \| "none"` | `"auto"` | Controlled shadow visibility; any value besides `"auto"` opts out of the scroll-driven mask and its always-on stacking context |
+| `onVisibilityChange` | `(visibility: ScrollShadowVisibility) => void` | - | Called when the shadow visibility changes |
+| `className` | `string` | - | Additional classes |
+| `children` | `ReactNode` | - | The scrollable content |
+
+Every other attribute of a `<div>` is accepted.
