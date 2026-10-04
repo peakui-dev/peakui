@@ -1,0 +1,156 @@
+---
+title: Tooltip
+description: Informative text on hover or focus
+links:
+  rac: Tooltip
+  source: tooltip/tooltip.tsx
+  styles: tooltip.css
+---
+
+## Usage
+
+```tsx
+import {Tooltip} from "@peakui/react";
+```
+
+<ComponentPreview name="tooltip-basic" />
+
+### Anatomy
+
+```tsx
+import {Button, Tooltip} from "@peakui/react";
+
+export default () => (
+  <Tooltip>
+    <Button>Hover for tooltip</Button>
+    <Tooltip.Content>
+      <Tooltip.Arrow />
+      Helpful information about this element
+    </Tooltip.Content>
+  </Tooltip>
+);
+```
+
+## Examples
+
+### Placement
+
+<ComponentPreview name="tooltip-placement" />
+
+### With Arrow
+
+<ComponentPreview name="tooltip-with-arrow" />
+
+### Custom Triggers
+
+<ComponentPreview name="tooltip-custom-trigger" />
+
+### Render Function
+
+<ComponentPreview name="tooltip-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="tooltip-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .tooltip {
+    @apply rounded-xl shadow-lg;
+  }
+
+  .tooltip__trigger {
+    @apply cursor-help;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Tooltip component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/tooltip.css)):
+
+#### Base Classes [!toc]
+
+- `.tooltip` - Base tooltip styles with animations
+- `.tooltip__trigger` - Trigger element styles
+
+### Slots
+
+- `[data-slot="tooltip"]` - The tooltip content element
+- `[data-slot="tooltip-trigger"]` - The `Tooltip.Trigger` element
+- `[data-slot="tooltip-arrow"]` - The arrow wrapper
+- `[data-slot="overlay-arrow"]` - The default arrow SVG
+
+### Interactive States
+
+The tooltip content carries RAC animation and positioning states:
+
+- **Entering**: `[data-entering="true"]`
+- **Exiting**: `[data-exiting="true"]`
+- **Placement**: `[data-placement="top | bottom | left | right"]`
+
+The trigger supports both pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+
+## API Reference
+
+### Tooltip
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The trigger element followed by `Tooltip.Content` |
+| `delay` | `number` | `1500` | Delay in milliseconds before the tooltip shows; read from the `--tooltip-delay` theme variable when omitted |
+| `closeDelay` | `number` | `500` | Delay in milliseconds before the tooltip hides; read from the `--tooltip-close-delay` theme variable when omitted |
+| `trigger` | `'hover' \| 'focus'` | `'hover'` | `'hover'` opens for both hover and focus, `'focus'` for focus only |
+| `shouldCloseOnPress` | `boolean` | `true` | Whether the tooltip closes when the trigger is pressed |
+| `isDisabled` | `boolean` | `false` | Whether the tooltip is disabled |
+| `isOpen` | `boolean` | - | Controlled open state |
+| `defaultOpen` | `boolean` | `false` | Initially open, without controlling |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Called when the tooltip opens or closes |
+| `shouldSkipAnimation` | `boolean` | `false` | Let React Aria skip the enter and exit animations when moving quickly from one tooltip to another |
+
+### Tooltip.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Content of the tooltip |
+| `placement` | `Placement` | `'top'` | Placement relative to the trigger: `'top'`, `'bottom'`, `'left'`, `'right'` with start/end/top/bottom variants |
+| `offset` | `number` | `3`, or `7` with `showArrow` | Distance from the trigger element |
+| `crossOffset` | `number` | `0` | Cross-axis offset from the trigger |
+| `showArrow` | `boolean` | `false` | Whether the arrow indicator is expected; reserves the larger default `offset` |
+| `shouldFlip` | `boolean` | `true` | Whether the tooltip flips when it does not fit |
+| `containerPadding` | `number` | `12` | Distance the tooltip keeps from the viewport edge |
+| `arrowBoundaryOffset` | `number` | `0` | Boundary offset for the arrow positioning |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the tooltip state |
+| `render` | `DOMRenderFunction<'div', TooltipRenderProps>` | - | Replaces the rendered `<div>` with your own element |
+
+### Tooltip.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Non-interactive element to make focusable and hoverable |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>` with your own element; `E` defaults to `'div'` |
+
+### Tooltip.Arrow
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Custom arrow element; defaults to a 12x12 SVG |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', OverlayArrowRenderProps>` | - | Replaces the rendered wrapper `<div>` with your own element; the arrow SVG stays as its child |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `Tooltip.Content` `className` | `(renderProps: TooltipRenderProps) => string` | Computes classes from `placement`, `isEntering`, `isExiting` and `state` |
