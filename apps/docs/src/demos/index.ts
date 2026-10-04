@@ -12,18 +12,6 @@ export interface DemoItem {
  * edited by hand; the sort-keys rules are off for this file.
  */
 export const demos: Record<string, DemoItem> = {
-  // breadcrumbs
-  "breadcrumbs-basic": {
-    loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),
-    file: "breadcrumbs/basic.tsx",
-  },
-  "breadcrumbs-custom-separator": {
-    loader: () => import("./breadcrumbs/custom-separator").then((m) => m.CustomSeparator),
-    file: "breadcrumbs/custom-separator.tsx",
-  },
-  "breadcrumbs-disabled": {
-    loader: () => import("./breadcrumbs/disabled").then((m) => m.Disabled),
-    file: "breadcrumbs/disabled.tsx",
   // alert
   "alert-basic": {
     loader: () => import("./alert/basic").then((m) => m.Basic),
@@ -44,6 +32,19 @@ export const demos: Record<string, DemoItem> = {
   "alert-without-description": {
     loader: () => import("./alert/without-description").then((m) => m.WithoutDescription),
     file: "alert/without-description.tsx",
+  },
+  // breadcrumbs
+  "breadcrumbs-basic": {
+    loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),
+    file: "breadcrumbs/basic.tsx",
+  },
+  "breadcrumbs-custom-separator": {
+    loader: () => import("./breadcrumbs/custom-separator").then((m) => m.CustomSeparator),
+    file: "breadcrumbs/custom-separator.tsx",
+  },
+  "breadcrumbs-disabled": {
+    loader: () => import("./breadcrumbs/disabled").then((m) => m.Disabled),
+    file: "breadcrumbs/disabled.tsx",
   },
   // button
   "button-basic": {
