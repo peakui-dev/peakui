@@ -177,15 +177,9 @@ const SearchFieldClearButton = ({className, ...rest}: SearchFieldClearButtonProp
   return (
     <CloseButton
       className={composeTwRenderProps(className, slots?.clearButton())}
-      /*
-       * data-slot части нельзя передать пропом: CloseButton ставит свой контрактный
-       * data-slot="close-button" ПОСЛЕ спреда и проп перетирает. Поэтому элемент рисуем через
-       * санционированный render-проп, ставя data-slot после спреда — как у каждой части.
-       * render стоит до {...rest}: потребитель вправе заменить элемент целиком, как у эталона.
-       */
-      render={(props) => <button {...props} data-slot="search-field-clear-button" />}
       slot="clear"
       {...rest}
+      data-slot="search-field-clear-button"
     />
   );
 };
