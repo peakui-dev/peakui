@@ -21,6 +21,7 @@
     "@peakui/testing": "workspace:*",
     "@react-aria/ssr": "^3.10.1",
     "@react-aria/utils": "^3.34.1",
+    "@react-types/shared": "^3.36.1",
     "@storybook/react-vite": "^10.6.1",
     "@testing-library/jest-dom": "7.0.1",
     "@types/node": "^24.0.0",

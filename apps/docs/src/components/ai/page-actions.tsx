@@ -2,9 +2,12 @@
 
 import type {ReactNode} from "react";
 
+<<<<<<< HEAD
 import {Button, ButtonGroup, toast} from "@peakui/react";
+=======
+import {Button, ButtonGroup, Description, Dropdown, Label} from "@peakui/react";
+>>>>>>> roadmap/20-dropdown
 import {useMemo, useState} from "react";
-import {Menu, MenuItem, MenuTrigger, Popover, Text} from "react-aria-components";
 
 import {ChevronDown} from "@/components/fumadocs/ui/icons";
 import {useDictionary} from "@/hooks/use-dictionary";
@@ -104,7 +107,7 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
         <Iconify icon="copy" />
         {dict.copyMarkdown}
       </Button>
-      <MenuTrigger isOpen={isOpen} onOpenChange={setOpen}>
+      <Dropdown isOpen={isOpen} onOpenChange={setOpen}>
         <Button isIconOnly aria-label={dict.moreOptions} size="md" variant="tertiary">
           <ButtonGroup.Separator />
           <ChevronDown
@@ -114,15 +117,11 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
             )}
           />
         </Button>
-        <Popover
-          className="min-w-64 rounded-2xl bg-overlay p-1 text-overlay-foreground shadow-overlay outline-none"
-          placement="bottom end"
-        >
-          <Menu className="outline-none">
+        <Dropdown.Popover placement="bottom end">
+          <Dropdown.Menu>
             {items.map((item) => (
-              <MenuItem
+              <Dropdown.Item
                 key={item.key}
-                className="flex cursor-(--cursor-interactive) items-center gap-3 rounded-xl px-3 py-2 text-sm outline-none data-[focused]:bg-default"
                 href={item.href}
                 id={item.key}
                 rel="noreferrer noopener"
@@ -131,21 +130,17 @@ export function ViewOptions({markdownUrl}: {markdownUrl: string}) {
               >
                 {item.icon}
                 <span className="flex w-full flex-col">
-                  <Text className="font-medium" slot="label">
-                    {item.title}
-                  </Text>
-                  <Text className="text-xs text-muted" slot="description">
-                    {item.description}
-                  </Text>
+                  <Label>{item.title}</Label>
+                  <Description>{item.description}</Description>
                 </span>
                 {item.external ? (
                   <Iconify className="text-foreground/70" icon="arrow-up-right-from-square" />
                 ) : null}
-              </MenuItem>
+              </Dropdown.Item>
             ))}
-          </Menu>
-        </Popover>
-      </MenuTrigger>
+          </Dropdown.Menu>
+        </Dropdown.Popover>
+      </Dropdown>
     </ButtonGroup>
   );
 }

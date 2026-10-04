@@ -1,0 +1,289 @@
+---
+title: Dropdown
+description: Dropdown menu triggered by a button
+links:
+  rac: MenuTrigger
+  source: dropdown/dropdown.tsx
+  styles: dropdown.css
+---
+
+## Usage
+
+```tsx
+import {Dropdown} from "@peakui/react";
+```
+
+<ComponentPreview name="dropdown-basic" />
+
+### Anatomy
+
+```tsx
+import {Button, Description, Dropdown, Kbd, Label, Separator} from "@peakui/react";
+
+export default () => (
+  <Dropdown>
+    <Button>Actions</Button>
+    <Dropdown.Popover>
+      <Dropdown.Menu>
+        <Dropdown.Item>
+          <Label />
+          <Description />
+          <Kbd slot="keyboard" />
+          <Dropdown.ItemIndicator />
+        </Dropdown.Item>
+        <Separator />
+        <Dropdown.Section>
+          <Dropdown.Item />
+        </Dropdown.Section>
+        <Dropdown.SubmenuTrigger>
+          <Dropdown.Item>
+            <Label />
+            <Dropdown.SubmenuIndicator />
+          </Dropdown.Item>
+          <Dropdown.Popover>
+            <Dropdown.Menu>
+              <Dropdown.Item />
+            </Dropdown.Menu>
+          </Dropdown.Popover>
+        </Dropdown.SubmenuTrigger>
+      </Dropdown.Menu>
+    </Dropdown.Popover>
+  </Dropdown>
+);
+```
+
+## Examples
+
+### With Icons
+
+<ComponentPreview name="dropdown-with-icons" />
+
+### With Descriptions
+
+<ComponentPreview name="dropdown-with-descriptions" />
+
+### With Disabled Items
+
+<ComponentPreview name="dropdown-with-disabled-items" />
+
+### With Sections
+
+<ComponentPreview name="dropdown-with-sections" />
+
+### With Single Selection
+
+<ComponentPreview name="dropdown-with-single-selection" />
+
+### Single With Custom Indicator
+
+<ComponentPreview name="dropdown-single-with-custom-indicator" />
+
+### With Multiple Selection
+
+<ComponentPreview name="dropdown-with-multiple-selection" />
+
+### With Section Level Selection
+
+<ComponentPreview name="dropdown-with-section-level-selection" />
+
+### With Keyboard Shortcuts
+
+<ComponentPreview name="dropdown-with-keyboard-shortcuts" />
+
+### With Submenus
+
+<ComponentPreview name="dropdown-with-submenus" />
+
+### With Custom Submenu Indicator
+
+<ComponentPreview name="dropdown-with-custom-submenu-indicator" />
+
+### Custom Trigger
+
+<ComponentPreview name="dropdown-custom-trigger" />
+
+### Long Press Trigger
+
+<ComponentPreview name="dropdown-long-press-trigger" />
+
+### Controlled
+
+<ComponentPreview name="dropdown-controlled" />
+
+### Controlled Open State
+
+<ComponentPreview name="dropdown-controlled-open-state" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="dropdown-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .dropdown {
+    @apply flex flex-col gap-1;
+  }
+
+  .dropdown__trigger {
+    @apply outline-none;
+  }
+
+  .dropdown__popover {
+    @apply rounded-lg border border-border bg-overlay p-2;
+  }
+
+  .dropdown__menu {
+    @apply flex flex-col gap-1;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Dropdown component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/dropdown.css)):
+
+#### Base Classes [!toc]
+
+- `.dropdown` - Base dropdown container
+- `.dropdown__trigger` - The trigger rendered by `Dropdown.Trigger`
+- `.dropdown__popover` - The popover that holds the open menu
+- `.dropdown__menu` - The menu container inside the popover
+
+### Slots
+
+- `[data-slot="dropdown-trigger"]`
+- `[data-slot="dropdown-popover"]`
+- `[data-slot="dropdown-menu"]`
+- `[data-slot="dropdown-submenu-trigger"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the trigger
+- **Disabled**: `:disabled` or `[aria-disabled="true"]` on the trigger
+- **Pending**: `[data-pending="true"]` on the trigger
+- **Pressed**: `:active` or `[data-pressed="true"]` on the trigger
+- **Entering**: `[data-entering="true"]` on the popover
+- **Exiting**: `[data-exiting="true"]` on the popover
+
+## API Reference
+
+### Dropdown
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isOpen` | `boolean` | - | Sets the open state of the menu (controlled) |
+| `defaultOpen` | `boolean` | - | Sets the default open state of the menu (uncontrolled) |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Handler called when the open state changes |
+| `trigger` | `"press" \| "longPress"` | `"press"` | The type of interaction that triggers the menu |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Dropdown content |
+| `...rest` | `MenuTriggerProps` | - | React Aria [MenuTrigger](https://react-spectrum.adobe.com/react-aria/MenuTrigger.html) attributes |
+
+### Dropdown.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Trigger content or render function |
+| `...rest` | `ButtonProps` | - | React Aria [Button](https://react-spectrum.adobe.com/react-aria/Button.html) attributes |
+
+### Dropdown.Popover
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placement` | `"bottom" \| "bottom left" \| "bottom right" \| "bottom start" \| "bottom end" \| "top" \| "top left" \| "top right" \| "top start" \| "top end" \| "left" \| "left top" \| "left bottom" \| "start" \| "start top" \| "start bottom" \| "right" \| "right top" \| "right bottom" \| "end" \| "end top" \| "end bottom"` | `"bottom"` | Placement of the popover relative to the trigger |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Popover content |
+| `...rest` | `PopoverProps` | - | React Aria [Popover](https://react-spectrum.adobe.com/react-aria/Popover.html) attributes |
+
+### Dropdown.Menu
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectionMode` | `"single" \| "multiple" \| "none"` | `"none"` | Whether single or multiple selection is enabled |
+| `selectedKeys` | `Iterable<Key>` | - | The currently selected keys (controlled) |
+| `defaultSelectedKeys` | `Iterable<Key>` | - | The initial selected keys (uncontrolled) |
+| `onSelectionChange` | `(keys: Selection) => void` | - | Handler called when the selection changes |
+| `disabledKeys` | `Iterable<Key>` | - | Keys of disabled items |
+| `onAction` | `(key: Key) => void` | - | Handler called when an item is activated |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Menu content |
+| `...rest` | `MenuProps<T>` | - | React Aria [Menu](https://react-spectrum.adobe.com/react-aria/Menu.html#menu) attributes |
+
+### Dropdown.Section
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectionMode` | `"single" \| "multiple"` | - | Selection mode for items within this section |
+| `selectedKeys` | `Iterable<Key>` | - | The currently selected keys (controlled) |
+| `defaultSelectedKeys` | `Iterable<Key>` | - | The initial selected keys (uncontrolled) |
+| `onSelectionChange` | `(keys: Selection) => void` | - | Handler called when the selection changes |
+| `disabledKeys` | `Iterable<Key>` | - | Keys of disabled items |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Section content |
+| `...rest` | `MenuSectionProps` | - | React Aria [MenuSection](https://react-spectrum.adobe.com/react-aria/Menu.html#menusection) attributes |
+
+### Dropdown.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | Unique identifier for the item |
+| `textValue` | `string` | - | Text content of the item for typeahead |
+| `variant` | `"default" \| "danger"` | `"default"` | Visual variant of the item |
+| `isDisabled` | `boolean` | - | Whether the item is disabled |
+| `href` | `string` | - | Renders the item as a link to this URL |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Item content or render function |
+| `...rest` | `MenuItemProps` | - | React Aria [MenuItem](https://react-spectrum.adobe.com/react-aria/Menu.html#menuitem) attributes |
+
+### Dropdown.ItemIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `type` | `"checkmark" \| "dot"` | `"checkmark"` | Type of indicator to display |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Custom indicator content or render function |
+
+### Dropdown.SubmenuIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Custom indicator content |
+
+### Dropdown.SubmenuTrigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Submenu trigger content |
+| `...rest` | `SubmenuTriggerProps` | - | React Aria [SubmenuTrigger](https://react-spectrum.adobe.com/react-aria/Menu.html#submenutrigger) attributes |
+
+### Render Props
+
+When using render functions with `Dropdown.Item`, these values are provided:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isSelected` | `boolean` | Whether the item is selected |
+| `isFocused` | `boolean` | Whether the item is focused |
+| `isDisabled` | `boolean` | Whether the item is disabled |
+| `isPressed` | `boolean` | Whether the item is being pressed |
+| `hasSubmenu` | `boolean` | Whether the item opens a submenu |
+
+When using render functions with `Dropdown.ItemIndicator`, these values are provided:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isSelected` | `boolean` | Whether the item is selected |
+| `isIndeterminate` | `boolean` | Whether the item is in an indeterminate state |

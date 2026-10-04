@@ -12,6 +12,7 @@ export * from "./close-button/index.ts";
 export * from "./description/index.ts";
 export * from "./disclosure-group/index.ts";
 export * from "./disclosure/index.ts";
+export * from "./dropdown/index.ts";
 export * from "./empty-state/index.ts";
 export * from "./field-error/index.ts";
 export * from "./fieldset/index.ts";
