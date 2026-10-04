@@ -418,6 +418,7 @@ export const demos: Record<string, DemoItem> = {
   "list-box-with-sections": {
     loader: () => import("./list-box/with-sections").then((m) => m.WithSections),
     file: "list-box/with-sections.tsx",
+  },
   // modal
   "modal-backdrop-variants": {
     loader: () => import("./modal/backdrop-variants").then((m) => m.BackdropVariants),
