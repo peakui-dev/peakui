@@ -15,6 +15,7 @@ const SHADOW_SIZE = 40;
 const STORY = {
   controlled: "components-scrollshadow--controlled",
   default: "components-scrollshadow--default",
+  offset: "components-scrollshadow--offset",
   orientation: "components-scrollshadow--orientation",
   rtl: "components-scrollshadow--rtl",
   size: "components-scrollshadow--custom-size",
@@ -126,6 +127,43 @@ test.describe("ScrollShadow (браузер)", () => {
     await scroller.evaluate((el, size) => {
       el.scrollTop = size / 2;
     }, SHADOW_SIZE);
+
+    await expect
+      .poll(
+        () =>
+          scroller.evaluate((el) =>
+            Number.parseFloat(getComputedStyle(el).getPropertyValue("--scroll-shadow-start-fade")),
+          ),
+        GEOMETRY_TIMEOUT,
+      )
+      .toBeCloseTo(SHADOW_SIZE / 2, 0);
+  });
+
+  /*
+   * animation-range стартового затемнения открывается со смещением: до его прохода градиент
+   * обязан держать ноль, а дальше — расти с той же скоростью.
+   */
+  test("держит стартовое затемнение до прохода смещения", async ({page}) => {
+    await page.goto(`/iframe.html?id=${STORY.offset}`);
+    const scroller = page.getByTestId("offset-scroller");
+    const OFFSET = 80;
+    const halfPastOffset = OFFSET + SHADOW_SIZE / 2;
+
+    await expect(scroller).toBeVisible(GEOMETRY_TIMEOUT);
+    await scroller.evaluate((el, offset) => {
+      el.scrollTop = offset;
+    }, OFFSET);
+    await scroller.evaluate(settleFrames);
+
+    expect(
+      await scroller.evaluate((el) =>
+        Number.parseFloat(getComputedStyle(el).getPropertyValue("--scroll-shadow-start-fade")),
+      ),
+    ).toBe(0);
+
+    await scroller.evaluate((el, top) => {
+      el.scrollTop = top;
+    }, halfPastOffset);
 
     await expect
       .poll(

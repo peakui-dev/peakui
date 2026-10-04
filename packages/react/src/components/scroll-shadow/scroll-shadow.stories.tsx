@@ -168,6 +168,19 @@ export const CustomSize: Story = {
   ),
 };
 
+export const Offset: Story = {
+  name: "Смещение",
+  render: () => (
+    <Showcase title="Смещение">
+      <div className="w-full p-0 sm:max-w-sm">
+        <ScrollShadow className="max-h-[240px] p-4" data-testid="offset-scroller" offset={80}>
+          <LoremContent />
+        </ScrollShadow>
+      </div>
+    </Showcase>
+  ),
+};
+
 export const VisibilityChange: Story = {
   name: "Колбэк видимости",
   render: () => {

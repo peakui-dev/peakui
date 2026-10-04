@@ -172,6 +172,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./scroll-shadow/hide-scroll-bar").then((m) => m.HideScrollBar),
     file: "scroll-shadow/hide-scroll-bar.tsx",
   },
+  "scroll-shadow-offset": {
+    loader: () => import("./scroll-shadow/offset").then((m) => m.Offset),
+    file: "scroll-shadow/offset.tsx",
+  },
   "scroll-shadow-orientation": {
     loader: () => import("./scroll-shadow/orientation").then((m) => m.Orientation),
     file: "scroll-shadow/orientation.tsx",

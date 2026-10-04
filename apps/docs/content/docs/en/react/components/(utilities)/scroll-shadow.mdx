@@ -12,6 +12,8 @@ links:
 import {ScrollShadow} from "@peakui/react";
 ```
 
+A region with no focusable content should also pass `tabIndex={0}` so keyboard users can scroll it (WCAG 2.1.1).
+
 <ComponentPreview name="scroll-shadow-basic" />
 
 ## Examples
@@ -31,6 +33,12 @@ import {ScrollShadow} from "@peakui/react";
 `size` sets the fade gradient length in pixels.
 
 <ComponentPreview name="scroll-shadow-size" />
+
+### Offset
+
+The start fade stays at zero until `offset` pixels are scrolled.
+
+<ComponentPreview name="scroll-shadow-offset" />
 
 ### Visibility Change
 
@@ -116,15 +124,15 @@ The ScrollShadow component uses these CSS classes ([view source styles](https://
 
 ### CSS Variables
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `--scroll-shadow-size` | `40px` | Fade gradient size; set from the `size` prop |
-| `--scroll-shadow-offset` | `0px` | Scroll distance before the fade starts; set from the `offset` prop |
-| `--scroll-shadow-scrollbar-size` | `10px` (`0px` when `hideScrollBar`) | Solid mask gutter reserving space for the native scrollbar |
+| Variable | Purpose |
+|----------|---------|
+| `--scroll-shadow-size` | Fade gradient size (default `40px`), set from the `size` prop |
+| `--scroll-shadow-offset` | Scroll distance before the fade starts (default `0px`), set from the `offset` prop |
+| `--scroll-shadow-scrollbar-size` | Solid mask gutter reserving space for the native scrollbar (`10px`, `0px` when `hideScrollBar`) |
 
 ### Interactive States
 
-The component communicates scroll position through data attributes, styled by the CSS above:
+The component supports both CSS pseudo-classes and data attributes:
 
 - **Top overflow**: `[data-top-scroll="true"]`
 - **Bottom overflow**: `[data-bottom-scroll="true"]`
