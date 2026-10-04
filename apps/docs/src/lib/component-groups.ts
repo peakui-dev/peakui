@@ -11,6 +11,14 @@ export const COMPONENT_GROUPS = [
     ],
   },
   {
+    category: "Collections",
+    components: [
+      "(collections)/dropdown",
+      "(collections)/list-box",
+      "(collections)/tag-group",
+    ],
+  },
+  {
     category: "Data Display",
     components: ["(data-display)/chip"],
   },
@@ -32,6 +40,7 @@ export const COMPONENT_GROUPS = [
       "(forms)/input",
       "(forms)/input-group",
       "(forms)/label",
+      "(forms)/search-field",
       "(forms)/text-field",
     ],
   },
@@ -51,7 +60,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Overlays",
-    components: ["(overlays)/popover", "(overlays)/tooltip"],
+    components: ["(overlays)/modal", "(overlays)/popover", "(overlays)/toast", "(overlays)/tooltip"],
   },
   {
     category: "Typography",
