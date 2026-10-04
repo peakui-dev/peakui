@@ -1,0 +1,32 @@
+import type {ComponentProps} from "react";
+
+import {CloseButtonRoot} from "./close-button.tsx";
+
+/* -------------------------------------------------------------------------------------------------
+ * Compound Component
+ * -----------------------------------------------------------------------------------------------*/
+export const CloseButton = Object.assign(CloseButtonRoot, {
+  Root: CloseButtonRoot,
+});
+
+export type CloseButton = {
+  Props: ComponentProps<typeof CloseButtonRoot>;
+  RootProps: ComponentProps<typeof CloseButtonRoot>;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Named Component
+ * -----------------------------------------------------------------------------------------------*/
+export {CloseButtonRoot};
+
+export type {
+  CloseButtonRootProps,
+  CloseButtonRootProps as CloseButtonProps,
+} from "./close-button.tsx";
+
+/* -------------------------------------------------------------------------------------------------
+ * Variants
+ * -----------------------------------------------------------------------------------------------*/
+export {closeButtonVariants} from "@peakui/styles";
+
+export type {CloseButtonVariants} from "@peakui/styles";
