@@ -155,12 +155,17 @@
 }
 
 /* Danger variant */
+/*
+ * Цвет — --color-danger-soft-foreground, а не --danger: измерено (аудит открытого Dropdown в
+ * apps/storybook/e2e/Dropdown.spec.ts), --danger как ТЕКСТ даёт 2.94:1 на фоне overlay в тёмной
+ * теме, ниже 4.5:1. То же решение, что у label.css и field-error.css — см. их расхождения.
+ */
 .menu-item--danger {
   .menu-item__indicator {
-    @apply text-danger;
+    @apply text-danger-soft-foreground;
   }
 
   [data-slot="label"] {
-    @apply text-danger;
+    @apply text-danger-soft-foreground;
   }
 }
