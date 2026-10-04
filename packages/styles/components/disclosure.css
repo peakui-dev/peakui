@@ -53,7 +53,7 @@
    * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
    */
   transition:
-    height 200ms var(--ease-out-quart),
+    height 200ms var(--ease-out-quad),
     opacity 200ms var(--ease-out);
   @apply motion-reduce:transition-none;
 
