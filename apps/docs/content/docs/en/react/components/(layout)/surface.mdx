@@ -1,0 +1,85 @@
+---
+title: Surface
+description: A themed surface level for content and nested controls
+links:
+  source: surface/surface.tsx
+  styles: surface.css
+---
+
+## Usage
+
+```tsx
+import {Surface} from "@peakui/react";
+```
+
+<ComponentPreview name="surface-basic" />
+
+## Examples
+
+### Variants
+
+`transparent` paints no background of its own and keeps the base text color.
+
+<ComponentPreview name="surface-variants" />
+
+### Nested Levels
+
+Each level provides `SurfaceContext`, telling nested components which level they sit on.
+
+<ComponentPreview name="surface-nested" />
+
+## Customization
+
+### Tailwind CSS
+
+Padding, radius and shadow are consumer-side: the block itself ships none of them.
+
+```tsx
+<Surface className="rounded-3xl p-6 shadow-surface">Content</Surface>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .surface--secondary {
+    @apply bg-default text-default-foreground;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Surface component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/surface.css)):
+
+#### Base Classes [!toc]
+
+- `.surface` - Base surface styles: relative, with the default text color
+
+#### Variant Classes [!toc]
+
+- `.surface--default` - `bg-surface` and its matching foreground
+- `.surface--secondary` - `bg-surface-secondary` and its matching foreground
+- `.surface--tertiary` - `bg-surface-tertiary` and its matching foreground
+- `.surface--transparent` - Transparent background; keeps the base text color
+
+### Slots
+
+- `[data-slot="surface"]` - The root element
+
+## API Reference
+
+### Surface
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The content to place on the surface (required) |
+| `variant` | `'default' \| 'secondary' \| 'tertiary' \| 'transparent'` | `'default'` | Surface level |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own element |
+
+Every other attribute of a `<div>` is accepted.

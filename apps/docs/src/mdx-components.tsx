@@ -1,6 +1,7 @@
 import type {MDXComponents} from "mdx/types";
 import type {ComponentProps, ReactNode} from "react";
 
+import {Surface} from "@peakui/react";
 import {Callout as FDCallout} from "fumadocs-ui/components/callout";
 import {Card, Cards} from "fumadocs-ui/components/card";
 import {Pre} from "fumadocs-ui/components/codeblock";
@@ -38,10 +39,9 @@ function ComponentPreviewWithSuspense(props: ComponentProps<typeof ComponentPrev
 
 function Callout({className, ...props}: ComponentProps<typeof FDCallout>) {
   return (
-    <FDCallout
-      {...props}
-      className={cn("bg-surface text-surface-foreground shadow-surface", className)}
-    />
+    <Surface className={cn("shadow-surface", className)}>
+      <FDCallout {...props} />
+    </Surface>
   );
 }
 

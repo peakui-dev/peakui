@@ -176,6 +176,19 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./spinner/sizes").then((m) => m.Sizes),
     file: "spinner/sizes.tsx",
   },
+  // surface
+  "surface-basic": {
+    loader: () => import("./surface/basic").then((m) => m.Basic),
+    file: "surface/basic.tsx",
+  },
+  "surface-nested": {
+    loader: () => import("./surface/nested").then((m) => m.Nested),
+    file: "surface/nested.tsx",
+  },
+  "surface-variants": {
+    loader: () => import("./surface/variants").then((m) => m.Variants),
+    file: "surface/variants.tsx",
+  },
   // text-field
   "text-field-basic": {
     loader: () => import("./text-field/basic").then((m) => m.Basic),
