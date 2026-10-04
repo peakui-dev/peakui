@@ -1,0 +1,34 @@
+/* Breadcrumbs. Class names come from src/components/breadcrumbs/breadcrumbs.styles.ts. */
+
+/* Base breadcrumbs container */
+.breadcrumbs {
+  @apply flex items-center gap-1.5;
+
+  /* Breadcrumb link */
+  .breadcrumbs__link {
+    @apply relative text-sm leading-5 font-medium text-muted no-underline opacity-100;
+
+    &:hover,
+    &[data-hovered="true"] {
+      @apply underline;
+    }
+
+    /*
+     * The current page's link: RAC marks it with aria-current="page" (and disables it as a
+     * control), so the full-opacity accent colour here is what keeps it readable.
+     */
+    &[aria-current="page"] {
+      @apply text-link opacity-100;
+    }
+  }
+
+  /* Breadcrumb item wrapper */
+  .breadcrumbs__item {
+    @apply flex shrink-0 items-center justify-center gap-1;
+  }
+
+  /* Separator icon */
+  .breadcrumbs__separator {
+    @apply size-3 text-muted rtl:rotate-180;
+  }
+}

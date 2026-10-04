@@ -12,6 +12,19 @@ export interface DemoItem {
  * edited by hand; the sort-keys rules are off for this file.
  */
 export const demos: Record<string, DemoItem> = {
+  // breadcrumbs
+  "breadcrumbs-basic": {
+    loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),
+    file: "breadcrumbs/basic.tsx",
+  },
+  "breadcrumbs-custom-separator": {
+    loader: () => import("./breadcrumbs/custom-separator").then((m) => m.CustomSeparator),
+    file: "breadcrumbs/custom-separator.tsx",
+  },
+  "breadcrumbs-disabled": {
+    loader: () => import("./breadcrumbs/disabled").then((m) => m.Disabled),
+    file: "breadcrumbs/disabled.tsx",
+  },
   // button
   "button-basic": {
     loader: () => import("./button/basic").then((m) => m.Basic),

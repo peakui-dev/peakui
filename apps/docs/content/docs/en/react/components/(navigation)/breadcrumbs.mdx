@@ -1,0 +1,138 @@
+---
+title: Breadcrumbs
+description: Breadcrumb trail for hierarchical navigation
+links:
+  rac: Breadcrumbs
+  source: breadcrumbs/breadcrumbs.tsx
+  styles: breadcrumbs.css
+---
+
+## Usage
+
+```tsx
+import {Breadcrumbs} from "@peakui/react";
+```
+
+<ComponentPreview name="breadcrumbs-basic" />
+
+### Anatomy
+
+```tsx
+import {Breadcrumbs} from "@peakui/react";
+
+export default () => (
+  <Breadcrumbs>
+    <Breadcrumbs.Item href="/products">Products</Breadcrumbs.Item>
+    <Breadcrumbs.Item>Laptop</Breadcrumbs.Item>
+  </Breadcrumbs>
+);
+```
+
+## Examples
+
+### Custom Separator
+
+`separator` accepts any node; an element receives the separator slot's class and `data-slot`.
+
+<ComponentPreview name="breadcrumbs-custom-separator" />
+
+### Disabled State
+
+`isDisabled` disables every link in the trail.
+
+<ComponentPreview name="breadcrumbs-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Breadcrumbs className="text-base">
+  <Breadcrumbs.Item href="#">Home</Breadcrumbs.Item>
+  <Breadcrumbs.Item>Laptop</Breadcrumbs.Item>
+</Breadcrumbs>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .breadcrumbs {
+    gap: calc(var(--spacing) * 2);
+  }
+
+  .breadcrumbs__link {
+    color: var(--color-muted);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Breadcrumbs component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/breadcrumbs.css)):
+
+#### Base Classes [!toc]
+
+- `.breadcrumbs` - Base list styles: flex row, `gap-1.5`
+
+#### Element Classes [!toc]
+
+- `.breadcrumbs__item` - The `<li>` wrapper: flex row, `gap-1`
+- `.breadcrumbs__link` - The item's link, composed with the `.link` classes
+- `.breadcrumbs__separator` - The separator glyph: `size-3`, muted, flipped in RTL
+
+### Slots
+
+- `[data-slot="breadcrumbs"]` - The root ordered list
+- `[data-slot="breadcrumbs-item"]` - Each breadcrumb's `<li>`
+- `[data-slot="breadcrumbs-separator"]` - Each separator between items
+
+The item's link is the [Link](/react/components/link) component and keeps its own `link` slot.
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]` on a link
+- **Focus**: `:focus-visible` or `[data-focus-visible]` on a link
+- **Pressed**: `:active` or `[data-pressed]` on a link
+- **Current**: `[aria-current="page"]` on the last item's link
+- **Disabled**: `[aria-disabled="true"]` on a link
+
+## API Reference
+
+### Breadcrumbs
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The breadcrumb items |
+| `separator` | `ReactNode` | - | Separator between items; defaults to a right chevron |
+| `isDisabled` | `boolean` | - | Disables every link in the trail |
+| `onAction` | `(key: Key) => void` | - | Called with the pressed item's `id` |
+| `className` | `string` | - | Additional classes on the list |
+| `render` | `DOMRenderFunction<'ol', undefined>` | - | Replaces the rendered `<ol>` with your own element |
+
+Every other attribute of an `<ol>` is accepted.
+
+### Breadcrumbs.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode \| ((values: BreadcrumbRenderProps) => ReactNode)` | - | The item content, or a function of the render props |
+| `href` | `string` | - | The URL the item's link navigates to |
+| `id` | `Key` | - | Passed to `onAction` when the item is pressed |
+| `className` | `string \| ((values: BreadcrumbRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `render` | `PossibleLinkDOMRenderProps<'span', LinkRenderProps>` | - | Replaces the item's link with your own element |
+
+Every other attribute of an `<a>` is accepted.
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: BreadcrumbRenderProps) => ReactNode` | Receives `isCurrent`, `isDisabled` |
+| `className` | `(values: BreadcrumbRenderProps) => string` | Same values as `children` |
