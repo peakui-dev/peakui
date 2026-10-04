@@ -123,12 +123,12 @@ export function TOCItems({className, ref, ...props}: TOCItemsProps) {
  * observer is engine territory and stays: fumadocs-core's ScrollProvider is fed the same
  * element, so active-anchor tracking keeps working against the element that scrolls.
  */
-export function TOCScrollArea({children, className, ...props}: ComponentProps<"div">) {
+export function TOCScrollArea({children, className, ref, ...props}: ComponentProps<"div">) {
   const viewRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <ScrollShadow
-      ref={viewRef}
+      ref={mergeRefs(ref, viewRef)}
       hideScrollBar
       className={cn("relative min-h-0 text-sm ms-px py-3", className)}
       orientation="vertical"
