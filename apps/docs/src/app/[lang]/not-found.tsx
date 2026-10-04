@@ -1,4 +1,4 @@
-import LinkRoot from "fumadocs-core/link";
+import {Link} from "@peakui/react";
 import {HomeLayout} from "fumadocs-ui/layouts/home";
 
 import {Footer} from "@/components/footer";
@@ -23,12 +23,9 @@ export default async function NotFound() {
       <div className="mt-12 flex h-full flex-col items-center justify-center text-center md:mt-24">
         <h2 className="text-4xl font-bold">{notFound.title}</h2>
         <p className="mt-2 max-w-sm text-balance text-muted">{notFound.description}</p>
-        <LinkRoot
-          className="button button--md button--tertiary mt-4"
-          href={`/${i18n.defaultLanguage}`}
-        >
+        <Link className="button button--md button--tertiary mt-4" href={`/${i18n.defaultLanguage}`}>
           {notFound.returnHome}
-        </LinkRoot>
+        </Link>
       </div>
       <Footer dict={dict.footer} />
     </HomeLayout>

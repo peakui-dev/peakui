@@ -1,0 +1,148 @@
+---
+title: Link
+description: A styled navigation link with optional icon
+links:
+  rac: Link
+  source: link/link.tsx
+  styles: link.css
+---
+
+## Usage
+
+```tsx
+import {Link} from "@peakui/react";
+```
+
+<ComponentPreview name="link-basic" />
+
+### Anatomy
+
+```tsx
+import {Link} from "@peakui/react";
+
+export default () => (
+  <Link href="/pricing">
+    Pricing
+    <Link.Icon />
+  </Link>
+);
+```
+
+## Examples
+
+### Custom Icon
+
+`Link.Icon` renders the built-in external-link glyph unless you pass your own children.
+
+<ComponentPreview name="link-custom-icon" />
+
+### Icon Placement
+
+The icon slot renders wherever you place it relative to the label.
+
+<ComponentPreview name="link-icon-placement" />
+
+### Underline
+
+The base ships `underline-offset-4` with no underline; utilities on `className` decide when it shows.
+
+<ComponentPreview name="link-underline" />
+
+### Disabled State
+
+`isDisabled` sets `aria-disabled="true"` and keeps the link in the accessibility tree.
+
+<ComponentPreview name="link-disabled" />
+
+### Button Variants
+
+Combining with the `button` classes turns the link into a tertiary button-shaped anchor.
+
+<ComponentPreview name="link-button-variants" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Link className="underline underline-offset-2" href="/pricing">
+  Pricing
+</Link>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .link {
+    --link-color: var(--color-accent);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Link component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/link.css)):
+
+#### Base Classes [!toc]
+
+- `.link` - Base link styles: inline-flex, `text-link` color, hover underline with offset
+
+#### Element Classes [!toc]
+
+- `.link__icon` - The icon slot: `0.75em` box, decorative, `opacity-60` until hover
+- `.link__icon[data-default-icon="true"]` - Spacing applied when the built-in glyph is used
+
+#### Modifier Classes [!toc]
+
+- `.button` - Composition hook: `.link.button` drops the gap and the underline
+
+### Slots
+
+- `[data-slot="link"]` - The root anchor element
+- `[data-slot="link-icon"]` - The icon slot element
+- `[data-slot="link-default-icon"]` - The built-in external-link `<svg>`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Pressed**: `:active` or `[data-pressed]`
+- **Focus**: `:focus-visible` or `[data-focus-visible]`
+- **Disabled**: `[aria-disabled="true"]`
+
+## API Reference
+
+### Link
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode \| ((values: LinkRenderProps) => ReactNode)` | - | The link content, or a function of the render props |
+| `href` | `string` | - | The URL the link navigates to |
+| `isDisabled` | `boolean` | - | Sets `aria-disabled="true"` and blocks navigation |
+| `className` | `string \| ((values: LinkRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `render` | `LinkDOMRenderProps` | - | Replaces the rendered `<a>` with your own element |
+
+Every other attribute of an `<a>` is accepted.
+
+### Link.Icon
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Replaces the built-in external-link glyph |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: LinkRenderProps) => ReactNode` | Receives `isCurrent`, `isDisabled`, `isHovered`, `isPressed`, `isFocused`, `isFocusVisible` |
+| `className` | `(values: LinkRenderProps) => string` | Same values as `children` |
