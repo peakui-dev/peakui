@@ -1,0 +1,253 @@
+---
+title: SearchField
+description: Search input with icon and clear button
+links:
+  rac: SearchField
+  source: search-field/search-field.tsx
+  styles: search-field.css
+---
+
+## Usage
+
+```tsx
+import {Label, SearchField} from "@peakui/react";
+```
+
+<ComponentPreview name="search-field-basic" />
+
+### Anatomy
+
+```tsx
+import {Description, FieldError, Label, SearchField} from "@peakui/react";
+
+export default () => (
+  <SearchField>
+    <Label />
+    <SearchField.Group>
+      <SearchField.SearchIcon />
+      <SearchField.Input />
+      <SearchField.ClearButton />
+    </SearchField.Group>
+    <Description />
+    <FieldError />
+  </SearchField>
+);
+```
+
+`SearchField` is the root: it owns the value, the validation state and the ids that link the parts. `Label`, `Description` and `FieldError` are its children, each a component of its own.
+
+## Examples
+
+### Variants
+
+`variant="primary"` (default) carries the field shadow; `variant="secondary"` is a flat fill for surfaces.
+
+<ComponentPreview name="search-field-variants" />
+
+### In Surface
+
+Use `variant="secondary"` inside a `Surface`.
+
+<ComponentPreview name="search-field-on-surface" />
+
+### With Description
+
+<ComponentPreview name="search-field-with-description" />
+
+### Required
+
+`isRequired` marks the label and makes the field required for form submission.
+
+<ComponentPreview name="search-field-required" />
+
+### Disabled State
+
+<ComponentPreview name="search-field-disabled" />
+
+### Full Width
+
+<ComponentPreview name="search-field-full-width" />
+
+### Validation
+
+`isInvalid` marks the field as invalid and makes `FieldError` render.
+
+<ComponentPreview name="search-field-validation" />
+
+### Controlled
+
+`onChange` receives the value as a string, not an event.
+
+<ComponentPreview name="search-field-controlled" />
+
+### With Validation
+
+Compute `isInvalid` from the value to validate as the user types.
+
+<ComponentPreview name="search-field-with-validation" />
+
+### Custom Icons
+
+Both `SearchField.SearchIcon` and `SearchField.ClearButton` accept a custom icon as children.
+
+<ComponentPreview name="search-field-custom-icons" />
+
+### With Keyboard Shortcut
+
+`SearchField.Input` forwards `ref` to the `<input>`.
+
+<ComponentPreview name="search-field-with-keyboard-shortcut" />
+
+### Render Function
+
+`render` replaces the root element; pass the props and the ref through to it.
+
+<ComponentPreview name="search-field-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="search-field-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .search-field__group {
+    --search-field-group-radius: var(--radius-lg);
+  }
+
+  .search-field__search-icon {
+    color: var(--color-accent);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The SearchField component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/search-field.css)):
+
+#### Base & Variant Classes [!toc]
+
+- `.search-field` - The field root
+- `.search-field--primary` - Primary variant (default)
+- `.search-field--secondary` - Flat fill for surfaces
+- `.search-field--full-width` - Stretches the root to the container's width
+
+#### Element Classes [!toc]
+
+- `.search-field__group` - The frame around the icon, the control and the clear button
+- `.search-field__group--full-width` - Stretches the group to the container's width
+- `.search-field__input` - The control
+- `.search-field__search-icon` - The search icon
+- `.search-field__clear-button` - The clear button
+
+### Slots
+
+- `[data-slot="search-field"]`
+- `[data-slot="search-field-group"]`
+- `[data-slot="search-field-input"]`
+- `[data-slot="search-field-search-icon"]`
+- `[data-slot="search-field-clear-button"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--search-field-group-bg` | Group background color |
+| `--search-field-group-bg-hover` | Group background color when hovered |
+| `--search-field-group-bg-focus` | Group background color when the control is focused |
+| `--search-field-group-fg` | Text color |
+| `--search-field-group-placeholder` | Placeholder color |
+| `--search-field-group-border` | Group border color |
+| `--search-field-group-border-hover` | Group border color when hovered |
+| `--search-field-group-border-focus` | Group border color when the control is focused |
+| `--search-field-group-radius` | Group corner radius |
+| `--search-field-group-shadow` | Group box shadow |
+
+### Interactive States
+
+- **Hover**: the group's `:hover` or `[data-hovered]`
+- **Focus**: the group's `:focus-within` or `[data-focus-within]`
+- **Invalid**: the root or group's `[data-invalid]` or `[aria-invalid="true"]`; the root also hides a `Description` while invalid
+- **Disabled**: the root or group's `[data-disabled]` or `[aria-disabled="true"]`
+- **Empty**: the root's `[data-empty="true"]` hides the clear button
+
+## API Reference
+
+### SearchField
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary'` | `'primary'` | Surface style, applied to the group. Inside a field it defaults to the outer field's `variant` |
+| `fullWidth` | `boolean` | `false` | Whether the field and its group take the full width of their container |
+| `value` | `string` | - | The controlled value |
+| `defaultValue` | `string` | - | The initial value when uncontrolled |
+| `onChange` | `(value: string) => void` | - | Handler called with the new value |
+| `onClear` | `() => void` | - | Handler called when the clear button is pressed |
+| `onSubmit` | `(value: string) => void` | - | Handler called when the user presses Enter |
+| `name` | `string` | - | Name of the field in form submission |
+| `isRequired` | `boolean` | `false` | Whether a value is required for form submission |
+| `isInvalid` | `boolean` | `false` | Whether the value is invalid |
+| `isDisabled` | `boolean` | `false` | Whether the field is disabled |
+| `isReadOnly` | `boolean` | `false` | Whether the value can be selected but not changed |
+| `validate` | `(value: string) => string \| string[] \| true \| null \| undefined` | - | Returns an error message, or messages, for an invalid value, and `true`, `null` or `undefined` for a valid one |
+| `validationBehavior` | `'native' \| 'aria'` | `'native'` | Whether validation blocks form submission (`native`) or only marks the field (`aria`) |
+| `children` | `React.ReactNode \| (values: SearchFieldRenderProps) => React.ReactNode` | - | The parts of the field, or a function of the field's state |
+| `className` | `string \| (values: SearchFieldRenderProps) => string` | - | Additional classes, or a function of the field's state |
+| `render` | `DOMRenderFunction<'div', SearchFieldRenderProps>` | - | Replaces the rendered root element |
+
+Every other [React Aria SearchField](https://react-aria.adobe.com/SearchField) prop is accepted, including `autoFocus`, `maxLength`, `autoComplete` and the `aria-*` attributes.
+
+### SearchField.Group
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| (values: GroupRenderProps) => React.ReactNode` | - | The icon, the control and the clear button |
+| `className` | `string \| (values: GroupRenderProps) => string` | - | Additional classes, or a function of the group's state |
+
+Every other [React Aria Group](https://react-aria.adobe.com/Group) prop is accepted.
+
+### SearchField.Input
+
+Renders an `<input type="search">` and accepts its attributes, such as `placeholder`, `autoFocus` and `ref`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string \| (values: InputRenderProps) => string` | - | Additional classes, or a function of the input's state |
+
+### SearchField.SearchIcon
+
+Renders `IconSearch`; a custom icon replaces it as `children`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactElement` | `<IconSearch />` | A custom icon element, which receives the classes and the slot |
+| `className` | `string` | - | Additional classes |
+
+### SearchField.ClearButton
+
+A `CloseButton` wired to the field: pressing it clears the value and calls `onClear`. It is hidden while the field is empty, and excluded from the tab order.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| ((values: ButtonRenderProps) => React.ReactNode)` | `CloseIcon` | A custom icon, or a function of the button's state |
+| `className` | `string \| (values: ButtonRenderProps) => string` | - | Additional classes, or a function of the button's state |
+| `aria-label` | `string` | `'Close'` | The button's accessible name; the `CloseButton` default applies unless overridden |
+
+### Render Props
+
+When `children` or `className` of the root is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isEmpty` | `boolean` | Whether the field is empty |
+| `isDisabled` | `boolean` | Whether the field is disabled |
+| `isInvalid` | `boolean` | Whether the field is invalid |
+| `isReadOnly` | `boolean` | Whether the field is read only |
+| `isRequired` | `boolean` | Whether the field is required |
