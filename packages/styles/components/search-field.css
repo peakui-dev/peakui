@@ -1,0 +1,264 @@
+/*
+ * SearchField — поле поиска: корень с подписью и сообщениями, группа-оболочка с иконкой, контролом
+ * и кнопкой очистки. Имена классов приходят из src/components/search-field/search-field.styles.ts.
+ *
+ * Оболочка несёт заливку, границу, радиус и кольцо фокуса; контрол внутри прозрачен и безграничен —
+ * иначе фокус рисуется дважды. Тот же принцип, что у .input-group.
+ *
+ * Сверено построчно с heroui/packages/styles/components/search-field.css. Расхождения перечислены в
+ * конце файла — каждое с причиной.
+ */
+
+.search-field {
+  @apply flex flex-col gap-1;
+
+  /*
+   * У невалидного поля описание скрывается: сообщение об ошибке заменяет его, а не встаёт под ним.
+   * Обе формы — псевдоатрибут и data-* — как того требует css-authoring.md.
+   */
+  &[data-invalid="true"],
+  &[aria-invalid="true"] {
+    [data-slot="description"] {
+      @apply hidden;
+    }
+  }
+
+  [data-slot="label"] {
+    @apply w-fit;
+  }
+
+  /* Пустое поле прячет кнопку очистки: чистить нечего. */
+  &[data-empty="true"] {
+    [data-slot="search-field-clear-button"] {
+      @apply pointer-events-none opacity-0;
+    }
+  }
+}
+
+.search-field__group {
+  /* Ручки темизации — те же имена, что у .input-group, с префиксом своего блока. */
+  --search-field-group-bg: var(--color-field);
+  --search-field-group-bg-hover: var(--color-field-hover);
+  --search-field-group-bg-focus: var(--color-field-focus);
+  --search-field-group-fg: var(--color-field-foreground);
+  --search-field-group-placeholder: var(--color-field-placeholder);
+  --search-field-group-border: var(--color-field-border);
+  --search-field-group-border-hover: var(--color-field-border-hover);
+  --search-field-group-border-focus: var(--color-field-border-focus);
+  --search-field-group-radius: var(--radius-field);
+  --search-field-group-shadow: var(--shadow-field);
+
+  @apply relative inline-flex items-center outline-none;
+  /*
+   * min-h, а не h: одна линия с .input-group и .button — 40px до 48rem ширины вьюпорта, 36px от
+   * неё. 36px оставляют место кнопке очистки: цель 24×24 (WCAG 2.2 SC 2.5.8) умещается, и оболочка
+   * от неё не растёт.
+   */
+  @apply min-h-10 md:min-h-9;
+  @apply text-sm;
+
+  border: var(--border-width-field) solid var(--search-field-group-border);
+  border-radius: var(--search-field-group-radius);
+  background-color: var(--search-field-group-bg);
+  /*
+   * Кольцо фокуса приходит тенью через --focus-ring (utilities/index.css) и ложится ПОВЕРХ
+   * собственной тени поля, а не вместо неё. Запасное значение прозрачное и той же формы, поэтому
+   * список теней не меняет длину — box-shadow интерполируется без скачка.
+   */
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent), var(--search-field-group-shadow);
+  color: var(--search-field-group-fg);
+
+  /*
+   * CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу.
+   * box-shadow в списке — это кольцо фокуса, собранное тенью, как у .input-group.
+   */
+  transition:
+    background-color 150ms var(--ease-smooth),
+    border-color 150ms var(--ease-smooth),
+    box-shadow 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  /* :hover под (hover: hover) — на таче он залипает; data-hovered ставит React Aria сама. */
+  @media (hover: hover) {
+    &:hover:not(:focus-within) {
+      background-color: var(--search-field-group-bg-hover);
+      border-color: var(--search-field-group-border-hover);
+    }
+  }
+
+  &[data-hovered]:not(:focus-within):not([data-focus-within]) {
+    background-color: var(--search-field-group-bg-hover);
+    border-color: var(--search-field-group-border-hover);
+  }
+
+  /*
+   * Кольцо фокуса на ОБОЛОЧКЕ, а не на контроле: иначе оно рисуется внутри и упирается в иконку и
+   * кнопку очистки. :focus-within — форма для разметки без React, data-focus-within ставит React
+   * Aria на сам Group.
+   */
+  &:focus-within,
+  &[data-focus-within="true"] {
+    @apply status-focused-field;
+  }
+
+  /*
+   * Невалидная граница приходит из status-invalid-field и равна --color-danger-soft-foreground.
+   */
+  &[aria-invalid="true"],
+  &[data-invalid] {
+    @apply status-invalid-field;
+    background-color: var(--search-field-group-bg-focus);
+  }
+
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /*
+   * Автозаполнение. Браузер красит :autofill только на внутреннем <input>, внутри его content-box.
+   * Подсветку поднимаем на оболочку; на самом контроле её гасим ниже — иначе прямоугольник с
+   * острыми углами лежит внутри скруглённой оболочки, а иконка и кнопка не подсвечиваются вовсе.
+   */
+  &:has([data-slot="search-field-input"]:autofill) {
+    background-color: var(--search-field-group-bg-focus);
+    border-color: var(--search-field-group-border-focus);
+  }
+
+  /*
+   * Структурная половина forced-colors: тема переназначает цвет границы, но не её ширину —
+   * --field-border-width равен 0px и в блоке forced-colors не переопределён. Без строки ниже
+   * оболочка осталась бы без видимых пределов. Запись в бэклоге; правильное место — слой токенов.
+   */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
+}
+
+.search-field__input {
+  @apply min-w-0 flex-1 appearance-none rounded-none border-0 bg-transparent px-3 py-2 shadow-none outline-none;
+  /* 16px на узком вьюпорте: Safari на iOS зумит страницу при фокусе в поле мельче 16px. */
+  @apply text-base sm:text-sm;
+
+  color: inherit;
+
+  &::placeholder {
+    color: var(--search-field-group-placeholder);
+  }
+
+  /* Прячем нативную кнопку очистки браузера: своя — кнопка слота clear. */
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Фокус рисует оболочка — у контрола его не должно быть видно ни в одной форме. */
+  &:focus,
+  &:focus-visible,
+  &[data-focused],
+  &[data-focus-visible] {
+    @apply outline-none;
+  }
+
+  /* Со стороны, где контрол примыкает к иконке или кнопке очистки, он теряет часть отступа. */
+  .search-field__group:has([data-slot="search-field-search-icon"]) & {
+    @apply ps-2;
+  }
+
+  .search-field__group:has([slot="clear"]) & {
+    @apply pe-2;
+  }
+
+  /*
+   * Гасим собственную заливку автозаполнения: единая подсветка живёт на оболочке. Цвет текста и
+   * каретки сохраняем, а переход background-color уводим в бесконечность — иначе трюк с внутренней
+   * тенью мигает при смене состояния. Форма взята у эталона целиком.
+   */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active,
+  &:autofill {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    box-shadow: 0 0 0 1000px transparent inset;
+    -webkit-text-fill-color: var(--search-field-group-fg);
+    caret-color: var(--search-field-group-fg);
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+.search-field__search-icon {
+  @apply pointer-events-none ms-3 me-0 size-4 shrink-0;
+
+  color: var(--search-field-group-placeholder);
+}
+
+.search-field__clear-button {
+  @apply me-2 size-5 shrink-0;
+
+  /* Иконка кнопки очистки меньше стандартного глифа CloseButton: 12px вместо 16px. */
+  [data-slot="close-button-icon"] {
+    @apply size-3;
+  }
+}
+
+/* ---------- Варианты ---------- */
+
+.search-field--primary {
+  /* Без стилей: вариант по умолчанию живёт в .search-field__group. */
+}
+
+/*
+ * Поле на поверхности: нейтральная заливка, без тени. Достаточно перезаписать ручки — правила
+ * покоя, наведения и фокуса выше читают их же и каскадом достают эти значения.
+ */
+.search-field--secondary .search-field__group {
+  --search-field-group-bg: var(--color-default);
+  --search-field-group-bg-hover: var(--color-default-hover);
+  --search-field-group-bg-focus: var(--color-default);
+  /*
+   * Прозрачная тень, а не none: тень поля стоит членом списка рядом с кольцом, а none членом
+   * списка быть не может — объявление стало бы невалидным целиком, и кольцо пропало бы вместе с
+   * ним.
+   */
+  --search-field-group-shadow: 0 0 0 0 transparent;
+}
+
+/* ---------- Ширина ---------- */
+
+.search-field--full-width {
+  @apply w-full;
+}
+
+.search-field__group--full-width {
+  @apply w-full;
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. forced-colors. У эталона нет вовсе; здесь поднимается ещё и border-width, потому что наш
+ *    --field-border-width равен 0px. Та же строка, что у .input-group.
+ *
+ * 2. Невалидная граница приходит из status-invalid-field и равна --color-danger-soft-foreground.
+ *    Эталон красит --color-field-border-invalid, который не объявлен ни в одной его теме — то есть
+ *    не рисует ничего. Измерения — спека 2026-10-03-input-field-family-design, раздел 4.1.
+ *
+ * 3. min-h-10 md:min-h-9 вместо фиксированного h-9: одна линия с .input-group и .button, и место
+ *    под цель 24×24 у кнопки очистки.
+ *
+ * 4. overflow-hidden на оболочке сознательно НЕ ставится (у эталона стоит): он срезал бы кольцо
+ *    фокуса кнопки очистки, то есть SC 2.4.11. Подсветку автозаполнения, которую эталон держит
+ *    обрезкой, здесь гасит нейтрализация на самом контроле.
+ *
+ * 5. Заливка и граница — через ручки --search-field-group-*, а не утилиты bg-field / border-field
+ *    как у эталона: ручки — публичный шов темизации, и вариант secondary меняет только их.
+ *
+ * 6. [data-hovered] вне @media (hover: hover), с :hover внутри запроса — так же, как в
+ *    close-button.css и input-group.css.
+ *
+ * 7. Радиус у иконки и кнопки очистки не переопределяется: они отступают от кромок (ms-3 / me-2),
+ *    их углы не пересекаются с дугами оболочки, и концентрическая пара здесь не нужна.
+ */

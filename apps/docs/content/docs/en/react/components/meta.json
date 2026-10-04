@@ -27,6 +27,7 @@
     "(navigation)/link",
     "(overlays)/popover",
     "(utilities)/scroll-shadow",
+    "(forms)/search-field",
     "(layout)/separator",
     "(feedback)/skeleton",
     "(feedback)/spinner",

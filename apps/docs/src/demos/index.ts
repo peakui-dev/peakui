@@ -448,6 +448,64 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./scroll-shadow/without-overflow").then((m) => m.WithoutOverflow),
     file: "scroll-shadow/without-overflow.tsx",
   },
+  // search-field
+  "search-field-basic": {
+    loader: () => import("./search-field/basic").then((m) => m.Basic),
+    file: "search-field/basic.tsx",
+  },
+  "search-field-controlled": {
+    loader: () => import("./search-field/controlled").then((m) => m.Controlled),
+    file: "search-field/controlled.tsx",
+  },
+  "search-field-custom-icons": {
+    loader: () => import("./search-field/custom-icons").then((m) => m.CustomIcons),
+    file: "search-field/custom-icons.tsx",
+  },
+  "search-field-custom-styles": {
+    loader: () => import("./search-field/custom-styles").then((m) => m.CustomStyles),
+    file: "search-field/custom-styles.tsx",
+  },
+  "search-field-disabled": {
+    loader: () => import("./search-field/disabled").then((m) => m.Disabled),
+    file: "search-field/disabled.tsx",
+  },
+  "search-field-full-width": {
+    loader: () => import("./search-field/full-width").then((m) => m.FullWidth),
+    file: "search-field/full-width.tsx",
+  },
+  "search-field-on-surface": {
+    loader: () => import("./search-field/on-surface").then((m) => m.OnSurface),
+    file: "search-field/on-surface.tsx",
+  },
+  "search-field-render-function": {
+    loader: () => import("./search-field/render-function").then((m) => m.RenderFunction),
+    file: "search-field/render-function.tsx",
+  },
+  "search-field-required": {
+    loader: () => import("./search-field/required").then((m) => m.Required),
+    file: "search-field/required.tsx",
+  },
+  "search-field-validation": {
+    loader: () => import("./search-field/validation").then((m) => m.Validation),
+    file: "search-field/validation.tsx",
+  },
+  "search-field-variants": {
+    loader: () => import("./search-field/variants").then((m) => m.Variants),
+    file: "search-field/variants.tsx",
+  },
+  "search-field-with-description": {
+    loader: () => import("./search-field/with-description").then((m) => m.WithDescription),
+    file: "search-field/with-description.tsx",
+  },
+  "search-field-with-keyboard-shortcut": {
+    loader: () =>
+      import("./search-field/with-keyboard-shortcut").then((m) => m.WithKeyboardShortcut),
+    file: "search-field/with-keyboard-shortcut.tsx",
+  },
+  "search-field-with-validation": {
+    loader: () => import("./search-field/with-validation").then((m) => m.WithValidation),
+    file: "search-field/with-validation.tsx",
+  },
   // separator
   "separator-basic": {
     loader: () => import("./separator/basic").then((m) => m.Basic),
