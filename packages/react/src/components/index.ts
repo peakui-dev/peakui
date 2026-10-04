@@ -18,5 +18,6 @@ export * from "./separator/index.ts";
 export * from "./skeleton/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
+export * from "./tabs/index.ts";
 export * from "./textfield/index.ts";
 export * from "./tooltip/index.ts";

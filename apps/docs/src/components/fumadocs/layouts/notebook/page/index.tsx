@@ -2,7 +2,7 @@ import type {BreadcrumbProps, FooterProps} from "./client";
 import type {AnchorProviderProps, TOCItemType} from "fumadocs-core/toc";
 import type {ComponentProps, ReactNode} from "react";
 
-import {TOCProvider, TOCScrollArea} from "fumadocs-ui/components/toc";
+import {TOCProvider} from "fumadocs-ui/components/toc";
 import {buttonVariants} from "fumadocs-ui/components/ui/button";
 import {I18nLabel} from "fumadocs-ui/contexts/i18n";
 
@@ -16,7 +16,7 @@ import {
   PageTOCPopoverContent,
   PageTOCPopoverTrigger,
 } from "./client";
-import {TOCItems} from "./toc-items";
+import {TOCItems, TOCScrollArea} from "./toc-items";
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
