@@ -27,11 +27,6 @@
   "footer": {
     "tagline": "Built on React Aria Components and Tailwind CSS."
   },
-  "statusChip": {
-    "new": "New",
-    "preview": "Preview",
-    "updated": "Updated"
-  },
   "componentLinks": {
     "source": "Source",
     "stylesSource": "Styles source"

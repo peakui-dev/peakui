@@ -1,17 +1,16 @@
 import type {ComponentInfo} from "./component-item";
-import type {StatusChipStatus} from "./status-chip";
+import type {ComponentStatus} from "@/lib/component-status";
 
 import {getDemo} from "@/demos";
 import {COMPONENT_GROUPS} from "@/lib/component-groups";
+import {isComponentStatus} from "@/lib/component-status";
 import {source} from "@/lib/source";
 
 import {ComponentItem} from "./component-item";
 
-const STATUS_ICONS: readonly string[] = ["preview", "new", "updated", "new-dot"];
-
 interface ComponentWithStatus {
   component: ComponentInfo;
-  status?: StatusChipStatus;
+  status?: ComponentStatus;
 }
 
 interface ComponentsCategoryProps {
@@ -38,7 +37,7 @@ function getComponentWithStatus(path: string, locale?: string): ComponentWithSta
       name: slug[slug.length - 1] ?? path,
       title: page.data.title,
     },
-    status: icon && STATUS_ICONS.includes(icon) ? (icon as StatusChipStatus) : undefined,
+    status: icon && isComponentStatus(icon) ? icon : undefined,
   };
 }
 

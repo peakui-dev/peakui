@@ -1,0 +1,131 @@
+---
+title: Chip
+description: A compact label for statuses, filters and attributes
+links:
+  source: chip/chip.tsx
+  styles: chip.css
+---
+
+## Usage
+
+```tsx
+import {Chip} from "@peakui/react";
+```
+
+<ComponentPreview name="chip-basic" />
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="chip-sizes" />
+
+### Colors
+
+<ComponentPreview name="chip-colors" />
+
+### Variants
+
+<ComponentPreview name="chip-variants" />
+
+### With Icons
+
+Icons are plain children of the root; the label stays in `Chip.Label`.
+
+<ComponentPreview name="chip-with-icons" />
+
+### Statuses
+
+A small glyph before the label turns a chip into a status.
+
+<ComponentPreview name="chip-statuses" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Chip className="rounded-full">Label</Chip>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .chip {
+    --chip-bg: var(--color-accent-soft);
+    --chip-fg: var(--color-accent-soft-foreground);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Chip component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/chip.css)):
+
+#### Base & Size Classes [!toc]
+
+- `.chip` - Base chip styles; carries the `md` size
+- `.chip--sm` - Small size
+- `.chip--md` - Medium size; empty, the base class carries it
+- `.chip--lg` - Large size
+
+#### Variant Classes [!toc]
+
+- `.chip--primary` - Solid background, set per color by a compound class
+- `.chip--secondary` - Neutral background; no additional styles
+- `.chip--tertiary` - Transparent background
+- `.chip--soft` - Muted background, set per color by a compound class
+
+#### Color Classes [!toc]
+
+- `.chip--accent`
+- `.chip--default`
+- `.chip--success`
+- `.chip--warning`
+- `.chip--danger`
+
+#### Element Classes [!toc]
+
+- `.chip__label` - The label; adds horizontal padding
+
+### Slots
+
+- `[data-slot="chip"]` - The root element
+- `[data-slot="chip-label"]` - The label element
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--chip-bg` | Chip background color |
+| `--chip-fg` | Chip text color |
+
+## API Reference
+
+### Chip
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Chip content; strings and numbers become the label (required) |
+| `color` | `'accent' \| 'danger' \| 'default' \| 'success' \| 'warning'` | `'default'` | Chip color |
+| `size` | `'sm' \| 'md' \| 'lg'` | `-` | Chip size; the base class already carries `md` |
+| `variant` | `'primary' \| 'secondary' \| 'soft' \| 'tertiary'` | `'secondary'` | Chip variant |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.
+
+### Chip.Label
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Label content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered `<span>` with your own element |
+
+Every other attribute of a `<span>` is accepted.

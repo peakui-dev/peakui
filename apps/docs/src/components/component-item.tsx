@@ -1,11 +1,11 @@
-import type {StatusChipStatus} from "./status-chip";
+import type {ComponentStatus} from "@/lib/component-status";
 import type {ReactNode} from "react";
 
+import {Chip} from "@peakui/react";
 import LinkRoot from "fumadocs-core/link";
 
+import {statusChipProps} from "@/lib/component-status";
 import {cn} from "@/utils/cn";
-
-import {StatusChip} from "./status-chip";
 
 export interface ComponentInfo {
   description: string;
@@ -19,11 +19,12 @@ interface ComponentItemProps {
   component: ComponentInfo;
   /** Live preview rendered in the card. The card is not interactive: the whole card is a link. */
   preview?: ReactNode;
-  status?: StatusChipStatus;
+  status?: ComponentStatus;
 }
 
 export function ComponentItem({className, component, preview, status}: ComponentItemProps) {
   const {href, title} = component;
+  const statusProps = status ? statusChipProps(status) : undefined;
 
   return (
     <div className={cn("flex flex-col gap-[9px]", className)}>
@@ -32,7 +33,7 @@ export function ComponentItem({className, component, preview, status}: Component
         <LinkRoot className="link no-underline" href={href}>
           <span className="flex items-center gap-2">
             {title}
-            {status ? <StatusChip className="w-fit" status={status} /> : null}
+            {statusProps ? <Chip {...statusProps} /> : null}
           </span>
         </LinkRoot>
       </div>

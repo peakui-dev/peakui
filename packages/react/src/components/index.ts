@@ -4,6 +4,7 @@
  */
 export * from "./button/index.ts";
 export * from "./close-button/index.ts";
+export * from "./chip/index.ts";
 export * from "./description/index.ts";
 export * from "./field-error/index.ts";
 export * from "./fieldset/index.ts";

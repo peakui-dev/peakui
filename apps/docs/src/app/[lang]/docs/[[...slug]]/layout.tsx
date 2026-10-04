@@ -1,12 +1,14 @@
 import type {ReactNode} from "react";
 
+import {Chip} from "@peakui/react";
+
 import {baseOptions} from "@/app/[lang]/layout.config";
 import {DocsLayout} from "@/components/fumadocs/layouts/notebook";
 import {ThemeToggle} from "@/components/fumadocs/ui/theme-toggle";
 import {GitHubLinkSmall} from "@/components/github-link";
 import {PeakUILogo} from "@/components/peakui-logo";
-import {VersionBadge} from "@/components/version-badge";
 import {source} from "@/lib/source";
+import {currentVersion} from "@/utils/version";
 
 export default async function Layout({
   children,
@@ -66,7 +68,7 @@ export default async function Layout({
         ),
         mode: "top",
         title: <PeakUILogo />,
-        titleSuffix: <VersionBadge className="mt-1 hidden lg:inline-flex" />,
+        titleSuffix: <Chip className="mt-1 hidden lg:inline-flex">v{currentVersion}</Chip>,
         titleSuffixGap: "gap-4",
       }}
     >

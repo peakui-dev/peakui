@@ -1,0 +1,157 @@
+/*
+ * Chip. Class names come from src/components/chip/chip.styles.ts; all Tailwind lives here.
+ * Ported line by line from the vendored reference styles/components/chip.css. The differences
+ * that remain are listed at the end of the file, each with its reason.
+ */
+
+/* Base styles */
+.chip {
+  @apply inline-flex w-fit shrink-0 items-center gap-0.5 rounded-2xl px-2 py-0.5 text-xs leading-5 font-medium;
+
+  /* Theming seam — the public customization surface, same role as --button-* in button.css. */
+  --chip-bg: var(--color-default);
+  --chip-fg: var(--color-default-foreground);
+
+  background-color: var(--chip-bg);
+  color: var(--chip-fg);
+
+  /*
+   * Forced colors: the variant identity is carried by the background alone, and forced-colors
+   * flattens backgrounds — the boundary has to carry it instead. The border is held transparent
+   * in the normal state so the layout does not shift when it appears (css-authoring.md).
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+}
+
+.chip__label {
+  @apply px-0.5;
+}
+
+/* Color variants - set foreground color */
+.chip--accent {
+  --chip-fg: var(--color-accent-soft-foreground);
+}
+
+.chip--danger {
+  --chip-fg: var(--color-danger-soft-foreground);
+}
+
+.chip--default {
+  --chip-fg: var(--color-default-foreground);
+}
+
+.chip--success {
+  --chip-fg: var(--color-success-soft-foreground);
+}
+
+.chip--warning {
+  --chip-fg: var(--color-warning-soft-foreground);
+}
+
+/* Variant styles */
+.chip--primary {
+  /* Compound selectors below carry the solid backgrounds. */
+}
+
+.chip--secondary {
+  /* No additional styles for secondary variant */
+}
+
+.chip--tertiary {
+  --chip-bg: transparent;
+}
+
+/* Size variants */
+.chip--sm {
+  @apply px-1 py-0 text-xs;
+}
+
+.chip--md {
+  /* No styles as this is the default size: the md values live in .chip above. */
+}
+
+.chip--lg {
+  @apply px-3 py-1 text-sm font-medium;
+}
+
+/* ====================== */
+/* = Compound variants = */
+/* ====================== */
+
+/* Primary variants - solid backgrounds */
+.chip--primary.chip--accent {
+  --chip-bg: var(--color-accent);
+  --chip-fg: var(--color-accent-foreground);
+}
+
+.chip--primary.chip--success {
+  --chip-bg: var(--color-success);
+  --chip-fg: var(--color-success-foreground);
+}
+
+.chip--primary.chip--warning {
+  --chip-bg: var(--color-warning);
+  --chip-fg: var(--color-warning-foreground);
+}
+
+.chip--primary.chip--danger {
+  --chip-bg: var(--color-danger);
+  --chip-fg: var(--color-danger-foreground);
+}
+
+/* Soft variants - muted backgrounds */
+.chip--accent.chip--soft {
+  --chip-bg: var(--color-accent-soft);
+  --chip-fg: var(--color-accent-soft-foreground);
+}
+
+.chip--success.chip--soft {
+  --chip-bg: var(--color-success-soft);
+  --chip-fg: var(--color-success-soft-foreground);
+}
+
+.chip--warning.chip--soft {
+  --chip-bg: var(--color-warning-soft);
+  --chip-fg: var(--color-warning-soft-foreground);
+}
+
+.chip--danger.chip--soft {
+  --chip-bg: var(--color-danger-soft);
+  --chip-fg: var(--color-danger-soft-foreground);
+}
+
+.chip--default.chip--soft {
+  --chip-bg: var(--color-default-soft);
+  --chip-fg: var(--color-default-soft-foreground);
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` token prefix on every token: that is how the peakui token layer is spelled
+ *    (reaffirmed in docs/superpowers/specs/2026-10-02-react-package-button-design.md, section 12).
+ *
+ * 2. `.chip--md` is empty while the reference repeats `text-xs` in it: the default size lives in
+ *    the base class so there is one source of truth (css-authoring.md). The rendered output is
+ *    byte-identical.
+ *
+ * 3. forced-colors block: the reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md; the pattern (transparent border
+ *    held in the normal state, ButtonBorder in forced colors) is the one button.css uses.
+ *
+ * 4. `--chip-fg` on the bare `.chip` is `var(--color-default-foreground)` where the reference
+ *    leaves `currentColor`. Reason recorded in button.css, deviation 10: standalone CSS inherits
+ *    the browser default and measured a color-contrast violation in the dark theme. Every color
+ *    variant overrides the handle anyway; here the fg token pairs with the `--color-default` bg
+ *    token, so bare `.chip` renders identically to the default `chip--default chip--secondary`.
+ *
+ * 5. Known contrast defect, not fixable here: `.chip--accent`/`--success`/`--warning`/`--danger`
+ *    in the secondary variant put a `*-soft-foreground` token on `--color-default`. Button.css
+ *    measured the accent pair at 4.44:1 in the dark theme against the 4.5:1 floor. The mapping is
+ *    the reference's own; the values live in themes/default/variables.css. Reported for the
+ *    backlog rather than forked.
+ */

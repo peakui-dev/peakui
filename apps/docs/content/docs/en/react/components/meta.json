@@ -9,6 +9,7 @@
     "---Components---",
     "(buttons)/button",
     "(buttons)/close-button",
+    "(data-display)/chip",
     "(forms)/description",
     "(forms)/field-error",
     "(forms)/fieldset",
