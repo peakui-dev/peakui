@@ -13,10 +13,10 @@
 @import "./input.css";
 @import "./kbd.css";
 @import "./label.css";
-@import "./separator.css";
 @import "./link.css";
-@import "./skeleton.css";
 @import "./scroll-shadow.css";
+@import "./separator.css";
+@import "./skeleton.css";
 @import "./spinner.css";
 @import "./surface.css";
 @import "./textfield.css";

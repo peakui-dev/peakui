@@ -226,30 +226,6 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./label/states").then((m) => m.States),
     file: "label/states.tsx",
   },
-  // separator
-  "separator-basic": {
-    loader: () => import("./separator/basic").then((m) => m.Basic),
-    file: "separator/basic.tsx",
-  },
-  "separator-render-function": {
-    loader: () => import("./separator/render-function").then((m) => m.RenderFunction),
-    file: "separator/render-function.tsx",
-  },
-  "separator-variants": {
-    loader: () => import("./separator/variants").then((m) => m.Variants),
-    file: "separator/variants.tsx",
-  },
-  "separator-vertical": {
-    loader: () => import("./separator/vertical").then((m) => m.Vertical),
-    file: "separator/vertical.tsx",
-  },
-  "separator-with-content": {
-    loader: () => import("./separator/with-content").then((m) => m.WithContent),
-    file: "separator/with-content.tsx",
-  },
-  "separator-with-surface": {
-    loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
-    file: "separator/with-surface.tsx",
   // link
   "link-basic": {
     loader: () => import("./link/basic").then((m) => m.Basic),
@@ -274,34 +250,7 @@ export const demos: Record<string, DemoItem> = {
   "link-underline": {
     loader: () => import("./link/underline").then((m) => m.Underline),
     file: "link/underline.tsx",
-  // skeleton
-  "skeleton-animation-types": {
-    loader: () => import("./skeleton/animation-types").then((m) => m.AnimationTypes),
-    file: "skeleton/animation-types.tsx",
   },
-  "skeleton-basic": {
-    loader: () => import("./skeleton/basic").then((m) => m.Basic),
-    file: "skeleton/basic.tsx",
-  },
-  "skeleton-grid": {
-    loader: () => import("./skeleton/grid").then((m) => m.Grid),
-    file: "skeleton/grid.tsx",
-  },
-  "skeleton-list": {
-    loader: () => import("./skeleton/list").then((m) => m.List),
-    file: "skeleton/list.tsx",
-  },
-  "skeleton-single-shimmer": {
-    loader: () => import("./skeleton/single-shimmer").then((m) => m.SingleShimmer),
-    file: "skeleton/single-shimmer.tsx",
-  },
-  "skeleton-text-content": {
-    loader: () => import("./skeleton/text-content").then((m) => m.TextContent),
-    file: "skeleton/text-content.tsx",
-  },
-  "skeleton-user-profile": {
-    loader: () => import("./skeleton/user-profile").then((m) => m.UserProfile),
-    file: "skeleton/user-profile.tsx",
   // scroll-shadow
   "scroll-shadow-basic": {
     loader: () => import("./scroll-shadow/basic").then((m) => m.Basic),
@@ -342,6 +291,60 @@ export const demos: Record<string, DemoItem> = {
   "scroll-shadow-without-overflow": {
     loader: () => import("./scroll-shadow/without-overflow").then((m) => m.WithoutOverflow),
     file: "scroll-shadow/without-overflow.tsx",
+  },
+  // separator
+  "separator-basic": {
+    loader: () => import("./separator/basic").then((m) => m.Basic),
+    file: "separator/basic.tsx",
+  },
+  "separator-render-function": {
+    loader: () => import("./separator/render-function").then((m) => m.RenderFunction),
+    file: "separator/render-function.tsx",
+  },
+  "separator-variants": {
+    loader: () => import("./separator/variants").then((m) => m.Variants),
+    file: "separator/variants.tsx",
+  },
+  "separator-vertical": {
+    loader: () => import("./separator/vertical").then((m) => m.Vertical),
+    file: "separator/vertical.tsx",
+  },
+  "separator-with-content": {
+    loader: () => import("./separator/with-content").then((m) => m.WithContent),
+    file: "separator/with-content.tsx",
+  },
+  "separator-with-surface": {
+    loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
+    file: "separator/with-surface.tsx",
+  },
+  // skeleton
+  "skeleton-animation-types": {
+    loader: () => import("./skeleton/animation-types").then((m) => m.AnimationTypes),
+    file: "skeleton/animation-types.tsx",
+  },
+  "skeleton-basic": {
+    loader: () => import("./skeleton/basic").then((m) => m.Basic),
+    file: "skeleton/basic.tsx",
+  },
+  "skeleton-grid": {
+    loader: () => import("./skeleton/grid").then((m) => m.Grid),
+    file: "skeleton/grid.tsx",
+  },
+  "skeleton-list": {
+    loader: () => import("./skeleton/list").then((m) => m.List),
+    file: "skeleton/list.tsx",
+  },
+  "skeleton-single-shimmer": {
+    loader: () => import("./skeleton/single-shimmer").then((m) => m.SingleShimmer),
+    file: "skeleton/single-shimmer.tsx",
+  },
+  "skeleton-text-content": {
+    loader: () => import("./skeleton/text-content").then((m) => m.TextContent),
+    file: "skeleton/text-content.tsx",
+  },
+  "skeleton-user-profile": {
+    loader: () => import("./skeleton/user-profile").then((m) => m.UserProfile),
+    file: "skeleton/user-profile.tsx",
   },
   // spinner
   "spinner-basic": {
