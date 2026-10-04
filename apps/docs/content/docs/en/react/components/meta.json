@@ -32,6 +32,8 @@
     "(layout)/surface",
     "(navigation)/tabs",
     "(forms)/text-field",
+    "(buttons)/toggle-button",
+    "(buttons)/toggle-button-group",
     "(overlays)/tooltip"
   ]
 }

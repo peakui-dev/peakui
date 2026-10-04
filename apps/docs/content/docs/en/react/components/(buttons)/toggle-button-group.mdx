@@ -1,0 +1,166 @@
+---
+title: ToggleButtonGroup
+description: Groups toggle buttons for single or multiple selection
+links:
+  rac: ToggleButtonGroup
+  source: toggle-button-group/toggle-button-group.tsx
+  styles: toggle-button-group.css
+---
+
+## Usage
+
+```tsx
+import {ToggleButton, ToggleButtonGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="toggle-button-group-basic" />
+
+Each `ToggleButton` in a group selects by its `id`, which is also the key in `selectedKeys` and `defaultSelectedKeys`.
+
+### Anatomy
+
+```tsx
+import {ToggleButton, ToggleButtonGroup} from "@peakui/react";
+
+export default () => (
+  <ToggleButtonGroup selectionMode="multiple">
+    <ToggleButton id="first">First</ToggleButton>
+    <ToggleButton id="second">
+      <ToggleButtonGroup.Separator />
+      Second
+    </ToggleButton>
+    <ToggleButton id="third">
+      <ToggleButtonGroup.Separator />
+      Third
+    </ToggleButton>
+  </ToggleButtonGroup>
+);
+```
+
+## Examples
+
+### Sizes
+
+The `size` set on the group reaches every button, so the group stays uniform.
+
+<ComponentPreview name="toggle-button-group-sizes" />
+
+### Orientation
+
+<ComponentPreview name="toggle-button-group-orientation" />
+
+### Full Width
+
+<ComponentPreview name="toggle-button-group-full-width" />
+
+### Selection Mode
+
+`selectionMode="single"` renders a radiogroup of mutually exclusive buttons; `selectionMode="multiple"` renders a toolbar of independent toggles.
+
+<ComponentPreview name="toggle-button-group-selection-mode" />
+
+### Detached
+
+`isDetached` separates the buttons with gaps instead of joining their edges.
+
+<ComponentPreview name="toggle-button-group-detached" />
+
+### Without Separator
+
+Omit `<ToggleButtonGroup.Separator />` and the buttons sit flush against each other.
+
+<ComponentPreview name="toggle-button-group-without-separator" />
+
+### Controlled
+
+<ComponentPreview name="toggle-button-group-controlled" />
+
+### Disabled State
+
+`isDisabled` on the group disables every button; a button's own `isDisabled={false}` opts it back in.
+
+<ComponentPreview name="toggle-button-group-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+Pass utilities through `className`. They are merged with the group's own classes.
+
+```tsx
+<ToggleButtonGroup className="gap-2" isDetached selectionMode="multiple">
+  <ToggleButton id="first">First</ToggleButton>
+  <ToggleButton id="second">Second</ToggleButton>
+</ToggleButtonGroup>
+```
+
+### Global CSS
+
+Override the group's classes in the `components` layer.
+
+```css
+@layer components {
+  .toggle-button-group--detached {
+    @apply gap-2;
+  }
+
+  .toggle-button-group__separator {
+    @apply opacity-25;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ToggleButtonGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/toggle-button-group.css)):
+
+#### Base & Layout Classes [!toc]
+
+- `.toggle-button-group` - Base container styles
+- `.toggle-button-group--horizontal` - Horizontal orientation
+- `.toggle-button-group--vertical` - Vertical orientation
+- `.toggle-button-group--full-width` - Full width modifier
+- `.toggle-button-group__separator` - Separator element inside a button
+
+#### Modifier Classes [!toc]
+
+- `.toggle-button-group--detached` - Detached mode (separated buttons with gaps)
+
+### Slots
+
+- `[data-slot="toggle-button-group"]`
+- `[data-slot="toggle-button-group-separator"]`
+
+## API Reference
+
+### ToggleButtonGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectionMode` | `'single' \| 'multiple'` | `'single'` | Whether one or multiple buttons can be selected |
+| `selectedKeys` | `Iterable<Key>` | - | Controlled selection state |
+| `defaultSelectedKeys` | `Iterable<Key>` | - | Default selected keys (uncontrolled) |
+| `onSelectionChange` | `(keys: Set<Key>) => void` | - | Called when selection changes |
+| `disallowEmptySelection` | `boolean` | `false` | Prevents clearing all selections; keeps one option selected with `selectionMode="single"` |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Layout direction |
+| `size` | `'sm' \| 'md' \| 'lg'` | - | Size propagated to child `ToggleButton`s |
+| `isDetached` | `boolean` | `false` | Whether buttons are visually separated with gaps |
+| `fullWidth` | `boolean` | `false` | Whether the group fills available width |
+| `isDisabled` | `boolean` | - | Disables all buttons in the group |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `React.ReactNode` | - | `ToggleButton`s, each selecting by its `id` |
+
+Every other [React Aria ToggleButtonGroup](https://react-aria.adobe.com/ToggleButtonGroup) prop is accepted.
+
+### ToggleButtonGroup.Separator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element. It must still return a `<span>` |
+
+Place it inside a `ToggleButton` (not between them), on every button except the first.

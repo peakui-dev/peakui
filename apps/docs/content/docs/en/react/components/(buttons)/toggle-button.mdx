@@ -1,0 +1,161 @@
+---
+title: ToggleButton
+description: A two-state button for on/off and selected states
+links:
+  rac: ToggleButton
+  source: toggle-button/toggle-button.tsx
+  styles: toggle-button.css
+---
+
+## Usage
+
+```tsx
+import {ToggleButton} from "@peakui/react";
+```
+
+<ComponentPreview name="toggle-button-basic" />
+
+`onChange` fires with the new state, and `isSelected` controls it.
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="toggle-button-variants" />
+
+### Icon Only
+
+An icon-only button has no visible text, so give it an `aria-label`.
+
+<ComponentPreview name="toggle-button-icon-only" />
+
+### Sizes
+
+<ComponentPreview name="toggle-button-sizes" />
+
+### Disabled
+
+<ComponentPreview name="toggle-button-disabled" />
+
+### Controlled
+
+Children can be a function that receives the button's state.
+
+<ComponentPreview name="toggle-button-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+Pass utilities through `className`. They are merged with the button's own classes.
+
+```tsx
+<ToggleButton className="rounded-full px-6 font-semibold">Rounded</ToggleButton>
+```
+
+### Global CSS
+
+Override the button's classes in the `components` layer. Prefer the component variables where one exists: the selected state derives from them.
+
+```css
+@layer components {
+  .toggle-button--default {
+    --toggle-button-bg: var(--color-accent-soft);
+    --toggle-button-bg-hover: var(--color-accent-soft-hover);
+    --toggle-button-bg-pressed: var(--color-accent-soft-hover);
+    --toggle-button-fg: var(--color-accent-soft-foreground);
+  }
+
+  .toggle-button--icon-only {
+    @apply rounded-lg;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ToggleButton component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/toggle-button.css)):
+
+#### Base & Size Classes [!toc]
+
+- `.toggle-button` - Base toggle button styles
+- `.toggle-button--sm` - Small size
+- `.toggle-button--md` - Medium size
+- `.toggle-button--lg` - Large size
+
+#### Variant Classes [!toc]
+
+- `.toggle-button--default` - Neutral background, accent-soft when selected
+- `.toggle-button--ghost` - Transparent background until hovered or selected
+
+#### Modifier Classes [!toc]
+
+- `.toggle-button--icon-only` - Square button for a single icon
+- `.toggle-button--icon-only.toggle-button--sm` - Small icon-only
+- `.toggle-button--icon-only.toggle-button--lg` - Large icon-only
+
+### Slots
+
+- `[data-slot="toggle-button"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--toggle-button-bg` | Background color |
+| `--toggle-button-bg-hover` | Background color when hovered |
+| `--toggle-button-bg-pressed` | Background color when pressed |
+| `--toggle-button-fg` | Text and icon color |
+| `--toggle-button-bg-selected` | Background color when selected |
+| `--toggle-button-bg-selected-hover` | Background color when selected and hovered |
+| `--toggle-button-bg-selected-pressed` | Background color when selected and pressed |
+| `--toggle-button-fg-selected` | Text and icon color when selected |
+| `--toggle-button-border` | Border color |
+| `--toggle-button-radius` | Corner radius |
+
+### Interactive States
+
+The toggle button supports both CSS pseudo-classes and data attributes:
+
+- **Selected**: `[data-selected="true"]` (accent-soft background and foreground)
+- **Hover**: `:hover` or `[data-hovered]`
+- **Pressed**: `:active` or `[data-pressed]` (includes scale transform)
+- **Focus**: `:focus-visible` or `[data-focus-visible]` (shows the focus ring)
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]`
+
+## API Reference
+
+### ToggleButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'default' \| 'ghost'` | `'default'` | Visual style |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of the toggle button |
+| `isIconOnly` | `boolean` | `false` | Whether the button contains only an icon |
+| `isSelected` | `boolean` | - | Controlled selected state |
+| `defaultSelected` | `boolean` | `false` | Default selected state (uncontrolled) |
+| `isDisabled` | `boolean` | `false` | Whether the toggle button is disabled |
+| `onChange` | `(isSelected: boolean) => void` | - | Handler called when selection changes |
+| `onPress` | `(e: PressEvent) => void` | - | Handler called when the button is pressed |
+| `children` | `React.ReactNode \| (values: ToggleButtonRenderProps) => React.ReactNode` | - | Button content, or a function of the button's state |
+| `className` | `string \| (values: ToggleButtonRenderProps) => string` | - | Additional classes, or a function of the button's state |
+| `render` | `DOMRenderFunction<'button', ToggleButtonRenderProps>` | - | Replaces the rendered element. It must still return a `<button>` |
+
+There is no separate `isPressed` prop: a toggle button's pressed style comes from the interaction itself. Every other [React Aria ToggleButton](https://react-aria.adobe.com/ToggleButton) prop is accepted.
+
+### Render Props
+
+When `children` or `className` is a function, it receives:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isSelected` | `boolean` | Whether the button is currently selected |
+| `isPressed` | `boolean` | Whether the button is currently pressed |
+| `isHovered` | `boolean` | Whether the button is hovered |
+| `isFocused` | `boolean` | Whether the button is focused |
+| `isFocusVisible` | `boolean` | Whether the button is focused by keyboard |
+| `isDisabled` | `boolean` | Whether the button is disabled |
