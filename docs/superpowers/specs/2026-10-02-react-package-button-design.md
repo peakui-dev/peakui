@@ -392,7 +392,15 @@ future agent to each difference below and invite it to "fix" it back. Each is th
 | `src/utils/index.ts` exports Tailwind utility strings | Not exported; utilities stay CSS-native, consumed via `@apply` | Recorded in `2026-10-02-composition-contract-design.md` section 3. A utility reaching a consumer outside `@source` would not compile at all, which breaks the standalone artefact promise. Reaffirmed by the owner for this spec. |
 | No `forced-colors` support | Central per-theme block plus the component's own identifying border | Recorded in `2026-10-01-design-tokens-design.md`, and `button.css` already implements it. Reaffirmed by the owner for this spec. |
 | `var(--accent)` | `var(--color-accent)` | peakui's token naming, mapped in `@theme`. |
-| `ButtonGroup` context merging inside `button.tsx` | Absent | ButtonGroup is not in this spec. |
+| `ButtonGroup` context merging inside `button.tsx` | Absent — **resolved 2026-10-04, see below** | ButtonGroup is not in this spec. |
+
+**Resolved 2026-10-04** (human-approved decision, wave-2 ledger): `button.tsx` reads
+`ButtonGroupContext` again and merges `size`, `variant`, `isDisabled` and `fullWidth` with its own
+props, direct props winning — the plain context-merge pattern wave 2 shipped in
+`toggle-button.tsx` (`const groupContext = use(<group>Context)` + `prop ?? groupContext?.prop`).
+What stays dropped from the reference is `BUTTON_GROUP_CHILD` and the child cloning behind it: the
+marker leaks a stray DOM attribute onto children, so the merge is depth-blind instead. The row
+above and section 8 keep the original record as history.
 
 ## 13. Defects Button inherits and cannot fix
 
