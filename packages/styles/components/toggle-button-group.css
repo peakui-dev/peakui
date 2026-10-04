@@ -93,6 +93,15 @@
 .toggle-button-group .toggle-button:focus-visible:not([data-focused]),
 .toggle-button-group .toggle-button[data-focus-visible] {
   --ring-offset-width: 0px;
+  /*
+   * The flush ring is still an OUTER shadow (utilities/index.css), and the joined buttons are
+   * position:relative stacking contexts in tree order: a later sibling's background paints over
+   * a focused earlier button's trailing 2px band. While a button carries the ring it steps
+   * above its neighbours, so the band on its end edge stays visible. Measured in a browser
+   * probe: without this, the band over the next button's box reads as the next button's
+   * background, not the focus colour.
+   */
+  z-index: 1;
 }
 
 /* Full width: stretch each toggle button */
@@ -164,4 +173,10 @@
  *
  * 3. `overflow: visible` is stated explicitly: the button's focus ring is a shadow, and the rule
  *    documents why the group must never clip it.
+ *
+ * 4. `z-index: 1` on the focused button. The reference needs nothing like it: its ring is inset,
+ *    so nothing of it ever reaches the neighbouring button. The peakui ring is outer (see 1),
+ *    and divergence 1 alone left the trailing band of a focused non-last button covered by the
+ *    next sibling's background — a paint-order consequence jsdom cannot see and VRT alone would
+ *    catch only with a keyboard-focused state.
  */
