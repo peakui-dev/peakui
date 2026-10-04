@@ -71,7 +71,8 @@
     mask-size:
       calc(100% - var(--scroll-shadow-scrollbar-size)) 100%,
       var(--scroll-shadow-scrollbar-size) 100%;
-    -webkit-mask-image: linear-gradient(var(--scroll-linear-gradient)), linear-gradient(black, black);
+    -webkit-mask-image:
+      linear-gradient(var(--scroll-linear-gradient)), linear-gradient(black, black);
     -webkit-mask-position:
       left top,
       right top;
@@ -112,7 +113,8 @@
     mask-size:
       100% calc(100% - var(--scroll-shadow-scrollbar-size)),
       100% var(--scroll-shadow-scrollbar-size);
-    -webkit-mask-image: linear-gradient(var(--scroll-linear-gradient)), linear-gradient(black, black);
+    -webkit-mask-image:
+      linear-gradient(var(--scroll-linear-gradient)), linear-gradient(black, black);
     -webkit-mask-position:
       left top,
       left bottom;
