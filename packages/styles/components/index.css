@@ -3,6 +3,7 @@
  * hand. src/components/index.test.ts gates completeness.
  */
 
+@import "./button-group.css";
 @import "./button.css";
 @import "./chip.css";
 @import "./close-button.css";

@@ -8,6 +8,7 @@
     "index",
     "---Components---",
     "(buttons)/button",
+    "(buttons)/button-group",
     "(data-display)/chip",
     "(buttons)/close-button",
     "(forms)/description",
