@@ -12,17 +12,18 @@ import {
   InputGroup,
   Label,
   Spinner,
+  Surface,
   TextField,
 } from "@peakui/react";
 import {useState} from "react";
 
 function DemoCard({children, className}: {children: ReactNode; className?: string}) {
   return (
-    <div
-      className={`flex w-full max-w-[360px] flex-col gap-4 rounded-3xl bg-surface p-5 text-start shadow-surface ${className ?? ""}`}
+    <Surface
+      className={`flex w-full max-w-[360px] flex-col gap-4 rounded-3xl p-5 text-start shadow-surface ${className ?? ""}`}
     >
       {children}
-    </div>
+    </Surface>
   );
 }
 
