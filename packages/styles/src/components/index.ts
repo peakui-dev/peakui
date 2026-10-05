@@ -43,6 +43,7 @@ export * from "./switch/index.ts";
 export * from "./tabs/index.ts";
 export * from "./tag-group/index.ts";
 export * from "./tag/index.ts";
+export * from "./textarea/index.ts";
 export * from "./textfield/index.ts";
 export * from "./toast/index.ts";
 export * from "./toggle-button-group/index.ts";

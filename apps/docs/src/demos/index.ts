@@ -955,6 +955,23 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./text-field/with-error").then((m) => m.WithError),
     file: "text-field/with-error.tsx",
   },
+  // textarea
+  "textarea-basic": {
+    loader: () => import("./textarea/basic").then((m) => m.Basic),
+    file: "textarea/basic.tsx",
+  },
+  "textarea-full-width": {
+    loader: () => import("./textarea/full-width").then((m) => m.FullWidth),
+    file: "textarea/full-width.tsx",
+  },
+  "textarea-in-text-field": {
+    loader: () => import("./textarea/in-text-field").then((m) => m.InTextField),
+    file: "textarea/in-text-field.tsx",
+  },
+  "textarea-variants": {
+    loader: () => import("./textarea/variants").then((m) => m.Variants),
+    file: "textarea/variants.tsx",
+  },
   // toast
   "toast-basic": {
     loader: () => import("./toast/basic").then((m) => m.Basic),

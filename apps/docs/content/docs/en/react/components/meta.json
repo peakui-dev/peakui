@@ -42,6 +42,7 @@
     "(navigation)/tabs",
     "(collections)/tag-group",
     "(forms)/text-field",
+    "(forms)/textarea",
     "(overlays)/toast",
     "(buttons)/toggle-button",
     "(buttons)/toggle-button-group",
