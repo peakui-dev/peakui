@@ -586,6 +586,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./modal/with-form").then((m) => m.WithForm),
     file: "modal/with-form.tsx",
   },
+  // number-field
+  "number-field-basic": {
+    loader: () => import("./number-field/basic").then((m) => m.Basic),
+    file: "number-field/basic.tsx",
+  },
+  "number-field-controlled": {
+    loader: () => import("./number-field/controlled").then((m) => m.Controlled),
+    file: "number-field/controlled.tsx",
+  },
+  "number-field-variants": {
+    loader: () => import("./number-field/variants").then((m) => m.Variants),
+    file: "number-field/variants.tsx",
+  },
+  "number-field-with-format-options": {
+    loader: () => import("./number-field/with-format-options").then((m) => m.WithFormatOptions),
+    file: "number-field/with-format-options.tsx",
+  },
+  "number-field-with-step": {
+    loader: () => import("./number-field/with-step").then((m) => m.WithStep),
+    file: "number-field/with-step.tsx",
+  },
   // popover
   "popover-basic": {
     loader: () => import("./popover/basic").then((m) => m.Basic),
