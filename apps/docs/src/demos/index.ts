@@ -375,6 +375,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./fieldset/render-prop").then((m) => m.RenderProp),
     file: "fieldset/render-prop.tsx",
   },
+  // form
+  "form-basic": {
+    loader: () => import("./form/basic").then((m) => m.Basic),
+    file: "form/basic.tsx",
+  },
   // input
   "input-basic": {
     loader: () => import("./input/basic").then((m) => m.Basic),
@@ -706,6 +711,10 @@ export const demos: Record<string, DemoItem> = {
   "search-field-disabled": {
     loader: () => import("./search-field/disabled").then((m) => m.Disabled),
     file: "search-field/disabled.tsx",
+  },
+  "search-field-form-example": {
+    loader: () => import("./search-field/form-example").then((m) => m.FormExample),
+    file: "search-field/form-example.tsx",
   },
   "search-field-full-width": {
     loader: () => import("./search-field/full-width").then((m) => m.FullWidth),

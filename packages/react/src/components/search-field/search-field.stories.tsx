@@ -6,8 +6,10 @@ import React from "react";
 import {Button} from "../button/index.ts";
 import {Description} from "../description/index.ts";
 import {FieldError} from "../field-error/index.ts";
+import {Form} from "../form/index.ts";
 import {Kbd} from "../kbd/index.ts";
 import {Label} from "../label/index.ts";
+import {Spinner} from "../spinner/index.ts";
 
 import {SearchField} from "./index.ts";
 
@@ -300,6 +302,73 @@ export const WithKeyboardShortcut: Story = {
           </Kbd>
           <span>to focus the search field</span>
         </div>
+      </Showcase>
+    );
+  },
+};
+
+export const FormExample: Story = {
+  name: "В форме",
+  render: () => {
+    const [value, setValue] = React.useState("");
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const MIN_LENGTH = 3;
+    const isInvalid = value.length > 0 && value.length < MIN_LENGTH;
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (value.length < MIN_LENGTH) {
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      setTimeout(() => {
+        setValue("");
+        setIsSubmitting(false);
+      }, 1500);
+    };
+
+    return (
+      <Showcase title="В форме">
+        <Form className="flex w-[280px] flex-col gap-4" onSubmit={handleSubmit}>
+          <SearchField
+            isRequired
+            isInvalid={isInvalid}
+            name="search"
+            value={value}
+            onChange={setValue}
+          >
+            <Label>Поиск товаров</Label>
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input className="w-full" placeholder="Поиск товаров…" />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+            {isInvalid ? (
+              <FieldError>Запрос должен быть не короче {MIN_LENGTH} символов</FieldError>
+            ) : (
+              <Description>Введите минимум {MIN_LENGTH} символов</Description>
+            )}
+          </SearchField>
+          <Button
+            className="w-full"
+            isDisabled={value.length < MIN_LENGTH}
+            isPending={isSubmitting}
+            type="submit"
+            variant="primary"
+          >
+            {isSubmitting ? (
+              <>
+                <Spinner color="current" size="sm" />
+                Идёт поиск…
+              </>
+            ) : (
+              "Искать"
+            )}
+          </Button>
+        </Form>
       </Showcase>
     );
   },

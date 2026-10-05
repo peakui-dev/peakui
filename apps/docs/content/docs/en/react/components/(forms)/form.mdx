@@ -1,0 +1,71 @@
+---
+title: Form
+description: Validation-aware form wrapper
+links:
+  rac: Form
+  source: form/form.tsx
+  styles: form.css
+---
+
+## Usage
+
+```tsx
+import {Form} from "@peakui/react";
+```
+
+<ComponentPreview name="form-basic" />
+
+## Examples
+
+Fields inside a form validate on submit; blocking an invalid submission is the browser's native constraint validation.
+
+### Validation Behavior
+
+```tsx
+<Form validationBehavior="aria" aria-label="Profile">
+  {/* fields validate on blur and show errors without blocking submit */}
+</Form>
+```
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Form aria-label="Profile" className="flex flex-col gap-4">
+  {/* fields */}
+</Form>
+```
+
+### Global CSS
+
+```css
+.form {
+  gap: 1rem;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.form` | The form element
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="form"]` | The form element
+
+## API Reference
+
+### Form.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `validationErrors` | `Record<string, string \| string[]>` | - | Server-side errors keyed by field name
+| `validationBehavior` | `"native" \| "aria"` | `"native"` | With `native`, the browser blocks invalid submits (`noValidate` stays off); with `aria`, validation is announced without blocking
+| `onSubmit` | `(event) => void` | - | Native submit handler; read values from the form elements
+| `...rest` | | | Every React Aria `Form` attribute is accepted

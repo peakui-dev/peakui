@@ -23,6 +23,7 @@
     "(feedback)/empty-state",
     "(forms)/field-error",
     "(forms)/fieldset",
+    "(forms)/form",
     "(forms)/input",
     "(forms)/input-group",
     "(typography)/kbd",
