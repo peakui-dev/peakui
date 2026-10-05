@@ -9,8 +9,9 @@ import {SearchField, SearchFieldRoot} from "@/components/search-field/index.ts";
 import {FieldVariantContext} from "@/contexts/field-variant.ts";
 
 /*
- * Кнопка очистки идентифицируется по data-slot, а не по роли: CloseButton даёт ей имя «Close», и
- * запрос по имени отличал бы часть от любой другой кнопки закрытия в тестовом дереве лишь случайно.
+ * Кнопка очистки идентифицируется по data-slot, а не по роли: имя «Clear search» даёт ей сам
+ * компонент, и запрос по имени отличал бы часть от любой другой кнопки в тестовом дереве лишь
+ * случайно.
  */
 const clearButton = () =>
   document.querySelector('[data-slot="search-field-clear-button"]') as HTMLElement | null;
@@ -50,6 +51,25 @@ describe("SearchField", () => {
     expect(screen.getByRole("searchbox")).toHaveAttribute("data-slot", "search-field-input");
     expect(document.querySelector('[data-slot="search-field-search-icon"]')).not.toBeNull();
     expect(clearButton()).not.toBeNull();
+  });
+
+  it("кнопка очистки объявляет контекстное имя", () => {
+    renderSearch();
+
+    expect(clearButton()).toHaveAttribute("aria-label", "Clear search");
+  });
+
+  it("имя кнопки очистки перекрывается потребителем", () => {
+    render(
+      <SearchField name="search" aria-label="Поиск">
+        <SearchField.Group>
+          <SearchField.Input />
+          <SearchField.ClearButton aria-label="Очистить фильтры" />
+        </SearchField.Group>
+      </SearchField>,
+    );
+
+    expect(clearButton()).toHaveAttribute("aria-label", "Очистить фильтры");
   });
 
   it("применяет модификатор variant", () => {

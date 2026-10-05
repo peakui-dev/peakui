@@ -176,6 +176,12 @@ const SearchFieldClearButton = ({className, ...rest}: SearchFieldClearButtonProp
 
   return (
     <CloseButton
+      /*
+       * A context-aware name: "Clear" says nothing about what the button clears. CloseButton's own
+       * default ("Close") spreads before its props, so this label wins there; this spread comes
+       * after it in turn, so a consumer-supplied label still wins here.
+       */
+      aria-label="Clear search"
       className={composeTwRenderProps(className, slots?.clearButton())}
       slot="clear"
       {...rest}
