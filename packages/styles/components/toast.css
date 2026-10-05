@@ -56,6 +56,17 @@
 
   @apply pointer-events-auto flex flex-row items-start justify-start gap-1.5 bg-surface px-4 py-3 shadow-overlay;
 
+  /*
+   * Forced colors, the overlay-family policy (see popover.css): the surface flattens to Canvas
+   * through the theme block, so the boundary must carry the toast. The border is held
+   * transparent in the normal state so the geometry never shifts between modes.
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+
   /* Timing tokens */
   --toast-ease: var(--ease-out-fluid);
   --toast-enter-duration: 350ms;

@@ -53,6 +53,17 @@
   border-radius: min(32px, var(--radius-3xl));
   box-shadow: var(--overlay-shadow);
 
+  /*
+   * Forced colors, the overlay-family policy (see popover.css): the surface flattens to Canvas
+   * through the theme block, so the boundary must carry the popover. The border is held
+   * transparent in the normal state so the geometry never shifts between modes.
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+
   /* Focus state */
   &:focus-visible:not([data-focused]),
   &[data-focus-visible="true"] {
