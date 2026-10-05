@@ -1,0 +1,158 @@
+---
+title: NumberField
+description: Numeric input with stepper buttons
+links:
+  rac: NumberField
+  source: number-field/number-field.tsx
+  styles: number-field.css
+---
+
+## Usage
+
+```tsx
+import {NumberField} from "@peakui/react";
+```
+
+<ComponentPreview name="number-field-basic" />
+
+### Anatomy
+
+```tsx
+<NumberField>
+  <Label>Width</Label>
+  <NumberField.Group>
+    <NumberField.DecrementButton />
+    <NumberField.Input />
+    <NumberField.IncrementButton />
+  </NumberField.Group>
+</NumberField>
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="number-field-variants" />
+
+### Step
+
+<ComponentPreview name="number-field-with-step" />
+
+### Controlled
+
+<ComponentPreview name="number-field-controlled" />
+
+### Format Options
+
+<ComponentPreview name="number-field-with-format-options" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<NumberField.Input className="w-[200px]" />
+```
+
+### Global CSS
+
+```css
+.number-field__input {
+  min-width: 8rem;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.number-field` | The field wrapper element
+| `.number-field--primary`, `.number-field--secondary` | Variant modifiers
+| `.number-field--full-width` | Full-width modifier
+| `.number-field__group` | The stepper group element
+| `.number-field__group--full-width` | Group full-width modifier
+| `.number-field__input` | The input element
+| `.number-field__increment-button` | The increment button
+| `.number-field__decrement-button` | The decrement button
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="number-field"]` | The field wrapper element
+| `[data-slot="number-field-group"]` | The stepper group element
+| `[data-slot="number-field-input"]` | The input element
+| `[data-slot="number-field-increment-button"]` | The increment button element
+| `[data-slot="number-field-increment-button-icon"]` | The default plus glyph
+| `[data-slot="number-field-decrement-button"]` | The decrement button element
+| `[data-slot="number-field-decrement-button-icon"]` | The default minus glyph
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Focused | `[data-focus-visible="true"]` / `:focus-visible`
+| Hovered | `[data-hovered="true"]`
+| Pressed | `[data-pressed="true"]`
+| Disabled | `[data-disabled="true"]`
+| Invalid | `[data-invalid="true"]`
+| Stepper disabled (at bounds) | `[data-disabled="true"]` on the button
+
+## API Reference
+
+### NumberField.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Visual variant
+| `fullWidth` | `boolean` | `false` | Stretches the group to the container width
+| `value` | `number` | - | Controlled value
+| `defaultValue` | `number` | - | Uncontrolled initial value
+| `minValue` | `number` | - | Lower bound
+| `maxValue` | `number` | - | Upper bound
+| `step` | `number` | - | Increment size
+| `formatOptions` | `Intl.NumberFormatOptions` | - | Locale-aware formatting
+| `isDisabled` | `boolean` | - | Disables the field
+| `isReadOnly` | `boolean` | - | Makes the field read-only
+| `isRequired` | `boolean` | - | Marks the field required
+| `isInvalid` | `boolean` | - | Marks the field invalid
+| `validate` | `(value) => boolean \| string` | - | Validation function
+| `onChange` | `(value: number) => void` | - | Called when the value changes
+| `...rest` | | | Every React Aria `NumberField` attribute is accepted
+
+The input renders a `textbox` with `aria-roledescription="Number field"` — React Aria's current pattern — and holds its value as a string.
+
+### NumberField.Group
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'div', GroupRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `Group` attribute is accepted
+
+### NumberField.Input
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `...rest` | | | Every React Aria `Input` attribute is accepted
+
+### NumberField.IncrementButton
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `children` | `ReactNode` | plus glyph | Replaces the default icon when a valid element
+| `...rest` | | | Every React Aria `Button` attribute is accepted
+
+### NumberField.DecrementButton
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `children` | `ReactNode` | minus glyph | Replaces the default icon when a valid element
+| `...rest` | | | Every React Aria `Button` attribute is accepted
+
+### Render Props
+
+`children` and `className` of `NumberField.Root` and `NumberField.Group` accept a function receiving the respective React Aria render props.

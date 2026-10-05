@@ -1,0 +1,179 @@
+---
+title: Switch
+description: On and off toggle control
+links:
+  rac: Switch
+  source: switch/switch.tsx
+  styles: switch.css
+---
+
+## Usage
+
+```tsx
+import {Switch} from "@peakui/react";
+```
+
+<ComponentPreview name="switch-basic" />
+
+### Anatomy
+
+```tsx
+<Switch>
+  <Switch.Content>
+    <Switch.Control>
+      <Switch.Thumb />
+    </Switch.Control>
+    Label text
+  </Switch.Content>
+</Switch>
+```
+
+For grouping multiple switches, use the `SwitchGroup` component — a presentational wrapper; each switch keeps its own state.
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="switch-sizes" />
+
+### Disabled
+
+<ComponentPreview name="switch-disabled" />
+
+### Without Label
+
+<ComponentPreview name="switch-without-label" />
+
+### With Description
+
+<ComponentPreview name="switch-with-description" />
+
+### Controlled
+
+<ComponentPreview name="switch-controlled" />
+
+### Group
+
+<ComponentPreview name="switch-group" />
+
+### Group Horizontal
+
+<ComponentPreview name="switch-group-horizontal" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Switch className="w-full">
+  <Switch.Content>
+    <Switch.Control>
+      <Switch.Thumb />
+    </Switch.Control>
+    Label text
+  </Switch.Content>
+</Switch>
+```
+
+### Global CSS
+
+```css
+.switch {
+  gap: 0.75rem;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.switch` | The field wrapper element
+| `.switch--sm`, `.switch--md`, `.switch--lg` | Size modifiers
+| `.switch__content` | The clickable label wrapping control and text
+| `.switch__control` | The track the thumb slides in
+| `.switch__thumb` | The sliding knob
+| `.switch__icon` | The optional icon container inside the track
+| `.switch-group` | The group wrapper element
+| `.switch-group--horizontal`, `.switch-group--vertical` | Group orientation modifiers
+| `.switch-group__items` | The group's items container
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="switch"]` | The field wrapper element
+| `[data-slot="switch-content"]` | The clickable label element
+| `[data-slot="switch-control"]` | The track element
+| `[data-slot="switch-thumb"]` | The knob element
+| `[data-slot="switch-icon"]` | The icon container element
+| `[data-slot="switch-group"]` | The group wrapper element
+| `[data-slot="switch-group-items"]` | The group's items container element
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Selected | `[data-selected="true"]` / `[aria-checked="true"]`
+| Hovered | `[data-hovered="true"]`
+| Pressed | `[data-pressed="true"]`
+| Focused (visible) | `[data-focus-visible="true"]`
+| Disabled | `[data-disabled="true"]`
+| Invalid | `[data-invalid="true"]`
+
+## API Reference
+
+### Switch.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Track size
+| `isSelected` | `boolean` | - | Controlled selected state
+| `defaultSelected` | `boolean` | - | Uncontrolled initial selected state
+| `isDisabled` | `boolean` | - | Disables the switch
+| `isInvalid` | `boolean` | - | Marks the switch invalid
+| `isRequired` | `boolean` | - | Marks the switch required
+| `validate` | `(isSelected) => boolean \| string` | - | Validation function
+| `onChange` | `(isSelected) => void` | - | Called when the state changes
+| `render` | `DOMRenderFunction<'div', SwitchFieldRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `SwitchField` attribute is accepted
+
+### Switch.Content
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'label', SwitchButtonRenderProps>` | - | Replaces the rendered label element
+| `...rest` | | | Every React Aria `SwitchButton` attribute is accepted
+
+### Switch.Control
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Switch.Thumb
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Switch.Icon
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### SwitchGroup.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Layout direction
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered element
+| `...rest` | | | Every `div` attribute is accepted
+
+### Render Props
+
+`children` and `className` of `Switch.Root` and `Switch.Content` accept a function receiving the respective React Aria render props.

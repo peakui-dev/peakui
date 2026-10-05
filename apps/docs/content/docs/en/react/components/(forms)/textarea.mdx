@@ -1,0 +1,92 @@
+---
+title: TextArea
+description: Multiline text input
+links:
+  rac: TextArea
+  source: textarea/textarea.tsx
+  styles: textarea.css
+---
+
+## Usage
+
+```tsx
+import {TextArea} from "@peakui/react";
+```
+
+<ComponentPreview name="textarea-basic" />
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="textarea-variants" />
+
+### Full Width
+
+<ComponentPreview name="textarea-full-width" />
+
+### In A Text Field
+
+A `TextArea` inside a `TextField` inherits its variant.
+
+<ComponentPreview name="textarea-in-text-field" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<TextArea className="min-h-40" aria-label="Description" />
+```
+
+### Global CSS
+
+```css
+.textarea {
+  min-height: 6rem;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.textarea` | The textarea element
+| `.textarea--primary`, `.textarea--secondary` | Variant modifiers
+| `.textarea--full-width` | Full-width modifier
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="textarea"]` | The textarea element
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Focused | `:focus-visible` / `[data-focus-visible="true"]` (from the owning field)
+| Hovered | `:hover` (from the owning field)
+| Disabled | `:disabled`
+| Invalid | `[data-invalid="true"]` (from the owning field)
+
+## API Reference
+
+### TextArea.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Visual variant; inherited from the owning `TextField` when unset
+| `fullWidth` | `boolean` | `false` | Stretches to the container width
+| `value` | `string` | - | Controlled value
+| `defaultValue` | `string` | - | Uncontrolled initial value
+| `isDisabled` | `boolean` | - | Disables the textarea
+| `isReadOnly` | `boolean` | - | Makes the textarea read-only
+| `isRequired` | `boolean` | - | Marks the textarea required
+| `rows` | `number` | - | Visible row count
+| `onChange` | `(event) => void` | - | Native change handler; read the value from `event.target.value`
+| `...rest` | | | Every React Aria `TextArea` attribute is accepted

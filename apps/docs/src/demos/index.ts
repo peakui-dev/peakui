@@ -375,6 +375,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./fieldset/render-prop").then((m) => m.RenderProp),
     file: "fieldset/render-prop.tsx",
   },
+  // form
+  "form-basic": {
+    loader: () => import("./form/basic").then((m) => m.Basic),
+    file: "form/basic.tsx",
+  },
   // input
   "input-basic": {
     loader: () => import("./input/basic").then((m) => m.Basic),
@@ -586,6 +591,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./modal/with-form").then((m) => m.WithForm),
     file: "modal/with-form.tsx",
   },
+  // number-field
+  "number-field-basic": {
+    loader: () => import("./number-field/basic").then((m) => m.Basic),
+    file: "number-field/basic.tsx",
+  },
+  "number-field-controlled": {
+    loader: () => import("./number-field/controlled").then((m) => m.Controlled),
+    file: "number-field/controlled.tsx",
+  },
+  "number-field-variants": {
+    loader: () => import("./number-field/variants").then((m) => m.Variants),
+    file: "number-field/variants.tsx",
+  },
+  "number-field-with-format-options": {
+    loader: () => import("./number-field/with-format-options").then((m) => m.WithFormatOptions),
+    file: "number-field/with-format-options.tsx",
+  },
+  "number-field-with-step": {
+    loader: () => import("./number-field/with-step").then((m) => m.WithStep),
+    file: "number-field/with-step.tsx",
+  },
   // popover
   "popover-basic": {
     loader: () => import("./popover/basic").then((m) => m.Basic),
@@ -606,6 +632,23 @@ export const demos: Record<string, DemoItem> = {
   "popover-with-arrow": {
     loader: () => import("./popover/with-arrow").then((m) => m.WithArrow),
     file: "popover/with-arrow.tsx",
+  },
+  // radio-group
+  "radio-group-basic": {
+    loader: () => import("./radio-group/basic").then((m) => m.Basic),
+    file: "radio-group/basic.tsx",
+  },
+  "radio-group-controlled": {
+    loader: () => import("./radio-group/controlled").then((m) => m.Controlled),
+    file: "radio-group/controlled.tsx",
+  },
+  "radio-group-disabled": {
+    loader: () => import("./radio-group/disabled").then((m) => m.Disabled),
+    file: "radio-group/disabled.tsx",
+  },
+  "radio-group-orientation": {
+    loader: () => import("./radio-group/orientation").then((m) => m.Orientation),
+    file: "radio-group/orientation.tsx",
   },
   // scroll-shadow
   "scroll-shadow-basic": {
@@ -668,6 +711,10 @@ export const demos: Record<string, DemoItem> = {
   "search-field-disabled": {
     loader: () => import("./search-field/disabled").then((m) => m.Disabled),
     file: "search-field/disabled.tsx",
+  },
+  "search-field-form-example": {
+    loader: () => import("./search-field/form-example").then((m) => m.FormExample),
+    file: "search-field/form-example.tsx",
   },
   "search-field-full-width": {
     loader: () => import("./search-field/full-width").then((m) => m.FullWidth),
@@ -790,6 +837,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./surface/variants").then((m) => m.Variants),
     file: "surface/variants.tsx",
   },
+  // switch
+  "switch-basic": {
+    loader: () => import("./switch/basic").then((m) => m.Basic),
+    file: "switch/basic.tsx",
+  },
+  "switch-controlled": {
+    loader: () => import("./switch/controlled").then((m) => m.Controlled),
+    file: "switch/controlled.tsx",
+  },
+  "switch-disabled": {
+    loader: () => import("./switch/disabled").then((m) => m.Disabled),
+    file: "switch/disabled.tsx",
+  },
+  "switch-group": {
+    loader: () => import("./switch/group").then((m) => m.Group),
+    file: "switch/group.tsx",
+  },
+  "switch-group-horizontal": {
+    loader: () => import("./switch/group-horizontal").then((m) => m.GroupHorizontal),
+    file: "switch/group-horizontal.tsx",
+  },
+  "switch-sizes": {
+    loader: () => import("./switch/sizes").then((m) => m.Sizes),
+    file: "switch/sizes.tsx",
+  },
+  "switch-with-description": {
+    loader: () => import("./switch/with-description").then((m) => m.WithDescription),
+    file: "switch/with-description.tsx",
+  },
+  "switch-without-label": {
+    loader: () => import("./switch/without-label").then((m) => m.WithoutLabel),
+    file: "switch/without-label.tsx",
+  },
   // tabs
   "tabs-basic": {
     loader: () => import("./tabs/basic").then((m) => m.Basic),
@@ -904,6 +984,23 @@ export const demos: Record<string, DemoItem> = {
   "text-field-with-error": {
     loader: () => import("./text-field/with-error").then((m) => m.WithError),
     file: "text-field/with-error.tsx",
+  },
+  // textarea
+  "textarea-basic": {
+    loader: () => import("./textarea/basic").then((m) => m.Basic),
+    file: "textarea/basic.tsx",
+  },
+  "textarea-full-width": {
+    loader: () => import("./textarea/full-width").then((m) => m.FullWidth),
+    file: "textarea/full-width.tsx",
+  },
+  "textarea-in-text-field": {
+    loader: () => import("./textarea/in-text-field").then((m) => m.InTextField),
+    file: "textarea/in-text-field.tsx",
+  },
+  "textarea-variants": {
+    loader: () => import("./textarea/variants").then((m) => m.Variants),
+    file: "textarea/variants.tsx",
   },
   // toast
   "toast-basic": {
