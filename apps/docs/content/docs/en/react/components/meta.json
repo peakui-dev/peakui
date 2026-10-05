@@ -31,6 +31,7 @@
     "(collections)/list-box",
     "(overlays)/modal",
     "(overlays)/popover",
+    "(forms)/radio-group",
     "(utilities)/scroll-shadow",
     "(forms)/search-field",
     "(layout)/separator",

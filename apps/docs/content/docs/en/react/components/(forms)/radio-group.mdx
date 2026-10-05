@@ -1,0 +1,170 @@
+---
+title: RadioGroup
+description: Mutually exclusive radio buttons
+links:
+  rac: RadioGroup
+  source: radio-group/radio-group.tsx
+  styles: radio-group.css
+---
+
+## Usage
+
+```tsx
+import {Radio, RadioGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="radio-group-basic" />
+
+A radio button renders only inside a group — the parts document their anatomy here.
+
+### Anatomy
+
+```tsx
+<RadioGroup>
+  <Label>Label</Label>
+  <Radio value="a">
+    <Radio.Content>
+      <Radio.Control>
+        <Radio.Indicator />
+      </Radio.Control>
+      Option A
+    </Radio.Content>
+    <Description>Optional description</Description>
+  </Radio>
+</RadioGroup>
+```
+
+## Examples
+
+### Orientation
+
+<ComponentPreview name="radio-group-orientation" />
+
+### Disabled
+
+<ComponentPreview name="radio-group-disabled" />
+
+### Controlled
+
+<ComponentPreview name="radio-group-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<RadioGroup className="gap-2">
+  <Label>Label</Label>
+  <Radio value="a">
+    <Radio.Content>
+      <Radio.Control>
+        <Radio.Indicator />
+      </Radio.Control>
+      Option A
+    </Radio.Content>
+  </Radio>
+</RadioGroup>
+```
+
+### Global CSS
+
+```css
+.radio-group {
+  --radio-control-bg: var(--default);
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.radio-group` | The group wrapper element
+| `.radio-group--primary`, `.radio-group--secondary` | Variant modifiers
+| `.radio` | The radio field wrapper
+| `.radio__content` | The clickable label wrapping control and text
+| `.radio__control` | The circle the indicator sits in
+| `.radio__indicator` | The indicator container
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="radio-group"]` | The group wrapper element
+| `[data-slot="radio"]` | The radio field wrapper
+| `[data-slot="radio-content"]` | The clickable label element
+| `[data-slot="radio-control"]` | The circle element
+| `[data-slot="radio-indicator"]` | The indicator container element
+
+### CSS Variables
+
+| Variable | Purpose
+| :- | :-
+| `--radio-control-bg` | Unselected background of the secondary variant control
+| `--radio-control-bg-hover` | Hover background of the secondary variant control
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Selected | `[data-selected="true"]`
+| Hovered | `[data-hovered="true"]`
+| Pressed | `[data-pressed="true"]`
+| Focused (visible) | `[data-focus-visible="true"]`
+| Disabled | `[data-disabled="true"]`
+| Invalid | `[data-invalid="true"]`
+
+## API Reference
+
+### RadioGroup.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Visual variant of the group wrapper
+| `value` | `string` | - | Controlled selected value
+| `defaultValue` | `string` | - | Uncontrolled initial value
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | Layout direction
+| `isDisabled` | `boolean` | - | Disables every child radio
+| `isReadOnly` | `boolean` | - | Makes every child radio read-only
+| `name` | `string` | - | The name used when submitting an HTML form
+| `onChange` | `(value: string) => void` | - | Called when the selection changes
+| `render` | `DOMRenderFunction<'div', RadioGroupRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `RadioGroup` attribute is accepted
+
+### Radio.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `value` | `string` | - | The value this radio represents in the group
+| `isDisabled` | `boolean` | - | Disables this radio
+| `isInvalid` | `boolean` | - | Marks this radio invalid
+| `isRequired` | `boolean` | - | Marks this radio required
+| `render` | `DOMRenderFunction<'div', RadioFieldRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `RadioField` attribute is accepted
+
+### Radio.Content
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'label', RadioButtonRenderProps>` | - | Replaces the rendered label element
+| `...rest` | | | Every React Aria `RadioButton` attribute is accepted
+
+### Radio.Control
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Radio.Indicator
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `children` | `ReactNode \| ((state) => ReactNode)` | - | Custom indicator; receives the field render props
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Render Props
+
+`children` and `className` of `RadioGroup.Root`, `Radio.Root` and `Radio.Content` accept a function receiving the respective React Aria render props.

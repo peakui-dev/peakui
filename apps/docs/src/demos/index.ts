@@ -607,6 +607,23 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./popover/with-arrow").then((m) => m.WithArrow),
     file: "popover/with-arrow.tsx",
   },
+  // radio-group
+  "radio-group-basic": {
+    loader: () => import("./radio-group/basic").then((m) => m.Basic),
+    file: "radio-group/basic.tsx",
+  },
+  "radio-group-controlled": {
+    loader: () => import("./radio-group/controlled").then((m) => m.Controlled),
+    file: "radio-group/controlled.tsx",
+  },
+  "radio-group-disabled": {
+    loader: () => import("./radio-group/disabled").then((m) => m.Disabled),
+    file: "radio-group/disabled.tsx",
+  },
+  "radio-group-orientation": {
+    loader: () => import("./radio-group/orientation").then((m) => m.Orientation),
+    file: "radio-group/orientation.tsx",
+  },
   // scroll-shadow
   "scroll-shadow-basic": {
     loader: () => import("./scroll-shadow/basic").then((m) => m.Basic),
