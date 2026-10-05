@@ -1,0 +1,91 @@
+---
+title: CheckboxGroup
+description: Group of related checkboxes
+links:
+  rac: CheckboxGroup
+  source: checkbox-group/checkbox-group.tsx
+  styles: checkbox-group.css
+---
+
+## Usage
+
+```tsx
+import {Checkbox, CheckboxGroup} from "@peakui/react";
+```
+
+<ComponentPreview name="checkbox-group-basic" />
+
+## Examples
+
+### Indeterminate Select All
+
+<ComponentPreview name="checkbox-group-indeterminate" />
+
+### Disabled
+
+<ComponentPreview name="checkbox-group-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<CheckboxGroup className="gap-2">
+  <Label>Label</Label>
+  <Checkbox value="a">
+    <Checkbox.Content>
+      <Checkbox.Control>
+        <Checkbox.Indicator />
+      </Checkbox.Control>
+      Option A
+    </Checkbox.Content>
+  </Checkbox>
+</CheckboxGroup>
+```
+
+### Global CSS
+
+```css
+.checkbox-group {
+  gap: 0.5rem;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.checkbox-group` | The group wrapper element
+| `.checkbox-group--primary`, `.checkbox-group--secondary` | Variant modifiers
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="checkbox-group"]` | The group wrapper element
+
+### Interactive States
+
+The group itself renders no interactive states; the styles apply to its `[data-slot="checkbox"]` children.
+
+## API Reference
+
+### CheckboxGroup.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Visual variant inherited by child checkboxes
+| `value` | `string[]` | - | Controlled selected values
+| `defaultValue` | `string[]` | - | Uncontrolled initial values
+| `isDisabled` | `boolean` | - | Disables every child checkbox
+| `isReadOnly` | `boolean` | - | Makes every child checkbox read-only
+| `name` | `string` | - | The name used when submitting an HTML form
+| `onChange` | `(value: string[]) => void` | - | Called when the selection changes
+| `render` | `DOMRenderFunction<'div', CheckboxGroupRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `CheckboxGroup` attribute is accepted
+
+### Render Props
+
+`children` and `className` accept a function receiving the group render props (`isDisabled`, `isReadOnly`, `isRequired`, `isInvalid`, `state`).

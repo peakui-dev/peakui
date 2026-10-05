@@ -149,6 +149,44 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./card/with-form").then((m) => m.WithForm),
     file: "card/with-form.tsx",
   },
+  // checkbox
+  "checkbox-basic": {
+    loader: () => import("./checkbox/basic").then((m) => m.Basic),
+    file: "checkbox/basic.tsx",
+  },
+  "checkbox-controlled": {
+    loader: () => import("./checkbox/controlled").then((m) => m.Controlled),
+    file: "checkbox/controlled.tsx",
+  },
+  "checkbox-disabled": {
+    loader: () => import("./checkbox/disabled").then((m) => m.Disabled),
+    file: "checkbox/disabled.tsx",
+  },
+  "checkbox-indeterminate": {
+    loader: () => import("./checkbox/indeterminate").then((m) => m.Indeterminate),
+    file: "checkbox/indeterminate.tsx",
+  },
+  "checkbox-invalid": {
+    loader: () => import("./checkbox/invalid").then((m) => m.Invalid),
+    file: "checkbox/invalid.tsx",
+  },
+  "checkbox-variants": {
+    loader: () => import("./checkbox/variants").then((m) => m.Variants),
+    file: "checkbox/variants.tsx",
+  },
+  // checkbox-group
+  "checkbox-group-basic": {
+    loader: () => import("./checkbox-group/basic").then((m) => m.Basic),
+    file: "checkbox-group/basic.tsx",
+  },
+  "checkbox-group-disabled": {
+    loader: () => import("./checkbox-group/disabled").then((m) => m.Disabled),
+    file: "checkbox-group/disabled.tsx",
+  },
+  "checkbox-group-indeterminate": {
+    loader: () => import("./checkbox-group/indeterminate").then((m) => m.Indeterminate),
+    file: "checkbox-group/indeterminate.tsx",
+  },
   // chip
   "chip-basic": {
     loader: () => import("./chip/basic").then((m) => m.Basic),
