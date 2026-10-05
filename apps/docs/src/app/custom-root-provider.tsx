@@ -6,10 +6,19 @@ import type {ReactNode} from "react";
 import {Toast} from "@peakui/react";
 import {i18nProvider} from "fumadocs-ui/i18n";
 import {RootProvider} from "fumadocs-ui/provider/next";
+import dynamic from "next/dynamic";
 
 import {LocaleLink} from "@/components/locale-link";
 import {DictionaryProvider} from "@/hooks/use-dictionary";
 import {translations} from "@/lib/layout.shared";
+
+/*
+ * The search dialog is replaced with the PeakUI-assembled one. The engine keeps the ⌘K shortcut,
+ * the open state and the search index; it renders this component where its own dialog would mount.
+ */
+const SearchDialog = dynamic(() => import("@/components/search-dialog"), {
+  ssr: false,
+});
 
 export function CustomRootProvider({
   children,
@@ -22,7 +31,11 @@ export function CustomRootProvider({
 }) {
   return (
     <DictionaryProvider dict={dict}>
-      <RootProvider components={{Link: LocaleLink}} i18n={i18nProvider(translations, lang)}>
+      <RootProvider
+        components={{Link: LocaleLink}}
+        i18n={i18nProvider(translations, lang)}
+        search={{SearchDialog}}
+      >
         {children}
         {/* The toast region: renders nothing until a toast is queued (e.g. by page actions). */}
         <Toast.Provider />

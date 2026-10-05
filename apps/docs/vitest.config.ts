@@ -18,6 +18,11 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    /*
+     * Глобалы нужны jsdom-наборам компонентов: сетап из @peakui/testing (installPointerEvent для
+     * RAC) рассчитывает на глобальные beforeAll/afterAll — как в конфиге packages/react.
+     */
+    globals: true,
     include: ["tests/**/*.test.{ts,tsx}"],
     testTimeout: 60_000,
   },
