@@ -44,6 +44,9 @@ check there before you change one:
   CSS-native instead of being exported as JS strings.
 - `docs/superpowers/specs/2026-10-01-design-tokens-design.md` — `forced-colors` support, which the
   reference has none of.
+- Section headers compose RAC's `Header` child directly at consumption sites; PeakUI ships no
+  `Header` wrapper (human decision at the wave-3 review, over the port recommendation —
+  `.superpowers/sdd/2026-10-04-roadmap-wave-3/closure-report.md`).
 
 The three rules in this file that were corrected *toward* the reference — hardcoded assistive strings,
 the `any` boundary, test location — each carry their reason where they are stated.
