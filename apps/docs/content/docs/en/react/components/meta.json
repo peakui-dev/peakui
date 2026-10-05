@@ -12,6 +12,8 @@
     "(buttons)/button",
     "(buttons)/button-group",
     "(layout)/card",
+    "(forms)/checkbox",
+    "(forms)/checkbox-group",
     "(data-display)/chip",
     "(buttons)/close-button",
     "(forms)/description",

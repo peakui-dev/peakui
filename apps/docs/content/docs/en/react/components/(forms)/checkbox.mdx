@@ -1,0 +1,160 @@
+---
+title: Checkbox
+description: Selectable box with label and indicator
+links:
+  rac: Checkbox
+  source: checkbox/checkbox.tsx
+  styles: checkbox.css
+---
+
+## Usage
+
+```tsx
+import {Checkbox} from "@peakui/react";
+```
+
+<ComponentPreview name="checkbox-basic" />
+
+### Anatomy
+
+```tsx
+<Checkbox>
+  <Checkbox.Content>
+    <Checkbox.Control>
+      <Checkbox.Indicator />
+    </Checkbox.Control>
+    Label text
+  </Checkbox.Content>
+</Checkbox>
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="checkbox-variants" />
+
+### Indeterminate
+
+<ComponentPreview name="checkbox-indeterminate" />
+
+### Disabled
+
+<ComponentPreview name="checkbox-disabled" />
+
+### Invalid
+
+<ComponentPreview name="checkbox-invalid" />
+
+### Controlled
+
+<ComponentPreview name="checkbox-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Checkbox className="w-full">
+  <Checkbox.Content>
+    <Checkbox.Control>
+      <Checkbox.Indicator />
+    </Checkbox.Control>
+    Label text
+  </Checkbox.Content>
+</Checkbox>
+```
+
+### Global CSS
+
+```css
+.checkbox {
+  --checkbox-control-bg: var(--default);
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.checkbox` | The field wrapper element
+| `.checkbox--primary`, `.checkbox--secondary` | Variant modifiers
+| `.checkbox__content` | The clickable label wrapping control and text
+| `.checkbox__control` | The square box the indicator sits in
+| `.checkbox__indicator` | The indicator container
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="checkbox"]` | The field wrapper element
+| `[data-slot="checkbox-content"]` | The clickable label element
+| `[data-slot="checkbox-control"]` | The square box element
+| `[data-slot="checkbox-indicator"]` | The indicator container element
+| `[data-slot="checkbox-default-indicator--checkmark"]` | The default checkmark SVG
+| `[data-slot="checkbox-default-indicator--indeterminate"]` | The default indeterminate line SVG
+
+### CSS Variables
+
+| Variable | Purpose
+| :- | :-
+| `--checkbox-control-bg` | Unselected background of the secondary variant control
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Selected | `[data-selected="true"]`
+| Indeterminate | `[data-indeterminate="true"]`
+| Hovered | `[data-hovered="true"]`
+| Pressed | `[data-pressed="true"]`
+| Focused (visible) | `[data-focus-visible="true"]`
+| Disabled | `[data-disabled="true"]`
+| Invalid | `[data-invalid="true"]`
+
+## API Reference
+
+### Checkbox.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `variant` | `"primary" \| "secondary"` | `"primary"` | Visual variant; inherited from the group when unset
+| `name` | `string` | - | The name used when submitting an HTML form
+| `isSelected` | `boolean` | - | Controlled selected state
+| `defaultSelected` | `boolean` | - | Uncontrolled initial selected state
+| `isIndeterminate` | `boolean` | - | Indeterminate state
+| `isDisabled` | `boolean` | - | Disables the checkbox
+| `isInvalid` | `boolean` | - | Marks the checkbox invalid
+| `isRequired` | `boolean` | - | Marks the checkbox required
+| `validate` | `(isSelected) => boolean \| string` | - | Validation function
+| `onChange` | `(isSelected) => void` | - | Called when the selected state changes
+| `render` | `DOMRenderFunction<'div', CheckboxFieldRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `CheckboxField` attribute is accepted
+
+### Checkbox.Content
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'label', CheckboxButtonRenderProps>` | - | Replaces the rendered label element
+| `...rest` | | | Every React Aria `CheckboxButton` attribute is accepted
+
+### Checkbox.Control
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Checkbox.Indicator
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `children` | `ReactNode \| ((state) => ReactNode)` | default SVGs | Custom indicator; receives the field render props
+| `render` | `DOMRenderFunction<'span', undefined>` | - | Replaces the rendered element
+
+### Render Props
+
+`children` and `className` of `Checkbox.Root` and `Checkbox.Content` accept a function receiving the respective React Aria render props.

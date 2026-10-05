@@ -61,7 +61,7 @@ describe("SearchField", () => {
 
   it("имя кнопки очистки перекрывается потребителем", () => {
     render(
-      <SearchField name="search" aria-label="Поиск">
+      <SearchField aria-label="Поиск" name="search">
         <SearchField.Group>
           <SearchField.Input />
           <SearchField.ClearButton aria-label="Очистить фильтры" />
