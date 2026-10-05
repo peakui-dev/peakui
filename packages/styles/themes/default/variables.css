@@ -208,6 +208,7 @@
     :host {
       --accent: Highlight;
       --accent-foreground: HighlightText;
+      --backdrop: Canvas;
       --background: Canvas;
       --border: ButtonBorder;
       --default: ButtonFace;

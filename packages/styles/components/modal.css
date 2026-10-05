@@ -78,29 +78,20 @@
  * Modifier: backdrop--opaque
  */
 .modal__backdrop--opaque {
-  @apply bg-backdrop;
-
   /*
-   * Forced colors: dimming has no system colour, and the theme block does not remap --backdrop.
-   * An opaque Canvas states the modal's occlusion explicitly instead of relying on the engine
-   * flattening the translucent token. The overlay-family policy: the dialog's border below
-   * carries the boundary; the backdrop carries the occlusion.
+   * Forced colors: the theme block remaps --backdrop to an opaque Canvas, so bg-backdrop states
+   * the occlusion on its own and no per-component override is needed. The overlay-family policy:
+   * the dialog's border below carries the boundary; the backdrop carries the occlusion.
    */
-  @media (forced-colors: active) {
-    background-color: Canvas;
-  }
+  @apply bg-backdrop;
 }
 
 /**
  * Modifier: backdrop--blur
  */
 .modal__backdrop--blur {
+  /* The theme's --backdrop: Canvas reaches this modifier too; the blur is meaningless over it. */
   @apply bg-backdrop backdrop-blur-md;
-
-  /* Same forced-colors reasoning as --opaque: the blur is meaningless over an opaque Canvas. */
-  @media (forced-colors: active) {
-    background-color: Canvas;
-  }
 }
 
 /**
@@ -373,8 +364,8 @@
  * 1. forced-colors. The reference has none. The overlay-family policy (decided in this task for
  *    modal.css + popover.css + surface.css): the surface element holds a transparent border in
  *    the normal state and paints it ButtonBorder in forced colors — the pattern button.css,
- *    close-button.css and chip.css set — while the backdrop states its occlusion as an opaque
- *    Canvas because the theme block does not remap --backdrop. Text and focus ride the theme
+ *    close-button.css and chip.css set — while the backdrop's occlusion comes from the theme
+ *    block itself, which remaps --backdrop to an opaque Canvas. Text and focus ride the theme
  *    block (--foreground: CanvasText, --muted: GrayText) and the status-focused outline
  *    fallback; the component adds nothing there.
  *

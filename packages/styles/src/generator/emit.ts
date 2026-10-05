@@ -27,6 +27,9 @@ const FORCED_COLORS: TokenSet = {
   "surface-tertiary": "Canvas",
   overlay: "Canvas",
   "overlay-foreground": "CanvasText",
+  // Затемнение не имеет системного цвета: плафон заявляет перекрытие непрозрачным Canvas,
+  // и компонентам больше не нужен обходной блок на месте.
+  backdrop: "Canvas",
   muted: "GrayText",
   default: "ButtonFace",
   "default-foreground": "ButtonText",
