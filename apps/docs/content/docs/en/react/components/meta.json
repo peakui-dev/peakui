@@ -38,6 +38,7 @@
     "(feedback)/skeleton",
     "(feedback)/spinner",
     "(layout)/surface",
+    "(forms)/switch",
     "(navigation)/tabs",
     "(collections)/tag-group",
     "(forms)/text-field",

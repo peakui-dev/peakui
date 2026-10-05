@@ -38,6 +38,8 @@ export * from "./separator/index.ts";
 export * from "./skeleton/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
+export * from "./switch-group/index.ts";
+export * from "./switch/index.ts";
 export * from "./tabs/index.ts";
 export * from "./tag-group/index.ts";
 export * from "./tag/index.ts";

@@ -39,6 +39,8 @@
 @import "./skeleton.css";
 @import "./spinner.css";
 @import "./surface.css";
+@import "./switch-group.css";
+@import "./switch.css";
 @import "./tabs.css";
 @import "./tag-group.css";
 @import "./tag.css";

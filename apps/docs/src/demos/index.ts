@@ -807,6 +807,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./surface/variants").then((m) => m.Variants),
     file: "surface/variants.tsx",
   },
+  // switch
+  "switch-basic": {
+    loader: () => import("./switch/basic").then((m) => m.Basic),
+    file: "switch/basic.tsx",
+  },
+  "switch-controlled": {
+    loader: () => import("./switch/controlled").then((m) => m.Controlled),
+    file: "switch/controlled.tsx",
+  },
+  "switch-disabled": {
+    loader: () => import("./switch/disabled").then((m) => m.Disabled),
+    file: "switch/disabled.tsx",
+  },
+  "switch-group": {
+    loader: () => import("./switch/group").then((m) => m.Group),
+    file: "switch/group.tsx",
+  },
+  "switch-group-horizontal": {
+    loader: () => import("./switch/group-horizontal").then((m) => m.GroupHorizontal),
+    file: "switch/group-horizontal.tsx",
+  },
+  "switch-sizes": {
+    loader: () => import("./switch/sizes").then((m) => m.Sizes),
+    file: "switch/sizes.tsx",
+  },
+  "switch-with-description": {
+    loader: () => import("./switch/with-description").then((m) => m.WithDescription),
+    file: "switch/with-description.tsx",
+  },
+  "switch-without-label": {
+    loader: () => import("./switch/without-label").then((m) => m.WithoutLabel),
+    file: "switch/without-label.tsx",
+  },
   // tabs
   "tabs-basic": {
     loader: () => import("./tabs/basic").then((m) => m.Basic),
