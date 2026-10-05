@@ -50,7 +50,7 @@ export default function SearchDialog({onOpenChange, open}: SharedProps) {
 
   const select = (item: SortedResult) => {
     router.push(item.url);
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   /*
@@ -61,7 +61,7 @@ export default function SearchDialog({onOpenChange, open}: SharedProps) {
    */
   const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape") {
-      onOpenChange(false);
+      handleOpenChange(false);
 
       return;
     }

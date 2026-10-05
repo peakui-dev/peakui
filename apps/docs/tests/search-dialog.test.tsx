@@ -232,5 +232,24 @@ describe("SearchDialog", () => {
         expect(screen.queryByRole("option")).toBeNull();
       });
     });
+
+    it("сбрасывает запрос при повторном открытии после выбора результата", async () => {
+      await searchFor(user, "button");
+
+      await user.click(screen.getByRole("option", {name: /Use the Button component/i}));
+
+      expect(pushMock).toHaveBeenCalledWith("/en/docs/react/components/button#usage");
+
+      await user.click(screen.getByRole("button", {name: "Снова открыть"}));
+
+      const input = screen.getByRole("searchbox") as HTMLInputElement;
+
+      expect(input.value).toBe("");
+
+      // Строчка сброшена сразу; старые результаты уходят после дебаунса движка.
+      await waitFor(() => {
+        expect(screen.queryByRole("option")).toBeNull();
+      });
+    });
   });
 });
