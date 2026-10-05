@@ -8,7 +8,7 @@ export function CustomTrigger() {
     <Dropdown>
       <Dropdown.Trigger className="rounded-full">
         <img
-          alt="Junior Garcia"
+          alt="User avatar"
           className="size-10 rounded-full object-cover"
           src="https://picsum.photos/80/80"
         />
