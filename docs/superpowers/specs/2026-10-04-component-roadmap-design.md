@@ -154,6 +154,11 @@ on `@peakui/react` except search.
 | 24 | `Tag` + `TagGroup` | collections | CloseButton (mutual pair) | search dialog filters. `tag` is a package with no documentation page upstream; `tag-group` has one |
 | 25 | `Toast` | overlays | Button, CloseButton, icons, Spinner | the manual `checked` timeout in `page-actions.tsx`; adds the `Toast` mount that `app/custom-root-provider.tsx` lacks |
 
+Annotation (added at wave-3 closure): entry 20's "Closes" cell overstates on its second item —
+`fumadocs-ui/components/sidebar/tabs/dropdown` is engine-owned Radix internals inside `fumadocs`'
+own Sidebar, on the far side of "The boundary we do not cross"; `Dropdown` closes only the raw RAC
+usage in `components/ai/page-actions.tsx`.
+
 ### Deliberately not in P1
 
 `Badge`, `Avatar`, `AvatarGroup`, `Typography`, `Toolbar`, `Accordion`, `Drawer`, `AlertDialog` and
