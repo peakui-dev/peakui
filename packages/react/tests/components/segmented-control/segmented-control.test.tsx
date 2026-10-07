@@ -271,6 +271,51 @@ describe("SegmentedControl", () => {
     });
   });
 
+  describe("границы controlled/uncontrolled", () => {
+    /*
+     * Переключатель темы в docs рендерится без выбора до монтирования, а после — с выбором. Если
+     * контролируемость определять по значению selectedKey, этот переход читается как
+     * uncontrolled → controlled, и react-stately пишет предупреждение в каждую dev-загрузку
+     * страницы. Присутствие пропа — то, чем консьюмер выражает «контролирую, но пока ничего».
+     */
+    it("selectedKey={undefined} остаётся контролируемым и не вызывает предупреждение о смене режима", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const {rerender} = render(
+        <SegmentedControl aria-label="Вид" selectedKey={undefined}>
+          {views()}
+        </SegmentedControl>,
+      );
+
+      for (const name of ["Сетка", "Список", "Таблица"]) {
+        expect(screen.getByRole("radio", {name})).not.toBeChecked();
+      }
+
+      rerender(
+        <SegmentedControl aria-label="Вид" selectedKey="list">
+          {views()}
+        </SegmentedControl>,
+      );
+
+      expect(screen.getByRole("radio", {name: "Список"})).toBeChecked();
+      expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("uncontrolled to controlled"));
+
+      warn.mockRestore();
+    });
+
+    it("без пропа selectedKey компонент остаётся неконтролируемым и выбирает по клику", async () => {
+      render(
+        <SegmentedControl aria-label="Вид" defaultSelectedKey="grid">
+          {views()}
+        </SegmentedControl>,
+      );
+
+      await user.click(screen.getByRole("radio", {name: "Таблица"}));
+
+      expect(screen.getByRole("radio", {name: "Таблица"})).toBeChecked();
+    });
+  });
+
   describe("граничные случаи", () => {
     it("selectedKey, не совпадающий ни с одним сегментом, не выбирает ничего и не падает", () => {
       render(

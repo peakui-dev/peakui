@@ -2,6 +2,7 @@ import {EmptyState} from "@peakui/react";
 import {HomeLayout} from "fumadocs-ui/layouts/home";
 
 import {Footer} from "@/components/footer";
+import {ThemeToggleSystem} from "@/components/fumadocs/ui/theme-toggle";
 import {NotFoundActions} from "@/components/not-found-actions";
 import {getDictionary} from "@/lib/dictionaries";
 import {i18n} from "@/lib/i18n";
@@ -17,8 +18,12 @@ export default async function NotFound() {
     <HomeLayout
       {...baseOptions}
       links={getHomeLayoutLinks(dict)}
-      themeSwitch={{
-        mode: "light-dark-system",
+      /*
+       * Same reason as (home)/layout.tsx: without the slot HomeLayout renders the upstream fumadocs
+       * ThemeSwitch, and a visitor who lands on a 404 would get a third, different control.
+       */
+      slots={{
+        themeSwitch: ThemeToggleSystem,
       }}
     >
       {/*

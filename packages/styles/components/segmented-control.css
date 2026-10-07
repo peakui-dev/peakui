@@ -60,10 +60,12 @@
   color: var(--segmented-control-item-fg);
 
   /*
-   * The focus ring arrives as a shadow through --focus-ring (utilities/index.css); the two
-   * transparent shadows keep the list length constant so box-shadow interpolates without a jump.
+   * The focus ring arrives as a shadow through --focus-ring (utilities/index.css). One transparent
+   * shadow, not two, keeps the list length constant so box-shadow interpolates without a jump:
+   * status-focused-field publishes a single ring, where status-focused publishes an offset plus a
+   * ring. See the deviation list for why a segment takes the field ring.
    */
-  box-shadow: var(--focus-ring, 0 0 0 0 transparent, 0 0 0 0 transparent);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent);
 
   /**
    * Transitions
@@ -96,7 +98,7 @@
   /* :not([data-focused]) guards against double application when React Aria owns the focus. */
   &:focus-visible:not([data-focused]),
   &[data-focus-visible] {
-    @apply status-focused;
+    @apply status-focused-field;
   }
 
   &:disabled,
@@ -183,6 +185,13 @@
  *    toggle-button.css rather than tabs.css. `tabs.css` applies `status-focused` without ever
  *    reading `--focus-ring` into a box-shadow, so the utility publishes a ring no declaration
  *    draws. Not fixed here — tabs.css is out of this component's scope — but not copied either.
+ *
+ * 1a. The ring is `status-focused-field`, not `status-focused`. utilities/index.css assigns the
+ *    field ring to "a control that sits in a shared shell", and a segment is exactly that: the
+ *    offset of the general ring is painted in --color-background, while the surface around a
+ *    segment is --color-default, so it drew a page-coloured band across the capsule's padding and
+ *    pushed the blue ring onto the capsule's outer edge. The field ring sits flush against the
+ *    segment instead. The fallback shadow list above is one entry for the same reason.
  *
  * 2. Value-less `data-*` selectors (`[data-selected]`, `[data-focus-visible]`) where `tabs.css`
  *    writes explicit values (`[data-selected="true"]`). The value-less form is the house form,

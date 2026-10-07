@@ -62,43 +62,53 @@ interface SegmentedControlRootProps
   onSelectionChange?: (key: Key) => void;
 }
 
-const SegmentedControlRoot = ({
-  children,
-  className,
-  defaultSelectedKey,
-  onSelectionChange,
-  selectedKey,
-  size,
-  ...rest
-}: SegmentedControlRootProps) => {
+const SegmentedControlRoot = (props: SegmentedControlRootProps) => {
+  const {children, className, defaultSelectedKey, onSelectionChange, selectedKey, size, ...rest} =
+    props;
+
   const slots = React.useMemo(() => segmentedControlVariants({size}), [size]);
   const contextValue = React.useMemo(() => ({slots}), [slots]);
 
   /*
-   * Only pass the key props the consumer actually supplied: an unconditional empty Set would make
-   * an uncontrolled consumer permanently controlled-empty.
+   * Controlled-ness is decided by the prop's PRESENCE, not by its value, so that a consumer can say
+   * "controlled, nothing selected yet" — which is what a theme switcher needs before it knows the
+   * resolved theme. Deciding by value instead would read that first render as uncontrolled and the
+   * next one as controlled, and react-stately's useControlledState warns on exactly that transition
+   * in every non-production build.
+   *
+   * The Sets are memoised because useToggleGroupState memoises on their identity: a fresh Set each
+   * render defeats that memo and pushes a new selection object into group state every time.
    */
-  const selection = {
-    ...(selectedKey === undefined ? {} : {selectedKeys: new Set([selectedKey])}),
-    ...(defaultSelectedKey === undefined
-      ? {}
-      : {defaultSelectedKeys: new Set([defaultSelectedKey])}),
-  };
+  const isControlled = "selectedKey" in props;
+  const selectedKeys = React.useMemo(
+    () => (isControlled ? new Set(selectedKey === undefined ? [] : [selectedKey]) : undefined),
+    [isControlled, selectedKey],
+  );
+  const defaultSelectedKeys = React.useMemo(
+    () => (defaultSelectedKey === undefined ? undefined : new Set([defaultSelectedKey])),
+    [defaultSelectedKey],
+  );
 
   return (
     <SegmentedControlContext value={contextValue}>
+      {/*
+       * `rest` is spread first so the locked props below cannot be overwritten through it. The type
+       * already omits them, so this only closes the hole a cast would open — the order TabsRoot uses
+       * for the same reason.
+       */}
       <ToggleButtonGroupPrimitive
+        {...rest}
         disallowEmptySelection
         className={composeTwRenderProps(className, slots.base())}
+        data-slot="segmented-control"
+        defaultSelectedKeys={defaultSelectedKeys}
+        selectedKeys={selectedKeys}
         selectionMode="single"
-        {...selection}
         onSelectionChange={(keys) => {
           const key = keys.values().next().value;
 
           if (key !== undefined) onSelectionChange?.(key);
         }}
-        {...rest}
-        data-slot="segmented-control"
       >
         {children}
       </ToggleButtonGroupPrimitive>
@@ -118,7 +128,18 @@ const SegmentedControlRoot = ({
  * decides whether it is visible for a given item and animates it between items, so the render is
  * never gated on a selected check.
  * -----------------------------------------------------------------------------------------------*/
-interface SegmentedControlItemProps extends ComponentPropsWithRef<typeof ToggleButtonPrimitive> {
+interface SegmentedControlItemProps extends Omit<
+  ComponentPropsWithRef<typeof ToggleButtonPrimitive>,
+  "id"
+> {
+  /*
+   * Required, where the primitive leaves it optional. Without an `id` the RAC ToggleButton stops
+   * consulting the group's state and falls back to a standalone toggle: `role="button"` with
+   * `aria-pressed` inside a radiogroup, invisible to `selectedKey` and `onSelectionChange`, and its
+   * indicator follows that local state — so two segments can show a capsule at once. It fails
+   * silently, and the type is the only place to catch it.
+   */
+  id: Key;
   className?: string;
 }
 

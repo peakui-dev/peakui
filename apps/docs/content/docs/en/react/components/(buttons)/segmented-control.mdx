@@ -44,8 +44,12 @@ The indicator — the capsule around the selected segment — is rendered for yo
 place. It animates from the previous segment to the new one, and respects
 `prefers-reduced-motion: reduce`, where it appears without animating.
 
-Exactly one segment is always selected. `SegmentedControl` fixes single selection and refuses an
-empty one, so clicking the selected segment again keeps it selected.
+The selection can never be *cleared*: `SegmentedControl` fixes single selection and refuses an empty
+one, so clicking the selected segment again keeps it selected. It does not follow that a segment is
+always selected — a control with neither `selectedKey` nor `defaultSelectedKey`, or one whose
+`selectedKey` matches no segment, starts with nothing selected and renders no indicator. Passing
+`selectedKey={undefined}` keeps the control *controlled* with nothing selected, which is how a
+switcher waits for a value it does not have yet.
 
 ## Examples
 
