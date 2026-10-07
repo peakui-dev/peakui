@@ -1,5 +1,10 @@
 import type {Meta, StoryObj} from "@storybook/react-vite";
 import type {ReactNode} from "react";
+import type {Key} from "react-aria-components/Collection";
+
+import {useState} from "react";
+
+import {IconMinus, IconPlus, IconSearch} from "../icons.tsx";
 
 import {SegmentedControl} from "./index.ts";
 
@@ -14,6 +19,14 @@ const Showcase = ({children, title}: {children: ReactNode; title: string}) => (
   </div>
 );
 
+const views = (
+  <>
+    <SegmentedControl.Item id="grid">Grid</SegmentedControl.Item>
+    <SegmentedControl.Item id="list">List</SegmentedControl.Item>
+    <SegmentedControl.Item id="table">Table</SegmentedControl.Item>
+  </>
+);
+
 const meta = {
   component: SegmentedControl,
   parameters: {
@@ -26,34 +39,119 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Basic: Story = {
   args: {
-    "aria-label": "Вид",
-    children: (
-      <>
-        <SegmentedControl.Item id="grid">Сетка</SegmentedControl.Item>
-        <SegmentedControl.Item id="list">Список</SegmentedControl.Item>
-        <SegmentedControl.Item id="table">Таблица</SegmentedControl.Item>
-      </>
-    ),
+    "aria-label": "View",
+    children: views,
     defaultSelectedKey: "grid",
   },
   render: (args) => (
-    <Showcase title="Default">
+    <Showcase title="Basic">
       <SegmentedControl {...args} />
     </Showcase>
   ),
 };
 
 /*
+ * Icon-only segments. The core ships no theme icons, and a story may not import from apps/docs, so
+ * this is a zoom control — the geometry it demonstrates is the same one a theme switcher uses.
+ * Each segment needs its own label, since the icon carries no accessible name.
+ */
+export const IconOnly: Story = {
+  args: {
+    "aria-label": "Zoom",
+    children: (
+      <>
+        <SegmentedControl.Item aria-label="Zoom out" id="out">
+          <IconMinus />
+        </SegmentedControl.Item>
+        <SegmentedControl.Item aria-label="Fit" id="fit">
+          <IconSearch />
+        </SegmentedControl.Item>
+        <SegmentedControl.Item aria-label="Zoom in" id="in">
+          <IconPlus />
+        </SegmentedControl.Item>
+      </>
+    ),
+    defaultSelectedKey: "fit",
+  },
+  render: (args) => (
+    <Showcase title="IconOnly">
+      <SegmentedControl {...args} />
+    </Showcase>
+  ),
+};
+
+/* The three sizes stacked, so the scale is comparable at a glance. */
+export const Sizes: Story = {
+  args: {
+    "aria-label": "View",
+    children: views,
+    defaultSelectedKey: "grid",
+  },
+  render: (args) => (
+    <Showcase title="Sizes">
+      <div className="flex flex-col items-start gap-4">
+        {(["sm", "md", "lg"] as const).map((size) => (
+          <SegmentedControl key={size} {...args} aria-label={`View ${size}`} size={size} />
+        ))}
+      </div>
+    </Showcase>
+  ),
+};
+
+export const Disabled: Story = {
+  args: {
+    "aria-label": "View",
+    children: views,
+    defaultSelectedKey: "grid",
+  },
+  render: (args) => (
+    <Showcase title="Disabled">
+      <div className="flex flex-col items-start gap-4">
+        <SegmentedControl {...args} isDisabled aria-label="Whole control disabled" />
+        <SegmentedControl aria-label="One segment disabled" defaultSelectedKey="grid">
+          <SegmentedControl.Item id="grid">Grid</SegmentedControl.Item>
+          <SegmentedControl.Item isDisabled id="list">
+            List
+          </SegmentedControl.Item>
+          <SegmentedControl.Item id="table">Table</SegmentedControl.Item>
+        </SegmentedControl>
+      </div>
+    </Showcase>
+  ),
+};
+
+/* Controlled: proves the handler hands over a single key, not a Set. */
+export const Controlled: Story = {
+  args: {
+    "aria-label": "View",
+    children: views,
+  },
+  render: () => {
+    const [view, setView] = useState<Key>("grid");
+
+    return (
+      <Showcase title="Controlled">
+        <div className="flex flex-col items-start gap-4">
+          <SegmentedControl aria-label="View" selectedKey={view} onSelectionChange={setView}>
+            {views}
+          </SegmentedControl>
+          <p className="text-sm text-muted">Selected: {String(view)}</p>
+        </div>
+      </Showcase>
+    );
+  },
+};
+
+/*
  * Deliberately uneven labels. This story is the instrument for the segment-width rule: the shell
- * must hug its content, the segments must come out equal, and the longest label must not be
- * clipped. The second control is the same set inside a narrow box, which is where a `w-full`
- * consumer lands.
+ * must hug its content, the longest label must not be clipped, and a stretched control must share
+ * its width equally. The measurement it produced is recorded in segmented-control.css.
  */
 export const LongLabels: Story = {
   args: {
-    "aria-label": "Период",
+    "aria-label": "Period",
     children: (
       <>
         <SegmentedControl.Item id="day">Day</SegmentedControl.Item>
