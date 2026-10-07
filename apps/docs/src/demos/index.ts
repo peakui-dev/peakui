@@ -753,6 +753,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./search-field/with-validation").then((m) => m.WithValidation),
     file: "search-field/with-validation.tsx",
   },
+  // segmented-control
+  "segmented-control-basic": {
+    loader: () => import("./segmented-control/basic").then((m) => m.Basic),
+    file: "segmented-control/basic.tsx",
+  },
   // separator
   "separator-basic": {
     loader: () => import("./separator/basic").then((m) => m.Basic),
