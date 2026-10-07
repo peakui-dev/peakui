@@ -1,6 +1,6 @@
 ---
 title: SegmentedControl
-description: SegmentedControl component
+description: Picks one option from a small set, with an indicator that slides to the chosen segment
 links:
   rac: ToggleButtonGroup
   source: segmented-control/segmented-control.tsx
@@ -14,3 +14,217 @@ import {SegmentedControl} from "@peakui/react";
 ```
 
 <ComponentPreview name="segmented-control-basic" />
+
+Each segment selects by its `id`, which is also the key in `selectedKey` and `defaultSelectedKey`.
+
+Use `SegmentedControl` when the choice changes what the interface shows — a theme, a view mode, a
+chart period, a table density. It is not a form control: nothing is submitted, and there is no
+`name` or `value`. For a choice that travels with a form, use `RadioGroup`. For panels that swap
+with the selection, use `Tabs`. For several independent toggles, or for multiple selection, use
+`ToggleButtonGroup`.
+
+An accessible name is required, because the control carries no visible label: pass `aria-label`, or
+`aria-labelledby` pointing at a label you render yourself.
+
+### Anatomy
+
+```tsx
+import {SegmentedControl} from "@peakui/react";
+
+export default () => (
+  <SegmentedControl aria-label="View" defaultSelectedKey="grid">
+    <SegmentedControl.Item id="grid">Grid</SegmentedControl.Item>
+    <SegmentedControl.Item id="list">List</SegmentedControl.Item>
+    <SegmentedControl.Item id="table">Table</SegmentedControl.Item>
+  </SegmentedControl>
+);
+```
+
+The indicator — the capsule around the selected segment — is rendered for you and is not a part you
+place. It animates from the previous segment to the new one, and respects
+`prefers-reduced-motion: reduce`, where it appears without animating.
+
+Exactly one segment is always selected. `SegmentedControl` fixes single selection and refuses an
+empty one, so clicking the selected segment again keeps it selected.
+
+## Examples
+
+### Sizes
+
+`size` names the outer height of the capsule, matching a `Button` of the same size, so the control
+lines up in a row with buttons.
+
+<ComponentPreview name="segmented-control-sizes" />
+
+At `sm` a segment is 24×24 on desktop — exactly the minimum of WCAG 2.2 AA
+[SC 2.5.8 Target Size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html), with
+no room to spare. Prefer `md` in headers, toolbars, and anywhere pointer precision matters; keep
+`sm` for dense layouts you control.
+
+### Icon-only segments
+
+An icon carries no accessible name, so give each segment its own `aria-label`.
+
+<ComponentPreview name="segmented-control-icon-only" />
+
+### Controlled
+
+`onSelectionChange` hands over the newly selected key itself, not a set.
+
+<ComponentPreview name="segmented-control-controlled" />
+
+### Disabled State
+
+`isDisabled` on the control disables every segment; on a segment it disables that one.
+
+<ComponentPreview name="segmented-control-disabled" />
+
+### Width
+
+The control hugs its content. Pass `className="w-full"` and it fills its container, sharing the
+width equally between segments — there is no `fullWidth` prop, because a segment distributes by
+design. A label is never truncated: in a container narrower than its content the segments keep their
+labels and overflow instead.
+
+```tsx
+<SegmentedControl aria-label="Period" className="w-full" defaultSelectedKey="day">
+  <SegmentedControl.Item id="day">Day</SegmentedControl.Item>
+  <SegmentedControl.Item id="week">Week</SegmentedControl.Item>
+  <SegmentedControl.Item id="month">Month</SegmentedControl.Item>
+</SegmentedControl>
+```
+
+## Keyboard
+
+| Key | Behavior |
+|-----|----------|
+| <kbd>Tab</kbd> | Moves focus into the control, onto the selected segment |
+| <kbd>←</kbd> <kbd>→</kbd> | Moves focus between segments **without** changing the selection |
+| <kbd>Space</kbd> <kbd>Enter</kbd> | Selects the focused segment |
+
+The control reports itself as a radio group, while arrow keys move focus without selecting. ARIA
+practices describe a radio group whose arrow keys also select; this behavior comes from the
+underlying React Aria primitive and is documented here rather than worked around, so it stays
+consistent with every other grouped control in the library.
+
+## Customization
+
+### Tailwind CSS
+
+Pass utilities through `className`. They are merged with the control's own classes.
+
+```tsx
+<SegmentedControl aria-label="View" className="w-full" defaultSelectedKey="grid">
+  <SegmentedControl.Item className="font-semibold" id="grid">
+    Grid
+  </SegmentedControl.Item>
+  <SegmentedControl.Item id="list">List</SegmentedControl.Item>
+</SegmentedControl>
+```
+
+### CSS Variables
+
+Each custom property is the supported way to retheme the control.
+
+```css
+@layer components {
+  .segmented-control {
+    --segmented-control-bg: var(--color-surface-secondary);
+    --segmented-control-radius: var(--radius-lg);
+    --segmented-control-indicator-bg: var(--color-background);
+    --segmented-control-indicator-radius: var(--radius-md);
+    --segmented-control-indicator-shadow: none;
+  }
+}
+```
+
+| Variable | Default | Controls |
+|----------|---------|----------|
+| `--segmented-control-bg` | `var(--color-default)` | The capsule's background |
+| `--segmented-control-radius` | `var(--radius-3xl)` | The capsule's corner radius |
+| `--segmented-control-item-fg` | `var(--color-muted)` | An unselected segment's label |
+| `--segmented-control-item-fg-selected` | `var(--color-segment-foreground)` | The selected segment's label |
+| `--segmented-control-indicator-bg` | `var(--color-segment)` | The sliding indicator's background |
+| `--segmented-control-indicator-radius` | `var(--radius-3xl)` | The indicator's corner radius |
+| `--segmented-control-indicator-shadow` | `var(--shadow-surface)` | The indicator's shadow |
+
+### Global CSS
+
+Override the classes in the `components` layer.
+
+```css
+@layer components {
+  .segmented-control__item {
+    @apply px-6;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The SegmentedControl component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/segmented-control.css)):
+
+#### Base & Layout Classes [!toc]
+
+- `.segmented-control` - The capsule container, and the `md` size
+- `.segmented-control__item` - One segment
+- `.segmented-control__indicator` - The sliding indicator behind the selected segment
+
+#### Modifier Classes [!toc]
+
+- `.segmented-control--sm` - Small size
+- `.segmented-control--md` - Medium size (default)
+- `.segmented-control--lg` - Large size
+
+### States
+
+State lives on the segment as data attributes:
+
+- `[data-selected]` - The selected segment
+- `[data-hovered]` - Pointer over an unselected, enabled segment
+- `[data-focus-visible]` - Keyboard focus
+- `[data-disabled]` - Disabled segment, or every segment of a disabled control
+
+### Slots
+
+- `[data-slot="segmented-control"]`
+- `[data-slot="segmented-control-item"]`
+- `[data-slot="segmented-control-indicator"]`
+
+## API Reference
+
+### SegmentedControl
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectedKey` | `Key` | - | Controlled selection |
+| `defaultSelectedKey` | `Key` | - | Initial selection (uncontrolled) |
+| `onSelectionChange` | `(key: Key) => void` | - | Called with the newly selected key |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Outer height of the capsule |
+| `isDisabled` | `boolean` | - | Disables every segment |
+| `aria-label` | `string` | - | Accessible name. Required unless `aria-labelledby` is given |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `React.ReactNode` | - | `SegmentedControl.Item`s, each selecting by its `id` |
+
+Single selection is fixed and the selection can never be empty, so `selectionMode` and
+`disallowEmptySelection` are not accepted. `orientation` is not accepted either: the control is
+horizontal.
+
+Every other [React Aria ToggleButtonGroup](https://react-aria.adobe.com/ToggleButtonGroup) prop is accepted.
+
+### SegmentedControl.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | The segment's key, used by `selectedKey` |
+| `isDisabled` | `boolean` | - | Disables this segment |
+| `aria-label` | `string` | - | Accessible name. Required when the segment holds only an icon |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `React.ReactNode` | - | The segment's label, an icon, or both |
+
+The indicator is rendered inside each segment automatically; there is no `SegmentedControl.Indicator`
+to place.
