@@ -11,6 +11,7 @@ import {tv} from "tailwind-variants";
  */
 export const segmentedControlVariants = tv({
   defaultVariants: {
+    isIconOnly: false,
     size: "md",
   },
   slots: {
@@ -19,6 +20,11 @@ export const segmentedControlVariants = tv({
     item: "segmented-control__item",
   },
   variants: {
+    isIconOnly: {
+      true: {
+        item: "segmented-control__item--icon-only",
+      },
+    },
     size: {
       lg: {
         base: "segmented-control--lg",

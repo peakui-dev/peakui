@@ -67,7 +67,8 @@ no room to spare. Prefer `md` in headers, toolbars, and anywhere pointer precisi
 
 ### Icon-only segments
 
-An icon carries no accessible name, so give each segment its own `aria-label`.
+`isIconOnly` squares the segment, so the capsule reads as a circle rather than an oval. An icon
+carries no accessible name, so give each segment its own `aria-label`.
 
 <ComponentPreview name="segmented-control-icon-only" />
 
@@ -183,6 +184,7 @@ The SegmentedControl component uses these CSS classes ([view source styles](http
 - `.segmented-control--sm` - Small size
 - `.segmented-control--md` - Medium size (default)
 - `.segmented-control--lg` - Large size
+- `.segmented-control__item--icon-only` - Square segment for a lone icon
 
 ### States
 
@@ -224,8 +226,9 @@ Every other [React Aria ToggleButtonGroup](https://react-aria.adobe.com/ToggleBu
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `id` | `Key` | - | The segment's key, used by `selectedKey` |
+| `id` | `Key` | - | The segment's key, used by `selectedKey`. Required — without it the segment leaves the group's selection entirely |
 | `isDisabled` | `boolean` | - | Disables this segment |
+| `isIconOnly` | `boolean` | `false` | Squares the segment for a lone icon, so the capsule is a circle |
 | `aria-label` | `string` | - | Accessible name. Required when the segment holds only an icon |
 | `className` | `string` | - | Additional CSS classes |
 | `children` | `React.ReactNode` | - | The segment's label, an icon, or both |

@@ -35,6 +35,17 @@ export function CustomRootProvider({
         components={{Link: LocaleLink}}
         i18n={i18nProvider(translations, lang)}
         search={{SearchDialog}}
+        /*
+         * fumadocs defaults next-themes to disableTransitionOnChange, which injects
+         * `*{transition:none!important}`, forces a reflow and removes it in setTimeout(…, 1).
+         * React Aria's selection indicator clears its FLIP offset in requestAnimationFrame, so
+         * whether the capsule slides or teleports becomes a race between those two — and the
+         * capsule is the one element on the page whose movement IS the feedback. Turning the
+         * blanket off lets each component's own short colour transition run on a theme change,
+         * which is what they are tuned for; the two large layout surfaces are already pinned to
+         * `transition: none` in global.css.
+         */
+        theme={{disableTransitionOnChange: false}}
       >
         {children}
         {/* The toast region: renders nothing until a toast is queued (e.g. by page actions). */}

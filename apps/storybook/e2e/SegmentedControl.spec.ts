@@ -81,6 +81,36 @@ test.describe("SegmentedControl (браузер)", () => {
       await expectIndicatorOn(page, table);
     });
 
+    /*
+     * Предыдущий тест ловит промах по месту, но не телепорт: осевшая геометрия у поездки и у прыжка
+     * одинаковая. Здесь проверяется сам факт перехода — браузер обязан сообщить transitionrun по
+     * свойству translate. Без этого «анимация пропала» прошло бы зелёным.
+     */
+    test("переезд действительно анимируется, а не телепортируется", async ({page}) => {
+      await page.goto(`/iframe.html?id=${STORY.basic}`);
+      await expect(page.getByRole("heading", {level: 2})).toBeVisible(GEOMETRY_TIMEOUT);
+
+      await page.evaluate(() => {
+        const w = window as unknown as {__transitions: string[]};
+
+        w.__transitions = [];
+        document.addEventListener(
+          "transitionrun",
+          (e) => w.__transitions.push((e as TransitionEvent).propertyName),
+          true,
+        );
+      });
+
+      await page.getByRole("radio", {name: "Table"}).click();
+      await expectIndicatorOn(page, page.getByRole("radio", {name: "Table"}));
+
+      const properties = await page.evaluate(
+        () => (window as unknown as {__transitions: string[]}).__transitions,
+      );
+
+      expect(properties).toContain("translate");
+    });
+
     test("капсула меняет ширину под сегмент другой длины", async ({page}) => {
       await page.goto(`/iframe.html?id=${STORY.longLabels}`);
       await expect(page.getByRole("heading", {level: 2})).toBeVisible(GEOMETRY_TIMEOUT);

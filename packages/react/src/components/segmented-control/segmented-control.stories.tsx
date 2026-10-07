@@ -55,20 +55,21 @@ export const Basic: Story = {
 /*
  * Icon-only segments. The core ships no theme icons, and a story may not import from apps/docs, so
  * this is a zoom control — the geometry it demonstrates is the same one a theme switcher uses.
- * Each segment needs its own label, since the icon carries no accessible name.
+ * `isIconOnly` squares the segment so the capsule reads as a circle, and each segment needs its own
+ * label, since an icon carries no accessible name.
  */
 export const IconOnly: Story = {
   args: {
     "aria-label": "Zoom",
     children: (
       <>
-        <SegmentedControl.Item aria-label="Zoom out" id="out">
+        <SegmentedControl.Item isIconOnly aria-label="Zoom out" id="out">
           <IconMinus />
         </SegmentedControl.Item>
-        <SegmentedControl.Item aria-label="Fit" id="fit">
+        <SegmentedControl.Item isIconOnly aria-label="Fit" id="fit">
           <IconSearch />
         </SegmentedControl.Item>
-        <SegmentedControl.Item aria-label="Zoom in" id="in">
+        <SegmentedControl.Item isIconOnly aria-label="Zoom in" id="in">
           <IconPlus />
         </SegmentedControl.Item>
       </>

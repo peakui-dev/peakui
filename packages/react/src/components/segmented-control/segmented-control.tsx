@@ -141,14 +141,25 @@ interface SegmentedControlItemProps extends Omit<
    */
   id: Key;
   className?: string;
+  /**
+   * A segment whose whole content is an icon. It becomes square, so the capsule reads as a circle
+   * rather than an oval — the geometry the house already uses for `.button--icon-only`. Give such a
+   * segment its own `aria-label`: an icon carries no accessible name.
+   */
+  isIconOnly?: boolean;
 }
 
-const SegmentedControlItem = ({children, className, ...rest}: SegmentedControlItemProps) => {
+const SegmentedControlItem = ({
+  children,
+  className,
+  isIconOnly,
+  ...rest
+}: SegmentedControlItemProps) => {
   const {slots} = use(SegmentedControlContext);
 
   return (
     <ToggleButtonPrimitive
-      className={composeTwRenderProps(className, slots?.item())}
+      className={composeTwRenderProps(className, slots?.item({isIconOnly}))}
       {...rest}
       data-slot="segmented-control-item"
     >

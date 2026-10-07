@@ -172,6 +172,26 @@
   /* No styles: this is the default size, and it lives in .segmented-control__item. */
 }
 
+/* ==========================================================================
+   Icon-only modifier
+   ==========================================================================
+   A square segment, so the capsule reads as a circle instead of an oval. The radius needs no
+   change: it is --radius-3xl (24px) and a browser clamps a radius to half the box, so a 24-32px
+   square is already round. Widths mirror the heights of each size, the same way
+   .button--icon-only and .toggle-button--icon-only pair theirs. */
+
+.segmented-control__item--icon-only {
+  @apply w-8 px-0 md:w-7;
+}
+
+.segmented-control--sm .segmented-control__item--icon-only {
+  @apply w-7 md:w-6;
+}
+
+.segmented-control--lg .segmented-control__item--icon-only {
+  @apply w-9 md:w-8;
+}
+
 .segmented-control--lg {
   .segmented-control__item {
     @apply h-9 text-base md:h-8;

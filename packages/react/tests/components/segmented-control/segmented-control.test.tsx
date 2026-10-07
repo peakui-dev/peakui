@@ -233,6 +233,38 @@ describe("SegmentedControl", () => {
     });
   });
 
+  describe("иконочный сегмент", () => {
+    it("isIconOnly добавляет модификатор сегменту", () => {
+      render(
+        <SegmentedControl aria-label="Тема" defaultSelectedKey="light">
+          <SegmentedControl.Item isIconOnly aria-label="Светлая" id="light">
+            <svg />
+          </SegmentedControl.Item>
+          <SegmentedControl.Item isIconOnly aria-label="Тёмная" id="dark">
+            <svg />
+          </SegmentedControl.Item>
+        </SegmentedControl>,
+      );
+
+      const item = screen.getByRole("radio", {name: "Светлая"});
+
+      expect(item).toHaveClass("segmented-control__item");
+      expect(item).toHaveClass("segmented-control__item--icon-only");
+    });
+
+    it("без isIconOnly модификатора нет", () => {
+      render(
+        <SegmentedControl aria-label="Вид" defaultSelectedKey="grid">
+          {views()}
+        </SegmentedControl>,
+      );
+
+      expect(screen.getByRole("radio", {name: "Сетка"})).not.toHaveClass(
+        "segmented-control__item--icon-only",
+      );
+    });
+  });
+
   describe("клавиатура", () => {
     it("стрелка переносит фокус, но не меняет выбор", async () => {
       render(

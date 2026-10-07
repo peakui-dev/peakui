@@ -55,7 +55,7 @@ export function ThemeToggle({
       {...props}
     >
       {SEGMENTS[mode].map(([key, Icon, label]) => (
-        <SegmentedControl.Item key={key} aria-label={label} id={key}>
+        <SegmentedControl.Item key={key} isIconOnly aria-label={label} id={key}>
           <Icon fill="currentColor" />
         </SegmentedControl.Item>
       ))}

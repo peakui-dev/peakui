@@ -4,13 +4,13 @@ import {SegmentedControl} from "@peakui/react";
 export function IconOnly() {
   return (
     <SegmentedControl aria-label="Theme" defaultSelectedKey="system">
-      <SegmentedControl.Item aria-label="Light" id="light">
+      <SegmentedControl.Item isIconOnly aria-label="Light" id="light">
         <Sun />
       </SegmentedControl.Item>
-      <SegmentedControl.Item aria-label="Dark" id="dark">
+      <SegmentedControl.Item isIconOnly aria-label="Dark" id="dark">
         <Moon />
       </SegmentedControl.Item>
-      <SegmentedControl.Item aria-label="System" id="system">
+      <SegmentedControl.Item isIconOnly aria-label="System" id="system">
         <Display />
       </SegmentedControl.Item>
     </SegmentedControl>

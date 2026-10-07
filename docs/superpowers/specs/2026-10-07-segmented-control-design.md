@@ -461,6 +461,21 @@ in the CSS file's own deviation list, in the form the other style files use.
    locking the selection mode is what makes the broken combination inexpressible. Merging them
    re-creates the override path that produced the 6px defect this spec opens with.
 
+## Amendment, 2026-10-07: icon-only segments are square
+
+Added after the migration measured the result. The spec gave segments a height and no icon-only
+geometry, so an icon-only segment inherited the text padding (`px-4`) and came out 48x28 at `md` on
+desktop — an oval, where the hand-rolled switcher this component replaces used round chips
+(`size-6.5 rounded-full`), and the three-icon control measured 152px against about 104px before.
+
+`SegmentedControl.Item` therefore takes `isIconOnly`, following the geometry the house already uses
+for `.button--icon-only` (`w-10 px-0 md:w-9`) and `.toggle-button--icon-only`: the segment squares to
+its own height, and the radius needs no change, because `--radius-3xl` is 24px and a browser clamps a
+radius to half the box. At `md` on desktop a segment becomes 28x28 and the three-icon control 92px.
+
+This also settles the width note recorded against the migration: the control is now narrower than
+the one it replaced rather than wider.
+
 ## Deferred
 
 - **`Separator`** — thin dividers between unselected segments are a genuine part of the pattern,
