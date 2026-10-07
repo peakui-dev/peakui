@@ -36,6 +36,7 @@
     "(forms)/radio-group",
     "(utilities)/scroll-shadow",
     "(forms)/search-field",
+    "(buttons)/segmented-control",
     "(layout)/separator",
     "(feedback)/skeleton",
     "(feedback)/spinner",

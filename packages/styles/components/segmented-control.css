@@ -1,0 +1,258 @@
+/*
+ * SegmentedControl — a single-select capsule whose selected segment is wrapped in an indicator that
+ * slides to the segment the user picks. Class names come from
+ * src/components/segmented-control/segmented-control.styles.ts; all the Tailwind lives here.
+ *
+ * There is no component to compare against in the vendored reference: it has tabs and
+ * toggle-button-group, and SelectionIndicator appears in exactly one of its files, tabs/tabs.tsx.
+ * The prior art this file follows is peakui's own — the indicator mechanism and easing from
+ * tabs.css, the token seam and the focus ring from toggle-button.css. The differences that remain
+ * are listed at the end of the file, each with its reason.
+ */
+
+/* Base styles — and the md size, which is the default */
+.segmented-control {
+  /*
+   * Theming seam — the public override contract, ahead of any tv({extend}).
+   */
+  --segmented-control-bg: var(--color-default);
+  --segmented-control-radius: var(--radius-3xl);
+  --segmented-control-item-fg: var(--color-muted);
+  --segmented-control-item-fg-selected: var(--color-segment-foreground);
+  --segmented-control-indicator-bg: var(--color-segment);
+  --segmented-control-indicator-radius: var(--radius-3xl);
+  --segmented-control-indicator-shadow: var(--shadow-surface);
+
+  @apply inline-flex w-fit items-center p-1;
+
+  border-radius: var(--segmented-control-radius);
+  background-color: var(--segmented-control-bg);
+
+  /*
+   * Visible on purpose: a focus ring in peakui is a box-shadow (utilities/index.css), and a
+   * clipping ancestor would cut it off — the reason .toggle-button-group records for the same
+   * declaration.
+   */
+  overflow: visible;
+
+  @media (forced-colors: active) {
+    border: 1px solid ButtonBorder;
+  }
+}
+
+/* ==========================================================================
+   Segment
+   ========================================================================== */
+
+.segmented-control__item {
+  @apply relative inline-flex h-8 flex-1 items-center justify-center gap-2 px-4 text-sm font-medium whitespace-nowrap select-none no-highlight md:h-7;
+  @apply outline-none;
+
+  /*
+   * The stacking context the indicator depends on. The indicator is a child with z-index: -1, so
+   * it falls behind this element's label while staying in front of the shell's background. Without
+   * a context here, -1 would push it behind that background and the capsule would be invisible.
+   */
+  z-index: 1;
+
+  cursor: var(--cursor-interactive);
+  border-radius: var(--segmented-control-indicator-radius);
+  color: var(--segmented-control-item-fg);
+
+  /*
+   * The focus ring arrives as a shadow through --focus-ring (utilities/index.css). One transparent
+   * shadow, not two, keeps the list length constant so box-shadow interpolates without a jump:
+   * status-focused-field publishes a single ring, where status-focused publishes an offset plus a
+   * ring. See the deviation list for why a segment takes the field ring.
+   */
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent);
+
+  /**
+   * Transitions
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition:
+    color 150ms var(--ease-smooth),
+    box-shadow 100ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  & svg {
+    @apply pointer-events-none size-4 shrink-0;
+  }
+
+  /*
+   * Both forms of every state: data-* is set by React Aria at runtime; a consumer outside React
+   * gets only the pseudo-classes. Value-less data-* selectors are the house form.
+   */
+  /* Hover — only on a segment that is neither selected nor disabled. */
+  @media (hover: hover) {
+    &:not([data-selected]):not([data-disabled]):hover {
+      @apply opacity-70;
+    }
+  }
+
+  &[data-hovered]:not([data-selected]):not([data-disabled]) {
+    @apply opacity-70;
+  }
+
+  /* :not([data-focused]) guards against double application when React Aria owns the focus. */
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible] {
+    @apply status-focused-field;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /* Selected — the capsule is the indicator; only the label's colour changes here. */
+  &[data-selected] {
+    color: var(--segmented-control-item-fg-selected);
+  }
+
+  /*
+   * Forced colors: the selected state is carried by the indicator's background alone, and
+   * forced-colors flattens backgrounds — the system Highlight pair carries it instead.
+   */
+  @media (forced-colors: active) {
+    &[data-selected] {
+      color: HighlightText;
+    }
+  }
+}
+
+/* ==========================================================================
+   Indicator — React Aria's SelectionIndicator
+   ========================================================================== */
+
+.segmented-control__indicator {
+  @apply absolute inset-0 size-full;
+
+  z-index: -1;
+
+  border-radius: var(--segmented-control-indicator-radius);
+  background-color: var(--segmented-control-indicator-bg);
+  box-shadow: var(--segmented-control-indicator-shadow);
+
+  /**
+   * Transitions
+   * The property list is a contract, not styling: SharedElementTransition snapshots only the
+   * properties named in transition-property, so dropping `translate` makes the capsule teleport
+   * instead of sliding. `width` and `height` keep a segment whose content changes at runtime from
+   * jumping.
+   * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+   */
+  transition-property: translate, width, height;
+  transition-duration: 250ms;
+  transition-timing-function: var(--ease-out-fluid);
+  @apply motion-reduce:transition-none;
+
+  @media (forced-colors: active) {
+    background-color: Highlight;
+  }
+}
+
+/* ==========================================================================
+   Size variants
+   ========================================================================== */
+
+.segmented-control--sm {
+  /*
+   * The segment is 24px tall on desktop — exactly the minimum of WCAG 2.2 AA SC 2.5.8 Target Size,
+   * with no margin. Documented on the component's page, where md is recommended for headers.
+   */
+  .segmented-control__item {
+    @apply h-7 px-3 md:h-6;
+  }
+}
+
+.segmented-control--md {
+  /* No styles: this is the default size, and it lives in .segmented-control__item. */
+}
+
+/* ==========================================================================
+   Icon-only modifier
+   ==========================================================================
+   A square segment, so the capsule reads as a circle instead of an oval. The radius needs no
+   change: it is --radius-3xl (24px) and a browser clamps a radius to half the box, so a 24-32px
+   square is already round. Widths mirror the heights of each size, the same way
+   .button--icon-only and .toggle-button--icon-only pair theirs. */
+
+.segmented-control__item--icon-only {
+  @apply w-8 px-0 md:w-7;
+}
+
+.segmented-control--sm .segmented-control__item--icon-only {
+  @apply w-7 md:w-6;
+}
+
+.segmented-control--lg .segmented-control__item--icon-only {
+  @apply w-9 md:w-8;
+}
+
+.segmented-control--lg {
+  .segmented-control__item {
+    @apply h-9 text-base md:h-8;
+  }
+}
+
+/*
+ * ---------- What differs from the prior art, and why ----------
+ *
+ * 1. The focus ring is consumed as a box-shadow through `--focus-ring`, following button.css and
+ *    toggle-button.css rather than tabs.css. `tabs.css` applies `status-focused` without ever
+ *    reading `--focus-ring` into a box-shadow, so the utility publishes a ring no declaration
+ *    draws. Not fixed here — tabs.css is out of this component's scope — but not copied either.
+ *
+ * 1a. The ring is `status-focused-field`, not `status-focused`. utilities/index.css assigns the
+ *    field ring to "a control that sits in a shared shell", and a segment is exactly that: the
+ *    offset of the general ring is painted in --color-background, while the surface around a
+ *    segment is --color-default, so it drew a page-coloured band across the capsule's padding and
+ *    pushed the blue ring onto the capsule's outer edge. The field ring sits flush against the
+ *    segment instead. The fallback shadow list above is one entry for the same reason.
+ *
+ * 2. Value-less `data-*` selectors (`[data-selected]`, `[data-focus-visible]`) where `tabs.css`
+ *    writes explicit values (`[data-selected="true"]`). The value-less form is the house form,
+ *    recorded in toggle-button.css's deviation list, item 5. tabs.css is left alone.
+ *
+ * 3. The radius comes from `--segmented-control-radius` / `--radius-3xl`, not from the off-scale
+ *    `calc(var(--radius) * 2.5)` that tabs.css:23 uses. Browsers clamp a radius to half the box,
+ *    so all three sizes read as a pill, and the value stays on the token scale.
+ *
+ * 4. A forced-colors block, which tabs.css has none of. The selected state is carried by the
+ *    indicator's background, and forced-colors flattens backgrounds; the Highlight/HighlightText
+ *    pair plus a ButtonBorder boundary carry it instead. Same technique and reason as
+ *    toggle-button.css deviation 2.
+ *
+ * 5. Segment width: `flex-1`, chosen by measurement rather than by argument.
+ *
+ *    The two candidates the design named — `w-full` as in .tabs__tab:128, and `flex-1` as in
+ *    .toggle-button-group--full-width .toggle-button:108 — were measured against the LongLabels
+ *    story (labels Day / Week / Last 12 months / All) at four container widths. They are
+ *    behaviourally indistinguishable here, to the tenth of a pixel:
+ *
+ *      container      segments (px)              clipped
+ *      fit-content    57.3 68.6 132.2 48.7       none     shell 315
+ *      320px          57.3 68.6 132.2 53.7       none     shell 320
+ *      600px          148  148  148   148        none     shell 600
+ *      200px          57.3 68.6 132.2 48.7       none     items spill past the shell
+ *
+ *    The reason they tie: `min-width: auto` plus `whitespace-nowrap` floors every segment at its
+ *    own content width, and that floor dominates wherever the two declarations could diverge.
+ *    `flex-1` wins the tie on intent — "share the row" is what a segment means, while `w-full`
+ *    only lands there through shrink — and it is the declaration peakui already uses for this
+ *    purpose in toggle-button-group.css.
+ *
+ * 6. Segments are equal width only when the control is stretched, not at the hugging default.
+ *    The design asked for equal width AND a shell that hugs its content; with uneven labels those
+ *    two cannot both hold. Equalising at the default needs `display: grid` with
+ *    `grid-auto-columns: 1fr`, which would render the example above at 4 x 132 + 8 = 536px for
+ *    315px of content — wrong for the primary case, a control sitting in a header. Content-sized
+ *    at the default, equal when stretched.
+ *
+ * 7. Known limit: in a container narrower than the content, the segments keep their labels and
+ *    spill past the capsule's background rather than truncating. A nowrap control cannot do
+ *    better without cutting a label, and a half-read option is worse than an overflowing one.
+ */

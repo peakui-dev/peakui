@@ -63,23 +63,10 @@
   transition: none;
 }
 
-[data-theme-toggle] {
-  @apply border-none bg-default/80;
-
-  button {
-    @apply rounded-2xl;
-    cursor: var(--cursor-interactive);
-  }
-}
-
 /* Home Layout Navigation */
 #nd-home-layout {
   #nd-nav {
     @apply bg-background blur-none backdrop-blur-none;
-
-    [data-theme-toggle] {
-      margin-left: 4px;
-    }
 
     > div {
       border: none;

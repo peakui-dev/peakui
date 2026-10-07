@@ -18,7 +18,7 @@ interface SearchToggleProps extends Omit<ButtonProps, "className" | "onPress"> {
 export function SearchToggle({
   className,
   hideIfDisabled,
-  size = "sm",
+  size = "md",
   variant = "tertiary",
   ...props
 }: SearchToggleProps) {
@@ -39,7 +39,7 @@ export function SearchToggle({
         {...props}
         isIconOnly
         aria-label="Open Search"
-        className={cn("size-[34px] border-none", className)}
+        className={cn("border-none", className)}
         data-search=""
         size={size}
         type="button"

@@ -753,6 +753,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./search-field/with-validation").then((m) => m.WithValidation),
     file: "search-field/with-validation.tsx",
   },
+  // segmented-control
+  "segmented-control-basic": {
+    loader: () => import("./segmented-control/basic").then((m) => m.Basic),
+    file: "segmented-control/basic.tsx",
+  },
+  "segmented-control-controlled": {
+    loader: () => import("./segmented-control/controlled").then((m) => m.Controlled),
+    file: "segmented-control/controlled.tsx",
+  },
+  "segmented-control-disabled": {
+    loader: () => import("./segmented-control/disabled").then((m) => m.Disabled),
+    file: "segmented-control/disabled.tsx",
+  },
+  "segmented-control-icon-only": {
+    loader: () => import("./segmented-control/icon-only").then((m) => m.IconOnly),
+    file: "segmented-control/icon-only.tsx",
+  },
+  "segmented-control-sizes": {
+    loader: () => import("./segmented-control/sizes").then((m) => m.Sizes),
+    file: "segmented-control/sizes.tsx",
+  },
   // separator
   "separator-basic": {
     loader: () => import("./separator/basic").then((m) => m.Basic),

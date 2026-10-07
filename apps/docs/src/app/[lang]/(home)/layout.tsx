@@ -5,6 +5,7 @@ import {notFound} from "next/navigation";
 
 import {baseOptions} from "@/app/[lang]/layout.config";
 import {SearchToggle} from "@/components/fumadocs/ui/search-toggle";
+import {ThemeToggleSystem} from "@/components/fumadocs/ui/theme-toggle";
 import {GitHubLinkSmall} from "@/components/github-link";
 import {getDictionary, hasLocale} from "@/lib/dictionaries";
 
@@ -47,8 +48,14 @@ export default async function Layout({
           sm: <SearchToggle hideIfDisabled />,
         },
       }}
-      themeSwitch={{
-        mode: "light-dark-system",
+      /*
+       * Without this slot HomeLayout renders the upstream fumadocs ThemeSwitch, and the home page
+       * showed a different control from the docs pages. The slot takes a component, not an element,
+       * and renders it with no props — hence the pre-bound ThemeToggleSystem. `themeSwitch.mode`
+       * reached the upstream component only, so it goes away with it.
+       */
+      slots={{
+        themeSwitch: ThemeToggleSystem,
       }}
     >
       {children}
