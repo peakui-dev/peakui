@@ -62,3 +62,12 @@ export function ThemeToggle({
     </SegmentedControl>
   );
 }
+
+/*
+ * The three-way switcher with its mode already bound. A layout slot renders its component with no
+ * props at all — `jsx(slots.themeSwitch, {})` in fumadocs' home header — so `mode` cannot travel
+ * through the slot and has to be fixed here, in a client file.
+ */
+export function ThemeToggleSystem() {
+  return <ThemeToggle mode="light-dark-system" />;
+}
