@@ -15,6 +15,7 @@ export const segmentedControlVariants = tv({
   },
   slots: {
     base: "segmented-control",
+    indicator: "segmented-control__indicator",
     item: "segmented-control__item",
   },
   variants: {

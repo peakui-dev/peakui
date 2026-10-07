@@ -6,10 +6,11 @@ import type {Key} from "react-aria-components/Collection";
 
 import {segmentedControlVariants} from "@peakui/styles";
 import React, {createContext, use} from "react";
+import {SelectionIndicator as SelectionIndicatorPrimitive} from "react-aria-components/SelectionIndicator";
 import {ToggleButton as ToggleButtonPrimitive} from "react-aria-components/ToggleButton";
 import {ToggleButtonGroup as ToggleButtonGroupPrimitive} from "react-aria-components/ToggleButtonGroup";
 
-import {composeTwRenderProps} from "../../utils/compose.ts";
+import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
 
 /* -------------------------------------------------------------------------------------------------
  * SegmentedControl Context
@@ -110,6 +111,12 @@ const SegmentedControlRoot = ({
  * -------------------------------------------------------------------------------------------------
  * One segment. Selection semantics belong to the group: the primitive reads the group's state by
  * the item's `id`, which is also the key in `selectedKey`.
+ *
+ * The indicator is rendered here and is not an exported part. Unlike Tabs — where the consumer
+ * places `<Tabs.Indicator />` because it has placement variants, a capsule in one variant and an
+ * underline in another — a segment's indicator is always the capsule filling that segment. RAC
+ * decides whether it is visible for a given item and animates it between items, so the render is
+ * never gated on a selected check.
  * -----------------------------------------------------------------------------------------------*/
 interface SegmentedControlItemProps extends ComponentPropsWithRef<typeof ToggleButtonPrimitive> {
   className?: string;
@@ -124,7 +131,15 @@ const SegmentedControlItem = ({children, className, ...rest}: SegmentedControlIt
       {...rest}
       data-slot="segmented-control-item"
     >
-      {(renderProps) => (typeof children === "function" ? children(renderProps) : children)}
+      {(renderProps) => (
+        <>
+          {typeof children === "function" ? children(renderProps) : children}
+          <SelectionIndicatorPrimitive
+            className={composeSlotClassName(slots?.indicator)}
+            data-slot="segmented-control-indicator"
+          />
+        </>
+      )}
     </ToggleButtonPrimitive>
   );
 };
