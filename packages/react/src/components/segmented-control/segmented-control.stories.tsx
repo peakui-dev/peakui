@@ -44,3 +44,34 @@ export const Default: Story = {
     </Showcase>
   ),
 };
+
+/*
+ * Deliberately uneven labels. This story is the instrument for the segment-width rule: the shell
+ * must hug its content, the segments must come out equal, and the longest label must not be
+ * clipped. The second control is the same set inside a narrow box, which is where a `w-full`
+ * consumer lands.
+ */
+export const LongLabels: Story = {
+  args: {
+    "aria-label": "Период",
+    children: (
+      <>
+        <SegmentedControl.Item id="day">Day</SegmentedControl.Item>
+        <SegmentedControl.Item id="week">Week</SegmentedControl.Item>
+        <SegmentedControl.Item id="year">Last 12 months</SegmentedControl.Item>
+        <SegmentedControl.Item id="all">All</SegmentedControl.Item>
+      </>
+    ),
+    defaultSelectedKey: "day",
+  },
+  render: (args) => (
+    <Showcase title="LongLabels">
+      <div className="flex flex-col items-start gap-6">
+        <SegmentedControl {...args} data-testid="hug" />
+        <div className="w-80">
+          <SegmentedControl {...args} className="w-full" data-testid="stretched" />
+        </div>
+      </div>
+    </Showcase>
+  ),
+};
