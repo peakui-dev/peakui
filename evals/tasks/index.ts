@@ -3,6 +3,7 @@ import type {TaskDefinition} from "../src/types.ts";
 import {brandPrimaryButton} from "./brand-primary-button/task.ts";
 import {customButtonVariant} from "./custom-button-variant/task.ts";
 import {destructiveActions} from "./destructive-actions/task.ts";
+import {firstSetupAction} from "./first-setup-action/task.ts";
 import {firstTimeSetup} from "./first-time-setup/task.ts";
 import {linkAsButton} from "./link-as-button/task.ts";
 import {pendingButton} from "./pending-button/task.ts";
@@ -30,6 +31,7 @@ export const tasks: TaskDefinition[] = [
   serverPageAction,
   profileSettings,
   teamMembers,
+  firstSetupAction,
 ];
 
 export function getTask(id: string): TaskDefinition {
