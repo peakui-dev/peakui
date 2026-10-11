@@ -141,7 +141,8 @@ export function cssProblems(css) {
   root.walkAtRules("import", (rule) => {
     const specifier = /^(?:url\(\s*)?["']?([^"')\s]+)/.exec(rule.params)?.[1] ?? "";
     const known =
-      specifier === "tailwindcss" || exported.some((pattern) => pattern.test(specifier));
+      specifier === "tailwindcss" ||
+      (specifier !== "@peakui/styles" && exported.some((pattern) => pattern.test(specifier)));
 
     if (!known) problems.push(`imports ${specifier}, which @peakui/styles does not export`);
   });
@@ -293,6 +294,8 @@ test("the css check tells an exported stylesheet from an invented one", () => {
   assert.deepEqual(cssProblems('@import "tailwindcss";\n@import "@peakui/styles/css";\n'), []);
   assert.deepEqual(cssProblems('@source "../node_modules/some-package";\n'), []);
   assert.equal(cssProblems('@import "@peakui/styles/everything";\n').length, 1);
+  // The bare package name is not a dependable way to reach the stylesheet; an example uses /css.
+  assert.equal(cssProblems('@import "@peakui/styles";\n').length, 1);
   assert.equal(cssProblems(".a { color: red;").length, 1);
 });
 

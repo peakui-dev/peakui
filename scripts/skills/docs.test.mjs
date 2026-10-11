@@ -277,3 +277,12 @@ test("with no site and no installed package the message offers the install, not 
   assert.match(stderr, /npm install @peakui\/react @peakui\/styles/);
   assert.doesNotMatch(stderr, /dist\//);
 });
+
+test("a page whose body is cut off is a failure, not an empty page", async () => {
+  const routes = {...SITE, [markdownPath("button")]: {body: "# Half", cutBody: true}};
+  const {code, stderr, stdout} = await run(["button"], {routes});
+
+  assert.equal(code, 2);
+  assert.match(stderr, /could not be reached/);
+  assert.ok(!stdout.includes("# Half"));
+});

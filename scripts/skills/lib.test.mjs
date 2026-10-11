@@ -220,3 +220,10 @@ test("sourceUrl is undefined for a page without a repository link", () => {
   assert.equal(sourceUrl({}, {}), undefined);
   assert.equal(sourceUrl({links: {source: "https://example.test/modal.tsx"}}, {}), undefined);
 });
+
+test("fetchText: a body cut off mid-transfer is unreachable, not an empty page", async () => {
+  await withServer({"/page.md": {body: "# Half a pa", cutBody: true}}, async (server) => {
+    await assert.rejects(fetchText(new URL("/page.md", server.origin)), rejectsWith("unreachable"));
+    assert.equal(server.requests.length, 2, "the read was retried once");
+  });
+});

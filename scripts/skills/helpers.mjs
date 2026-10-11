@@ -42,7 +42,8 @@ export function markdownPath(name) {
 /**
  * Starts a local HTTP server. `routes` maps a request path to its response; a path that is not
  * listed answers 404 with an empty body, as the docs site does for an unknown markdown page.
- * `requests` records every request received, in order.
+ * `requests` records every request received, in order. A route with `cutBody` drops the connection
+ * partway through its body.
  */
 export async function startDocsServer(routes) {
   const requests = [];
@@ -58,6 +59,15 @@ export async function startDocsServer(routes) {
     }
 
     setTimeout(() => {
+      if (route.cutBody) {
+        // Headers and the start of the body arrive, then the connection drops.
+        response.writeHead(200, {"Content-Length": String((route.body ?? "").length + 1000)});
+        response.write(route.body ?? "");
+        setTimeout(() => response.socket?.destroy(), 20);
+
+        return;
+      }
+
       response.writeHead(route.status ?? 200, route.headers ?? {});
       response.end(route.body ?? "");
     }, route.delayMs ?? 0);

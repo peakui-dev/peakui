@@ -7,8 +7,8 @@ finding behind each rule in it. Spec: `docs/superpowers/specs/2026-10-11-peakui-
 `Bash, Read, Edit, Write, Glob, Grep, Skill`, no MCP server, project settings only. Agent
 configuration `inherit`: the CLI's only login on this machine is in the keychain, so the user's own
 config directory is used and user-level memory cannot be ruled out. Each run reported 19 built-in
-skills and three built-in plugins. Cost is the figure the CLI reports; the runs were billed to a
-subscription, not per token. Local paths are written `<workspace>`.
+skills and three built-in plugins. The cost table at the end holds the figure the CLI reports for each run; the runs were
+billed to a subscription, not per token. Local paths are written `<workspace>`.
 
 ## Round 0 — baseline (2026-10-11, no skill)
 
@@ -106,10 +106,10 @@ a real pointer.
 | Task | Model | typecheck | build | static | render | Failed gating rules | Skill loaded | `docs.mjs` | `doctor.mjs` | Turns | Seconds |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `profile-settings` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 2 | 1 | 10 | 31 |
-| `team-members` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 4 | 1 | 12 | 32 |
+| `team-members` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 7 | 1 | 12 | 32 |
 | `first-setup-action` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 1 | 2 | 6 | 27 |
 | `profile-settings` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 2 | 2 | 22 | 61 |
-| `team-members` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 6 | 1 | 17 | 54 |
+| `team-members` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 7 | 1 | 17 | 54 |
 | `first-setup-action` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 2 | 2 | 14 | 32 |
 
 **Against round 0.** F1, F2 and F3 are gone on the model that made each, and nothing that passed
@@ -176,9 +176,9 @@ the Haiku drop in turns and tokens is the only movement large enough to mention.
 
 - **Agents asked for three components per call, as told.** The largest single output fell from
   150–250 KB to 34–39 KB.
-- **Three calls of nineteen still exceeded what the harness shows inline**, all just over its
-  limit of about 30 KB: `modal dropdown tooltip`, `dropdown modal button`, and two calls chained
-  in one shell command. Three overlay pages do not fit; two do, barely.
+- **Three shell commands of twenty-one that ran `docs.mjs` still exceeded what the harness shows
+  inline**, all just over its limit of about 30 KB: `modal dropdown tooltip`, `dropdown modal
+  button`, and two calls chained in one command. Three overlay pages do not fit; two do, barely.
 - **`--examples` was used nine times, all by Haiku**; Sonnet read the default output only.
   `--styling` and `--full` were never used: no task restyles anything.
 - **`--source` was never used.** No run reached a question the page did not answer.
@@ -198,19 +198,22 @@ that text.
 | `profile-settings` | `claude-haiku-5-5` | all pass | — | yes | 7 | 1 | 18 | 74 |
 | `team-members` | `claude-haiku-5-5` | all pass | — | yes | 7 | 1 | 15 | 47 |
 | `first-setup-action` | `claude-haiku-5-5` | all pass | — | yes | 2 | 2 | 11 | 33 |
-| `profile-settings` | `claude-opus-5-5` | all pass | — | yes | 9 | 1 | 10 | 50 |
-| `team-members` | `claude-opus-5-5` | all pass | — | yes | 5 | 0 | 13 | 43 |
-| `first-setup-action` | `claude-opus-5-5` | all pass | — | yes | 1 | 1 | 8 | 30 |
+| `profile-settings` | `claude-opus-5-5` | all pass | — | yes | 9 | 2 | 10 | 50 |
+| `team-members` | `claude-opus-5-5` | all pass | — | yes | 5 | 1 | 13 | 43 |
+| `first-setup-action` | `claude-opus-5-5` | all pass | — | yes | 1 | 2 | 8 | 30 |
 
 ### Observations
 
-- **"Two components per call" held.** Of thirty-one calls one exceeded the inline limit — Haiku
-  asked for four pages at once.
+- **"Two components per call" held.** Of twenty-five shell commands that ran `docs.mjs`, one
+  exceeded the inline limit — Haiku asked for four pages at once.
 - **`--source` was used once, by Opus**, for `link`, while deciding how to render a link that looks
   like a button. The file came from GitHub; the agent then wrote a plain anchor with the button's
   classes, which is what the composition guide shows.
-- **Opus skipped `doctor.mjs` in `team-members`**, the one run of eighteen that did. The project was
-  already set up, so nothing was lost.
+- **`doctor.mjs` ran in every one of the eighteen with-skill runs.** An earlier version of this
+  journal said Opus skipped it once. That was the stand's counter, not the agent: it matched the
+  literal text `scripts/doctor.mjs`, and Opus wrote `S=…/scripts; node $S/doctor.mjs`. The counter
+  now matches however the path is written, and every count in this journal was recomputed from
+  the saved transcripts.
 - **Opus has no baseline.** It was never run without the skill, so this table says the skill does
   not get in its way, not that it helps.
 
@@ -221,7 +224,7 @@ that text.
 | 1 | Every gating rule that failed in the baseline passes with the skill on `sonnet` in the last round | Met: `menu.no-button-in-trigger` passes in rounds 1 and 2. |
 | 2 | No gating rule that passed in the baseline fails with the skill | Met, on all three models. |
 | 3 | On `haiku` and `opus` every task type-checks and builds; any other failed gating rule is listed for a decision | Met; no rule failed, nothing to decide. |
-| 4 | Every with-skill run loaded the skill and called `docs.mjs` | Met: 18 of 18, all with the `skill` setup. The pointer was never needed here. |
+| 4 | Every with-skill run loaded the skill and called `docs.mjs` | Met: 18 of 18, all with the `skill` setup, recounted from the transcripts after the counter was corrected. The pointer was never needed here. |
 | 5 | The offline gates pass | Met at commit `58e2e4a`: 139 script tests, 484 stand tests, 147 docs tests, lint, format. |
 | 6 | The owner has read the skill and the results and accepts them | **Open.** |
 
@@ -240,6 +243,22 @@ codex --yes`, skills CLI 1.7.2, into an empty project: `.agents/skills/peakui-re
 skill and `.claude/skills/peakui-react` links to it; both scripts run through the link. Before the
 contributor skills were marked internal the installer offered six skills from this repository; it
 now offers one.
+
+## Reported cost per run
+
+The `total_cost_usd` each run reported, in USD. It is the CLI's estimate at API prices; these runs
+drew on a subscription. Twenty-four runs: 2.57 in total.
+
+| Round | Model | `profile-settings` | `team-members` | `first-setup-action` |
+| --- | --- | --- | --- | --- |
+| 0, no skill | Sonnet | 0.28 | 0.24 | 0.16 |
+| 0, no skill | Haiku | 0.03 | 0.03 | 0.01 |
+| 1 | Sonnet | 0.13 | 0.15 | 0.09 |
+| 1 | Haiku | 0.02 | 0.01 | 0.01 |
+| 2 | Sonnet | 0.19 | 0.14 | 0.07 |
+| 2 | Haiku | 0.01 | 0.01 | 0.01 |
+| Final | Haiku | 0.02 | 0.01 | 0.01 |
+| Final | Opus | 0.41 | 0.38 | 0.15 |
 
 ## Rules and the findings behind them
 

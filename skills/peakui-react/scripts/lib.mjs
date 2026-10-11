@@ -72,22 +72,29 @@ async function request(url, fetchImpl, timeoutMs) {
     return {retry: true, why: `${url.href}: ${reason}`};
   }
 
-  // The body is always read or discarded, so the connection is released either way.
-  const body = await response.text().catch(() => "");
-
-  if (response.status >= 300 && response.status < 400) {
-    return {redirect: response.headers.get("location") ?? ""};
-  }
-
-  if (response.status === 404) {
-    throw new DocsError("not-found", `${url.href} was not found.`);
-  }
-
   if (!response.ok) {
+    // Nothing in this body is wanted; dropping it releases the connection.
+    await response.body?.cancel().catch(() => {});
+
+    if (response.status >= 300 && response.status < 400) {
+      return {redirect: response.headers.get("location") ?? ""};
+    }
+
+    if (response.status === 404) {
+      throw new DocsError("not-found", `${url.href} was not found.`);
+    }
+
     return {retry: true, why: `${url.href} answered ${response.status}`};
   }
 
-  return {body};
+  try {
+    return {body: await response.text()};
+  } catch (error) {
+    // A connection that drops partway is a failed read, never an empty page.
+    const reason = error?.name === "TimeoutError" ? `no answer in ${timeoutMs} ms` : error.message;
+
+    return {retry: true, why: `${url.href}: the response was cut off (${reason})`};
+  }
 }
 
 /** GETs `url` as text. Follows one redirect inside the same origin and no other. */

@@ -161,8 +161,9 @@ test("an import inside a comment does not count", () => {
 });
 
 test("the bare package specifier is the script entry, not the stylesheet", () => {
-  // Observed in a trial: both Vite and Next.js resolve the bare specifier to JavaScript and fail
-  // the build with an error that does not name the cause.
+  // Observed in a trial and reproduced by hand: with the package as the stand builds it, Vite and
+  // Next.js resolve the bare specifier to JavaScript and fail the build without naming the cause.
+  // A resolver that prefers the "style" condition would find the stylesheet; "/css" always does.
   const css = '@import "tailwindcss";\n@import "@peakui/styles";\n';
   const {context, findings} = inspect(consumer({"src/index.css": css}));
 
@@ -241,4 +242,42 @@ test("--project inspects another directory", async () => {
 
   assert.equal(code, 1);
   assert.match(stdout.join(""), /src\/index\.css:1/);
+});
+
+// The theming guide documents importing the parts one by one instead of the whole stylesheet.
+const BY_PARTS = `@import "tailwindcss";
+
+@import "@peakui/styles/themes/default";
+@import "@peakui/styles/base" layer(base);
+@import "@peakui/styles/utilities";
+@import "@peakui/styles/variants";
+
+/* Only the components you use */
+@import "@peakui/styles/components/button.css" layer(components);
+`;
+
+test("the stylesheet imported part by part counts as imported", () => {
+  const {context, findings} = inspect(consumer({"src/index.css": BY_PARTS}));
+
+  assert.deepEqual(findings, []);
+  assert.equal(context.cssEntry, "src/index.css");
+});
+
+test("parts imported before Tailwind are the same order mistake", () => {
+  const css = BY_PARTS.replace('@import "tailwindcss";\n', "") + '@import "tailwindcss";\n';
+  const {findings} = inspect(consumer({"src/index.css": css}));
+
+  assert.deepEqual(
+    findings.map((finding) => finding.id),
+    ["css-import-order"],
+  );
+});
+
+test("the bare specifier finding claims only what is certain", () => {
+  const css = '@import "tailwindcss";\n@import "@peakui/styles";\n';
+  const [finding] = inspect(consumer({"src/index.css": css})).findings;
+
+  // Which file the bare name resolves to depends on the bundler and on the package's export map.
+  assert.match(finding.what, /can resolve to/);
+  assert.doesNotMatch(`${finding.what} ${finding.fix}`, /is not a stylesheet|the build fails/);
 });

@@ -101,7 +101,7 @@ export interface RunSummary {
   costUsd?: number;
   /** The agent loaded the `peakui-react` skill through the Skill tool. */
   skillLoaded: boolean;
-  /** Shell commands that ran each of the skill's scripts. */
+  /** How many times each of the skill's scripts was run. */
   scriptCalls: {docs: number; doctor: number};
 }
 
@@ -118,6 +118,17 @@ function toolUses(event: Record<string, unknown>): ToolUse[] {
   return content.filter(
     (block): block is ToolUse => (block as {type?: unknown} | null)?.type === "tool_use",
   );
+}
+
+/**
+ * How many times a shell command runs `script` with node. The path in front of the name is
+ * whatever the agent wrote: a literal path, a shell variable, or nothing after a `cd`.
+ */
+function invocations(command: string, script: string): number {
+  const name = script.replace(".", "\\.");
+  const pattern = new RegExp(`\\bnode\\s+(?:\\S*/)?${name}(?![\\w.-])`, "g");
+
+  return [...command.matchAll(pattern)].length;
 }
 
 /** Reads the raw `stream-json` lines of one run; a line that is not JSON is skipped. */
@@ -149,10 +160,9 @@ export function summarizeTranscript(lines: string[]): RunSummary {
       if (use.name === "Skill" && String(use.input?.skill ?? "").includes("peakui-react")) {
         summary.skillLoaded = true;
       }
-      if (use.name === "Bash" && command.includes("scripts/docs.mjs"))
-        summary.scriptCalls.docs += 1;
-      if (use.name === "Bash" && command.includes("scripts/doctor.mjs")) {
-        summary.scriptCalls.doctor += 1;
+      if (use.name === "Bash") {
+        summary.scriptCalls.docs += invocations(command, "docs.mjs");
+        summary.scriptCalls.doctor += invocations(command, "doctor.mjs");
       }
     }
 

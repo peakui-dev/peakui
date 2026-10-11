@@ -70,8 +70,12 @@ function cssImports(css) {
   }));
 }
 
+/**
+ * The whole stylesheet (`/css`), the bare package name, or one of the parts the theming guide
+ * imports separately: a theme, the base, the utilities, the variants, a component's file.
+ */
 function isPeakuiStylesheet(specifier) {
-  return specifier === STYLES || specifier === `${STYLES}/css`;
+  return specifier === STYLES || specifier.startsWith(`${STYLES}/`);
 }
 
 function major(version) {
@@ -154,12 +158,14 @@ function stylesheetFindings(project, files, context) {
 
     context.cssEntry ??= path;
 
-    if (peakui.specifier === STYLES) {
+    const bare = imports.find((entry) => entry.specifier === STYLES);
+
+    if (bare) {
       findings.push({
-        fix: `Change it to @import "${STYLES}/css";. The bare package name resolves to the package's JavaScript, and the build fails on it with an error that does not name the cause.`,
+        fix: `Change it to @import "${STYLES}/css";, which always resolves to the stylesheet. With the bare name a build can fail with an error that does not name the cause.`,
         id: "css-wrong-specifier",
-        what: `The stylesheet is imported as "${STYLES}", which is not a stylesheet.`,
-        where: `${path}:${peakui.line}`,
+        what: `The stylesheet is imported as "${STYLES}", which can resolve to the package's JavaScript instead of its stylesheet, depending on the bundler.`,
+        where: `${path}:${bare.line}`,
       });
     }
 

@@ -113,6 +113,20 @@ describe("summarizeTranscript", () => {
     });
   });
 
+  it("counts a script however its path is written, once per invocation", () => {
+    const summary = summarizeTranscript([
+      toolUse("Bash", {
+        command:
+          "S=.claude/skills/peakui-react/scripts; node $S/doctor.mjs; node $S/docs.mjs list; node $S/docs.mjs modal dropdown",
+      }),
+      toolUse("Bash", {command: "cd .claude/skills/peakui-react/scripts && node docs.mjs button"}),
+      toolUse("Bash", {command: "cat .claude/skills/peakui-react/scripts/docs.mjs | head"}),
+      JSON.stringify({is_error: false, type: "result"}),
+    ]);
+
+    expect(summary.scriptCalls).toEqual({docs: 3, doctor: 1});
+  });
+
   it("does not count another skill or an unrelated command", () => {
     const summary = summarizeTranscript([
       toolUse("Skill", {skill: "code-review"}),
