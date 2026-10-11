@@ -26,6 +26,7 @@
     "(forms)/form",
     "(forms)/input",
     "(forms)/input-group",
+    "(forms)/input-otp",
     "(typography)/kbd",
     "(forms)/label",
     "(navigation)/link",
