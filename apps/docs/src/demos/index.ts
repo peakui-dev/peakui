@@ -447,6 +447,51 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./input-group/with-text-area").then((m) => m.WithTextArea),
     file: "input-group/with-text-area.tsx",
   },
+  // input-otp
+  "input-otp-basic": {
+    loader: () => import("./input-otp/basic").then((m) => m.Basic),
+    file: "input-otp/basic.tsx",
+  },
+  "input-otp-controlled": {
+    loader: () => import("./input-otp/controlled").then((m) => m.Controlled),
+    file: "input-otp/controlled.tsx",
+  },
+  "input-otp-custom-styles": {
+    loader: () => import("./input-otp/custom-styles").then((m) => m.CustomStyles),
+    file: "input-otp/custom-styles.tsx",
+  },
+  "input-otp-disabled": {
+    loader: () => import("./input-otp/disabled").then((m) => m.Disabled),
+    file: "input-otp/disabled.tsx",
+  },
+  "input-otp-form-example": {
+    loader: () => import("./input-otp/form-example").then((m) => m.FormExample),
+    file: "input-otp/form-example.tsx",
+  },
+  "input-otp-four-digits": {
+    loader: () => import("./input-otp/four-digits").then((m) => m.FourDigits),
+    file: "input-otp/four-digits.tsx",
+  },
+  "input-otp-on-complete": {
+    loader: () => import("./input-otp/on-complete").then((m) => m.OnComplete),
+    file: "input-otp/on-complete.tsx",
+  },
+  "input-otp-on-surface": {
+    loader: () => import("./input-otp/on-surface").then((m) => m.OnSurface),
+    file: "input-otp/on-surface.tsx",
+  },
+  "input-otp-variants": {
+    loader: () => import("./input-otp/variants").then((m) => m.Variants),
+    file: "input-otp/variants.tsx",
+  },
+  "input-otp-with-pattern": {
+    loader: () => import("./input-otp/with-pattern").then((m) => m.WithPattern),
+    file: "input-otp/with-pattern.tsx",
+  },
+  "input-otp-with-validation": {
+    loader: () => import("./input-otp/with-validation").then((m) => m.WithValidation),
+    file: "input-otp/with-validation.tsx",
+  },
   // kbd
   "kbd-basic": {
     loader: () => import("./kbd/basic").then((m) => m.Basic),

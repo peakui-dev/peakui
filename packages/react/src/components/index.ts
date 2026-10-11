@@ -21,6 +21,7 @@ export * from "./field-error/index.ts";
 export * from "./fieldset/index.ts";
 export * from "./form/index.ts";
 export * from "./input-group/index.ts";
+export * from "./input-otp/index.ts";
 export * from "./input/index.ts";
 export * from "./kbd/index.ts";
 export * from "./label/index.ts";
