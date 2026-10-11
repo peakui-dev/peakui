@@ -16,11 +16,11 @@
    * Theming seam — the public override contract, ahead of any tv({extend}).
    */
   --segmented-control-bg: var(--color-default);
-  --segmented-control-radius: var(--radius-3xl);
+  --segmented-control-radius: var(--radius-lg);
   --segmented-control-item-fg: var(--color-muted);
   --segmented-control-item-fg-selected: var(--color-segment-foreground);
   --segmented-control-indicator-bg: var(--color-segment);
-  --segmented-control-indicator-radius: var(--radius-3xl);
+  --segmented-control-indicator-radius: var(--radius-lg);
   --segmented-control-indicator-shadow: var(--shadow-surface);
 
   @apply inline-flex w-fit items-center p-1;
