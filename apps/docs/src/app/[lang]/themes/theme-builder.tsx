@@ -25,12 +25,13 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
     matched?.semanticOverrides,
     themeDerivations,
   );
-  const [showPanel, setShowPanel] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
   return (
     <div className="flex h-dvh flex-col">
       <header className="flex h-16 shrink-0 items-center border-b border-separator">
-        <div className="flex w-full items-center gap-x-4 px-6 lg:mx-auto lg:max-w-[1400px]">
+        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-x-4 px-6">
           <Link className="text-sm font-semibold tracking-tight text-foreground" href="/en">
             PeakUI
           </Link>
@@ -56,6 +57,13 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
               <SegmentedControl.Item id="light">Light</SegmentedControl.Item>
               <SegmentedControl.Item id="dark">Dark</SegmentedControl.Item>
             </SegmentedControl>
+            <Button
+              className="hidden lg:max-[1919px]:inline-flex"
+              variant="secondary"
+              onPress={() => setShowControls(true)}
+            >
+              Controls
+            </Button>
             <Button isDisabled={isDefault} variant="ghost" onPress={reset}>
               Reset
             </Button>
@@ -65,18 +73,20 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
             >
               Share
             </Button>
-            <Button variant="primary" onPress={() => setShowPanel((open) => !open)}>
+            <Button variant="primary" onPress={() => setShowCode((open) => !open)}>
               Code
             </Button>
           </div>
         </div>
       </header>
       {/*
-       * The sheet scrolls as one column inside the 1400px wrapper; the instrument card hangs
-       * off the screen's right edge (fixed, lg+), and the reserved padding keeps the sheet's
-       * right column from sliding under it. Below lg the card joins the column.
+       * The specimen sheet is a framed canvas centered in the page: the theme it shows is
+       * bounded by the frame, and the site's own chrome stays on the default theme around it.
+       * The instrument card floats at the screen's right edge only when it fits beyond the
+       * 1400px wrapper; between lg and that width it opens as a drawer, and below lg it
+       * joins the column after the sheet.
        */}
-      <main className="min-h-0 flex-1 overflow-y-auto lg:pr-[344px]">
+      <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1400px]">
           <ThemePreview css={previewCss} scheme={scheme}>
             <PreviewGallery />
@@ -86,15 +96,34 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
           </div>
         </div>
       </main>
-      <div className="fixed bottom-6 right-6 top-20 z-40 hidden w-80 lg:block">
-        <ControlsPanel rail fixes={derived.fixes} set={set} state={state} />
+      <div className="fixed bottom-4 right-4 top-20 z-40 hidden w-64 min-[1920px]:block">
+        <ControlsPanel fixes={derived.fixes} set={set} state={state} variant="card" />
       </div>
-      {!!showPanel && (
+      {!!showControls && (
+        <aside
+          aria-label="Theme controls"
+          className="fixed inset-y-0 right-0 z-50 flex w-80 flex-col gap-4 overflow-y-auto border-l border-separator bg-surface p-6 shadow-overlay"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-foreground">Theme controls</h2>
+            <Button
+              isIconOnly
+              aria-label="Close controls"
+              variant="ghost"
+              onPress={() => setShowControls(false)}
+            >
+              ✕
+            </Button>
+          </div>
+          <ControlsPanel fixes={derived.fixes} set={set} state={state} variant="plain" />
+        </aside>
+      )}
+      {!!showCode && (
         <CodePanel
           derived={derived}
           semanticOverrides={matched?.semanticOverrides}
           values={values}
-          onClose={() => setShowPanel(false)}
+          onClose={() => setShowCode(false)}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ import {
   Checkbox,
   Chip,
   Input,
+  Kbd,
   Label,
   Link,
   Radio,
@@ -71,11 +72,34 @@ function ButtonsSection() {
 
 function ChipsSection() {
   return (
-    <Section title="Chips">
-      <div className="flex flex-wrap gap-2">
+    <Section title="Chips & keys">
+      <div className="flex flex-wrap items-center gap-2">
         {["New", "Beta", "Stable", "Deprecated", "Internal"].map((label) => (
           <Chip key={label}>{label}</Chip>
         ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
+        <span className="flex items-center gap-1.5">
+          <Kbd>
+            <Kbd.Abbr keyValue="command" />
+            <Kbd.Content>K</Kbd.Content>
+          </Kbd>
+          Search
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Kbd>
+            <Kbd.Abbr keyValue="command" />
+            <Kbd.Content>E</Kbd.Content>
+          </Kbd>
+          Export
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Kbd>
+            <Kbd.Abbr keyValue="command" />
+            <Kbd.Content>P</Kbd.Content>
+          </Kbd>
+          Preview
+        </span>
       </div>
     </Section>
   );
@@ -91,6 +115,10 @@ function InputsSection() {
       <TextField className="w-full">
         <Label>Project name</Label>
         <Input placeholder="Aurora" type="text" />
+      </TextField>
+      <TextField className="w-full">
+        <Label>Workspace</Label>
+        <Input placeholder="acme-inc" type="text" />
       </TextField>
     </Section>
   );

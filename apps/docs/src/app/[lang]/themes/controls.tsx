@@ -45,14 +45,15 @@ function Group({children, label}: {children: ReactNode; label: string}) {
 
 export function ControlsPanel({
   fixes,
-  rail = false,
   set,
   state,
+  variant = "card",
 }: {
   fixes: ContrastFix[];
-  rail?: boolean;
   state: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
+  /** "card" wraps the groups in floating-card chrome; "plain" is for a drawer that has its own. */
+  variant?: "card" | "plain";
 }) {
   const {scheme: _scheme, ...values} = state;
   const {formRadius, grayChroma, radius} = state;
@@ -121,18 +122,11 @@ export function ControlsPanel({
   );
 
   /*
-   * In rail mode the panel is the floating instrument card pinned to the screen's right edge;
-   * below lg the same card joins the page column.
+   * The floating instrument card pinned to the screen's right edge (and the same card joined
+   * to the page column below lg) carries its own chrome; a drawer provides its own.
    */
-  if (rail) {
-    return (
-      <aside
-        aria-label="Theme controls"
-        className="flex h-full flex-col gap-6 overflow-y-auto rounded-xl border border-separator bg-surface p-6 shadow-overlay"
-      >
-        {body}
-      </aside>
-    );
+  if (variant === "plain") {
+    return <div className="flex flex-col gap-6">{body}</div>;
   }
 
   return (
