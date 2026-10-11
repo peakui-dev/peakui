@@ -189,6 +189,58 @@ the Haiku drop in turns and tokens is the only movement large enough to mention.
 `SKILL.md` now says two components per call instead of two or three. The final check runs with
 that text.
 
+## Final check — skill 0.10.0, final text (2026-10-11, setup `skill`, no pointer)
+
+`--source` read the real repository: it was made public and `main` was pushed before this check.
+
+| Task | Model | Layers | Failed gating rules | Skill loaded | `docs.mjs` calls | `doctor.mjs` | Turns | Seconds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `profile-settings` | `claude-haiku-5-5` | all pass | — | yes | 7 | 1 | 18 | 74 |
+| `team-members` | `claude-haiku-5-5` | all pass | — | yes | 7 | 1 | 15 | 47 |
+| `first-setup-action` | `claude-haiku-5-5` | all pass | — | yes | 2 | 2 | 11 | 33 |
+| `profile-settings` | `claude-opus-5-5` | all pass | — | yes | 9 | 1 | 10 | 50 |
+| `team-members` | `claude-opus-5-5` | all pass | — | yes | 5 | 0 | 13 | 43 |
+| `first-setup-action` | `claude-opus-5-5` | all pass | — | yes | 1 | 1 | 8 | 30 |
+
+### Observations
+
+- **"Two components per call" held.** Of thirty-one calls one exceeded the inline limit — Haiku
+  asked for four pages at once.
+- **`--source` was used once, by Opus**, for `link`, while deciding how to render a link that looks
+  like a button. The file came from GitHub; the agent then wrote a plain anchor with the button's
+  classes, which is what the composition guide shows.
+- **Opus skipped `doctor.mjs` in `team-members`**, the one run of eighteen that did. The project was
+  already set up, so nothing was lost.
+- **Opus has no baseline.** It was never run without the skill, so this table says the skill does
+  not get in its way, not that it helps.
+
+## Readiness (spec 8.4)
+
+| # | Condition | Verdict |
+| --- | --- | --- |
+| 1 | Every gating rule that failed in the baseline passes with the skill on `sonnet` in the last round | Met: `menu.no-button-in-trigger` passes in rounds 1 and 2. |
+| 2 | No gating rule that passed in the baseline fails with the skill | Met, on all three models. |
+| 3 | On `haiku` and `opus` every task type-checks and builds; any other failed gating rule is listed for a decision | Met; no rule failed, nothing to decide. |
+| 4 | Every with-skill run loaded the skill and called `docs.mjs` | Met: 18 of 18, all with the `skill` setup. The pointer was never needed here. |
+| 5 | The offline gates pass | Met at commit `58e2e4a`: 139 script tests, 484 stand tests, 147 docs tests, lint, format. |
+| 6 | The owner has read the skill and the results and accepts them | **Open.** |
+
+**What the numbers are.** Twenty-four agent runs: six without the skill, eighteen with it. Without
+it three of six passed; with it eighteen of eighteen. Each cell is one run, the three tasks were
+written by the author of the skill, and the two rules answer failures seen on these same tasks. That
+is evidence the rules remove the failures they were written for. It is not a measure of how much
+the skill helps on tasks nobody has looked at.
+
+**Not covered.** A tooltip opening on pointer hover (the browser check confirmed keyboard focus
+only); a project with the skill installed and the package absent (the fixtures ship the package);
+any agent other than Claude Code; a project with many skills, where loading is less certain.
+
+**Install channel.** `npx skills add <this repository> --skill peakui-react --agent claude-code
+codex --yes`, skills CLI 1.7.2, into an empty project: `.agents/skills/peakui-react/` holds the
+skill and `.claude/skills/peakui-react` links to it; both scripts run through the link. Before the
+contributor skills were marked internal the installer offered six skills from this repository; it
+now offers one.
+
 ## Rules and the findings behind them
 
 | Rule in the skill | File | Finding | Rule of the stand it answers |
