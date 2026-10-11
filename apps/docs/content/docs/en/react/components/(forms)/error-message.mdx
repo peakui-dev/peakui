@@ -1,0 +1,63 @@
+---
+title: ErrorMessage
+description: Error text displayed through a parent's error slot
+links:
+  rac: Text
+  source: error-message/error-message.tsx
+  styles: error-message.css
+---
+
+## Usage
+
+```tsx
+import {ErrorMessage} from "@peakui/react";
+```
+
+<ComponentPreview name="error-message-basic" />
+
+`ErrorMessage` presents the `errorMessage` slot of a parent such as `TagGroup`; the parent decides when the message shows. For a form field's validation errors, use [FieldError](/docs/react/components/field-error), which renders them while the field is invalid.
+
+<Callout type="warn">
+  Outside a parent that publishes the `errorMessage` slot, `ErrorMessage` still renders its `<span>`, but nothing links it to a control. Inside such a parent, the message is announced with it through `aria-describedby` while it is mounted.
+</Callout>
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="error-message-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .error-message {
+    @apply text-sm font-medium;
+  }
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+The ErrorMessage component uses this CSS class ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/error-message.css)):
+
+- `.error-message` - Base error message styles
+
+### Slots
+
+- `[data-slot="error-message"]`
+
+## API Reference
+
+### ErrorMessage
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The error message |
+| `className` | `string` | - | Additional classes |
+| `elementType` | `string` | `'span'` | The element to render |
+| `render` | `DOMRenderFunction<any, any>` | - | Replaces the rendered element with your own. React Aria types it loosely because `elementType` can change the element |
+
+The `slot` defaults to `errorMessage`; it is what links the message to the parent, so leave it as it is.

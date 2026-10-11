@@ -2,10 +2,11 @@ import type {Meta, StoryObj} from "@storybook/react-vite";
 import type {ComponentProps, ReactNode} from "react";
 import type {Key} from "react-aria-components/TagGroup";
 
-import {useState} from "react";
+import {useMemo, useState} from "react";
 
 import {Description} from "../description/index.ts";
 import {EmptyState} from "../empty-state/index.ts";
+import {ErrorMessage} from "../error-message/index.ts";
 import {Label} from "../label/index.ts";
 import {Tag} from "../tag/index.ts";
 
@@ -257,6 +258,41 @@ export const Controlled: Story = {
             </Description>
           </TagGroup>
         </div>
+      </Showcase>
+    );
+  },
+};
+
+export const WithErrorMessage: Story = {
+  name: "С сообщением об ошибке",
+  render: () => {
+    const [selected, setSelected] = useState<Iterable<Key>>(new Set());
+
+    const isInvalid = useMemo(() => Array.from(selected).length === 0, [selected]);
+
+    return (
+      <Showcase title="С сообщением об ошибке">
+        <TagGroup
+          className="w-72"
+          selectedKeys={selected}
+          selectionMode="multiple"
+          onSelectionChange={(keys) => setSelected(keys)}
+        >
+          <Label>Удобства</Label>
+          <TagGroup.List>
+            <Tag id="laundry">Стирка</Tag>
+            <Tag id="fitness">Фитнес-центр</Tag>
+            <Tag id="parking">Парковка</Tag>
+            <Tag id="pool">Бассейн</Tag>
+            <Tag id="breakfast">Завтрак</Tag>
+          </TagGroup.List>
+          <Description>
+            {isInvalid
+              ? "Выберите хотя бы одну категорию"
+              : `Выбрано: ${Array.from(selected).join(", ")}`}
+          </Description>
+          {!!isInvalid && <ErrorMessage>Выберите хотя бы одну категорию</ErrorMessage>}
+        </TagGroup>
       </Showcase>
     );
   },

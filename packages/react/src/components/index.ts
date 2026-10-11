@@ -16,6 +16,7 @@ export * from "./disclosure-group/index.ts";
 export * from "./disclosure/index.ts";
 export * from "./dropdown/index.ts";
 export * from "./empty-state/index.ts";
+export * from "./error-message/index.ts";
 export * from "./field-error/index.ts";
 export * from "./fieldset/index.ts";
 export * from "./form/index.ts";

@@ -21,6 +21,7 @@
     "(navigation)/disclosure-group",
     "(collections)/dropdown",
     "(feedback)/empty-state",
+    "(forms)/error-message",
     "(forms)/field-error",
     "(forms)/fieldset",
     "(forms)/form",

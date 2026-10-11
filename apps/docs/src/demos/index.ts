@@ -349,6 +349,15 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./empty-state/with-icon").then((m) => m.WithIcon),
     file: "empty-state/with-icon.tsx",
   },
+  // error-message
+  "error-message-basic": {
+    loader: () => import("./error-message/basic").then((m) => m.Basic),
+    file: "error-message/basic.tsx",
+  },
+  "error-message-custom-styles": {
+    loader: () => import("./error-message/custom-styles").then((m) => m.CustomStyles),
+    file: "error-message/custom-styles.tsx",
+  },
   // field-error
   "field-error-basic": {
     loader: () => import("./field-error/basic").then((m) => m.Basic),
