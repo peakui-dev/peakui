@@ -17,13 +17,13 @@ const group = (node: React.ReactNode) => (
 );
 
 describe("ErrorMessage", () => {
-  it("renders the message inside a tag group", () => {
+  it("рендерит сообщение внутри группы тегов", () => {
     render(group(<ErrorMessage>Select at least one category</ErrorMessage>));
 
     expect(screen.getByText("Select at least one category")).toBeInTheDocument();
   });
 
-  it("describes the group it sits in while it is rendered", () => {
+  it("связывает сообщение с группой через aria-describedby", () => {
     render(
       <TagGroup aria-label="Categories" selectionMode="multiple">
         <TagGroup.List>
@@ -37,7 +37,7 @@ describe("ErrorMessage", () => {
     expect(screen.getByRole("grid")).toHaveAccessibleDescription("Select at least one category");
   });
 
-  it("exposes BEM block and data-slot", () => {
+  it("выставляет BEM-блок и data-slot", () => {
     render(group(<ErrorMessage>Select at least one category</ErrorMessage>));
     const message = screen.getByText("Select at least one category");
 
@@ -45,7 +45,7 @@ describe("ErrorMessage", () => {
     expect(message).toHaveAttribute("data-slot", "error-message");
   });
 
-  it("renders nothing inside a gate with no error message slot", () => {
+  it("не рендерит ничего внутри гейта без слота errorMessage", () => {
     render(
       <FieldSlotsGateContext value>
         <ErrorMessage>Select at least one category</ErrorMessage>
@@ -55,7 +55,7 @@ describe("ErrorMessage", () => {
     expect(screen.queryByText("Select at least one category")).not.toBeInTheDocument();
   });
 
-  it("forwards ref to the rendered element", () => {
+  it("передаёт ref на отрендеренный элемент", () => {
     const ref = createRef<HTMLElement>();
 
     render(group(<ErrorMessage ref={ref}>Select at least one category</ErrorMessage>));
@@ -63,7 +63,7 @@ describe("ErrorMessage", () => {
     expect(ref.current).toBeInstanceOf(HTMLElement);
   });
 
-  it("behaves identically as ErrorMessage.Root and ErrorMessageRoot", () => {
+  it("ведёт себя одинаково как ErrorMessage.Root и ErrorMessageRoot", () => {
     render(
       <>
         {group(<ErrorMessage.Root>Namespaced</ErrorMessage.Root>)}
