@@ -160,10 +160,19 @@ test("an import inside a comment does not count", () => {
   assert.deepEqual(ids(consumer({"src/index.css": css})), ["styles-not-imported"]);
 });
 
-test("the root stylesheet specifier counts", () => {
+test("the bare package specifier is the script entry, not the stylesheet", () => {
+  // Observed in a trial: both Vite and Next.js resolve the bare specifier to JavaScript and fail
+  // the build with an error that does not name the cause.
   const css = '@import "tailwindcss";\n@import "@peakui/styles";\n';
+  const {context, findings} = inspect(consumer({"src/index.css": css}));
 
-  assert.deepEqual(ids(consumer({"src/index.css": css})), []);
+  assert.deepEqual(
+    findings.map((finding) => finding.id),
+    ["css-wrong-specifier"],
+  );
+  assert.equal(findings[0].where, "src/index.css:2");
+  assert.match(findings[0].fix, /@peakui\/styles\/css/);
+  assert.equal(context.cssEntry, "src/index.css");
 });
 
 test("styles imported from a script", () => {

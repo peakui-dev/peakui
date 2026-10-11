@@ -522,6 +522,16 @@ export function peakuiElements(context: StaticContext, tag: string): JsxNode[] {
   );
 }
 
+/**
+ * Whether `node` sits inside the compound root `name`. A root has three spellings — `Tooltip`,
+ * `Tooltip.Root` and `TooltipRoot` — and a rule about what a root contains must accept all three.
+ */
+export function insideRoot(node: JsxNode, name: string): boolean {
+  return node.ancestors.some(
+    (ancestor) => ancestor === name || ancestor === `${name}.Root` || ancestor === `${name}Root`,
+  );
+}
+
 export function locate(source: ParsedSource, node: {line: number; excerpt: string}): Location {
   return {excerpt: node.excerpt, file: source.file.path, line: node.line};
 }

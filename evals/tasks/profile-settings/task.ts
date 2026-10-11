@@ -1,6 +1,6 @@
 import type {TaskDefinition} from "../../src/types.ts";
 
-import {parsedSources, peakuiElements} from "../../src/scoring/ast.ts";
+import {insideRoot, parsedSources, peakuiElements} from "../../src/scoring/ast.ts";
 import {classTokens, labelLinked, textOf} from "../../src/scoring/dom.ts";
 import {check} from "../../src/scoring/findings.ts";
 
@@ -119,7 +119,7 @@ export const profileSettings: TaskDefinition = {
   },
   staticChecks(context) {
     const errorsInFields = peakuiElements(context, "FieldError").filter((node) =>
-      node.ancestors.includes("TextField"),
+      insideRoot(node, "TextField"),
     );
     const app = parsedSources(context).find((source) => source.file.path === "src/App.tsx");
 

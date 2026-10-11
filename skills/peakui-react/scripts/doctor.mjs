@@ -154,6 +154,15 @@ function stylesheetFindings(project, files, context) {
 
     context.cssEntry ??= path;
 
+    if (peakui.specifier === STYLES) {
+      findings.push({
+        fix: `Change it to @import "${STYLES}/css";. The bare package name resolves to the package's JavaScript, and the build fails on it with an error that does not name the cause.`,
+        id: "css-wrong-specifier",
+        what: `The stylesheet is imported as "${STYLES}", which is not a stylesheet.`,
+        where: `${path}:${peakui.line}`,
+      });
+    }
+
     if (tailwind && tailwind.line > peakui.line) {
       findings.push({
         fix: `Move @import "tailwindcss"; above @import "${peakui.specifier}";. In the other order Tailwind's reset overrides the component styles, and nothing reports it.`,

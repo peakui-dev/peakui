@@ -1,7 +1,7 @@
 import type {ParsedSource} from "../../src/scoring/ast.ts";
 import type {StaticContext, TaskDefinition} from "../../src/types.ts";
 
-import {parsedSources, peakuiElements} from "../../src/scoring/ast.ts";
+import {insideRoot, parsedSources, peakuiElements} from "../../src/scoring/ast.ts";
 import {textOf} from "../../src/scoring/dom.ts";
 import {check} from "../../src/scoring/findings.ts";
 
@@ -79,7 +79,7 @@ export const teamMembers: TaskDefinition = {
   staticChecks(context) {
     const sources = parsedSources(context);
     const tooltipChildren = (tag: string) =>
-      peakuiElements(context, tag).some((node) => node.ancestors.includes("Tooltip"));
+      peakuiElements(context, tag).some((node) => insideRoot(node, "Tooltip"));
     const app = sources.find((source) => source.file.path === "src/App.tsx");
 
     return [
