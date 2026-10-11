@@ -26,24 +26,39 @@ describe("ThemePreview", () => {
     host.remove();
   });
 
-  it("applies the scoped css and the scheme attribute to the preview container", async () => {
+  it("mounts the standard theme css and puts <html> on the scheme", async () => {
     const preset = toPreset(DEFAULT_VALUES);
-    const css = emitVariablesCss(preset, deriveTheme(preset), {scope: "#tb-preview"});
+    const css = emitVariablesCss(preset, deriveTheme(preset));
 
     await act(async () => {
       root.render(
         <ThemePreview css={css} scheme="dark">
-          <p>preview content</p>
+          <p>page content</p>
         </ThemePreview>,
       );
     });
 
-    const container = host.querySelector("#tb-preview")!;
+    expect(document.documentElement.getAttribute("data-theme")).toBe("builder-dark");
+    expect(document.documentElement.classList.contains("builder-dark")).toBe(true);
+    expect(host.querySelector("style")?.textContent).toContain(":root,");
+    expect(host.querySelector("style")?.textContent).toContain('[data-theme="builder-dark"]');
+    expect(host.textContent).toContain("page content");
 
-    expect(container.getAttribute("data-theme")).toBe("builder-dark");
-    expect(container.querySelector("style")?.textContent).toContain(
-      '#tb-preview[data-theme="builder-dark"]',
-    );
-    expect(container.textContent).toContain("preview content");
+    await act(async () => {
+      root.render(
+        <ThemePreview css={css} scheme="light">
+          <p>page content</p>
+        </ThemePreview>,
+      );
+    });
+
+    expect(document.documentElement.getAttribute("data-theme")).toBe("builder-light");
+
+    await act(async () => {
+      root.render(null);
+    });
+
+    expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
+    expect(document.documentElement.classList.contains("builder-light")).toBe(false);
   });
 });

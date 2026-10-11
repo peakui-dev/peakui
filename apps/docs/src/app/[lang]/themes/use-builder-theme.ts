@@ -8,12 +8,9 @@ import {useDeferredValue, useMemo} from "react";
 
 import {toPreset} from "./presets";
 
-export const PREVIEW_SCOPE = "#tb-preview";
-
 export function useBuilderTheme(
   state: BuilderState,
   semanticOverrides?: ThemePreset["semanticOverrides"],
-  themeDerivations?: string,
 ) {
   const {accent, darkAccent, formRadius, grayChroma, radius, scheme} = state;
 
@@ -22,17 +19,16 @@ export function useBuilderTheme(
     [accent, grayChroma, radius, formRadius, darkAccent, semanticOverrides],
   );
   const derived = useMemo(() => deriveTheme(preset), [preset]);
-  const previewCss = useDeferredValue(
-    useMemo(() => {
-      const emitted = emitVariablesCss(preset, derived, {scope: PREVIEW_SCOPE});
 
-      // The re-declared derivations recompute the shared theme's derived mappings
-      // (--radius-*, --color-*, --shadow-*) from THIS theme's tokens inside the scope.
-      return themeDerivations
-        ? `${emitted}\n\n${PREVIEW_SCOPE} {\n${themeDerivations}\n}`
-        : emitted;
-    }, [preset, derived, themeDerivations]),
+  /*
+   * The builder themes the whole page: the emission is the standard one a theme ships with —
+   * `:root` carries the light scheme, `[data-theme="builder-dark"]` the dark one — and the
+   * page sets that attribute on <html>. No scoping, no derived-variable re-declarations: at
+   * :root the shared theme's own calc() chains re-resolve against the winning tokens.
+   */
+  const themeCss = useDeferredValue(
+    useMemo(() => emitVariablesCss(preset, derived), [preset, derived]),
   );
 
-  return {preset, derived, previewCss, scheme: scheme as Scheme};
+  return {preset, derived, themeCss, scheme: scheme as Scheme};
 }

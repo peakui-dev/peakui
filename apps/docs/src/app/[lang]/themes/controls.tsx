@@ -8,8 +8,7 @@ import {Label, SegmentedControl, Separator, Slider} from "@peakui/react";
 
 import {AccentPopover} from "./accent-popover";
 import {ContrastChips} from "./contrast-chips";
-import {PresetPicker} from "./preset-picker";
-import {matchGalleryPreset} from "./presets";
+import {GALLERY, matchGalleryPreset} from "./presets";
 
 const RADIUS_OPTIONS: [RadiusId, string][] = [
   ["none", "None"],
@@ -27,6 +26,26 @@ const RADIUS_OPTIONS: [RadiusId, string][] = [
 const SURFACE_RADIUS_OPTIONS: [RadiusId, string][] = RADIUS_OPTIONS.filter(
   ([id]) => id !== "extra-small",
 );
+
+/** Glyph radii in px: the shape previews the rounding the step produces, maxing at half-size. */
+const GLYPH_RADIUS: Record<RadiusId, number> = {
+  none: 0,
+  "extra-small": 1.5,
+  small: 3,
+  medium: 5,
+  large: 7.5,
+  "extra-large": 10,
+};
+
+function RadiusGlyph({id}: {id: RadiusId}) {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block size-5 border border-current opacity-70"
+      style={{borderRadius: GLYPH_RADIUS[id]}}
+    />
+  );
+}
 
 /** RAC Slider supports multi-thumb values; this slider has exactly one thumb. */
 const single = (value: number | number[]): number => (Array.isArray(value) ? value[0]! : value);
@@ -52,7 +71,7 @@ export function ControlsPanel({
   fixes: ContrastFix[];
   state: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
-  /** "card" wraps the groups in floating-card chrome; "plain" is for a drawer that has its own. */
+  /** "card" floats on the themed page; "plain" sits inside a drawer that has its own surface. */
   variant?: "card" | "plain";
 }) {
   const {scheme: _scheme, ...values} = state;
@@ -62,7 +81,28 @@ export function ControlsPanel({
   const body = (
     <>
       <Group label="Presets">
-        <PresetPicker activeName={activeName} onSelect={(preset) => set(preset.values)} />
+        <div className="grid grid-cols-2 gap-1.5">
+          {GALLERY.map((preset) => (
+            <button
+              key={preset.name}
+              aria-pressed={preset.name === activeName}
+              type="button"
+              className={
+                preset.name === activeName
+                  ? "flex items-center gap-2 rounded-field bg-default px-2.5 py-1.5 text-xs text-foreground"
+                  : "flex items-center gap-2 rounded-field bg-background px-2.5 py-1.5 text-xs text-muted hover:text-foreground"
+              }
+              onClick={() => set(preset.values)}
+            >
+              <span
+                aria-hidden="true"
+                className="size-2.5 shrink-0 rounded-full"
+                style={{background: preset.values.accent}}
+              />
+              {preset.name}
+            </button>
+          ))}
+        </div>
       </Group>
       <Group label="Accent">
         <AccentPopover values={values} onChange={set} />
@@ -95,9 +135,9 @@ export function ControlsPanel({
           size="sm"
           onSelectionChange={(key) => set({radius: key as RadiusId})}
         >
-          {SURFACE_RADIUS_OPTIONS.map(([id, label]) => (
-            <SegmentedControl.Item key={id} id={id}>
-              {label}
+          {SURFACE_RADIUS_OPTIONS.map(([id]) => (
+            <SegmentedControl.Item key={id} isIconOnly aria-label={id} id={id}>
+              <RadiusGlyph id={id} />
             </SegmentedControl.Item>
           ))}
         </SegmentedControl>
@@ -109,9 +149,9 @@ export function ControlsPanel({
           size="sm"
           onSelectionChange={(key) => set({formRadius: key as RadiusId})}
         >
-          {RADIUS_OPTIONS.map(([id, label]) => (
-            <SegmentedControl.Item key={id} id={id}>
-              {label}
+          {RADIUS_OPTIONS.map(([id]) => (
+            <SegmentedControl.Item key={id} isIconOnly aria-label={id} id={id}>
+              <RadiusGlyph id={id} />
             </SegmentedControl.Item>
           ))}
         </SegmentedControl>
@@ -121,20 +161,16 @@ export function ControlsPanel({
     </>
   );
 
-  /*
-   * The floating instrument card pinned to the screen's right edge (and the same card joined
-   * to the page column below lg) carries its own chrome; a drawer provides its own.
-   */
   if (variant === "plain") {
     return <div className="flex flex-col gap-6">{body}</div>;
   }
 
   return (
-    <div
+    <aside
       aria-label="Theme controls"
-      className="flex flex-col gap-6 rounded-xl border border-separator bg-surface p-6 shadow-overlay"
+      className="flex h-full flex-col gap-6 overflow-y-auto rounded-xl bg-surface p-6"
     >
       {body}
-    </div>
+    </aside>
   );
 }

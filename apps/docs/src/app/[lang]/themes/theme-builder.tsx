@@ -14,22 +14,18 @@ import {ThemePreview} from "./theme-preview";
 import {useBuilderState} from "./use-builder-state";
 import {useBuilderTheme} from "./use-builder-theme";
 
-function Builder({themeDerivations}: {themeDerivations?: string}) {
+function Builder() {
   const {isDefault, reset, set, state} = useBuilderState();
   const {scheme: _scheme, ...values} = state;
   // A preset's semanticOverrides reattach through the value match — preset click and shared
-  // link alike — so the preview and the export agree on what those values mean.
+  // link alike — so the page and the export agree on what those values mean.
   const matched = matchGalleryPreset(values);
-  const {derived, previewCss, scheme} = useBuilderTheme(
-    state,
-    matched?.semanticOverrides,
-    themeDerivations,
-  );
+  const {derived, scheme, themeCss} = useBuilderTheme(state, matched?.semanticOverrides);
   const [showCode, setShowCode] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="flex h-dvh flex-col bg-background text-foreground">
       <header className="flex h-16 shrink-0 items-center border-b border-separator">
         <div className="mx-auto flex w-full max-w-[1400px] items-center gap-x-4 px-6">
           <Link className="text-sm font-semibold tracking-tight text-foreground" href="/en">
@@ -38,7 +34,7 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
           <h1 className="text-sm font-medium text-muted">Theme Builder</h1>
           <p
             aria-live="polite"
-            className="flex items-center gap-2 rounded-field border border-separator px-2.5 py-1 text-xs text-muted"
+            className="flex items-center gap-2 rounded-field bg-surface px-2.5 py-1 text-xs text-muted"
           >
             <span
               aria-hidden="true"
@@ -80,15 +76,15 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
         </div>
       </header>
       {/*
-       * The specimen sheet is a framed canvas centered in the page: the theme it shows is
-       * bounded by the frame, and the site's own chrome stays on the default theme around it.
-       * The instrument card floats at the screen's right edge only when it fits beyond the
-       * 1400px wrapper; between lg and that width it opens as a drawer, and below lg it
-       * joins the column after the sheet.
+       * The whole page is the preview: the generated theme rides :root via <html>, so the
+       * header, the gutters and the instrument card follow it as much as the gallery does.
+       * The card floats at the screen's right edge only when it fits beyond the 1400px
+       * wrapper; between lg and that width a Controls button opens it as a drawer, and below
+       * lg it joins the column after the gallery.
        */}
       <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1400px]">
-          <ThemePreview css={previewCss} scheme={scheme}>
+          <ThemePreview css={themeCss} scheme={scheme}>
             <PreviewGallery />
           </ThemePreview>
           <div className="px-6 pb-6 lg:hidden">
@@ -97,12 +93,12 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
         </div>
       </main>
       <div className="fixed bottom-4 right-4 top-20 z-40 hidden w-64 min-[1920px]:block">
-        <ControlsPanel fixes={derived.fixes} set={set} state={state} variant="card" />
+        <ControlsPanel fixes={derived.fixes} set={set} state={state} />
       </div>
       {!!showControls && (
         <aside
           aria-label="Theme controls"
-          className="fixed inset-y-0 right-0 z-50 flex w-80 flex-col gap-4 overflow-y-auto border-l border-separator bg-surface p-6 shadow-overlay"
+          className="fixed inset-y-0 right-0 z-50 flex w-80 flex-col gap-4 overflow-y-auto bg-surface p-6"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-foreground">Theme controls</h2>
@@ -130,10 +126,10 @@ function Builder({themeDerivations}: {themeDerivations?: string}) {
   );
 }
 
-export function ThemeBuilder({themeDerivations}: {themeDerivations?: string}) {
+export function ThemeBuilder() {
   return (
     <Suspense fallback={null}>
-      <Builder themeDerivations={themeDerivations} />
+      <Builder />
     </Suspense>
   );
 }

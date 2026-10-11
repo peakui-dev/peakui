@@ -35,12 +35,66 @@ const VARIANTS = [
 
 const SIZES = ["sm", "md"] as const;
 
-function Section({children, title}: {children: React.ReactNode; title: string}) {
+function Section({
+  children,
+  className,
+  title,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  title: string;
+}) {
   return (
-    <section className="flex flex-col gap-4 border-t border-separator pt-4">
+    <section className={`flex flex-col gap-4 border-t border-separator pt-4 ${className ?? ""}`}>
       <h3 className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted">{title}</h3>
       {children}
     </section>
+  );
+}
+
+/*
+ * The sheet's thesis: the theme's own palette, painted from its live tokens — semantic colors
+ * on the left, the neutral ramp on the right.
+ */
+function PaletteSection() {
+  const semantic: [string, string][] = [
+    ["Accent", "var(--accent)"],
+    ["Success", "var(--success)"],
+    ["Warning", "var(--warning)"],
+    ["Danger", "var(--danger)"],
+  ];
+  const neutrals: [string, string][] = [
+    ["Background", "var(--background)"],
+    ["Surface", "var(--surface)"],
+    ["Control", "var(--default)"],
+    ["Border", "var(--border)"],
+    ["Muted", "var(--muted)"],
+    ["Foreground", "var(--foreground)"],
+  ];
+
+  const swatch = (name: string, color: string) => (
+    <div key={name} className="flex flex-col items-start gap-1.5">
+      <span
+        aria-hidden="true"
+        className="size-10 w-14 rounded-field border border-separator"
+        style={{background: color}}
+      />
+      <span className="text-[10px] text-muted">{name}</span>
+    </div>
+  );
+
+  return (
+    <Section className="sm:col-span-2 xl:col-span-3" title="Palette">
+      <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+        <div className="flex flex-wrap items-start gap-4">
+          {semantic.map(([n, c]) => swatch(n, c))}
+        </div>
+        <Separator className="hidden h-14 self-center sm:block" orientation="vertical" />
+        <div className="flex flex-wrap items-start gap-4">
+          {neutrals.map(([n, c]) => swatch(n, c))}
+        </div>
+      </div>
+    </Section>
   );
 }
 
@@ -245,7 +299,7 @@ function AlertsSection() {
 
 function LoginSection() {
   return (
-    <Section title="Sign in">
+    <Section className="sm:col-span-2 xl:col-span-2" title="Sign in">
       <Card className="w-full">
         <Card.Header>
           <Card.Title>Welcome back</Card.Title>
@@ -274,9 +328,10 @@ function LoginSection() {
 export function PreviewGallery() {
   return (
     <div className="grid items-start gap-x-8 gap-y-10 p-8 sm:grid-cols-2 xl:grid-cols-3">
+      <PaletteSection />
+      <LoginSection />
       <ButtonsSection />
       <SelectionSection />
-      <LoginSection />
       <InputsSection />
       <ControlsSection />
       <AlertsSection />
