@@ -1,0 +1,189 @@
+---
+title: Slider
+description: Selects one or more values within a range
+links:
+  rac: Slider
+  source: slider/slider.tsx
+  styles: slider.css
+---
+
+## Usage
+
+```tsx
+import {Slider} from "@peakui/react";
+```
+
+<ComponentPreview name="slider-basic" />
+
+### Anatomy
+
+```tsx
+<Slider>
+  <Label />
+  <Slider.Output />
+  <Slider.Track>
+    <Slider.Fill />
+    <Slider.Thumb />
+  </Slider.Track>
+</Slider>
+```
+
+## Examples
+
+### Disabled
+
+<ComponentPreview name="slider-disabled" />
+
+### Range
+
+Pass an array to `defaultValue` and render one `Slider.Thumb` per value through the track's render function.
+
+<ComponentPreview name="slider-range" />
+
+### Vertical
+
+<ComponentPreview name="slider-vertical" />
+
+### Controlled
+
+Control the value with `value` and `onChange`.
+
+<ComponentPreview name="slider-controlled" />
+
+### Custom Value Formatting
+
+Use `formatOptions` to format the displayed value.
+
+<ComponentPreview name="slider-custom-value-formatting" />
+
+### Custom Output
+
+Customize `Slider.Output` to control how the selected values are shown.
+
+<ComponentPreview name="slider-custom-output" />
+
+### Render Function
+
+<ComponentPreview name="slider-render-function" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="slider-custom-styles" />
+
+### Global CSS
+
+```css
+.slider {
+  @apply flex flex-col gap-2;
+}
+
+.slider__output {
+  @apply text-muted-fg text-sm;
+}
+```
+
+## Styling Reference
+
+### CSS Classes
+
+| Class | Description
+| :- | :-
+| `.slider` | The slider container element
+| `.slider__output` | The output element displaying the current value(s)
+| `.slider__track` | The track element containing the fill and thumbs
+| `.slider__fill` | The fill element showing the selected range
+| `.slider__thumb` | The thumb element
+| `.slider__marks` | The marks element
+
+### Slots
+
+| Slot | Description
+| :- | :-
+| `[data-slot="slider"]` | The slider container element
+| `[data-slot="slider-output"]` | The output element displaying the current value(s)
+| `[data-slot="slider-track"]` | The track element containing the fill and thumbs
+| `[data-slot="slider-fill"]` | The fill element showing the selected range
+| `[data-slot="slider-thumb"]` | The thumb element
+| `[data-slot="slider-marks"]` | The marks element
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+| State | Attribute
+| :- | :-
+| Disabled | `[data-disabled="true"]` / `:disabled` on the slider or thumb
+| Dragging | `[data-dragging="true"]` on the thumb
+| Keyboard focused | `[data-focus-visible="true"]` / `:focus-visible` on the thumb
+| Vertical | `[data-orientation="vertical"]` on the slider
+| Fill starts at the beginning | `[data-fill-start="true"]` on the track
+| Fill ends at the end | `[data-fill-end="true"]` on the track
+
+## API Reference
+
+### Slider.Root
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `value` | `number \| number[]` | - | Controlled value
+| `defaultValue` | `number \| number[]` | - | Uncontrolled initial value
+| `onChange` | `(value: number \| number[]) => void` | - | Called when the value changes
+| `onChangeEnd` | `(value: number \| number[]) => void` | - | Called when dragging ends
+| `minValue` | `number` | `0` | Lower bound
+| `maxValue` | `number` | `100` | Upper bound
+| `step` | `number` | `1` | Step size
+| `formatOptions` | `Intl.NumberFormatOptions` | - | Locale-aware formatting of the value label
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Orientation of the slider
+| `isDisabled` | `boolean` | - | Disables the slider
+| `render` | `DOMRenderFunction<'div', SliderRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `Slider` attribute is accepted
+
+Each thumb renders a visually hidden native `<input type="range">` carrying the `slider` role, its value and its keyboard interaction.
+
+### Slider.Output
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `children` | `ReactNode \| RenderFunction` | value labels | Overrides the joined value labels
+| `render` | `DOMRenderFunction<'div', SliderOutputRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `SliderOutput` attribute is accepted
+
+### Slider.Track
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<'div', SliderTrackRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `SliderTrack` attribute is accepted
+
+### Slider.Fill
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `style` | `CSSProperties` | - | Merged under the computed fill geometry
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'`
+| `...rest` | | | Every `<div>` attribute is accepted
+
+### Slider.Thumb
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `index` | `number` | `0` | Index of the thumb within the slider
+| `isDisabled` | `boolean` | - | Disables this thumb
+| `name` | `string` | - | Name of the hidden input, used when submitting an HTML form
+| `render` | `DOMRenderFunction<'div', SliderThumbRenderProps>` | - | Replaces the rendered element
+| `...rest` | | | Every React Aria `SliderThumb` attribute is accepted
+
+### Slider.Marks
+
+| Prop | Type | Default | Description
+| :- | :- | :- | :-
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'`
+| `...rest` | | | Every `<div>` attribute is accepted
+
+Planned: `Slider.Marks` is a placeholder that renders an empty element — marks support is not implemented yet.
+
+### Render Props
+
+`children` and `className` of `Slider.Root`, `Slider.Output`, `Slider.Track` and `Slider.Thumb` accept a function receiving the respective React Aria render props, including `state` with `values` and `getThumbValueLabel`.
