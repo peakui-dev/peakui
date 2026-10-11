@@ -35,7 +35,72 @@ the path to this skill's directory in front of `scripts/`.
 ## Rules the type-checker will not catch
 
 Take every variant name, prop name and part name from the page you read in step 2, not from memory
-and not from another library.
+and not from another library. The examples below show the shape of a solution; their labels and
+names are placeholders for the ones in your task.
+
+### A busy button is pending, not disabled
+
+A disabled button drops out of the focus order and tells assistive technology nothing about the
+wait. `isPending` keeps the button focusable and ignores presses, so the form cannot be submitted
+twice. It draws no spinner of its own: put one beside the label, and keep the label.
+
+```tsx
+import {Button, Spinner} from "@peakui/react";
+
+export function PublishButton({publishing}: {publishing: boolean}) {
+  return (
+    <Button isPending={publishing} type="submit">
+      {publishing ? <Spinner aria-hidden color="current" size="sm" /> : null}
+      Publish
+    </Button>
+  );
+}
+```
+
+### One button is the trigger of everything attached to it
+
+A `Button` placed directly inside `Dropdown`, `Tooltip`, `Popover` or `Modal` becomes that
+component's trigger; no wrapper is needed. When one button needs two of them — a hint on hover and
+a menu on press — nest the roots around the same `Button`:
+
+```tsx
+import {Button, Dropdown, Label, Tooltip} from "@peakui/react";
+
+export function FileActions({onDelete}: {onDelete: () => void}) {
+  return (
+    <Dropdown>
+      <Tooltip>
+        <Button isIconOnly aria-label="File actions" variant="ghost">
+          ⋯
+        </Button>
+        <Tooltip.Content>File actions</Tooltip.Content>
+      </Tooltip>
+      <Dropdown.Popover>
+        <Dropdown.Menu
+          onAction={(key) => {
+            if (key === "delete") onDelete();
+          }}
+        >
+          <Dropdown.Item id="rename" textValue="Rename">
+            <Label>Rename</Label>
+          </Dropdown.Item>
+          <Dropdown.Item id="delete" textValue="Delete">
+            <Label>Delete</Label>
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
+  );
+}
+```
+
+Two parts look like the wrapper you might reach for, and both produce a pressable element inside
+another one — invalid markup and a broken focus order:
+
+- `Dropdown.Trigger` renders a button itself. It is for a trigger that is not a `Button`, such as
+  an avatar image; never put a `Button` inside it.
+- `Tooltip.Trigger` makes content that is not interactive, such as an icon or a word, focusable.
+  Never put a button, a link or a field inside it.
 
 ## What to read for the task
 

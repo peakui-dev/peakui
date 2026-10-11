@@ -101,7 +101,56 @@ a real pointer.
 | `doctor.mjs` reports `css-wrong-specifier` for `@import "@peakui/styles";`. | F4. Before this round the script accepted the bare specifier and would have answered "No problems found" about the line that broke the build. |
 | `summarizeTranscript` needed no change. | The `tool_use` shape of the real transcript matches its tests; CLI 2.1.293 accepted every flag. |
 
+## Round 1 — skill 0.9.0 with two rules (2026-10-11, setup `skill`, no pointer)
+
+| Task | Model | typecheck | build | static | render | Failed gating rules | Skill loaded | `docs.mjs` | `doctor.mjs` | Turns | Seconds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `profile-settings` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 2 | 1 | 10 | 31 |
+| `team-members` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 4 | 1 | 12 | 32 |
+| `first-setup-action` | `claude-sonnet-5-5` | pass | pass | pass | pass | — | yes | 1 | 2 | 6 | 27 |
+| `profile-settings` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 2 | 2 | 22 | 61 |
+| `team-members` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 6 | 1 | 17 | 54 |
+| `first-setup-action` | `claude-haiku-5-5` | pass | pass | pass | pass | — | yes | 2 | 2 | 14 | 32 |
+
+**Against round 0.** F1, F2 and F3 are gone on the model that made each, and nothing that passed
+now fails. One run per cell: this shows the failures can be removed, not how often they are.
+
+| | Sonnet, round 0 → 1 | Haiku, round 0 → 1 |
+| --- | --- | --- |
+| Tasks passed | 2 of 3 → 3 of 3 | 1 of 3 → 3 of 3 |
+| Seconds, three tasks | 142 → 90 | 285 → 147 |
+| Turns, three tasks | 34 → 28 | 57 → 53 |
+| Cached input tokens read, three tasks | 763k → 329k | 2.0M → 830k |
+
+### Observations
+
+- **The skill loaded in all six runs without the pointer**, as the first tool call. The pointer
+  rule was not triggered. The project held one skill and every prompt named PeakUI, so this says
+  little about a project with many skills or a prompt that does not name the library.
+- **The scripts were run as written**, from the project root with the skill's path in front
+  (`node .claude/skills/peakui-react/scripts/docs.mjs …`). No call failed; no agent ran one from the
+  skill's own directory.
+- **`doctor.mjs` removed F4.** On the app that was not set up it reported `styles-not-imported`
+  with the line to add; both agents wrote `@import "@peakui/styles/css";` at the first attempt.
+- **Agents wrote the rule's shape, not its text.** `isPending` with a spinner beside the kept
+  label; one `Button` inside `Tooltip` inside `Dropdown`. Labels came from the task
+  ("Member actions"), not from the example ("File actions").
+- **A request for many pages is too large to read.** Three of six runs asked for six to ten pages
+  in one call. The output exceeded what the agent harness returns inline and was saved to a file,
+  which the agent then searched with `grep`, `sed` or several partial reads — two to five extra
+  steps. Sonnet avoided it once by piping a page through `head` and `sed`. Page sizes on the site:
+  `button` 16 KB, `toast` 37 KB, `modal` 41 KB, `dropdown` 51 KB; Examples is 50–65% of a page and
+  API Reference 25–45%.
+- **Sonnet still opened the type declarations once**, for the modal's controlled state, after
+  reading the page: the answer sits 220 lines into a 41 KB page.
+- **No reference file was needed**, and none exists.
+
 ## Rules and the findings behind them
 
-The skill holds no rule yet. Its `SKILL.md` is the skeleton: the workflow, the routing table and
-the fallback. The findings a rule may answer are F1–F3 above; F4 is answered by `doctor.mjs`.
+| Rule in the skill | File | Finding | Rule of the stand it answers |
+| --- | --- | --- | --- |
+| A busy button is pending, not disabled | `SKILL.md` | F3 | `submit.pending` |
+| One button is the trigger of everything attached to it | `SKILL.md` | F1, F2 | `menu.no-button-in-trigger`, `menu.no-nested-interactive` |
+| Workflow step 1, `doctor.mjs`: `css-wrong-specifier` | `scripts/doctor.mjs` | F4 | — (cost turns; the result passed) |
+
+No reference file exists: no finding belongs to setup, composition of fields, or styling.
