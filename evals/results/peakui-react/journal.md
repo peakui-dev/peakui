@@ -145,6 +145,50 @@ now fails. One run per cell: this shows the failures can be removed, not how oft
   reading the page: the answer sits 220 lines into a 41 KB page.
 - **No reference file was needed**, and none exists.
 
+## Round 2 — skill 0.10.0: `docs.mjs` prints by purpose (2026-10-11, setup `skill`, no pointer)
+
+What changed since round 1: a component page is printed as Usage and API Reference by default,
+with `--examples`, `--styling`, `--full` and `--source` for the rest; `SKILL.md` describes the
+flags and says to ask for two or three components per call. `--source` read a local mirror of the
+repository, which was private when the round started.
+
+| Task | Model | Layers | Failed gating rules | Skill loaded | `docs.mjs` calls | `doctor.mjs` | Turns | Seconds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `profile-settings` | `claude-sonnet-5-5` | all pass | — | yes | 5 | 1 | 14 | 42 |
+| `team-members` | `claude-sonnet-5-5` | all pass | — | yes | 4 | 1 | 11 | 31 |
+| `first-setup-action` | `claude-sonnet-5-5` | all pass | — | yes | 1 | 2 | 6 | 29 |
+| `profile-settings` | `claude-haiku-5-5` | all pass | — | yes | 6 | 1 | 14 | 45 |
+| `team-members` | `claude-haiku-5-5` | all pass | — | yes | 7 | 2 | 14 | 53 |
+| `first-setup-action` | `claude-haiku-5-5` | all pass | — | yes | 2 | 2 | 10 | 39 |
+
+**No result changed against round 1**, which by the plan ends the rounds.
+
+| Three tasks together | Sonnet, round 1 → 2 | Haiku, round 1 → 2 |
+| --- | --- | --- |
+| Seconds | 90 → 102 | 147 → 137 |
+| Turns | 28 → 31 | 53 → 38 |
+| Cached input tokens read | 329k → 343k | 830k → 572k |
+
+With one run per cell the Sonnet difference is within what two runs of the same thing would show;
+the Haiku drop in turns and tokens is the only movement large enough to mention.
+
+### Observations
+
+- **Agents asked for three components per call, as told.** The largest single output fell from
+  150–250 KB to 34–39 KB.
+- **Three calls of nineteen still exceeded what the harness shows inline**, all just over its
+  limit of about 30 KB: `modal dropdown tooltip`, `dropdown modal button`, and two calls chained
+  in one shell command. Three overlay pages do not fit; two do, barely.
+- **`--examples` was used nine times, all by Haiku**; Sonnet read the default output only.
+  `--styling` and `--full` were never used: no task restyles anything.
+- **`--source` was never used.** No run reached a question the page did not answer.
+- **The skill loaded in all six runs without the pointer**, as in round 1 and with the same caveat.
+
+### Change made after this round, not yet run
+
+`SKILL.md` now says two components per call instead of two or three. The final check runs with
+that text.
+
 ## Rules and the findings behind them
 
 | Rule in the skill | File | Finding | Rule of the stand it answers |

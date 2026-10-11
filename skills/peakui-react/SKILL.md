@@ -26,7 +26,7 @@ the path to this skill's directory in front of `scripts/`.
    one-line description. `node scripts/docs.mjs modal dropdown` prints, for each, how to build with
    it: its parts, a usage example and the props of every part. Read that for every component you
    are about to use: the names of its parts, props and variants are there and nowhere in this file.
-   Ask for two or three components per call; the output of more is too long to be shown whole.
+   Ask for two components per call; the output of more is too long to be shown whole.
    A page has more than that default, and a flag prints each further piece:
 
    | Add | To get |
