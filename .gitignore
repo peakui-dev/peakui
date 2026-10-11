@@ -21,3 +21,6 @@ test-results/
 
 # agent worktrees
 .worktrees/
+
+# Local git worktrees (superpowers:using-git-worktrees)
+.worktrees/
