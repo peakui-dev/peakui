@@ -1,6 +1,8 @@
 ---
 name: peakui-docs
 description: "Use when writing, updating, reviewing or curating PeakUI documentation — a component page under apps/docs/content, its demos in apps/docs/src/demos, the demo registry, a guide or a migration guide. Also use when a page reads verbose, an example may not match the component source, or a new or changed component needs its docs. Keywords: docs, documentation, MDX, Fumadocs, ComponentPreview, demo, frontmatter, links, API Reference, CSS Classes, Anatomy, curate, docs review."
+metadata:
+  internal: true
 ---
 
 # PeakUI Docs

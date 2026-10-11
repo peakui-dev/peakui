@@ -1,6 +1,8 @@
 ---
 name: peakui-component-standards
 description: "Use when implementing, reviewing, or refactoring any PeakUI React component — a new component, a new part of an existing one, its variants, styles, exports, stories, tests, or accessibility. Also use before changing a component's public props or exported types. Keywords: component, part, Root, compound, namespace, variant, slot, data-slot, BEM, tv, tailwind-variants, React Aria, RAC, a11y, WCAG, forced-colors, Storybook, codemod."
+metadata:
+  internal: true
 ---
 
 # PeakUI Component Standards

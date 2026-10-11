@@ -1,6 +1,8 @@
 ---
 name: playwright-e2e
 description: Write and review E2E tests using Playwright for Storybook components in the design system. Use when creating new E2E tests, reviewing test files, debugging failing tests, or when the user mentions Playwright, E2E testing, or asks about testing components.
+metadata:
+  internal: true
 ---
 
 # E2E Testing with Playwright

@@ -40,7 +40,7 @@ Settled with the project owner on 2026-10-08 … 2026-10-11.
 | S7 | Measured agent | Claude Code, models `sonnet` (authoring), `haiku` and `opus` (final check). | The stand has no other agent; best practices ask for a weak, a balanced and a strong model. |
 | S8 | Verification volume | Three composite tasks, one run per task and model, 15–18 runs in total, 2 USD cap per run. | Owner's choice: a skill is being written, not a study. Section 8. |
 | S9 | Always-on pointer | A three-line block for `AGENTS.md` / `CLAUDE.md`, documented on the install page, added to a stand project only when a transcript shows the skill was not loaded. | Unforced skill activation measures 41–53% elsewhere (section 3.3); a separate run matrix for it is not worth its cost here. |
-| S10 | Install channel | `npx skills add peakui-dev/peakui`, and nothing else in this stage. | It needs only the `skills/peakui-react/` directory and installs for every agent. |
+| S10 | Install channel | `npx skills add peakui-dev/peakui --skill peakui-react`, and nothing else in this stage. | It needs only the `skills/peakui-react/` directory and installs for every agent. |
 | S11 | Skill set | One skill in this stage. | Focused skills outperform exhaustive bundles (section 3.3); theming is stage 2. |
 
 **Effect on the umbrella architecture**
@@ -293,8 +293,12 @@ installed either, it says so and names the install command instead.
 ### 7.1 Install
 
 ```bash
-npx skills add peakui-dev/peakui
+npx skills add peakui-dev/peakui --skill peakui-react
 ```
+
+*Amended 2026-10-11: the installer offers every `SKILL.md` in a repository, and this one also
+holds five contributor skills under `.agents/skills/`. Each of those now carries
+`metadata.internal: true`, which hides it from the installer; the command names the skill as well.*
 
 The implementation verifies the channel by installing from a local path into an empty project and
 checking that `.agents/skills/peakui-react/` and `.claude/skills/peakui-react/` both hold the skill.

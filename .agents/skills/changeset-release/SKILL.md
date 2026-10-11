@@ -4,6 +4,8 @@ description: >-
   Create changesets, release branches, and prepare version bumps for PeakUI packages.
   Use when the user asks to create a changeset, prepare a release, bump version,
   describe changes for changelog, or start a release branch.
+metadata:
+  internal: true
 ---
 
 # Changeset Release Workflow

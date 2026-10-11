@@ -303,3 +303,27 @@ test("every css block parses and imports only exported specifiers", () => {
     }
   }
 });
+
+test("contributor skills are hidden from the skill installer", () => {
+  // `npx skills add <repository>` offers every SKILL.md it finds. The skills under .agents/ are
+  // for people working on the library; `metadata.internal: true` keeps them out of that list.
+  const contributor = walk(".agents/skills").filter((path) => basename(path) === "SKILL.md");
+
+  assert.ok(contributor.length > 0, "the repository has contributor skills");
+
+  for (const path of contributor) {
+    const block = /^---\n([\s\S]*?)\n---\n/.exec(read(path))?.[1] ?? "";
+
+    assert.match(
+      block,
+      /^metadata:\n(?: {2}.*\n)*? {2}internal: true$/m,
+      `${path} is not internal`,
+    );
+  }
+});
+
+test("the install page installs this skill only", () => {
+  const page = read(`${DOCS_CONTENT}/getting-started/(ui-for-agents)/agent-skills.mdx`);
+
+  assert.match(page, /npx skills add peakui-dev\/peakui --skill peakui-react/);
+});
