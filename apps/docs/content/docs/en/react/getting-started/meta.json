@@ -13,6 +13,7 @@
     "(handbook)/styling",
     "(handbook)/composition",
     "---UI for Agents---",
-    "(ui-for-agents)/llms-txt"
+    "(ui-for-agents)/llms-txt",
+    "(ui-for-agents)/agent-skills"
   ]
 }

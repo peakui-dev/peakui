@@ -50,6 +50,14 @@ describe("/api/components", () => {
     }
   });
 
+  it("lists the agent skills guide", async () => {
+    const {guides} = await loadIndex();
+    const guide = guides.find((candidate) => candidate.name === "agent-skills");
+
+    expect(guide, "a guide named agent-skills").toBeDefined();
+    expect(guide!.description.length).toBeGreaterThan(0);
+  });
+
   it("lists guides with the same fields as components, minus links", async () => {
     const {guides} = await loadIndex();
 

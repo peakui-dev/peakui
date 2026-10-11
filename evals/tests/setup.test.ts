@@ -1,4 +1,4 @@
-import {existsSync, mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import {existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 
@@ -49,5 +49,14 @@ describe("buildSetup", () => {
     expect(existsSync(join(dir, ".claude/skills/peakui-react/stale.md"))).toBe(false);
   });
 
-  it.todo("skill-pointer: also holds CLAUDE.md and AGENTS.md with exactly the pointer block");
+  it("skill-pointer: also holds CLAUDE.md and AGENTS.md with exactly the pointer block", () => {
+    const dir = buildSetup("skill-pointer");
+    const pointer = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+
+    expect(existsSync(join(dir, ".claude/skills/peakui-react/SKILL.md"))).toBe(true);
+    expect(pointer.startsWith("<!-- peakui:start -->\n")).toBe(true);
+    expect(pointer.endsWith("<!-- peakui:end -->\n")).toBe(true);
+    expect(pointer).toContain("load the `peakui-react` skill");
+    expect(readFileSync(join(dir, "AGENTS.md"), "utf8")).toBe(pointer);
+  });
 });
