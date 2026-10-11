@@ -39,6 +39,7 @@ export * from "./search-field/index.ts";
 export * from "./segmented-control/index.ts";
 export * from "./separator/index.ts";
 export * from "./skeleton/index.ts";
+export * from "./slider/index.ts";
 export * from "./spinner/index.ts";
 export * from "./surface/index.ts";
 export * from "./switch-group/index.ts";

@@ -828,6 +828,43 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./skeleton/user-profile").then((m) => m.UserProfile),
     file: "skeleton/user-profile.tsx",
   },
+  // slider
+  "slider-basic": {
+    loader: () => import("./slider/basic").then((m) => m.Basic),
+    file: "slider/basic.tsx",
+  },
+  "slider-controlled": {
+    loader: () => import("./slider/controlled").then((m) => m.Controlled),
+    file: "slider/controlled.tsx",
+  },
+  "slider-custom-output": {
+    loader: () => import("./slider/custom-output").then((m) => m.CustomOutput),
+    file: "slider/custom-output.tsx",
+  },
+  "slider-custom-styles": {
+    loader: () => import("./slider/custom-styles").then((m) => m.CustomStyles),
+    file: "slider/custom-styles.tsx",
+  },
+  "slider-custom-value-formatting": {
+    loader: () => import("./slider/custom-value-formatting").then((m) => m.CustomValueFormatting),
+    file: "slider/custom-value-formatting.tsx",
+  },
+  "slider-disabled": {
+    loader: () => import("./slider/disabled").then((m) => m.Disabled),
+    file: "slider/disabled.tsx",
+  },
+  "slider-range": {
+    loader: () => import("./slider/range").then((m) => m.Range),
+    file: "slider/range.tsx",
+  },
+  "slider-render-function": {
+    loader: () => import("./slider/render-function").then((m) => m.RenderFunction),
+    file: "slider/render-function.tsx",
+  },
+  "slider-vertical": {
+    loader: () => import("./slider/vertical").then((m) => m.Vertical),
+    file: "slider/vertical.tsx",
+  },
   // spinner
   "spinner-basic": {
     loader: () => import("./spinner/basic").then((m) => m.Basic),

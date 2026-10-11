@@ -39,6 +39,7 @@
     "(buttons)/segmented-control",
     "(layout)/separator",
     "(feedback)/skeleton",
+    "(controls)/slider",
     "(feedback)/spinner",
     "(layout)/surface",
     "(forms)/switch",
