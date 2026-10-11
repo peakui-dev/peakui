@@ -27,26 +27,6 @@ const SURFACE_RADIUS_OPTIONS: [RadiusId, string][] = RADIUS_OPTIONS.filter(
   ([id]) => id !== "extra-small",
 );
 
-/** Glyph radii in px: the shape previews the rounding the step produces, maxing at half-size. */
-const GLYPH_RADIUS: Record<RadiusId, number> = {
-  none: 0,
-  "extra-small": 1.5,
-  small: 3,
-  medium: 5,
-  large: 7.5,
-  "extra-large": 10,
-};
-
-function RadiusGlyph({id}: {id: RadiusId}) {
-  return (
-    <span
-      aria-hidden="true"
-      className="inline-block size-5 border border-current opacity-70"
-      style={{borderRadius: GLYPH_RADIUS[id]}}
-    />
-  );
-}
-
 /** RAC Slider supports multi-thumb values; this slider has exactly one thumb. */
 const single = (value: number | number[]): number => (Array.isArray(value) ? value[0]! : value);
 
@@ -135,9 +115,9 @@ export function ControlsPanel({
           size="sm"
           onSelectionChange={(key) => set({radius: key as RadiusId})}
         >
-          {SURFACE_RADIUS_OPTIONS.map(([id]) => (
-            <SegmentedControl.Item key={id} isIconOnly aria-label={id} id={id}>
-              <RadiusGlyph id={id} />
+          {SURFACE_RADIUS_OPTIONS.map(([id, label]) => (
+            <SegmentedControl.Item key={id} id={id}>
+              {label}
             </SegmentedControl.Item>
           ))}
         </SegmentedControl>
@@ -149,9 +129,9 @@ export function ControlsPanel({
           size="sm"
           onSelectionChange={(key) => set({formRadius: key as RadiusId})}
         >
-          {RADIUS_OPTIONS.map(([id]) => (
-            <SegmentedControl.Item key={id} isIconOnly aria-label={id} id={id}>
-              <RadiusGlyph id={id} />
+          {RADIUS_OPTIONS.map(([id, label]) => (
+            <SegmentedControl.Item key={id} id={id}>
+              {label}
             </SegmentedControl.Item>
           ))}
         </SegmentedControl>
