@@ -45,8 +45,16 @@ export const teamMembers: TaskDefinition = {
     check({documents}) {
       const document = documents.get("default")!;
       const text = textOf(document.body);
-      const named = [...document.querySelectorAll('button[data-slot="button"]')].filter(
-        (button) => (button.getAttribute("aria-label") ?? "").trim() !== "",
+      // The trigger may be a PeakUI Button or the Dropdown's own trigger part; both are buttons.
+      const named = [
+        ...document.querySelectorAll(
+          'button[data-slot="button"], button[data-slot="dropdown-trigger"]',
+        ),
+      ].filter((button) => (button.getAttribute("aria-label") ?? "").trim() !== "");
+      // A button inside a button, or anything pressable inside the tooltip's own trigger part,
+      // which is meant for content that is not interactive.
+      const nested = document.querySelector(
+        'button button, [role="button"] button, a button, button a, [data-slot="tooltip-trigger"] button',
       );
 
       return [
@@ -66,7 +74,13 @@ export const teamMembers: TaskDefinition = {
           "menu.trigger-named",
           "rac-props",
           named.length === MEMBERS.length,
-          "one PeakUI button with an accessible name per member",
+          "one button with an accessible name per member",
+        ),
+        check(
+          "menu.no-nested-interactive",
+          "composition",
+          nested === null,
+          "no pressable element sits inside another: one button is the trigger of both the tooltip and the menu",
         ),
       ];
     },
@@ -93,6 +107,16 @@ export const teamMembers: TaskDefinition = {
         "the menu is a PeakUI Dropdown with its popover, menu and items",
       ),
       check(
+        "menu.no-button-in-trigger",
+        "composition",
+        // The Dropdown's trigger part renders a button itself. The rendered layer cannot see this
+        // one: an HTML parser closes the outer button when it meets the inner.
+        !peakuiElements(context, "Button").some((node) =>
+          node.ancestors.some((ancestor) => /^Dropdown(?:\.Trigger|Trigger)$/.test(ancestor)),
+        ),
+        "no PeakUI Button inside the Dropdown's trigger part, which is a button already",
+      ),
+      check(
         "menu.item-action",
         "rac-props",
         hasAttribute(context, ["Dropdown.Menu", "Dropdown.Item"], "onAction") &&
@@ -103,9 +127,9 @@ export const teamMembers: TaskDefinition = {
         "tooltip.wraps-trigger",
         "composition",
         count(context, "Tooltip") > 0 &&
-          tooltipChildren("Button") &&
+          (tooltipChildren("Button") || tooltipChildren("Dropdown.Trigger")) &&
           tooltipChildren("Tooltip.Content"),
-        "a PeakUI Tooltip wraps the button and holds its content part",
+        "a PeakUI Tooltip wraps the trigger and holds its content part",
       ),
       check(
         "dialog.composition",
