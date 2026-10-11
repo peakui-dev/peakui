@@ -1,10 +1,11 @@
 "use client";
 
-import {Suspense} from "react";
+import {Suspense, useState} from "react";
 import Link from "next/link";
 
 import {Button} from "@peakui/react";
 
+import {CodePanel} from "./code-panel";
 import {ControlsPanel} from "./controls";
 import {matchGallery} from "./presets";
 import {ThemePreview} from "./theme-preview";
@@ -16,6 +17,7 @@ function Builder() {
   const {derived, previewCss, scheme} = useBuilderTheme(state);
   const {scheme: _scheme, ...values} = state;
   const presetName = matchGallery(values);
+  const [showPanel, setShowPanel] = useState(false);
 
   return (
     <div className="flex h-dvh flex-col">
@@ -37,14 +39,22 @@ function Builder() {
           >
             Share
           </Button>
+          <Button onPress={() => setShowPanel((open) => !open)} variant="secondary">
+            Code
+          </Button>
         </div>
       </header>
-      <main className="flex min-h-0 flex-1 flex-col">
-        <ThemePreview css={previewCss} scheme={scheme}>
-          <div className="p-6" />
-        </ThemePreview>
-        <ControlsPanel fixes={derived.fixes} set={set} state={state} />
-      </main>
+      <div className="flex min-h-0 flex-1">
+        <main className="flex min-h-0 flex-1 flex-col">
+          <ThemePreview css={previewCss} scheme={scheme}>
+            <div className="p-6" />
+          </ThemePreview>
+          <ControlsPanel fixes={derived.fixes} set={set} state={state} />
+        </main>
+        {showPanel && (
+          <CodePanel derived={derived} onClose={() => setShowPanel(false)} values={values} />
+        )}
+      </div>
     </div>
   );
 }
