@@ -4,10 +4,12 @@ import type {BuilderState} from "./url-codec";
 import type {ContrastFix, RadiusId} from "@peakui/styles/generator";
 import type {ReactNode} from "react";
 
-import {Label, SegmentedControl, Slider} from "@peakui/react";
+import {Label, SegmentedControl, Separator, Slider} from "@peakui/react";
 
 import {AccentPopover} from "./accent-popover";
 import {ContrastChips} from "./contrast-chips";
+import {PresetPicker} from "./preset-picker";
+import {matchGalleryPreset} from "./presets";
 
 const RADIUS_OPTIONS: [RadiusId, string][] = [
   ["none", "None"],
@@ -29,7 +31,7 @@ const SURFACE_RADIUS_OPTIONS: [RadiusId, string][] = RADIUS_OPTIONS.filter(
 /** RAC Slider supports multi-thumb values; this slider has exactly one thumb. */
 const single = (value: number | number[]): number => (Array.isArray(value) ? value[0]! : value);
 
-/** A labelled group of the toolbar: the micro-caption names the axis the group controls. */
+/** A labelled group of the panel: the micro-caption names the axis the group controls. */
 function Group({children, label}: {children: ReactNode; label: string}) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -43,50 +45,53 @@ function Group({children, label}: {children: ReactNode; label: string}) {
 
 export function ControlsPanel({
   fixes,
+  rail = false,
   set,
   state,
 }: {
   fixes: ContrastFix[];
+  rail?: boolean;
   state: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
 }) {
-  const {...values} = state;
+  const {scheme: _scheme, ...values} = state;
   const {formRadius, grayChroma, radius} = state;
+  const activeName = matchGalleryPreset(values)?.name ?? "Custom";
 
-  return (
-    <div
-      aria-label="Theme controls"
-      className="flex flex-wrap items-end gap-x-8 gap-y-4 border-t border-separator px-6 py-4"
-    >
+  const body = (
+    <>
+      <Group label="Presets">
+        <PresetPicker activeName={activeName} onSelect={(preset) => set(preset.values)} />
+      </Group>
       <Group label="Accent">
         <AccentPopover values={values} onChange={set} />
       </Group>
+      <Separator />
       <Group label="Neutral tint">
-        <div className="w-56">
-          <Slider
-            maxValue={0.03}
-            minValue={0}
-            step={0.001}
-            value={grayChroma}
-            onChange={(g) => set({grayChroma: single(g)})}
-          >
-            <Label>Neutral tint</Label>
-            <Slider.Output />
-            <Slider.Track>
-              <Slider.Fill />
-              <Slider.Thumb />
-            </Slider.Track>
-          </Slider>
-          <p className="mt-1 text-[11px] leading-snug text-muted">
-            Accent hue in neutrals — 0 is pure gray.
-          </p>
-        </div>
+        <Slider
+          maxValue={0.03}
+          minValue={0}
+          step={0.001}
+          value={grayChroma}
+          onChange={(g) => set({grayChroma: single(g)})}
+        >
+          <Label>Neutral tint</Label>
+          <Slider.Output />
+          <Slider.Track>
+            <Slider.Fill />
+            <Slider.Thumb />
+          </Slider.Track>
+        </Slider>
+        <p className="text-[11px] leading-snug text-muted">
+          Accent hue in neutrals — 0 is pure gray.
+        </p>
       </Group>
+      <Separator />
       <Group label="Surface radius">
         <SegmentedControl
           aria-label="Radius"
           selectedKey={radius}
-          size="md"
+          size="sm"
           onSelectionChange={(key) => set({radius: key as RadiusId})}
         >
           {SURFACE_RADIUS_OPTIONS.map(([id, label]) => (
@@ -100,7 +105,7 @@ export function ControlsPanel({
         <SegmentedControl
           aria-label="Form radius"
           selectedKey={formRadius}
-          size="md"
+          size="sm"
           onSelectionChange={(key) => set({formRadius: key as RadiusId})}
         >
           {RADIUS_OPTIONS.map(([id, label]) => (
@@ -110,9 +115,32 @@ export function ControlsPanel({
           ))}
         </SegmentedControl>
       </Group>
-      <div className="ms-auto self-center">
-        <ContrastChips fixes={fixes} />
-      </div>
+      <Separator />
+      <ContrastChips fixes={fixes} />
+    </>
+  );
+
+  /*
+   * In rail mode the panel is the floating instrument card pinned to the screen's right edge;
+   * below lg the same card joins the page column.
+   */
+  if (rail) {
+    return (
+      <aside
+        aria-label="Theme controls"
+        className="flex h-full flex-col gap-6 overflow-y-auto rounded-xl border border-separator bg-surface p-6 shadow-overlay"
+      >
+        {body}
+      </aside>
+    );
+  }
+
+  return (
+    <div
+      aria-label="Theme controls"
+      className="flex flex-col gap-6 rounded-xl border border-separator bg-surface p-6 shadow-overlay"
+    >
+      {body}
     </div>
   );
 }

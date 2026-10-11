@@ -97,7 +97,7 @@ export function CodePanel({
   return (
     <aside
       aria-label="Export panel"
-      className="flex w-full max-w-md flex-col gap-4 border-l border-separator bg-surface p-4"
+      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col gap-4 border-l border-separator bg-surface p-6 shadow-overlay"
     >
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-medium text-foreground">Export</h2>

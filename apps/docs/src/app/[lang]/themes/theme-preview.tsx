@@ -21,7 +21,7 @@ export function ThemePreview({
 }) {
   return (
     <div
-      className="flex-1 overflow-y-auto bg-background text-foreground"
+      className="w-full bg-background text-foreground"
       data-theme={`builder-${scheme}`}
       id={PREVIEW_ID}
     >
