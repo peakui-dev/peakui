@@ -1,4 +1,4 @@
-import {existsSync, readFileSync} from "node:fs";
+import {existsSync, readFileSync, realpathSync} from "node:fs";
 import {dirname, join, resolve} from "node:path";
 
 /** The public PeakUI documentation site. PEAKUI_DOCS_URL overrides it for mirrors and previews. */
@@ -257,25 +257,36 @@ export function splitProjectFlag(argv, cwd) {
   return {project, rest};
 }
 
-/** The manifest of `packageName` as installed for `project`, searched upward like Node does. */
-export function installedManifest(project, packageName) {
-  let current = resolve(project);
+/**
+ * The real directory of `packageName` as installed for `from`, searched upward like Node does.
+ * Real, because a strict package manager installs a symlink into its store, and the package's
+ * own dependencies sit beside the target, not beside the link.
+ */
+export function installedDirectory(from, packageName) {
+  let current = resolve(from);
 
   for (;;) {
-    const manifest = join(current, "node_modules", packageName, "package.json");
+    const directory = join(current, "node_modules", packageName);
 
-    if (existsSync(manifest)) {
-      try {
-        return JSON.parse(readFileSync(manifest, "utf8"));
-      } catch {
-        return undefined;
-      }
-    }
+    if (existsSync(join(directory, "package.json"))) return realpathSync(directory);
 
     const parent = dirname(current);
 
     if (parent === current) return undefined;
     current = parent;
+  }
+}
+
+/** The manifest of `packageName` as installed for `from`, or undefined. */
+export function installedManifest(from, packageName) {
+  const directory = installedDirectory(from, packageName);
+
+  if (directory === undefined) return undefined;
+
+  try {
+    return JSON.parse(readFileSync(join(directory, "package.json"), "utf8"));
+  } catch {
+    return undefined;
   }
 }
 
