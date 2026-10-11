@@ -17,7 +17,8 @@
     "documentation": "Documentation",
     "gettingStarted": "Getting Started",
     "components": "Components",
-    "docs": "Docs"
+    "docs": "Docs",
+    "themes": "Theme Builder"
   },
   "notFound": {
     "title": "404",
