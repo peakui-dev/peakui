@@ -90,8 +90,13 @@ export function toPreset(
   };
 }
 
-/** Values → gallery name. The URL stores values, so equality is exact after a round-trip. */
-export function matchGallery(values: BuilderValues): string {
+/**
+ * Values → the matching gallery preset, or undefined for a custom theme.
+ *
+ * The URL stores values only, so a preset's `semanticOverrides` reattach through this match —
+ * from a preset click and from a shared link alike.
+ */
+export function matchGalleryPreset(values: BuilderValues): GalleryPreset | undefined {
   const same = (candidate: BuilderValues): boolean =>
     candidate.accent === values.accent &&
     Math.abs(candidate.grayChroma - values.grayChroma) < 1e-9 &&
@@ -99,5 +104,10 @@ export function matchGallery(values: BuilderValues): string {
     candidate.formRadius === values.formRadius &&
     candidate.darkAccent === values.darkAccent;
 
-  return GALLERY.find((preset) => same(preset.values))?.name ?? "Custom";
+  return GALLERY.find((preset) => same(preset.values));
+}
+
+/** Values → gallery name. The URL stores values, so equality is exact after a round-trip. */
+export function matchGallery(values: BuilderValues): string {
+  return matchGalleryPreset(values)?.name ?? "Custom";
 }

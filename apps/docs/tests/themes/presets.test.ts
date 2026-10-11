@@ -2,7 +2,13 @@ import {describe, expect, it} from "vitest";
 
 import {deriveTheme} from "@peakui/styles/generator";
 
-import {DEFAULT_VALUES, GALLERY, matchGallery, toPreset} from "@/app/[lang]/themes/presets";
+import {
+  DEFAULT_VALUES,
+  GALLERY,
+  matchGallery,
+  matchGalleryPreset,
+  toPreset,
+} from "@/app/[lang]/themes/presets";
 
 describe("gallery", () => {
   it("derives every preset through the engine without error", () => {
@@ -16,5 +22,14 @@ describe("gallery", () => {
   it("matches its own values and reports tweaks as Custom", () => {
     expect(matchGallery(DEFAULT_VALUES)).toBe("Default");
     expect(matchGallery({...DEFAULT_VALUES, grayChroma: 0.01})).toBe("Custom");
+  });
+
+  it("reattaches a preset's semantic overrides through matching", () => {
+    const netflix = GALLERY.find((preset) => preset.name === "Netflix")!;
+
+    expect(matchGalleryPreset(netflix.values)?.semanticOverrides).toBe(
+      netflix.semanticOverrides,
+    );
+    expect(matchGalleryPreset({...netflix.values, grayChroma: 0.009})).toBeUndefined();
   });
 });

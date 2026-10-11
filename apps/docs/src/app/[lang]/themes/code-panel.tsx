@@ -1,6 +1,7 @@
 "use client";
 
 import type {BuilderValues} from "./presets";
+import type {ThemePreset} from "@peakui/styles/generator";
 
 import {deriveTheme, emitVariablesCss} from "@peakui/styles/generator";
 import {useDeferredValue, useMemo, useState} from "react";
@@ -10,6 +11,7 @@ import {Button, Label, SegmentedControl, TextField, Input} from "@peakui/react";
 import {toPreset} from "./presets";
 
 type Derived = ReturnType<typeof deriveTheme>;
+type SemanticOverrides = ThemePreset["semanticOverrides"];
 
 export function slugifyThemeId(raw: string): string {
   const slug = raw.toLowerCase().replaceAll(/[^a-z0-9-]+/g, "-").replaceAll(/^-+|-+$/g, "");
@@ -17,23 +19,36 @@ export function slugifyThemeId(raw: string): string {
   return slug || "custom";
 }
 
-function buildExportCss(id: string, values: BuilderValues, derived: Derived): string {
+function buildExportCss(
+  id: string,
+  values: BuilderValues,
+  derived: Derived,
+  semanticOverrides?: SemanticOverrides,
+): string {
   const usage = [
     `/* PeakUI theme "${id}".`,
     `   Import this file after @peakui/styles, then set data-theme="${id}-light"`,
     `   (or data-theme="${id}-dark") on the root element. */`,
   ].join("\n");
 
-  return `${usage}\n${emitVariablesCss(toPreset(values, undefined, id), derived)}`;
+  return `${usage}\n${emitVariablesCss(toPreset(values, semanticOverrides, id), derived)}`;
 }
 
-function buildExportPreset(id: string, values: BuilderValues): string {
+function buildExportPreset(
+  id: string,
+  values: BuilderValues,
+  semanticOverrides?: SemanticOverrides,
+): string {
   const name = `${id.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())}Preset`;
 
   return [
     `import type {ThemePreset} from "@peakui/styles/generator";`,
     ``,
-    `export const ${name}: ThemePreset = ${JSON.stringify(toPreset(values, undefined, id), null, 2)};`,
+    `export const ${name}: ThemePreset = ${JSON.stringify(
+      toPreset(values, semanticOverrides, id),
+      null,
+      2,
+    )};`,
   ].join("\n");
 }
 
@@ -56,10 +71,12 @@ export function CodePanel({
   onClose,
   values,
   derived,
+  semanticOverrides,
 }: {
   onClose: () => void;
   values: BuilderValues;
   derived: Derived;
+  semanticOverrides?: SemanticOverrides;
 }) {
   const [name, setName] = useState("custom");
   const [tab, setTab] = useState<"css" | "preset">("css");
@@ -67,8 +84,11 @@ export function CodePanel({
 
   const content = useDeferredValue(
     useMemo(
-      () => (tab === "css" ? buildExportCss(id, values, derived) : buildExportPreset(id, values)),
-      [tab, id, values, derived],
+      () =>
+        tab === "css"
+          ? buildExportCss(id, values, derived, semanticOverrides)
+          : buildExportPreset(id, values, semanticOverrides),
+      [tab, id, values, derived, semanticOverrides],
     ),
   );
 
