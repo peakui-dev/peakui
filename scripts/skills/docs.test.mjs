@@ -31,7 +31,7 @@ async function run(argv, options = {}) {
   try {
     const code = await main(argv, {
       cwd: makeProject(options.project ?? INSTALLED("1.5.0")),
-      env: {PEAKUI_DOCS_URL: server.origin},
+      env: {PEAKUI_DOCS_URL: server.origin, PEAKUI_SOURCE_URL: `${server.origin}/raw/`},
       stderr: {write: (text) => stderr.push(text)},
       stdout: {write: (text) => stdout.push(text)},
     });
@@ -140,4 +140,140 @@ test("--project selects the project the installed version is read from", async (
   const {stdout} = await run(["list", "--project", other]);
 
   assert.match(stdout.split("\n")[0], /installed: 1\.2\.0/);
+});
+
+// A component page as the site serves it: a header, then the five sections every page has.
+const HEADER =
+  '<page url="https://docs.example.test/en/docs/react/components/modal">\n# Modal\n\n> Modal dialog overlay\n\n**Category**: components\n\n';
+const USAGE = "## Usage\n\nusage text\n\n### Anatomy\n\nanatomy text\n\n";
+const EXAMPLES = "## Examples\n\n### Controlled State\n\nexample text\n\n";
+const CUSTOMIZATION = "## Customization\n\ncustomization text\n\n";
+const STYLING = "## Styling Reference\n\nstyling text\n\n";
+const API = "## API Reference\n\napi text\n";
+const MODAL = `${HEADER}${USAGE}${EXAMPLES}${CUSTOMIZATION}${STYLING}${API}</page>\n`;
+const MODAL_SOURCE = "export const Modal = () => null;\n";
+const MODAL_ENTRY = {
+  description: "Modal dialog overlay",
+  links: {
+    reactAria: null,
+    source:
+      "https://github.com/peakui-dev/peakui/blob/main/packages/react/src/components/modal/modal.tsx",
+    styles: null,
+  },
+  markdownUrl: "https://docs.example.test/en/docs/react/components/modal.md",
+  name: "modal",
+  title: "Modal",
+  url: "https://docs.example.test/en/docs/react/components/modal",
+};
+const RAW_SOURCE = "/raw/peakui-dev/peakui/main/packages/react/src/components/modal/modal.tsx";
+const WITH_MODAL = {
+  ...SITE,
+  "/api/components": {
+    body: JSON.stringify({
+      ...SAMPLE_INDEX,
+      components: [...SAMPLE_INDEX.components, MODAL_ENTRY],
+    }),
+  },
+  "/en/docs/react/components/modal.md": {body: MODAL},
+  [RAW_SOURCE]: {body: MODAL_SOURCE},
+};
+
+test("a component page prints its header, Usage and API Reference by default", async () => {
+  const {code, stdout} = await run(["modal"], {routes: WITH_MODAL});
+
+  assert.equal(code, 0);
+  assert.ok(stdout.includes(HEADER));
+  assert.ok(stdout.includes("anatomy text"));
+  assert.ok(stdout.includes("api text"));
+  assert.ok(stdout.indexOf("usage text") < stdout.indexOf("api text"));
+  for (const left of ["example text", "customization text", "styling text"]) {
+    assert.ok(!stdout.includes(left), `the default output leaves out "${left}"`);
+  }
+  assert.ok(stdout.trimEnd().endsWith("</page>"));
+});
+
+test("the default output says which flag prints the rest", async () => {
+  const {stdout} = await run(["modal"], {routes: WITH_MODAL});
+  const hint = stdout.split("\n").find((line) => line.includes("--examples"));
+
+  assert.ok(hint, "a line names --examples");
+  for (const flag of ["--styling", "--source", "--full"]) assert.ok(hint.includes(flag), flag);
+});
+
+test("--examples prints the header and the Examples section", async () => {
+  const {code, stdout} = await run(["modal", "--examples"], {routes: WITH_MODAL});
+
+  assert.equal(code, 0);
+  assert.ok(stdout.includes(HEADER));
+  assert.ok(stdout.includes("example text"));
+  for (const left of ["usage text", "api text", "styling text"]) assert.ok(!stdout.includes(left));
+});
+
+test("--styling prints Customization and Styling Reference", async () => {
+  const {code, stdout} = await run(["modal", "--styling"], {routes: WITH_MODAL});
+
+  assert.equal(code, 0);
+  assert.ok(stdout.includes("customization text"));
+  assert.ok(stdout.includes("styling text"));
+  for (const left of ["usage text", "api text", "example text"]) assert.ok(!stdout.includes(left));
+});
+
+test("--full prints the page exactly as served", async () => {
+  const {code, stdout} = await run(["modal", "--full"], {routes: WITH_MODAL});
+
+  assert.equal(code, 0);
+  assert.ok(stdout.includes(MODAL));
+});
+
+test("a page without those sections prints whole, whatever the flag", async () => {
+  const {stdout} = await run(["button", "--examples"], {routes: WITH_MODAL});
+
+  assert.ok(stdout.includes(BUTTON));
+});
+
+test("--source prints the component's source file and says which branch it is from", async () => {
+  const {code, stdout} = await run(["modal", "--source"], {routes: WITH_MODAL});
+  const [first] = stdout.split("\n");
+
+  assert.equal(code, 0);
+  assert.match(first, /main branch/);
+  assert.match(first, /installed.*1\.5\.0/);
+  assert.ok(stdout.includes(MODAL_SOURCE));
+  assert.ok(stdout.includes(MODAL_ENTRY.links.source), "the output names where the file lives");
+  assert.ok(!stdout.includes("usage text"), "the documentation page is not printed with it");
+});
+
+test("--source for a file that cannot be fetched exits 1 and says the repository may be private", async () => {
+  const routes = {...WITH_MODAL};
+
+  delete routes[RAW_SOURCE];
+
+  const {code, stderr} = await run(["modal", "--source"], {routes});
+
+  assert.equal(code, 1);
+  assert.match(stderr, /modal/);
+  assert.match(stderr, /not be public/);
+});
+
+test("--source for a page that has no source exits 1", async () => {
+  const {code, stderr} = await run(["quick-start", "--source"], {routes: WITH_MODAL});
+
+  assert.equal(code, 1);
+  assert.match(stderr, /quick-start.*no source/);
+});
+
+test("list ignores the section flags", async () => {
+  const {code, stdout} = await run(["list", "--examples"], {routes: WITH_MODAL});
+
+  assert.equal(code, 0);
+  assert.ok(stdout.includes("modal — Modal dialog overlay"));
+});
+
+test("with no site and no installed package the message offers the install, not node_modules", async () => {
+  const {code, stderr} = await run(["button"], {offline: true, project: {"package.json": "{}"}});
+
+  assert.equal(code, 2);
+  assert.match(stderr, /not installed/);
+  assert.match(stderr, /npm install @peakui\/react @peakui\/styles/);
+  assert.doesNotMatch(stderr, /dist\//);
 });

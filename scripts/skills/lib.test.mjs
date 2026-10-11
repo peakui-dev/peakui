@@ -14,6 +14,7 @@ import {
   pageUrl,
   resolveOrigin,
   resolvePage,
+  sourceUrl,
   splitProjectFlag,
   versionLine,
 } from "../../skills/peakui-react/scripts/lib.mjs";
@@ -194,4 +195,28 @@ test("splitProjectFlag", () => {
     rest: ["list"],
   });
   assert.deepEqual(splitProjectFlag(["button"], "/b"), {project: "/b", rest: ["button"]});
+});
+
+test("sourceUrl turns the index's repository link into a raw file URL", () => {
+  const entry = {
+    links: {
+      source:
+        "https://github.com/peakui-dev/peakui/blob/main/packages/react/src/components/modal/modal.tsx",
+    },
+  };
+
+  assert.equal(
+    sourceUrl(entry, {}).href,
+    "https://raw.githubusercontent.com/peakui-dev/peakui/main/packages/react/src/components/modal/modal.tsx",
+  );
+  assert.equal(
+    sourceUrl(entry, {PEAKUI_SOURCE_URL: "http://127.0.0.1:1/raw"}).href,
+    "http://127.0.0.1:1/raw/peakui-dev/peakui/main/packages/react/src/components/modal/modal.tsx",
+  );
+});
+
+test("sourceUrl is undefined for a page without a repository link", () => {
+  assert.equal(sourceUrl({links: {source: null}}, {}), undefined);
+  assert.equal(sourceUrl({}, {}), undefined);
+  assert.equal(sourceUrl({links: {source: "https://example.test/modal.tsx"}}, {}), undefined);
 });

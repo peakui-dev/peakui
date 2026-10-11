@@ -15,7 +15,7 @@ const USAGE = `usage:
   trial prepare --task <id> --label <name> [--setup <dir>]
   trial setup --kind <skill|skill-pointer>
   trial run --task <id> --workspace <path> --model <alias> --docs-url <url>
-            [--max-budget-usd <n>] [--agent-config <isolated|inherit>]
+            [--source-url <url>] [--max-budget-usd <n>] [--agent-config <isolated|inherit>]
   trial score --task <id> --workspace <path>
   trial list
   trial clean --label <name>`;
@@ -45,6 +45,7 @@ async function main(argv: string[]): Promise<void> {
       label: {type: "string"},
       "max-budget-usd": {type: "string"},
       model: {type: "string"},
+      "source-url": {type: "string"},
       setup: {type: "string"},
       task: {type: "string"},
       workspace: {type: "string"},
@@ -106,6 +107,7 @@ async function main(argv: string[]): Promise<void> {
         docsUrl: need(values["docs-url"], "docs-url"),
         ...(budget === undefined ? {} : {maxBudgetUsd: Number(budget)}),
         model: need(values.model, "model"),
+        ...(values["source-url"] === undefined ? {} : {sourceUrl: values["source-url"]}),
         task: getTask(need(values.task, "task")),
         workspace: fromCaller(need(values.workspace, "workspace")),
       });

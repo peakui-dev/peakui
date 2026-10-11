@@ -37,7 +37,7 @@ The skill ships two scripts that the agent runs with Node.js 18 or later.
 
 | Script | Reads | Network |
 |--------|-------|---------|
-| `scripts/docs.mjs` | The documentation index and the pages the agent asks for | `GET` requests to this site, nothing else |
+| `scripts/docs.mjs` | The documentation index and the pages the agent asks for; with `--source`, a component's source file | `GET` requests to this site and, for `--source`, to `raw.githubusercontent.com` |
 | `scripts/doctor.mjs` | Your project's `package.json`, installed package versions and CSS imports | None |
 
 Neither script writes a file or sends anything about your project.

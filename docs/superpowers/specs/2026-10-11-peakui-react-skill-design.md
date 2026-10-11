@@ -114,7 +114,7 @@ Consumer project
      SKILL.md      workflow · rules the type-checker misses · task → what to read
      references/   stable contract, one level deep
      scripts/      Node, no dependencies: page index · page as markdown · setup check
-          │  GET only, one configurable origin
+          │  GET only: the docs origin, and for --source the repository's raw file host
           ▼
 Docs site ── /api/components (schemaVersion 1) · <page>.md
 ```
@@ -217,7 +217,15 @@ to the skill directory, and states once that the commands run from the project r
 | --- | --- |
 | `node scripts/docs.mjs list` | The version line, then one `name — description` line per component, then per guide. About 4 KB. |
 | `node scripts/docs.mjs list --json` | The same index as JSON: `library`, `installed`, `components`, `guides`. |
-| `node scripts/docs.mjs <name> [<name>…]` | Each page's markdown exactly as the site returns it, in the order asked. |
+| `node scripts/docs.mjs <name> [<name>…]` | For each page, in the order asked: its header, Usage and API Reference. A page without those sections, such as a guide, is printed whole. |
+| `… --examples` | The header and the Examples section. |
+| `… --styling` | The header, Customization and Styling Reference. |
+| `… --full` | The page exactly as the site returns it. |
+| `… --source` | The component's source file, fetched from the repository through the `links.source` the index gives for it. |
+
+*Amended 2026-10-11 after round 1 (journal): a request for six to ten whole pages exceeded what the
+agent harness returns inline in three runs of six, and Examples is 50–65% of a page. The owner
+asked for the source mode: the installed package holds compiled output, not source.*
 
 - **The version line comes first.** It states the version the documentation describes
   (`library.version` from the index) and the installed `@peakui/react` version. When they differ it
@@ -225,6 +233,10 @@ to the skill directory, and states once that the commands run from the project r
   `node_modules` before relying on them. When the package is not installed it says so and continues.
 - **Names** resolve by the contract's rule: the `name` field, components before guides. `Button`
   and `TextField` are accepted and normalised to `button` and `text-field`.
+- **`--source` reads the `main` branch.** The repository has no release tags yet, so the first
+  line of the output says the file may be newer than the version in use, and names the installed
+  version. With tags, the script moves to the tag of the installed version. A file that cannot be
+  fetched exits 1 with a message that the repository may not be public.
 - **An unknown name** exits 1 and prints the closest names: `Unknown page "buton". Closest: button,
   button-group. Run "list" to see every page.` Pages that did resolve are still printed.
 
@@ -256,6 +268,7 @@ Shared by the two scripts.
 | Concern | Behaviour |
 | --- | --- |
 | Origin | `PEAKUI_DOCS_URL` when set, otherwise `https://peakui.dev`. |
+| Source host | `PEAKUI_SOURCE_URL` when set, otherwise `https://raw.githubusercontent.com/`; used by `--source` only. |
 | Resolving URLs | Only the path of `markdownUrl` is used, resolved against the script's own origin, as the contract requires. |
 | `schemaVersion` | A value above 1 stops the script with: the documentation index is newer than this skill understands; update the skill. |
 | Timeout and retry | 15 seconds per request — pages are static and cached, so this allows for a slow connection — and one retry, because a transient failure usually clears on the second attempt. |
@@ -272,7 +285,8 @@ Shared by the two scripts.
 | 2 | The site could not be reached, or the index did not match the contract | The directory is not a project: no `package.json` |
 
 On exit code 2 `docs.mjs` prints the fallback: the types are in `node_modules/@peakui/react/dist/`
-and the class names in `node_modules/@peakui/styles/components/<name>.css`.
+and the class names in `node_modules/@peakui/styles/components/<name>.css`. When the package is not
+installed either, it says so and names the install command instead.
 
 ## 7. Install and pointer
 
@@ -308,8 +322,8 @@ Without skills: read https://peakui.dev/llms.txt first.
 
 `apps/docs/content/docs/en/react/getting-started/(ui-for-agents)/agent-skills.mdx`: what the skill
 does, the install command, the pointer block, how to update, `PEAKUI_DOCS_URL` for mirrors, and a
-plain statement of what the scripts do on the network — `GET` requests to the documentation origin,
-nothing sent. The page follows the `peakui-docs` contributor skill and enters `/api/components` and
+plain statement of what the scripts do on the network — `GET` requests to the documentation origin
+and, for `--source`, to the repository's raw file host; nothing sent. The page follows the `peakui-docs` contributor skill and enters `/api/components` and
 `/llms.txt` automatically.
 
 ## 8. Verification

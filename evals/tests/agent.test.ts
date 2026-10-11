@@ -75,6 +75,13 @@ describe("agentEnvironment", () => {
     });
   });
 
+  it("passes a source mirror when one is given, and none otherwise", () => {
+    expect(agentEnvironment({}, {docsUrl: "u", sourceUrl: "http://localhost:3101/"})).toMatchObject(
+      {PEAKUI_SOURCE_URL: "http://localhost:3101/"},
+    );
+    expect(agentEnvironment({}, {docsUrl: "u"})).not.toHaveProperty("PEAKUI_SOURCE_URL");
+  });
+
   it("omits the config directory in inherit mode", () => {
     expect(agentEnvironment({PATH: "/bin"}, {docsUrl: "u"})).not.toHaveProperty(
       "CLAUDE_CONFIG_DIR",

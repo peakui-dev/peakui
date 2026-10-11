@@ -75,7 +75,7 @@ export function buildClaudeArgs(options: ClaudeArgsOptions): string[] {
  */
 export function agentEnvironment(
   parent: NodeJS.ProcessEnv,
-  options: {configDir?: string; docsUrl: string},
+  options: {configDir?: string; docsUrl: string; sourceUrl?: string},
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
 
@@ -88,6 +88,8 @@ export function agentEnvironment(
 
   if (options.configDir !== undefined) env.CLAUDE_CONFIG_DIR = options.configDir;
   env.PEAKUI_DOCS_URL = options.docsUrl;
+  // Component source is read from the repository, which a stand run replaces with a local mirror.
+  if (options.sourceUrl !== undefined) env.PEAKUI_SOURCE_URL = options.sourceUrl;
 
   return env;
 }

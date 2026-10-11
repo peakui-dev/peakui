@@ -5,7 +5,7 @@ import {dirname, join, resolve} from "node:path";
 export const DEFAULT_ORIGIN = "https://peakui.dev";
 
 /** The version of this skill; the same string as `metadata.version` in SKILL.md. */
-export const SKILL_VERSION = "0.9.0";
+export const SKILL_VERSION = "0.10.0";
 
 /** The newest shape of the documentation index these scripts understand. */
 export const SUPPORTED_SCHEMA = 1;
@@ -80,7 +80,7 @@ async function request(url, fetchImpl, timeoutMs) {
   }
 
   if (response.status === 404) {
-    throw new DocsError("not-found", `${url.href} does not exist on the documentation site.`);
+    throw new DocsError("not-found", `${url.href} was not found.`);
   }
 
   if (!response.ok) {
@@ -234,6 +234,27 @@ export function closestNames(index, name, limit = 3) {
  */
 export function pageUrl(origin, entry) {
   return new URL(new URL(entry.markdownUrl).pathname.replace(/^\/+/, ""), origin);
+}
+
+/** Where the repository serves a file's raw text. PEAKUI_SOURCE_URL overrides it for mirrors. */
+const RAW_HOST = "https://raw.githubusercontent.com/";
+const SOURCE_VARIABLE = "PEAKUI_SOURCE_URL";
+const REPOSITORY_FILE = /^https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/(.+)$/;
+
+/**
+ * Where to fetch a component's source file, from the repository link the index gives for it.
+ * Undefined for a page without one, such as a guide.
+ */
+export function sourceUrl(entry, env) {
+  const match = REPOSITORY_FILE.exec(entry.links?.source ?? "");
+
+  if (!match) return undefined;
+
+  let base = env[SOURCE_VARIABLE] || RAW_HOST;
+
+  if (!base.endsWith("/")) base += "/";
+
+  return new URL(`${match[1]}/${match[2]}`, base);
 }
 
 /** Splits `--project <dir>` out of the arguments; without it the project is `cwd`. */

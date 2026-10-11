@@ -261,6 +261,8 @@ export async function runTrial(options: {
   model: string;
   /** Where the skill's scripts read the documentation from. */
   docsUrl: string;
+  /** A mirror of the repository's raw files, for `docs.mjs --source`. */
+  sourceUrl?: string;
   maxBudgetUsd?: number;
   /** `inherit` keeps the caller's own login, for a machine with no token in the environment. */
   agentConfig?: AgentConfigMode;
@@ -297,7 +299,11 @@ export async function runTrial(options: {
     ],
     {
       cwd: dir,
-      env: agentEnvironment(process.env, {configDir, docsUrl: options.docsUrl}),
+      env: agentEnvironment(process.env, {
+        configDir,
+        docsUrl: options.docsUrl,
+        ...(options.sourceUrl === undefined ? {} : {sourceUrl: options.sourceUrl}),
+      }),
       maxOutputBytes: TRANSCRIPT_BYTES,
       timeoutMs: RUN_TIMEOUT_MS,
     },
