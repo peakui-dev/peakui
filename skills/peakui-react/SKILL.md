@@ -3,7 +3,7 @@ name: peakui-react
 description: Builds React UI with the PeakUI component library (@peakui/react, @peakui/styles) - finds the right component, reads its documentation page, composes its parts, and wires the styles into the app. Use whenever a project depends on @peakui/react and the task touches UI - forms, buttons, dialogs, menus, cards, tabs, notifications, style setup or restyling a component - even when PeakUI is not named.
 compatibility: Requires Node.js 18 or later and network access to the PeakUI documentation site.
 metadata:
-  version: "0.10.0"
+  version: "1.0.0"
 ---
 
 # PeakUI React

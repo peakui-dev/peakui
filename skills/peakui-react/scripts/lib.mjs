@@ -5,7 +5,7 @@ import {dirname, join, resolve} from "node:path";
 export const DEFAULT_ORIGIN = "https://peakui.dev";
 
 /** The version of this skill; the same string as `metadata.version` in SKILL.md. */
-export const SKILL_VERSION = "0.10.0";
+export const SKILL_VERSION = "1.0.0";
 
 /** The newest shape of the documentation index these scripts understand. */
 export const SUPPORTED_SCHEMA = 1;

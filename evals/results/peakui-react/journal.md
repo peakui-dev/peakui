@@ -225,8 +225,8 @@ that text.
 | 2 | No gating rule that passed in the baseline fails with the skill | Met, on all three models. |
 | 3 | On `haiku` and `opus` every task type-checks and builds; any other failed gating rule is listed for a decision | Met; no rule failed, nothing to decide. |
 | 4 | Every with-skill run loaded the skill and called `docs.mjs` | Met: 18 of 18, all with the `skill` setup, recounted from the transcripts after the counter was corrected. The pointer was never needed here. |
-| 5 | The offline gates pass | Met at commit `58e2e4a`: 139 script tests, 484 stand tests, 147 docs tests, lint, format. |
-| 6 | The owner has read the skill and the results and accepts them | **Open.** |
+| 5 | The offline gates pass | Met after the review fixes: 144 script tests, 485 stand tests, 147 docs tests, lint, format, type-check. |
+| 6 | The owner has read the skill and the results and accepts them | Met on 2026-10-11: the owner asked for the merge after the review report. The skill is 1.0.0 from that point; its text is the one the final check ran with. |
 
 **What the numbers are.** Twenty-four agent runs: six without the skill, eighteen with it. Without
 it three of six passed; with it eighteen of eighteen. Each cell is one run, the three tasks were
