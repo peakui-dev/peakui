@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "pass"},
+  "rules": {"static": ["menu.no-button-in-trigger"]}
+}

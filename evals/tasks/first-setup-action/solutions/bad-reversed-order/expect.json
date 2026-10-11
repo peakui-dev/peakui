@@ -1,0 +1,4 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {"static": ["setup.import-order"], "render": ["setup.layer-order"]}
+}

@@ -1,0 +1,11 @@
+{
+  "layers": {"typecheck": "pass", "build": "pass", "static": "fail", "render": "pass"},
+  "rules": {
+    "static": [
+      "menu.composition",
+      "dialog.composition",
+      "tooltip.wraps-trigger",
+      "toast.helper-called"
+    ]
+  }
+}
