@@ -61,8 +61,19 @@ const declarations = (tokens: TokenSet, indent: string): string =>
     .map((name) => `${indent}--${name}: ${tokens[name]};`)
     .join("\n");
 
+/**
+ * A scope re-anchors a theme onto a container, for embedding (the theme builder's preview).
+ *
+ * The scope replaces the unqualified `:root`/`:host` anchor, and the shadow-tree `:host(…)`
+ * forms are dropped: they have no meaning in a document-level, scoped sheet.
+ */
+const scopedSelectors = (selectors: string[], scope: string): string[] =>
+  selectors
+    .filter((selector) => !selector.startsWith(":host"))
+    .map((selector) => (selector === ":root" ? scope : `${scope}${selector}`));
+
 /** A theme's scheme matches a bare class, a `data-theme` attribute, and both inside a shadow tree. */
-const selectorsFor = (id: string, scheme: Scheme): string => {
+const selectorsFor = (id: string, scheme: Scheme, scope?: string): string => {
   const name = `${id}-${scheme}`;
   const selectors = [
     `.${name}`,
@@ -74,10 +85,17 @@ const selectorsFor = (id: string, scheme: Scheme): string => {
   // The light scheme is also the unqualified default, so bare `:root` resolves without a theme class.
   if (scheme === "light") selectors.unshift(":root", ":host");
 
-  return selectors.join(",\n");
+  return (scope === undefined ? selectors : scopedSelectors(selectors, scope)).join(",\n");
 };
 
-export function emitVariablesCss(preset: ThemePreset, derived: Derived): string {
+export function emitVariablesCss(
+  preset: ThemePreset,
+  derived: Derived,
+  options: {scope?: string} = {},
+): string {
+  const anchor = (indent: string): string =>
+    options.scope === undefined ? `${indent}:root,\n${indent}:host` : `${indent}${options.scope}`;
+
   const parts: string[] = [];
 
   parts.push(
@@ -86,12 +104,12 @@ export function emitVariablesCss(preset: ThemePreset, derived: Derived): string 
 
   // `:root` matches nothing inside a shadow tree, so scheme-invariant tokens are declared on both.
   parts.push(
-    `${INDENT}:root,\n${INDENT}:host {\n${declarations(derived.invariant, INDENT.repeat(2))}\n${INDENT}}`,
+    `${anchor(INDENT)} {\n${declarations(derived.invariant, INDENT.repeat(2))}\n${INDENT}}`,
   );
 
   for (const scheme of ["light", "dark"] as const) {
     const tokens = scheme === "light" ? derived.light : derived.dark;
-    const selector = selectorsFor(preset.id, scheme)
+    const selector = selectorsFor(preset.id, scheme, options.scope)
       .split("\n")
       .map((line) => `${INDENT}${line}`)
       .join("\n");
@@ -108,7 +126,7 @@ export function emitVariablesCss(preset: ThemePreset, derived: Derived): string 
 
   parts.push(
     `${INDENT}@media (forced-colors: active) {\n` +
-      `${INDENT.repeat(2)}:root,\n${INDENT.repeat(2)}:host {\n${forced}\n${INDENT.repeat(2)}}\n` +
+      `${anchor(INDENT.repeat(2))} {\n${forced}\n${INDENT.repeat(2)}}\n` +
       `${INDENT}}`,
   );
 

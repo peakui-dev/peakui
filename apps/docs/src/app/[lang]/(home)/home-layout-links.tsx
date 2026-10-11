@@ -19,6 +19,11 @@ export function getHomeLayoutLinks(dict: Dictionary): LinkItemType[] {
           text: nav.components,
           url: "/docs/react/components",
         },
+        {
+          icon: <Iconify icon="palette" />,
+          text: nav.themes,
+          url: "/themes",
+        },
       ],
       on: "menu",
       text: nav.documentation,
@@ -35,6 +40,12 @@ export function getHomeLayoutLinks(dict: Dictionary): LinkItemType[] {
       on: "nav",
       text: nav.components,
       url: "/docs/react/components",
+    },
+    {
+      active: "nested-url",
+      on: "nav",
+      text: nav.themes,
+      url: "/themes",
     },
   ];
 }

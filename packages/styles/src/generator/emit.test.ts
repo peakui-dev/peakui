@@ -49,3 +49,33 @@ describe("emitVariablesCss", () => {
     expect(emitVariablesCss(preset, deriveTheme(preset))).toBe(css);
   });
 });
+
+describe("emitVariablesCss with scope", () => {
+  const derived = deriveTheme(preset);
+  const scoped = emitVariablesCss(preset, derived, {scope: "#tb-preview"});
+
+  it("anchors invariants on the scope instead of :root/:host", () => {
+    expect(scoped).toContain("#tb-preview {");
+    expect(scoped).not.toContain(":root");
+    expect(scoped).not.toContain(":host");
+  });
+
+  it("prefixes class and attribute selectors with the scope", () => {
+    expect(scoped).toContain("#tb-preview.test-light");
+    expect(scoped).toContain('#tb-preview[data-theme="test-light"]');
+    expect(scoped).toContain("#tb-preview.test-dark");
+    expect(scoped).toContain('#tb-preview[data-theme="test-dark"]');
+  });
+
+  it("keeps color-scheme and forced-colors content", () => {
+    expect(scoped.match(/color-scheme: light/g)?.length).toBe(1);
+    const media = scoped.slice(scoped.indexOf("@media (forced-colors"));
+
+    expect(media).toContain("#tb-preview {");
+    expect(media).toContain("--accent: Highlight");
+  });
+
+  it("leaves the unscoped output byte-identical", () => {
+    expect(emitVariablesCss(preset, derived)).toBe(emitVariablesCss(preset, derived, {}));
+  });
+});

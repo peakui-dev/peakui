@@ -59,7 +59,7 @@
 
 /* If only one button, apply both rounded edges */
 .toggle-button-group--horizontal .toggle-button:first-child:last-child {
-  @apply rounded-3xl;
+  @apply rounded-lg;
 }
 
 /* Apply border radius to first button (top edge) in vertical */
@@ -74,7 +74,7 @@
 
 /* If only one button in vertical, apply all rounded edges */
 .toggle-button-group--vertical .toggle-button:first-child:last-child {
-  @apply rounded-3xl;
+  @apply rounded-lg;
 }
 
 /* Remove scale transform on active/pressed state for buttons in group */
@@ -152,7 +152,7 @@
 
 /* Restore border radius in detached mode */
 .toggle-button-group--detached .toggle-button {
-  @apply rounded-3xl;
+  @apply rounded-lg;
 }
 
 /* Hide separators in detached mode */

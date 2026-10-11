@@ -10,7 +10,7 @@
 
 /* Base close button styles */
 .close-button {
-  @apply relative isolate inline-flex h-6 w-6 shrink-0 origin-center items-center justify-center rounded-xl p-1 select-none no-highlight;
+  @apply relative isolate inline-flex h-6 w-6 shrink-0 origin-center items-center justify-center rounded-lg p-1 select-none no-highlight;
 
   /* Held transparent in the normal state so the forced-colors border causes no layout shift. */
   border: 1px solid transparent;

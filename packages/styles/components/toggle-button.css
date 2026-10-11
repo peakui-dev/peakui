@@ -20,7 +20,7 @@
   --toggle-button-bg-pressed: var(--color-default-hover);
   --toggle-button-fg: var(--color-default-foreground);
   --toggle-button-border: transparent;
-  --toggle-button-radius: var(--radius-3xl);
+  --toggle-button-radius: var(--radius-lg);
 
   /* Selected state tokens */
   --toggle-button-bg-selected: var(--color-accent-soft);

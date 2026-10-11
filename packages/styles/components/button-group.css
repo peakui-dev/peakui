@@ -37,7 +37,7 @@
 
 /* If only one button, apply both rounded edges */
 .button-group--horizontal .button:first-child:last-child {
-  @apply rounded-3xl;
+  @apply rounded-lg;
 }
 
 /* Apply border radius to first button (top edge) in vertical */
@@ -52,7 +52,7 @@
 
 /* If only one button in vertical, apply all rounded edges */
 .button-group--vertical .button:first-child:last-child {
-  @apply rounded-3xl;
+  @apply rounded-lg;
 }
 
 /* Remove scale transform on active/pressed state for buttons in group */
