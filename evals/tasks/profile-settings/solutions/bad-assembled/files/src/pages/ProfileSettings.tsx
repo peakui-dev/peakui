@@ -6,7 +6,12 @@ export function ProfileSettings({onSave, profile, saving}: ProfileSettingsProps)
   return (
     <Card title="Profile">
       <form className="flex flex-col gap-4" onSubmit={() => onSave(profile)}>
-        <Input required defaultValue={profile.displayName} label="Display name" name="displayName" />
+        <Input
+          required
+          defaultValue={profile.displayName}
+          label="Display name"
+          name="displayName"
+        />
         <Input
           required
           defaultValue={profile.email}
