@@ -47,7 +47,7 @@ function ButtonsSection() {
   return (
     <Section title="Buttons">
       {SIZES.map((size) => (
-        <div className="flex flex-wrap gap-2" key={size}>
+        <div key={size} className="flex flex-wrap gap-2">
           {VARIANTS.map((variant) => (
             <Button key={variant} size={size} variant={variant}>
               {variant}
@@ -167,7 +167,7 @@ function TabsSection() {
         <Tabs.ListContainer>
           <Tabs.List aria-label="Sections">
             {(["overview", "activity", "settings"] as const).map((id) => (
-              <Tabs.Tab id={id} key={id}>
+              <Tabs.Tab key={id} id={id}>
                 {id}
                 <Tabs.Indicator />
               </Tabs.Tab>

@@ -3,8 +3,8 @@
 import type {GalleryPreset} from "./presets";
 
 import {Button, Popover} from "@peakui/react";
-import {OverlayTriggerStateContext} from "react-aria-components";
 import {useContext} from "react";
+import {OverlayTriggerStateContext} from "react-aria-components";
 
 import {GALLERY} from "./presets";
 
@@ -22,14 +22,14 @@ function PresetButton({
 
   return (
     <button
+      key={preset.name}
       aria-current={preset.name === activeName || undefined}
       className="flex items-center gap-3 rounded-field px-3 py-2 text-sm text-foreground hover:bg-surface"
-      key={preset.name}
+      type="button"
       onClick={() => {
         onSelect(preset);
         popoverState?.close();
       }}
-      type="button"
     >
       <span
         aria-hidden="true"
@@ -56,7 +56,12 @@ export function PresetPicker({
       <Popover.Content>
         <Popover.Dialog className="flex w-56 flex-col gap-1">
           {GALLERY.map((preset) => (
-            <PresetButton activeName={activeName} key={preset.name} onSelect={onSelect} preset={preset} />
+            <PresetButton
+              key={preset.name}
+              activeName={activeName}
+              preset={preset}
+              onSelect={onSelect}
+            />
           ))}
         </Popover.Dialog>
       </Popover.Content>

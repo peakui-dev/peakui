@@ -1,6 +1,6 @@
-import {z} from "zod";
-
 import type {BuilderValues} from "./presets";
+
+import {z} from "zod";
 
 import {DEFAULT_VALUES} from "./presets";
 

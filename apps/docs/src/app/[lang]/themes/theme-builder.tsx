@@ -1,21 +1,20 @@
 "use client";
 
-import {Suspense, useState} from "react";
-import Link from "next/link";
-
 import {Button} from "@peakui/react";
+import Link from "next/link";
+import {Suspense, useState} from "react";
 
 import {CodePanel} from "./code-panel";
 import {ControlsPanel} from "./controls";
+import {PresetPicker} from "./preset-picker";
 import {matchGalleryPreset} from "./presets";
 import {PreviewGallery} from "./preview/gallery";
-import {PresetPicker} from "./preset-picker";
 import {ThemePreview} from "./theme-preview";
 import {useBuilderState} from "./use-builder-state";
 import {useBuilderTheme} from "./use-builder-theme";
 
 function Builder() {
-  const {state, set, reset, isDefault} = useBuilderState();
+  const {isDefault, reset, set, state} = useBuilderState();
   const {scheme: _scheme, ...values} = state;
   // A preset's semanticOverrides reattach through the value match — preset click and shared
   // link alike — so the preview and the export agree on what those values mean.
@@ -38,16 +37,16 @@ function Builder() {
             activeName={matched?.name ?? "Custom"}
             onSelect={(preset) => set(preset.values)}
           />
-          <Button isDisabled={isDefault} onPress={reset} variant="ghost">
+          <Button isDisabled={isDefault} variant="ghost" onPress={reset}>
             Reset
           </Button>
           <Button
-            onPress={() => navigator.clipboard?.writeText(window.location.href)}
             variant="secondary"
+            onPress={() => navigator.clipboard?.writeText(window.location.href)}
           >
             Share
           </Button>
-          <Button onPress={() => setShowPanel((open) => !open)} variant="secondary">
+          <Button variant="secondary" onPress={() => setShowPanel((open) => !open)}>
             Code
           </Button>
         </div>
@@ -59,12 +58,12 @@ function Builder() {
           </ThemePreview>
           <ControlsPanel fixes={derived.fixes} set={set} state={state} />
         </main>
-        {showPanel && (
+        {!!showPanel && (
           <CodePanel
             derived={derived}
-            onClose={() => setShowPanel(false)}
             semanticOverrides={matched?.semanticOverrides}
             values={values}
+            onClose={() => setShowPanel(false)}
           />
         )}
       </div>

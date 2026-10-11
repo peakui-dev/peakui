@@ -1,11 +1,10 @@
 "use client";
 
-import type {Scheme, ThemePreset} from "@peakui/styles/generator";
 import type {BuilderState} from "./url-codec";
-
-import {useDeferredValue, useMemo} from "react";
+import type {Scheme, ThemePreset} from "@peakui/styles/generator";
 
 import {deriveTheme, emitVariablesCss} from "@peakui/styles/generator";
+import {useDeferredValue, useMemo} from "react";
 
 import {toPreset} from "./presets";
 
@@ -15,7 +14,7 @@ export function useBuilderTheme(
   state: BuilderState,
   semanticOverrides?: ThemePreset["semanticOverrides"],
 ) {
-  const {accent, grayChroma, radius, formRadius, darkAccent, scheme} = state;
+  const {accent, darkAccent, formRadius, grayChroma, radius, scheme} = state;
 
   const preset = useMemo(
     () => toPreset({accent, grayChroma, radius, formRadius, darkAccent}, semanticOverrides),
@@ -23,10 +22,7 @@ export function useBuilderTheme(
   );
   const derived = useMemo(() => deriveTheme(preset), [preset]);
   const previewCss = useDeferredValue(
-    useMemo(
-      () => emitVariablesCss(preset, derived, {scope: PREVIEW_SCOPE}),
-      [preset, derived],
-    ),
+    useMemo(() => emitVariablesCss(preset, derived, {scope: PREVIEW_SCOPE}), [preset, derived]),
   );
 
   return {preset, derived, previewCss, scheme: scheme as Scheme};

@@ -1,9 +1,9 @@
 "use client";
 
+import type {BuilderState} from "./url-codec";
+
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useCallback, useMemo} from "react";
-
-import type {BuilderState} from "./url-codec";
 
 import {decodeBuilderState, encodeBuilderState} from "./url-codec";
 

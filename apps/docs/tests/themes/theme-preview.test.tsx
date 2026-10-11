@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import {act} from "react";
-import {createRoot, type Root} from "react-dom/client";
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import type {Root} from "react-dom/client";
 
 import {deriveTheme, emitVariablesCss} from "@peakui/styles/generator";
+import {act} from "react";
+import {createRoot} from "react-dom/client";
+import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {DEFAULT_VALUES, toPreset} from "@/app/[lang]/themes/presets";
 import {ThemePreview} from "@/app/[lang]/themes/theme-preview";

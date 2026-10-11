@@ -1,12 +1,11 @@
 "use client";
 
 import type {BuilderValues} from "./presets";
-import type {ThemePreset} from "@peakui/styles/generator";
+import type {ThemePreset, deriveTheme} from "@peakui/styles/generator";
 
-import {deriveTheme, emitVariablesCss} from "@peakui/styles/generator";
+import {Button, Input, Label, SegmentedControl, TextField} from "@peakui/react";
+import {emitVariablesCss} from "@peakui/styles/generator";
 import {useDeferredValue, useMemo, useState} from "react";
-
-import {Button, Label, SegmentedControl, TextField, Input} from "@peakui/react";
 
 import {toPreset} from "./presets";
 
@@ -14,7 +13,10 @@ type Derived = ReturnType<typeof deriveTheme>;
 type SemanticOverrides = ThemePreset["semanticOverrides"];
 
 export function slugifyThemeId(raw: string): string {
-  const slug = raw.toLowerCase().replaceAll(/[^a-z0-9-]+/g, "-").replaceAll(/^-+|-+$/g, "");
+  const slug = raw
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9-]+/g, "-")
+    .replaceAll(/^-+|-+$/g, "");
 
   return slug || "custom";
 }
@@ -68,10 +70,10 @@ const TABS: ["css" | "preset", string][] = [
 ];
 
 export function CodePanel({
-  onClose,
-  values,
   derived,
+  onClose,
   semanticOverrides,
+  values,
 }: {
   onClose: () => void;
   values: BuilderValues;
@@ -99,22 +101,22 @@ export function CodePanel({
     >
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-medium text-foreground">Export</h2>
-        <Button isIconOnly aria-label="Close export panel" onPress={onClose} variant="ghost">
+        <Button isIconOnly aria-label="Close export panel" variant="ghost" onPress={onClose}>
           ✕
         </Button>
       </div>
-      <TextField className="w-full" onChange={setName} value={name}>
+      <TextField className="w-full" value={name} onChange={setName}>
         <Label>Theme name</Label>
         <Input placeholder="custom" type="text" />
       </TextField>
       <SegmentedControl
         aria-label="Export format"
-        onSelectionChange={(key) => setTab(key as "css" | "preset")}
         selectedKey={tab}
         size="md"
+        onSelectionChange={(key) => setTab(key as "css" | "preset")}
       >
         {TABS.map(([key, label]) => (
-          <SegmentedControl.Item id={key} key={key}>
+          <SegmentedControl.Item key={key} id={key}>
             {label}
           </SegmentedControl.Item>
         ))}
@@ -123,17 +125,14 @@ export function CodePanel({
         {content}
       </pre>
       <div className="flex gap-2">
-        <Button onPress={() => navigator.clipboard?.writeText(content)} variant="secondary">
+        <Button variant="secondary" onPress={() => navigator.clipboard?.writeText(content)}>
           Copy
         </Button>
         <Button
-          onPress={() =>
-            download(
-              tab === "css" ? `${id}-variables.css` : `${id}-preset.ts`,
-              content,
-            )
-          }
           variant="primary"
+          onPress={() =>
+            download(tab === "css" ? `${id}-variables.css` : `${id}-preset.ts`, content)
+          }
         >
           Download
         </Button>

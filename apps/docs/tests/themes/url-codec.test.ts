@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
-
 import type {BuilderState} from "@/app/[lang]/themes/url-codec";
+
+import {describe, expect, it} from "vitest";
 
 import {DEFAULT_STATE, decodeBuilderState, encodeBuilderState} from "@/app/[lang]/themes/url-codec";
 

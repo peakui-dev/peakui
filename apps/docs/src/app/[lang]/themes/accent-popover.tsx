@@ -2,9 +2,8 @@
 
 import type {BuilderValues} from "./presets";
 
-import {formatOklch, parseOklch} from "@peakui/styles/generator";
-
 import {Button, Input, Label, Popover, Slider, TextField} from "@peakui/react";
+import {formatOklch, parseOklch} from "@peakui/styles/generator";
 
 const SWATCHES = [
   "oklch(0.555 0.215 262)",
@@ -29,8 +28,8 @@ const commitHex = (raw: string, onChange: (patch: Partial<BuilderValues>) => voi
 };
 
 export function AccentPopover({
-  values,
   onChange,
+  values,
 }: {
   values: BuilderValues;
   onChange: (patch: Partial<BuilderValues>) => void;
@@ -57,9 +56,9 @@ export function AccentPopover({
           <Slider
             maxValue={360}
             minValue={0}
-            onChange={(h) => commit({l: oklch.l, c: oklch.c, h: single(h)})}
             step={1}
             value={oklch.h}
+            onChange={(h) => commit({l: oklch.l, c: oklch.c, h: single(h)})}
           >
             <Label>Hue</Label>
             <Slider.Output />
@@ -71,9 +70,9 @@ export function AccentPopover({
           <Slider
             maxValue={0.4}
             minValue={0}
-            onChange={(c) => commit({l: oklch.l, c: single(c), h: oklch.h})}
             step={0.005}
             value={oklch.c}
+            onChange={(c) => commit({l: oklch.l, c: single(c), h: oklch.h})}
           >
             <Label>Chroma</Label>
             <Slider.Output />
@@ -85,9 +84,9 @@ export function AccentPopover({
           <Slider
             maxValue={1}
             minValue={0}
-            onChange={(l) => commit({l: single(l), c: oklch.c, h: oklch.h})}
             step={0.005}
             value={oklch.l}
+            onChange={(l) => commit({l: single(l), c: oklch.c, h: oklch.h})}
           >
             <Label>Lightness</Label>
             <Slider.Output />
@@ -99,43 +98,45 @@ export function AccentPopover({
           <TextField className="w-full">
             <Label>Hex</Label>
             <Input
+              placeholder="#1db954"
+              type="text"
               onBlur={(event) => commitHex(event.currentTarget.value, onChange)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") commitHex(event.currentTarget.value, onChange);
               }}
-              placeholder="#1db954"
-              type="text"
             />
           </TextField>
           <div className="flex flex-wrap gap-2">
             {SWATCHES.map((swatch) => (
               <button
+                key={swatch}
                 aria-label={`Accent ${swatch}`}
                 className="size-6 rounded-field border border-border"
-                key={swatch}
-                onClick={() => onChange({accent: swatch})}
                 style={{background: swatch}}
                 type="button"
+                onClick={() => onChange({accent: swatch})}
               />
             ))}
           </div>
           <TextField
+            key={values.darkAccent ?? "unset"}
             className="w-full"
             defaultValue={values.darkAccent ?? ""}
-            key={values.darkAccent ?? "unset"}
           >
             <Label>Accent for the dark scheme (optional)</Label>
             <Input
-              onBlur={(event) => onChange({darkAccent: event.currentTarget.value.trim() || undefined})}
+              placeholder="#e4e4e7"
+              type="text"
+              onBlur={(event) =>
+                onChange({darkAccent: event.currentTarget.value.trim() || undefined})
+              }
               onKeyDown={(event) => {
                 if (event.key === "Enter")
                   onChange({darkAccent: event.currentTarget.value.trim() || undefined});
               }}
-              placeholder="#e4e4e7"
-              type="text"
             />
           </TextField>
-          {needsDarkAccent && (
+          {!!needsDarkAccent && (
             <p className="text-xs text-muted">
               This accent cannot invert on its own — set a separate accent for the dark scheme.
             </p>
