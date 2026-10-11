@@ -36,8 +36,8 @@ const SIZES = ["sm", "md"] as const;
 
 function Section({children, title}: {children: React.ReactNode; title: string}) {
   return (
-    <section className="flex flex-col gap-4 border border-border p-5">
-      <h3 className="text-xs font-medium text-muted">{title}</h3>
+    <section className="flex flex-col gap-4 border-t border-separator pt-4">
+      <h3 className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted">{title}</h3>
       {children}
     </section>
   );
@@ -47,14 +47,24 @@ function ButtonsSection() {
   return (
     <Section title="Buttons">
       {SIZES.map((size) => (
-        <div key={size} className="flex flex-wrap gap-2">
-          {VARIANTS.map((variant) => (
-            <Button key={variant} size={size} variant={variant}>
-              {variant}
-            </Button>
-          ))}
+        <div key={size} className="flex items-center gap-2">
+          <span className="w-6 shrink-0 text-[10px] text-muted">{size}</span>
+          <div className="flex flex-wrap gap-2">
+            {VARIANTS.map((variant) => (
+              <Button key={variant} size={size} variant={variant}>
+                {variant}
+              </Button>
+            ))}
+          </div>
         </div>
       ))}
+      <Tooltip delay={0}>
+        <Button variant="outline">Hover me</Button>
+        <Tooltip.Content showArrow>
+          <Tooltip.Arrow />
+          <p>Themed by the builder</p>
+        </Tooltip.Content>
+      </Tooltip>
     </Section>
   );
 }
@@ -192,6 +202,9 @@ function AlertsSection() {
         </Alert.Content>
       </Alert>
       <div className="flex items-center gap-4">
+        <span className="w-24 text-[10px] uppercase tracking-[0.12em] text-muted">
+          Loading state
+        </span>
         <Spinner aria-label="Loading" />
         <div className="w-40">
           <Skeleton className="h-4 w-3/4" />
@@ -217,7 +230,7 @@ function LoginSection() {
           </TextField>
           <TextField className="w-full">
             <Label>Password</Label>
-            <Input placeholder="••••••••" type="password" />
+            <Input placeholder="Password" type="password" />
           </TextField>
         </div>
         <Card.Footer>
@@ -229,33 +242,18 @@ function LoginSection() {
   );
 }
 
-function TooltipSection() {
-  return (
-    <Section title="Overlay">
-      <Tooltip delay={0}>
-        <Button variant="secondary">Hover me</Button>
-        <Tooltip.Content showArrow>
-          <Tooltip.Arrow />
-          <p>Themed by the builder</p>
-        </Tooltip.Content>
-      </Tooltip>
-    </Section>
-  );
-}
-
 /** A live gallery of core components; every section is themed by the preview container's CSS. */
 export function PreviewGallery() {
   return (
-    <div className="grid items-start gap-6 p-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid items-start gap-x-8 gap-y-10 p-8 sm:grid-cols-2 xl:grid-cols-3">
       <ButtonsSection />
-      <ChipsSection />
-      <InputsSection />
       <SelectionSection />
-      <ControlsSection />
-      <TabsSection />
-      <AlertsSection />
       <LoginSection />
-      <TooltipSection />
+      <InputsSection />
+      <ControlsSection />
+      <AlertsSection />
+      <ChipsSection />
+      <TabsSection />
     </div>
   );
 }

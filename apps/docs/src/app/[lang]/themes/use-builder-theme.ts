@@ -13,6 +13,7 @@ export const PREVIEW_SCOPE = "#tb-preview";
 export function useBuilderTheme(
   state: BuilderState,
   semanticOverrides?: ThemePreset["semanticOverrides"],
+  themeDerivations?: string,
 ) {
   const {accent, darkAccent, formRadius, grayChroma, radius, scheme} = state;
 
@@ -22,7 +23,15 @@ export function useBuilderTheme(
   );
   const derived = useMemo(() => deriveTheme(preset), [preset]);
   const previewCss = useDeferredValue(
-    useMemo(() => emitVariablesCss(preset, derived, {scope: PREVIEW_SCOPE}), [preset, derived]),
+    useMemo(() => {
+      const emitted = emitVariablesCss(preset, derived, {scope: PREVIEW_SCOPE});
+
+      // The re-declared derivations recompute the shared theme's derived mappings
+      // (--radius-*, --color-*, --shadow-*) from THIS theme's tokens inside the scope.
+      return themeDerivations
+        ? `${emitted}\n\n${PREVIEW_SCOPE} {\n${themeDerivations}\n}`
+        : emitted;
+    }, [preset, derived, themeDerivations]),
   );
 
   return {preset, derived, previewCss, scheme: scheme as Scheme};

@@ -51,7 +51,7 @@ export function PresetPicker({
   return (
     <Popover>
       <Button aria-label="Preset themes" variant="secondary">
-        {activeName}
+        Presets
       </Button>
       <Popover.Content>
         <Popover.Dialog className="flex w-56 flex-col gap-1">
