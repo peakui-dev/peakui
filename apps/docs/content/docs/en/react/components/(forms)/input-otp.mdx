@@ -110,11 +110,11 @@ A complete two-factor authentication form with validation and submission.
   }
 
   .input-otp__slot[data-active="true"] {
-    @apply border-accent-500 ring-2 ring-accent-200;
+    @apply border-accent ring-2 ring-accent;
   }
 
   .input-otp__separator {
-    @apply w-2 h-1 bg-border-strong rounded-full;
+    @apply w-2 h-1 bg-separator rounded-full;
   }
 }
 ```
@@ -148,7 +148,6 @@ The InputOtp component uses these CSS classes ([view source styles](https://gith
 - `.input-otp__slot[data-filled="true"]` - A slot holding a character
 - `.input-otp__slot[data-disabled="true"]` - A slot of a disabled input
 - `.input-otp__slot[data-invalid="true"]` - A slot of an invalid input
-- `.input-otp[data-disabled="true"]` - The container of a disabled input
 
 ### Slots
 
@@ -173,7 +172,7 @@ The InputOtp component uses these CSS classes ([view source styles](https://gith
 - **Hover**: the slot's `:hover` or `[data-hovered="true"]`
 - **Active**: the slot's `[data-active="true"]` — the slot the caret is in
 - **Filled**: the slot's `[data-filled="true"]`
-- **Disabled**: the container's or slot's `[data-disabled="true"]`
+- **Disabled**: the hidden input's or slot's `[data-disabled="true"]`
 - **Invalid**: the input's or slot's `[data-invalid="true"]`
 
 ## API Reference

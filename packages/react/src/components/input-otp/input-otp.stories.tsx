@@ -206,7 +206,7 @@ export const WithValidation: Story = {
               value={value}
               onChange={handleChange}
             />
-            <span className="field-error" data-visible={isInvalid} id="code-error">
+            <span className="field-error" data-visible={isInvalid || undefined} id="code-error">
               Invalid code. Please try again.
             </span>
             <Button isDisabled={value.length !== 6} type="submit">
@@ -322,7 +322,7 @@ export const FormExample: Story = {
                 setError("");
               }}
             />
-            <span className="field-error" data-visible={!!error} id="code-error">
+            <span className="field-error" data-visible={!!error || undefined} id="code-error">
               {error}
             </span>
           </div>

@@ -52,7 +52,7 @@ export function WithValidation() {
             <InputOtp.Slot index={5} />
           </InputOtp.Group>
         </InputOtp>
-        <span className="field-error" data-visible={isInvalid} id="code-error">
+        <span className="field-error" data-visible={isInvalid || undefined} id="code-error">
           Invalid code. Please try again.
         </span>
         <Button isDisabled={value.length !== 6} type="submit">

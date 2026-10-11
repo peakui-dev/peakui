@@ -58,7 +58,7 @@ export function FormExample() {
             <InputOtp.Slot index={5} />
           </InputOtp.Group>
         </InputOtp>
-        <span className="field-error" data-visible={!!error} id="code-error">
+        <span className="field-error" data-visible={!!error || undefined} id="code-error">
           {error}
         </span>
       </div>

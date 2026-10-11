@@ -21,7 +21,7 @@ export function CustomStyles() {
         <Tag id="docs">Docs</Tag>
       </TagGroup.List>
       <Description>Pick at least one topic</Description>
-      <ErrorMessage className="font-medium text-danger">
+      <ErrorMessage className="font-medium text-danger-soft-foreground">
         {!!isInvalid && <>Choose at least one topic</>}
       </ErrorMessage>
     </TagGroup>
