@@ -1,0 +1,7 @@
+{
+  "layers": {"typecheck": "fail", "build": "pass", "static": "fail", "render": "fail"},
+  "rules": {
+    "static": ["form.error-in-each-required-field"],
+    "render": ["form.required-fields", "cancel.real-link"]
+  }
+}

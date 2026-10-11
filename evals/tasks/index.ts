@@ -8,6 +8,7 @@ import {linkAsButton} from "./link-as-button/task.ts";
 import {pendingButton} from "./pending-button/task.ts";
 import {prefixedField} from "./prefixed-field/task.ts";
 import {pressStateLabel} from "./press-state-label/task.ts";
+import {profileSettings} from "./profile-settings/task.ts";
 import {sectionGroupRender} from "./section-group-render/task.ts";
 import {serverPageAction} from "./server-page-action/task.ts";
 import {signInForm} from "./sign-in-form/task.ts";
@@ -26,6 +27,7 @@ export const tasks: TaskDefinition[] = [
   brandPrimaryButton,
   firstTimeSetup,
   serverPageAction,
+  profileSettings,
 ];
 
 export function getTask(id: string): TaskDefinition {
