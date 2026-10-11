@@ -22,7 +22,9 @@ describe("ThemePreview", () => {
   });
 
   afterAll(() => {
-    root.unmount();
+    act(() => {
+      root.unmount();
+    });
     host.remove();
   });
 

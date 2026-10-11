@@ -5,7 +5,7 @@ import type {ThemePreset, deriveTheme} from "@peakui/styles/generator";
 
 import {Button, Input, Label, SegmentedControl, TextField} from "@peakui/react";
 import {emitVariablesCss} from "@peakui/styles/generator";
-import {useDeferredValue, useMemo, useState} from "react";
+import {useDeferredValue, useEffect, useMemo, useState} from "react";
 
 import {toPreset} from "./presets";
 
@@ -21,7 +21,7 @@ export function slugifyThemeId(raw: string): string {
   return slug || "custom";
 }
 
-function buildExportCss(
+export function buildExportCss(
   id: string,
   values: BuilderValues,
   derived: Derived,
@@ -36,7 +36,7 @@ function buildExportCss(
   return `${usage}\n${emitVariablesCss(toPreset(values, semanticOverrides, id), derived)}`;
 }
 
-function buildExportPreset(
+export function buildExportPreset(
   id: string,
   values: BuilderValues,
   semanticOverrides?: SemanticOverrides,
@@ -81,17 +81,28 @@ export function CodePanel({
   semanticOverrides?: SemanticOverrides;
 }) {
   const [name, setName] = useState("custom");
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    window.addEventListener("keydown", onKey);
+
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   const [tab, setTab] = useState<"css" | "preset">("css");
   const id = slugifyThemeId(name);
 
+  const {accent, darkAccent, formRadius, grayChroma, radius} = values;
   const content = useDeferredValue(
-    useMemo(
-      () =>
-        tab === "css"
-          ? buildExportCss(id, values, derived, semanticOverrides)
-          : buildExportPreset(id, values, semanticOverrides),
-      [tab, id, values, derived, semanticOverrides],
-    ),
+    useMemo(() => {
+      const snapshot = {accent, grayChroma, radius, formRadius, darkAccent};
+
+      return tab === "css"
+        ? buildExportCss(id, snapshot, derived, semanticOverrides)
+        : buildExportPreset(id, snapshot, semanticOverrides);
+    }, [tab, id, accent, grayChroma, radius, formRadius, darkAccent, derived, semanticOverrides]),
   );
 
   return (

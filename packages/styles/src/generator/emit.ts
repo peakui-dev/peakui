@@ -70,7 +70,7 @@ const declarations = (tokens: TokenSet, indent: string): string =>
 const scopedSelectors = (selectors: string[], scope: string): string[] =>
   selectors
     .filter((selector) => !selector.startsWith(":host"))
-    .map((selector) => (selector === ":root" || selector === ":host" ? scope : `${scope}${selector}`));
+    .map((selector) => (selector === ":root" ? scope : `${scope}${selector}`));
 
 /** A theme's scheme matches a bare class, a `data-theme` attribute, and both inside a shadow tree. */
 const selectorsFor = (id: string, scheme: Scheme, scope?: string): string => {

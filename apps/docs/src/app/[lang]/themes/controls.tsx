@@ -72,7 +72,7 @@ export function ControlsPanel({
                   ? "flex items-center gap-2 rounded-field bg-default px-2.5 py-1.5 text-xs text-foreground"
                   : "flex items-center gap-2 rounded-field bg-background px-2.5 py-1.5 text-xs text-muted hover:text-foreground"
               }
-              onClick={() => set(preset.values)}
+              onClick={() => set({...preset.values, darkAccent: preset.values.darkAccent})}
             >
               <span
                 aria-hidden="true"

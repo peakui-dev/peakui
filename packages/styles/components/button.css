@@ -277,8 +277,9 @@
  * 2. Постоянная прозрачная граница на .button вместо `border border-border` только у --outline.
  *    Так layout не дёргается при смене варианта, и forced-colors есть за что зацепиться.
  *
- * 3. Радиус через ручку --button-radius, а не хардкодом. Значение: --radius-lg — на M это
- *    заметное скругление, капсула достигается только на верхней ступени шкалы.
+ * 3. Radius comes through the --button-radius knob, never a hardcoded utility: --radius-lg.
+ *    The theme's radius scale drives it, every step stays visually distinct, and the default
+ *    (extra-large) keeps the reference's strongly-rounded look.
  *
  * 4. Hover у --outline. Эталон берёт color-mix(in srgb, var(--default) 60%, transparent).
  *    Рукописные производные цвета здесь запрещены: их контраст никто не измеряет. Используется

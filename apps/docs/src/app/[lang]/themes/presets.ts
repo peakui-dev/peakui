@@ -6,7 +6,8 @@ export type BuilderValues = {
   grayChroma: number;
   radius: RadiusId;
   formRadius: RadiusId;
-  darkAccent?: string;
+  /** Explicitly assignable as undefined, so a preset click can clear a stale value. */
+  darkAccent?: string | undefined;
 };
 
 /** The preview derives one theme under this id; the export uses the user's own id. */
@@ -105,9 +106,4 @@ export function matchGalleryPreset(values: BuilderValues): GalleryPreset | undef
     candidate.darkAccent === values.darkAccent;
 
   return GALLERY.find((preset) => same(preset.values));
-}
-
-/** Values → gallery name. The URL stores values, so equality is exact after a round-trip. */
-export function matchGallery(values: BuilderValues): string {
-  return matchGalleryPreset(values)?.name ?? "Custom";
 }

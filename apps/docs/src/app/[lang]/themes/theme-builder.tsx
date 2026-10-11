@@ -4,7 +4,7 @@ import type {BuilderState} from "./url-codec";
 
 import {Button, SegmentedControl} from "@peakui/react";
 import Link from "next/link";
-import {Suspense, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 
 import {CodePanel} from "./code-panel";
 import {ControlsPanel} from "./controls";
@@ -23,6 +23,21 @@ function Builder() {
   const {derived, scheme, themeCss} = useBuilderTheme(state, matched?.semanticOverrides);
   const [showCode, setShowCode] = useState(false);
   const [showControls, setShowControls] = useState(false);
+
+  useEffect(() => {
+    if (!showCode && !showControls) return;
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowCode(false);
+        setShowControls(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showCode, showControls]);
 
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground">

@@ -1,5 +1,6 @@
 import type {BuilderValues} from "./presets";
 
+import {parseOklch} from "@peakui/styles/generator";
 import {z} from "zod";
 
 import {DEFAULT_VALUES} from "./presets";
@@ -11,11 +12,15 @@ export const DEFAULT_STATE: BuilderState = {...DEFAULT_VALUES, scheme: "light"};
 const RADIUS_IDS = ["none", "extra-small", "small", "medium", "large", "extra-large"] as const;
 
 /*
- * A colour string the engine can parse (hex or oklch(...)); precise validation belongs to
- * parseOklch inside the engine, so the codec only rejects emptiness and lets deriveTheme fail
- * loudly if fed something impossible through a hand-crafted URL.
+ * A colour string the engine can actually parse (hex or oklch(...)) — checked here with the
+ * engine's own parser, so a hand-crafted URL collapses to defaults instead of throwing inside
+ * deriveTheme and taking the page down.
  */
-const accentSchema = z.string().trim().min(4);
+const accentSchema = z
+  .string()
+  .trim()
+  .min(4)
+  .refine((value) => parseOklch(value) !== null);
 
 const partialSchema = z.object({
   a: accentSchema.optional(),

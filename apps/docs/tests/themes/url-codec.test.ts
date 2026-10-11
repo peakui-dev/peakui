@@ -59,4 +59,8 @@ describe("decodeBuilderState", () => {
   it("falls back to defaults when any param is invalid", () => {
     expect(decodeBuilderState("?a=%23zz&g=abc&r=huge")).toEqual(DEFAULT_STATE);
   });
+
+  it("rejects an accent the engine cannot parse instead of crashing the page", () => {
+    expect(decodeBuilderState("?a=abcd&da=wxyz&s=dark")).toEqual(DEFAULT_STATE);
+  });
 });

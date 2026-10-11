@@ -11,9 +11,9 @@ import type {ThemePreset} from "../src/generator/preset.ts";
  * ring drops below 3:1 on the deepest dark surface. 0.555 gives the foreground 4.66:1 and keeps the
  * ring at 3.02:1 or better on every surface level in both schemes.
  *
- * The radius sits on the scale's top step on purpose: the reference's pill-button identity is the
- * default look, and since controls consume the scale at 1x, the pill is reachable only here — the
- * knob's lower steps stay visually distinct instead of saturating (see components/*.css).
+ * The radius sits on the scale's top step on purpose: the reference's strongly-rounded controls
+ * are the default look, and controls consume the scale at 1x, so every lower step stays visually
+ * distinct instead of saturating (see components/*.css).
  */
 export const defaultPreset: ThemePreset = {
   id: "default",
