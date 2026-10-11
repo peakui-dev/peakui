@@ -1,0 +1,28 @@
+/*
+ * ErrorMessage — сообщение об ошибке вне форм: предъявление слота errorMessage у коллекционных
+ * корней. Имена классов приходят из src/components/error-message/error-message.styles.ts.
+ *
+ * Свёрено с heroui/packages/styles/components/error-message.css. Расхождения — в конце файла.
+ */
+
+.error-message {
+  @apply h-auto text-xs wrap-break-word;
+
+  /*
+   * CRITICAL: motion-reduce ПОСЛЕ transition, иначе специфичность отдаёт победу переходу.
+   */
+  transition:
+    opacity 150ms var(--ease-out),
+    height 350ms var(--ease-smooth);
+  @apply motion-reduce:transition-none;
+
+  color: var(--color-danger-soft-foreground);
+}
+
+/*
+ * ---------- Расхождения с эталоном ----------
+ *
+ * 1. Цвет — --color-danger-soft-foreground, а не --danger: --danger как текст даёт контраст ниже
+ *    4.5:1. Та же причина и то же решение, что у field-error.css, — спека
+ *    2026-10-03-input-field-family-design, раздел 4.1.
+ */
