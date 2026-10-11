@@ -2,13 +2,29 @@ import type {ScoreResult} from "../src/scoring/score.ts";
 import type {LayerId, LayerResult} from "../src/types.ts";
 
 import {execFileSync} from "node:child_process";
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import {tmpdir} from "node:os";
 import {dirname, join} from "node:path";
 
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
 
-import {cleanTrials, createTrial, formatList, scoreTrial, trialBatch} from "../src/trial.ts";
+import {
+  cleanTrials,
+  createTrial,
+  formatList,
+  runTrial,
+  scoreTrial,
+  trialBatch,
+} from "../src/trial.ts";
 import {tasks} from "../tasks/index.ts";
 
 const task = tasks.find((candidate) => candidate.id === "pending-button")!;
@@ -233,5 +249,100 @@ describe("formatList", () => {
 
     expect(lines).toHaveLength(tasks.length);
     expect(lines).toContain("pending-button\tvite-app\tButton in a pending state");
+  });
+});
+
+describe("runTrial", () => {
+  const RESULT = '{"type":"result","is_error":false,"num_turns":3,"total_cost_usd":0.1}';
+
+  /** A stand-in for the agent binary: records how it was called, then prints `stdout`. */
+  function fakeAgent(stdout: string): string {
+    const bin = join(root, "fake-agent");
+
+    write(
+      bin,
+      `#!/bin/sh
+{ pwd -P; printf '%s\\n' "$@"; echo "docs=$PEAKUI_DOCS_URL"; echo "config=$CLAUDE_CONFIG_DIR"; } > ../invocation.txt
+echo 'a warning' >&2
+${stdout === "" ? "" : `echo '${stdout}'`}
+`,
+    );
+    chmodSync(bin, 0o755);
+
+    return bin;
+  }
+
+  it("runs the agent in the workspace, saves the transcript beside it and summarizes it", async () => {
+    const out = await prepare("run");
+    const base = dirname(out.workspace);
+    const summary = await runTrial({
+      bin: fakeAgent(RESULT),
+      docsUrl: "http://localhost:3100",
+      model: "haiku",
+      task,
+      workspace: out.workspace,
+    });
+    const invocation = readFileSync(join(base, "invocation.txt"), "utf8").split("\n");
+
+    expect(summary).toMatchObject({costUsd: 0.1, outcome: "ok", skillLoaded: false, turns: 3});
+    // The harness resolves the workspace to its real path; on macOS the temp directory is a symlink.
+    expect(summary.transcript).toBe(join(realpathSync(base), "transcript.jsonl"));
+    expect(readFileSync(summary.transcript, "utf8").trim()).toBe(RESULT);
+    expect(readFileSync(join(base, "stderr.txt"), "utf8")).toContain("a warning");
+    expect(invocation[0]).toBe(realpathSync(out.workspace));
+    expect(invocation[1]).toBe("-p");
+    expect(invocation[2]).toBe(task.prompt);
+    expect(invocation[invocation.indexOf("--model") + 1]).toBe("haiku");
+    expect(invocation[invocation.indexOf("--max-budget-usd") + 1]).toBe("2");
+    expect(invocation).toContain("docs=http://localhost:3100");
+    expect(invocation.find((line) => line.startsWith("config="))).toContain(
+      join("agent-config", trialBatch("run")),
+    );
+    expect(existsSync(invocation[invocation.indexOf("--mcp-config") + 1]!)).toBe(true);
+  });
+
+  it("inherits the caller's agent configuration when asked to", async () => {
+    const out = await prepare("inherit");
+
+    await runTrial({
+      agentConfig: "inherit",
+      bin: fakeAgent(RESULT),
+      docsUrl: "u",
+      model: "sonnet",
+      task,
+      workspace: out.workspace,
+    });
+
+    expect(readFileSync(join(dirname(out.workspace), "invocation.txt"), "utf8")).toContain(
+      "config=\n",
+    );
+  });
+
+  it("reports infra-error when the agent produced no result", async () => {
+    const out = await prepare("silent");
+    const summary = await runTrial({
+      bin: fakeAgent(""),
+      docsUrl: "u",
+      model: "sonnet",
+      task,
+      workspace: out.workspace,
+    });
+
+    expect(summary.outcome).toBe("infra-error");
+  });
+
+  it("refuses a workspace prepared for another task", async () => {
+    const out = await prepare("other");
+    const other = tasks.find((candidate) => candidate.id !== task.id)!;
+
+    await expect(
+      runTrial({
+        bin: fakeAgent(RESULT),
+        docsUrl: "u",
+        model: "sonnet",
+        task: other,
+        workspace: out.workspace,
+      }),
+    ).rejects.toThrow(/was prepared for task/);
   });
 });

@@ -1,3 +1,4 @@
+import type {RunSummary} from "./agent/claude.ts";
 import type {
   FileChanges,
   FixtureDefinition,
@@ -21,8 +22,10 @@ import {dirname, join, relative, resolve, sep} from "node:path";
 
 import {getFixture} from "../fixtures/index.ts";
 
+import {agentEnvironment, buildClaudeArgs, summarizeTranscript} from "./agent/claude.ts";
+import {runCommand} from "./exec.ts";
 import {copyDir, readFiles, walkFiles} from "./files.ts";
-import {workspacesDir} from "./paths.ts";
+import {agentConfigDir, workspacesDir} from "./paths.ts";
 import {scoreWorkspace} from "./scoring/score.ts";
 import {LAYERS} from "./types.ts";
 import {
@@ -239,6 +242,73 @@ export async function scoreTrial(options: {
 }
 
 /** Removes every workspace created with `label`; returns the workspace directories removed. */
+export type AgentConfigMode = "isolated" | "inherit";
+
+/** The cap of one agent run in USD; a composite task fits well under it. */
+const DEFAULT_BUDGET_USD = 2;
+const RUN_TIMEOUT_MS = 15 * 60 * 1000;
+/** A transcript carries every file the agent read; the default 8 MiB would cut it. */
+const TRANSCRIPT_BYTES = 64 * 1024 * 1024;
+const TRANSCRIPT_FILE = "transcript.jsonl";
+
+/**
+ * Runs Claude Code headless in a prepared workspace with the task's prompt. The raw transcript and
+ * stderr are saved beside the workspace; scoring stays with `scoreTrial`.
+ */
+export async function runTrial(options: {
+  task: TaskDefinition;
+  workspace: string;
+  model: string;
+  /** Where the skill's scripts read the documentation from. */
+  docsUrl: string;
+  maxBudgetUsd?: number;
+  /** `inherit` keeps the caller's own login, for a machine with no token in the environment. */
+  agentConfig?: AgentConfigMode;
+  bin?: string;
+}): Promise<RunSummary & {transcript: string}> {
+  const {task, workspace} = options;
+  const {dir, meta} = locateTrial(workspace);
+
+  if (meta.task !== task.id) {
+    throw new Error(`${workspace} was prepared for task ${meta.task}, not ${task.id}`);
+  }
+
+  const base = dirname(dir);
+  const mcpConfigPath = join(base, "mcp.json");
+  const transcript = join(base, TRANSCRIPT_FILE);
+  let configDir: string | undefined;
+
+  if ((options.agentConfig ?? "isolated") === "isolated") {
+    configDir = agentConfigDir(trialBatch(meta.label));
+    mkdirSync(configDir, {recursive: true});
+  }
+
+  writeFileSync(mcpConfigPath, `${JSON.stringify({mcpServers: {}})}\n`);
+
+  const result = await runCommand(
+    [
+      options.bin ?? process.env.PEAKUI_EVALS_CLAUDE_BIN ?? "claude",
+      ...buildClaudeArgs({
+        maxBudgetUsd: options.maxBudgetUsd ?? DEFAULT_BUDGET_USD,
+        mcpConfigPath,
+        model: options.model,
+        prompt: task.prompt,
+      }),
+    ],
+    {
+      cwd: dir,
+      env: agentEnvironment(process.env, {configDir, docsUrl: options.docsUrl}),
+      maxOutputBytes: TRANSCRIPT_BYTES,
+      timeoutMs: RUN_TIMEOUT_MS,
+    },
+  );
+
+  writeFileSync(transcript, result.stdout);
+  writeFileSync(join(base, "stderr.txt"), result.stderr);
+
+  return {...summarizeTranscript(result.stdout.split("\n")), transcript};
+}
+
 export function cleanTrials(label: string): string[] {
   const batchDir = join(workspacesDir(), trialBatch(label));
   const removed: string[] = [];
