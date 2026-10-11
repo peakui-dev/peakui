@@ -15,6 +15,10 @@ export const COMPONENT_GROUPS = [
     components: ["(collections)/dropdown", "(collections)/list-box", "(collections)/tag-group"],
   },
   {
+    category: "Controls",
+    components: ["(controls)/slider"],
+  },
+  {
     category: "Data Display",
     components: ["(data-display)/chip"],
   },
@@ -31,10 +35,12 @@ export const COMPONENT_GROUPS = [
     category: "Forms",
     components: [
       "(forms)/description",
+      "(forms)/error-message",
       "(forms)/field-error",
       "(forms)/fieldset",
       "(forms)/input",
       "(forms)/input-group",
+      "(forms)/input-otp",
       "(forms)/label",
       "(forms)/search-field",
       "(forms)/text-field",
