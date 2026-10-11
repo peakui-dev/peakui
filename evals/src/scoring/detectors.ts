@@ -122,7 +122,16 @@ function importFindings(source: ParsedSource): Finding[] {
 
     const binds = entry.kind === "import" || entry.kind === "export";
 
-    if (binds && entry.module.startsWith("@peakui/") && entry.imported.endsWith("Provider")) {
+    // A part the library really exports, such as the toast region's provider, is not the
+    // app-level provider this rule is about.
+    const realPart = libraryFacts().components.has(entry.imported);
+
+    if (
+      binds &&
+      entry.module.startsWith("@peakui/") &&
+      entry.imported.endsWith("Provider") &&
+      !realPart
+    ) {
       findings.push(
         fail(
           "provider",

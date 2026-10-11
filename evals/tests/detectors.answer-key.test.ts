@@ -3,6 +3,7 @@ import type {StaticContext} from "../src/types.ts";
 import {describe, expect, it} from "vitest";
 
 import {runDetectors} from "../src/scoring/detectors.ts";
+import {libraryFacts} from "../src/scoring/library.ts";
 
 function contextOf(files: Record<string, string>, changed?: string[]): StaticContext {
   const list = Object.entries(files).map(([path, text]) => ({path, text}));
@@ -362,5 +363,20 @@ describe("where a finding points", () => {
 
     expect(finding?.message).toContain(use);
     for (const other of others) expect(finding?.message).not.toContain(other);
+  });
+});
+
+describe("provider", () => {
+  it("does not report a provider the library really exports", () => {
+    const exported = [...libraryFacts().components.keys()].find((name) =>
+      name.endsWith("Provider"),
+    );
+
+    expect(exported, "the library exports a part ending in Provider").toBeDefined();
+    expect(rules(`import {${exported}} from "@peakui/react";`)).not.toContain("provider");
+  });
+
+  it("still reports a provider the library does not export", () => {
+    expect(rules('import {PeakUIProvider} from "@peakui/react";')).toContain("provider");
   });
 });

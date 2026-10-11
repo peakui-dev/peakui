@@ -12,6 +12,7 @@ import {profileSettings} from "./profile-settings/task.ts";
 import {sectionGroupRender} from "./section-group-render/task.ts";
 import {serverPageAction} from "./server-page-action/task.ts";
 import {signInForm} from "./sign-in-form/task.ts";
+import {teamMembers} from "./team-members/task.ts";
 import {unstyledSharedBadge} from "./unstyled-shared-badge/task.ts";
 
 export const tasks: TaskDefinition[] = [
@@ -28,6 +29,7 @@ export const tasks: TaskDefinition[] = [
   firstTimeSetup,
   serverPageAction,
   profileSettings,
+  teamMembers,
 ];
 
 export function getTask(id: string): TaskDefinition {
