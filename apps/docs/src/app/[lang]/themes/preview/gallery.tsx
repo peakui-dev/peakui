@@ -110,8 +110,8 @@ function PaletteSection() {
 
 function LoginSection() {
   return (
-    <Section className="sm:col-span-2 xl:col-span-2" title="Sign in">
-      <Card className="mx-auto w-full max-w-md">
+    <Section title="Sign in">
+      <Card className="w-full">
         <Card.Header>
           <Card.Title>Welcome back</Card.Title>
           <Card.Description>Sign in to continue to your workspace.</Card.Description>
