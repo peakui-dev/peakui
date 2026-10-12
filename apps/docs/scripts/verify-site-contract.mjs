@@ -13,23 +13,120 @@ export function buildChecks(page) {
   const unprefixed = page.replace(/^\/en/, "");
 
   return [
-    {accept: "text/html", contentType: "text/html", name: "root serves HTML", path: "/", status: 200},
-    {accept: "text/markdown", contentType: "text/markdown", name: "root negotiates markdown", path: "/", status: 200, vary: true},
-    {accept: "text/html", contentType: "text/html", name: "page serves HTML", path: page, status: 200},
-    {accept: "text/markdown", contentType: "text/markdown", name: "page negotiates markdown", path: page, status: 200, vary: true},
+    {
+      accept: "text/html",
+      contentType: "text/html",
+      name: "root serves HTML",
+      path: "/",
+      status: 200,
+    },
+    {
+      accept: "text/markdown",
+      contentType: "text/markdown",
+      name: "root negotiates markdown",
+      path: "/",
+      status: 200,
+      vary: true,
+    },
+    {
+      accept: "text/html",
+      contentType: "text/html",
+      name: "page serves HTML",
+      path: page,
+      status: 200,
+    },
+    {
+      accept: "text/markdown",
+      contentType: "text/markdown",
+      name: "page negotiates markdown",
+      path: page,
+      status: 200,
+      vary: true,
+    },
     {contentType: "text/markdown", name: "page .md", path: `${page}.md`, status: 200},
     {contentType: "text/markdown", name: "page .mdx alias", path: `${page}.mdx`, status: 200},
-    {contentType: "text/markdown", name: "unprefixed .md serves directly", path: `${unprefixed}.md`, redirect: "manual", status: 200},
-    {contentType: "text/markdown", emptyBody: true, method: "HEAD", name: "HEAD .md matches GET", path: `${page}.md`, status: 200},
-    {contentType: "text/plain", charset: "utf-8", machineCache: true, name: "machine route /llms.txt", noindex: true, path: "/llms.txt", status: 200},
-    {contentType: "text/plain", charset: "utf-8", machineCache: true, name: "machine route /llms-components.txt", noindex: true, path: "/llms-components.txt", status: 200},
-    {contentType: "text/plain", charset: "utf-8", machineCache: true, name: "machine route /llms-patterns.txt", noindex: true, path: "/llms-patterns.txt", status: 200},
-    {contentType: "application/json", json: true, name: "/api/components", path: "/api/components", status: 200},
-    {location: "/en/nope", name: "unprefixed route redirects to /en", path: "/nope", redirect: "manual", status: 307},
+    {
+      contentType: "text/markdown",
+      name: "unprefixed .md serves directly",
+      path: `${unprefixed}.md`,
+      redirect: "manual",
+      status: 200,
+    },
+    {
+      contentType: "text/markdown",
+      emptyBody: true,
+      method: "HEAD",
+      name: "HEAD .md matches GET",
+      path: `${page}.md`,
+      status: 200,
+    },
+    {
+      contentType: "text/plain",
+      charset: "utf-8",
+      machineCache: true,
+      name: "machine route /llms.txt",
+      noindex: true,
+      path: "/llms.txt",
+      status: 200,
+    },
+    {
+      contentType: "text/plain",
+      charset: "utf-8",
+      machineCache: true,
+      name: "machine route /llms-components.txt",
+      noindex: true,
+      path: "/llms-components.txt",
+      status: 200,
+    },
+    {
+      contentType: "text/plain",
+      charset: "utf-8",
+      machineCache: true,
+      name: "machine route /llms-patterns.txt",
+      noindex: true,
+      path: "/llms-patterns.txt",
+      status: 200,
+    },
+    {
+      contentType: "application/json",
+      json: true,
+      name: "/api/components",
+      path: "/api/components",
+      status: 200,
+    },
+    {
+      location: "/en/nope",
+      name: "unprefixed route redirects to /en",
+      path: "/nope",
+      redirect: "manual",
+      status: 307,
+    },
     {contentType: "text/html", name: "prefixed 404 is HTML", path: "/en/nope", status: 404},
-    {accept: "text/markdown", bodyIncludes: "# Not Found", contentType: "text/markdown", machineCache: true, name: "markdown 404 body", path: "/nope", status: 404, vary: true},
-    {emptyBody: true, name: "unknown .md is an empty 404", noContentType: true, noindex: true, path: `${page}-nope.md`, status: 404},
-    {location: `/en${unprefixed}-nope`, name: "unknown /docs path redirects 308", path: `${unprefixed}-nope`, redirect: "manual", status: 308},
+    {
+      accept: "text/markdown",
+      bodyIncludes: "# Not Found",
+      contentType: "text/markdown",
+      machineCache: true,
+      name: "markdown 404 body",
+      path: "/nope",
+      status: 404,
+      vary: true,
+    },
+    {
+      emptyBody: true,
+      name: "unknown .md is an empty 404",
+      noContentType: true,
+      noindex: true,
+      path: `${page}-nope.md`,
+      status: 404,
+    },
+    {
+      location: `/en${unprefixed}-nope`,
+      name: "unknown /docs path redirects 308",
+      path: `${unprefixed}-nope`,
+      redirect: "manual",
+      status: 308,
+    },
   ];
 }
 
@@ -118,7 +215,7 @@ async function main() {
     const problems = await runCheck(base.replace(/\/$/, ""), check);
 
     if (problems.length === 0) {
-      console.log(`ok    ${check.name}`);
+      process.stdout.write(`ok    ${check.name}\n`);
     } else {
       failed += 1;
       console.error(`FAIL  ${check.name} (${check.path})`);

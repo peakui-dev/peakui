@@ -8,6 +8,7 @@ allowBuilds:
   esbuild: true
   # Нативный резолвер eslint-import-resolver-typescript.
   unrs-resolver: true
+  workerd: true
 
 # @typescript-eslint 8.71.0 опубликован без части своего же семейства: scope-manager и
 # visitor-keys остановились на 8.70.0, и дерево не разрешается вообще. Пин снимается, когда

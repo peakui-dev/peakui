@@ -1,8 +1,5 @@
 import type {Page} from "@/lib/source";
 
-import {readFile} from "node:fs/promises";
-import {join} from "node:path";
-
 import matter from "gray-matter";
 import {remark} from "remark";
 import remarkGfm from "remark-gfm";
@@ -11,6 +8,7 @@ import remarkMdx from "remark-mdx";
 import {siteConfig} from "@/config/site";
 import {getComponentCount, getDemo, getExampleCount} from "@/demos";
 import {COMPONENT_GROUPS} from "@/lib/component-groups";
+import {readDemoSource, readDocsSource} from "@/lib/read-source";
 import {absoluteUrl} from "@/lib/seo";
 import {source} from "@/lib/source";
 
@@ -23,8 +21,6 @@ import {source} from "@/lib/source";
  * survive whatever gets added to the MDX component map later.
  */
 
-const CONTENT_DIR = "content/docs";
-const DEMOS_DIR = "src/demos";
 const DEFAULT_CATEGORY = "docs";
 
 /** The subset of the mdast / mdx-jsx node shapes this module reads or writes. */
@@ -85,7 +81,7 @@ async function demoSourceNode(node: MdNode, pagePath: string): Promise<MdNode> {
     throw new Error(`${pagePath}: <ComponentPreview name="${name ?? ""}"> has no registered demo`);
   }
 
-  const code = await readFile(join(process.cwd(), DEMOS_DIR, demo.file), "utf-8");
+  const code = await readDemoSource(demo.file);
 
   return codeNode(code, "tsx");
 }
@@ -207,7 +203,7 @@ async function transformChildren(children: MdNode[], page: Page): Promise<MdNode
 
 async function getRawMDXContent(pagePath: string): Promise<string> {
   // `page.path` already carries the locale directory (`en/react/components/...`).
-  return readFile(join(process.cwd(), CONTENT_DIR, pagePath), "utf-8");
+  return readDocsSource(pagePath);
 }
 
 function formatHeader(page: Page): string {
