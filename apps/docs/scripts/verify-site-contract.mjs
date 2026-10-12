@@ -87,10 +87,48 @@ export function evaluate(check, res) {
   return problems;
 }
 
-function main() {
-  throw new Error("not implemented yet");
+async function runCheck(base, check) {
+  const response = await fetch(`${base}${check.path}`, {
+    headers: check.accept ? {Accept: check.accept} : undefined,
+    method: check.method ?? "GET",
+    redirect: check.redirect === "manual" ? "manual" : "follow",
+  });
+
+  return evaluate(check, {
+    body: check.method === "HEAD" ? "" : await response.text(),
+    contentType: response.headers.get("content-type"),
+    header: (name) => response.headers.get(name),
+    location: response.headers.get("location"),
+    status: response.status,
+  });
+}
+
+async function main() {
+  const [base, page = "/en/docs/react/components/button"] = process.argv.slice(2);
+
+  if (!base) {
+    console.error("usage: verify-site-contract.mjs <baseUrl> [page]");
+
+    process.exit(2);
+  }
+
+  let failed = 0;
+
+  for (const check of buildChecks(page)) {
+    const problems = await runCheck(base.replace(/\/$/, ""), check);
+
+    if (problems.length === 0) {
+      console.log(`ok    ${check.name}`);
+    } else {
+      failed += 1;
+      console.error(`FAIL  ${check.name} (${check.path})`);
+      console.error(`      ${problems.join("; ")}`);
+    }
+  }
+
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 if (process.argv[1]?.endsWith("verify-site-contract.mjs")) {
-  main();
+  await main();
 }
