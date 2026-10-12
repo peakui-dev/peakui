@@ -34,6 +34,12 @@ jobs:
         env:
           NEXT_PUBLIC_SITE_URL: https://docs.ci.invalid
 
+      # Production builds through vinext; a PR that breaks only this path must not
+      # merge green and strand main undeployable.
+      - run: pnpm --filter @peakui/docs run build:vinext
+        env:
+          NEXT_PUBLIC_SITE_URL: https://docs.ci.invalid
+
       # Гейты слоя токенов: дрейф, контраст, висящие токены, полнота тем, литеральные цвета.
       - run: pnpm check:tokens
 
