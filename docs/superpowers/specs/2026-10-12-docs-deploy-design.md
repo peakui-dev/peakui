@@ -16,7 +16,7 @@ that trigger decision: docs changes must ship without waiting for an npm release
 | Adapter | **vinext** (Cloudflare's default path). `@opennextjs/cloudflare` is the documented fallback; switch criteria below. |
 | Domain | `https://peakui.dev` as a custom domain on the Worker from the first deploy. `NEXT_PUBLIC_SITE_URL=https://peakui.dev` at build. |
 | Trigger | Push to `main` + `workflow_dispatch`. **Supersedes** the tags-only decision in the release pipeline spec: docs-only changes (guides, fixes, demos) ship independently of npm releases; the Releases pages stay release-bound by content, not by deploy. No tag trigger: a tag's tree is already on `main` at release time. |
-| Auth in CI | `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` GitHub secrets; deploy step runs the adapter's deploy command with these env vars. |
+| Auth in CI | `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` GitHub secrets; deploy step runs the adapter's deploy command with these env vars. The token is custom-built, not the "Deploy Workers" template: Worker deploy **plus** zone cache purge, so the workflow can purge the edge after every deploy. |
 | Previews | None. Solo development; verification is local dev, the blocking post-deploy smoke, and the live site. |
 
 ## Adapter
@@ -32,8 +32,14 @@ Known risk: vinext is in beta, and this app stresses two specific paths — `fum
 `@peakui/styles` are consumed as TypeScript from `src/`). The first implementation task is a
 spike gate that must pass before anything else is built on top (see *Fallback criteria*).
 
-Local workflow does not change: content work stays on `pnpm dev:docs`; `dev:vinext` exists for
-periodic parity checks against the target platform.
+Local workflow does not change: content work stays on `pnpm dev:docs`. The generated
+`dev:vinext` script stays for on-demand debugging against the target platform — no recurring
+process is attached to it.
+
+The install also wants `allowBuilds` entries in `pnpm-workspace.yaml` for toolchain packages
+with postinstall scripts (wrangler, workerd and friends): pnpm silently skips their builds
+under `--frozen-lockfile`, and the breakage surfaces only inside CI. Adding the entries is a
+task in the plan, not an afterthought.
 
 ## Worker configuration
 
@@ -43,19 +49,32 @@ Whatever `vinext init` generates, the committed configuration must satisfy:
 - `nodejs_compat` compatibility flag and a current compatibility date.
 - Static assets bound per the adapter's layout; no KV/R2/D1 bindings — the site is build-output
   only.
+- **The proxy must run before asset serving for negotiated paths.** Workers serves a matching
+  static asset *without invoking the Worker* unless the assets binding says otherwise (for
+  example `run_worker_first`): prerendered HTML must never bypass `proxy.ts` content
+  negotiation. The smoke catches a violation; the configuration must prevent it.
+- The compressed Worker script stays within the plan's script-size limit — asserted during the
+  spike gate; the contingency is bundle trimming or the Workers paid plan.
 - The generated files follow repo conventions (English comments, prettier-clean) and are
   committed.
 
 ## Deploy workflow — `.github/workflows/docs-deploy.yml`
 
-- Triggers: `push` to `main`, `workflow_dispatch`.
+- Triggers: `push` to `main`, `workflow_dispatch` (with an optional `base-url` input for the
+  smoke, default `https://peakui.dev` — used for the pre-domain first deploy).
 - `concurrency: docs-deploy` with `cancel-in-progress: false` — deploys serialize.
 - Steps: checkout → pnpm setup (node 24, cache) → `pnpm install --frozen-lockfile` → build the
   docs app with `NEXT_PUBLIC_SITE_URL=https://peakui.dev` (the adapter's build script) → deploy
-  with `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` from secrets → run the contract smoke
-  against `https://peakui.dev`, **blocking**: a red smoke fails the workflow.
-- `CI` (typecheck, unit tests, e2e) already gated the merge; this workflow's own gate is the
-  build plus the smoke.
+  with `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` from secrets → **purge the zone's edge
+  cache** (the contract's `s-maxage=3600` would otherwise keep serving the previous deploy's
+  `llms-*` and `.md` bytes — cached by extension — for up to an hour, and the smoke would
+  validate stale content) → run the contract smoke, **blocking**.
+- If the smoke fails, the workflow attempts `wrangler rollback` (best effort,
+  `continue-on-error`) and goes red. The accepted runbook beyond that is fix-forward: revert on
+  `main`, the next push redeploys.
+- Deploys trust that `main` is gated by `CI` through PRs; a direct push to `main` deploys
+  unverified. Branch protection on `main` is the stated assumption, not something this
+  workflow enforces.
 
 ## Contract preservation — `apps/docs/scripts/verify-site-contract.mjs`
 
@@ -65,15 +84,20 @@ load-bearing promises from `docs-site-contract.md` against any environment (loca
 production):
 
 - Content negotiation: a docs page URL returns HTML to `Accept: text/html` and markdown to
-  `Accept: text/markdown` — both representations correct, never cross-served.
-- `<page>.md` returns `text/markdown` with the page's markdown.
-- `/llms.txt` (and one of `/llms-components.txt`, `/llms-patterns.txt`) returns
+  `Accept: text/markdown` — both representations correct, never cross-served; the site root `/`
+  negotiates too. Markdown responses carry `Vary: Accept`. `HEAD` answers like `GET` without a
+  body for `.md` URLs and negotiated requests.
+- `<page>.md` and the `.mdx` alias return `text/markdown` with the page's markdown — with and
+  without the `/en` prefix (`200`, no redirect on the unprefixed form).
+- All three of `/llms.txt`, `/llms-components.txt`, `/llms-patterns.txt` return
   `text/plain; charset=utf-8`.
 - `/api/components` returns JSON with the documented shape.
 - Machine routes carry `X-Robots-Tag: noindex, nofollow` and
   `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`.
-- An unknown route responds in the documented 404 shape (redirect to the `/en`-prefixed path,
-  no cache headers on the 404).
+- All three documented 404 shapes: an unknown `<page>.md`/`.mdx` (any prefix) answers `404`
+  with an empty body and no `Content-Type`; any unknown path with `Accept: text/markdown`
+  answers the `# Not Found` markdown body; an unknown path without the header redirects to the
+  `/en`-prefixed form (307 outside `/docs`, 308 inside) which serves the HTML 404.
 
 Run locally after a vinext build (`wrangler dev`/adapter preview) and in the deploy workflow
 after every production deploy. If the Workers host violates a promise the script catches it
@@ -95,11 +119,14 @@ steps change.
 
 ## Owner setup (outside the repository)
 
-1. Cloudflare API token with the "Deploy Workers" template permissions; add as
+1. Cloudflare API token with permissions for Worker deploy **and** zone cache purge; add as
    `CLOUDFLARE_API_TOKEN` secret on `peakui-dev/peakui`; add `CLOUDFLARE_ACCOUNT_ID`.
-2. `peakui.dev` zone in Cloudflare (DNS moved to Cloudflare if not yet); attach the custom
-   domain `peakui.dev` to the `peakui-docs` Worker.
-3. First deploy via the workflow's manual dispatch; watch the smoke.
+2. `peakui.dev` zone in Cloudflare (DNS moved to Cloudflare if not yet).
+3. First deploy via the workflow's manual dispatch with `base-url` pointed at the Worker's
+   `workers.dev` URL — this dispatch also creates the Worker.
+4. Attach the custom domain `peakui.dev` to the now-existing `peakui-docs` Worker (custom
+   domains require an existing Worker; certificate provisioning takes a moment), dispatch
+   again, watch the smoke against `peakui.dev`.
 
 ## Documentation updates
 
@@ -115,10 +142,14 @@ steps change.
 
 - Spike gate: `vinext check` + local `build:vinext` + `wrangler dev` + smoke on localhost —
   pass before the workflow is wired.
-- `verify-site-contract.mjs` has unit tests for its assertion logic (pure functions, `test:ai`
-  pattern) — the HTTP fetches stay a thin shell.
+- `ci.yml`'s verify job runs the vinext docs build in addition to the classic one: a PR that
+  breaks only `build:vinext` must not merge green and strand `main` undeployable.
+- `verify-site-contract.mjs` keeps its logic in pure, unit-tested helpers (the URL/check
+  matrix); the HTTP layer stays a thin shell.
 - Existing suites (`agent-markdown.test.ts`, docs app vitest) keep passing; `pnpm build:docs`
-  (classic Next build) stays the CI gate and must keep working — the migration is additive.
+  (classic Next build) stays. The two build paths are maintained deliberately, without a
+  sunset: the classic build feeds dev workflows and the OpenNext fallback, the vinext build
+  feeds production.
 
 ## Out of scope
 

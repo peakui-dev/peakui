@@ -217,6 +217,7 @@ index entry.
 
 ## Out of scope
 
-- Docs deployment (decision recorded above: from release tags when introduced).
+- Docs deployment — superseded by `docs/superpowers/specs/2026-10-12-docs-deploy-design.md`
+  (Cloudflare Workers, deploy on `main` + manual dispatch).
 - `@peakui/codemodes` (contract-mentioned, does not exist yet; first breaking API change is far).
 - Provenance beyond npm's automatic attestation, npm star/2FA policy, publishing `evals`.
