@@ -25,21 +25,32 @@ export interface ClientDirectivePlugin {
 }
 
 /*
- * Исходные id абсолютны, имена выходных файлов — относительны. Сопоставляем по пути без
- * расширения: в unbundle-режиме один модуль даёт ровно один файл, поэтому хвост пути совпадает.
- * Вынесено наружу, потому что пустой результат здесь провалил бы весь гейт вхолостую.
+ * Source ids are absolute or config-relative and may carry Windows separators (tsdown.config.ts
+ * builds entries with node:path join), while output file names are always posix and relative to
+ * the `src/` root in unbundle mode — one module gives exactly one file. Matching therefore
+ * normalizes separators and compares by the module path under `src/`. A bare suffix compare is
+ * not enough: it misses Windows ids and collides (`index.js` would match every `<dir>/index`
+ * module). Kept as a pure function because an empty result here would run the whole gate idle.
  */
 export function matchDeclared(
   outputNames: readonly string[],
   clientModuleIds: readonly string[],
 ): Set<string> {
-  const stems = clientModuleIds.map((id) => id.replace(/\.[cm]?[jt]sx?$/, ""));
+  const stems = clientModuleIds.map((id) => {
+    const posix = id.replace(/\\/g, "/");
+    const cut = posix.lastIndexOf("/src/");
+
+    return (cut === -1 ? posix.replace(/^src\//, "") : posix.slice(cut + 5)).replace(
+      /\.[cm]?[jt]sx?$/,
+      "",
+    );
+  });
   const declared = new Set<string>();
 
   for (const name of outputNames) {
     const stem = name.replace(/\.[cm]?js$/, "");
 
-    if (stems.some((candidate) => candidate.endsWith(`/${stem}`) || candidate === stem)) {
+    if (stems.includes(stem)) {
       declared.add(name);
     }
   }
