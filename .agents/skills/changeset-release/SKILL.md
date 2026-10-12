@@ -19,9 +19,9 @@ Automate the release preparation process: analyze changes, create changeset file
 Run these commands to understand what changed:
 
 ```bash
-git diff master --stat
-git diff master --name-only
-git log master..HEAD --oneline
+git diff main --stat
+git diff main --name-only
+git log main..HEAD --oneline
 ```
 
 Identify:
@@ -100,7 +100,7 @@ Summarize what was done:
 - Which packages and bump types
 - Branch name
 - Changeset file created
-- Next steps (create PR, review, merge to master)
+- Next steps (create PR, review, merge to main)
 
 ## Constraints
 
@@ -108,6 +108,27 @@ Summarize what was done:
 - Reference MKI task numbers when available
 - Do not run `pnpm changeset version` — this is done by CI on merge
 - Do not run `pnpm changeset add` interactively — create the `.changeset/*.md` file directly
+
+## Automated half (CI)
+
+The `Release` workflow (`.github/workflows/release.yml`) owns everything after the changeset
+lands:
+
+- Every push to `main` keeps the **Version Packages** PR up to date (bot branch
+  `changeset-release/main`). It carries the version bumps, both `CHANGELOG.md` files, the
+  styles version const, and the lockfile.
+- Merging that PR is the release: `scripts/publish-release.mjs` packs and publishes both
+  packages to npm (OIDC trusted publishing), pushes tag `v<version>`, and creates the GitHub
+  Release from the changelogs.
+- The `dry_run` workflow input rehearses a publish without uploading or tagging.
+
+## Docs release page
+
+Every release writes a page under `apps/docs/content/docs/en/react/releases/`:
+
+1. Create `v<x-y-z>.mdx` (dots become dashes: `v0-0-1.mdx`) — an English summary of what
+   shipped, the install command, and a link to the GitHub Release.
+2. Prepend the release to `index.mdx` and to the `pages` list in the section's `meta.json`.
 
 ## Additional resources
 
