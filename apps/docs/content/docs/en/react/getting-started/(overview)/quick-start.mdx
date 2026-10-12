@@ -10,13 +10,19 @@ description: Install PeakUI, import its styles in the right order and render you
 
 ## Install
 
-Install the two PeakUI packages together with their peer dependencies:
+Install the two PeakUI packages:
 
 ```npm
-npm install @peakui/react @peakui/styles react-aria-components @react-aria/utils
+npm install @peakui/react @peakui/styles
 ```
 
-`react-aria-components` and `@react-aria/utils` are peer dependencies of `@peakui/react`. Tailwind CSS is a peer dependency of `@peakui/styles`; if your project does not have it yet, follow the [Tailwind CSS installation guide](https://tailwindcss.com/docs/installation) for your framework first.
+npm (7 or later), pnpm (8 or later) and Bun install peer dependencies automatically, so the React Aria packages arrive with `@peakui/react`. With Yarn, add them yourself:
+
+```bash
+npm install react-aria-components @react-aria/utils
+```
+
+Tailwind CSS is a peer dependency of `@peakui/styles`; if your project does not have it yet, follow the [Tailwind CSS installation guide](https://tailwindcss.com/docs/installation) for your framework first.
 
 ## Import Styles
 
@@ -24,10 +30,10 @@ Add both imports to your main CSS file, for example `app/globals.css`:
 
 ```css title="globals.css"
 @import "tailwindcss";
-@import "@peakui/styles/css";
+@import "@peakui/styles";
 ```
 
-Write the subpath `@peakui/styles/css`. The root specifier `@peakui/styles` is the package's TypeScript entry (the variant functions and `tv`); it reaches the stylesheet only through a `style` export condition. Tailwind's own resolver follows that condition, but the supported CSS entry is the explicit `/css` subpath.
+In CSS files the bare package name resolves to the stylesheet through the `style` export condition, which Tailwind, Vite and Next.js follow. The explicit subpath `@peakui/styles/css` is the same file, for tooling that does not follow the condition.
 
 <Callout type="warn">
   The order matters. `@peakui/styles` extends Tailwind and does not import it. If Tailwind comes second, or is missing, the component styles are silently absent: there is no build error.
@@ -80,7 +86,7 @@ Tailwind finds class names by scanning your source files as text. Two consequenc
 
 ```css title="globals.css"
 @import "tailwindcss";
-@import "@peakui/styles/css";
+@import "@peakui/styles";
 @source "../node_modules/@acme/ui";
 ```
 

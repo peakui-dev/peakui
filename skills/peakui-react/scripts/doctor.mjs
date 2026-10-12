@@ -158,17 +158,6 @@ function stylesheetFindings(project, files, context) {
 
     context.cssEntry ??= path;
 
-    const bare = imports.find((entry) => entry.specifier === STYLES);
-
-    if (bare) {
-      findings.push({
-        fix: `Change it to @import "${STYLES}/css";, which always resolves to the stylesheet. With the bare name a build can fail with an error that does not name the cause.`,
-        id: "css-wrong-specifier",
-        what: `The stylesheet is imported as "${STYLES}", which can resolve to the package's JavaScript instead of its stylesheet, depending on the bundler.`,
-        where: `${path}:${bare.line}`,
-      });
-    }
-
     if (tailwind && tailwind.line > peakui.line) {
       findings.push({
         fix: `Move @import "tailwindcss"; above @import "${peakui.specifier}";. In the other order Tailwind's reset overrides the component styles, and nothing reports it.`,
@@ -181,7 +170,7 @@ function stylesheetFindings(project, files, context) {
 
   if (context.cssEntry === undefined && installedManifest(project, STYLES)) {
     findings.push({
-      fix: `In the app's CSS entry file add @import "${STYLES}/css"; on the line after @import "tailwindcss";`,
+      fix: `In the app's CSS entry file add @import "${STYLES}"; on the line after @import "tailwindcss";`,
       id: "styles-not-imported",
       what: "No CSS file imports the PeakUI stylesheet, so components render unstyled.",
       ...(tailwindOnly === undefined ? {} : {where: tailwindOnly}),

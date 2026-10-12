@@ -9,7 +9,7 @@
  * Order is load-bearing: @peakui/styles extends an already-declared Tailwind and does not import
  * it itself.
  */
-@import "@peakui/styles/css";
+@import "@peakui/styles";
 
 /* ============================================================================
    CSS VARIABLES - ROOT & THEMES
