@@ -1,7 +1,7 @@
-import {mkdirSync, readdirSync, readFileSync} from "node:fs";
+import {spawnSync} from "node:child_process";
+import {mkdirSync, readFileSync, readdirSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
-import {spawnSync} from "node:child_process";
 
 /*
  * Release publisher. Runs in CI (release.yml) on every push to main:
@@ -91,6 +91,12 @@ function main() {
   const version = manifests[0].version;
   const tag = `v${version}`;
 
+  if (version === "0.0.0") {
+    console.log("0.0.0 is the pre-release placeholder — publish only after a Version Packages PR");
+
+    return;
+  }
+
   if (tagExists(tag)) {
     console.log(`${tag} already exists — nothing to publish`);
 
@@ -122,7 +128,7 @@ function main() {
   run("git", ["push", "origin", tag]);
 
   const sections = Object.fromEntries(
-    manifests.map(({name, dir}) => [
+    manifests.map(({dir, name}) => [
       name,
       extractChangelogSection(readFileSync(join(dir, "CHANGELOG.md"), "utf8"), version),
     ]),
