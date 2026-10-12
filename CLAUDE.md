@@ -198,6 +198,14 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
   does not reach them (checked against `next start`). The host must vary cached HTML docs pages on
   `Accept`, or run the proxy before its cache. Without that a shared cache can hand HTML to an agent
   that asked for markdown, or the reverse.
+- **Production** — Cloudflare Workers, Worker `peakui-docs`, custom domain `peakui.dev`. The
+  `Docs deploy` workflow ships `main` (plus manual dispatch with a `base-url` smoke input);
+  every deploy purges the zone cache and must pass the contract smoke
+  `apps/docs/scripts/verify-site-contract.mjs`, and a red smoke attempts `wrangler rollback`.
+  Two dual-mode seams keep one codebase on both hosts: `src/lib/read-source.ts` (fs) is swapped
+  for `read-source.worker.ts` (bundled raw sources) by a vite alias, and the proxy answers
+  markdown itself instead of rewriting to an internal route. Design:
+  `docs/superpowers/specs/2026-10-12-docs-deploy-design.md`.
 - **Storybook stays independent** — docs never import stories, and stories never import demos.
 - The app has no `@heroui/*` dependency: those styles define the same BEM classes as
   `@peakui/styles` and would collide.
