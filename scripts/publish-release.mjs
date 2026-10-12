@@ -1,3 +1,6 @@
+import {mkdirSync, readdirSync, readFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
 import {spawnSync} from "node:child_process";
 
 /*
@@ -30,7 +33,10 @@ export function extractChangelogSection(markdown, version) {
 
   const end = lines.findIndex((line, index) => index > start && line.startsWith("## "));
 
-  return lines.slice(start + 1, end === -1 ? undefined : end).join("\n").trim();
+  return lines
+    .slice(start + 1, end === -1 ? undefined : end)
+    .join("\n")
+    .trim();
 }
 
 export function releaseNotes(sections) {
@@ -56,8 +62,73 @@ export function run(command, args) {
   }
 }
 
+function tagExists(tag) {
+  return spawnSync("git", ["tag", "-l", tag], {encoding: "utf8"}).stdout.trim() !== "";
+}
+
 function main() {
-  throw new Error("not implemented yet");
+  const dryRun = process.argv.includes("--dry-run");
+
+  if (pendingChangesets(readdirSync(".changeset"))) {
+    console.log(
+      "pending changesets — the Version Packages PR is being maintained, nothing to publish",
+    );
+
+    return;
+  }
+
+  const manifests = PACKAGES.map((pkg) => ({
+    ...pkg,
+    version: JSON.parse(readFileSync(join(pkg.dir, "package.json"), "utf8")).version,
+  }));
+  const versions = Object.fromEntries(manifests.map((pkg) => [pkg.name, pkg.version]));
+  const error = lockstepError(versions);
+
+  if (error) {
+    throw error;
+  }
+
+  const version = manifests[0].version;
+  const tag = `v${version}`;
+
+  if (tagExists(tag)) {
+    console.log(`${tag} already exists — nothing to publish`);
+
+    return;
+  }
+
+  const packDir = join(tmpdir(), "peakui-release");
+
+  mkdirSync(packDir, {recursive: true});
+
+  for (const {name} of manifests) {
+    run("pnpm", ["--filter", name, "pack", "--pack-destination", packDir]);
+    run("npm", [
+      "publish",
+      join(packDir, tarballName(name, version)),
+      "--access",
+      "public",
+      ...(dryRun ? ["--dry-run"] : ["--provenance"]),
+    ]);
+  }
+
+  if (dryRun) {
+    console.log(`dry run — ${tag} would now be tagged and the GitHub Release created`);
+
+    return;
+  }
+
+  run("git", ["tag", tag]);
+  run("git", ["push", "origin", tag]);
+
+  const sections = Object.fromEntries(
+    manifests.map(({name, dir}) => [
+      name,
+      extractChangelogSection(readFileSync(join(dir, "CHANGELOG.md"), "utf8"), version),
+    ]),
+  );
+
+  run("gh", ["release", "create", tag, "--title", tag, "--notes", releaseNotes(sections)]);
 }
 
 if (process.argv[1]?.endsWith("publish-release.mjs")) {
