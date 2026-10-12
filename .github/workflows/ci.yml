@@ -37,6 +37,10 @@ jobs:
       # Гейты слоя токенов: дрейф, контраст, висящие токены, полнота тем, литеральные цвета.
       - run: pnpm check:tokens
 
+      # The package gates validate the dist-based publish form (publishConfig), so the build
+      # must exist before they pack.
+      - run: pnpm build:packages
+
       - run: pnpm lint:package
 
       # Тесты скриптов харнеса: bootstrap и агентские хуки. Без этого шага регрессия в
