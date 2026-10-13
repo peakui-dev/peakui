@@ -114,7 +114,8 @@ function main() {
       join(packDir, tarballName(name, version)),
       "--access",
       "public",
-      ...(dryRun ? ["--dry-run"] : ["--provenance"]),
+      // Provenance is produced by the OIDC flow only; a token-authenticated publish omits it.
+      ...(dryRun ? ["--dry-run"] : process.env.NODE_AUTH_TOKEN ? [] : ["--provenance"]),
     ]);
   }
 
