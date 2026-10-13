@@ -21,7 +21,7 @@ Declare your values after the two imports:
 
 ```css title="globals.css"
 @import "tailwindcss";
-@import "@peakui/styles/css";
+@import "@peakui/styles";
 
 :root {
   --accent: oklch(0.6 0.2 250);
@@ -111,7 +111,7 @@ Each component page lists its classes and variables under **Styling Reference**.
 
 ## Import Strategies
 
-`@peakui/styles/css` imports everything. To pick the parts yourself, import them separately, in this order:
+`@peakui/styles` imports everything. To pick the parts yourself, import them separately, in this order:
 
 ```css
 @import "tailwindcss";

@@ -160,19 +160,15 @@ test("an import inside a comment does not count", () => {
   assert.deepEqual(ids(consumer({"src/index.css": css})), ["styles-not-imported"]);
 });
 
-test("the bare package specifier is the script entry, not the stylesheet", () => {
-  // Observed in a trial and reproduced by hand: with the package as the stand builds it, Vite and
-  // Next.js resolve the bare specifier to JavaScript and fail the build without naming the cause.
-  // A resolver that prefers the "style" condition would find the stylesheet; "/css" always does.
+test("the bare package specifier reaches the stylesheet", () => {
+  // With "import" listed before "style" in the export map, Vite and Next.js resolved the bare
+  // specifier to JavaScript and failed the build without naming the cause (observed in a trial).
+  // The map now lists "style" first, so a CSS resolver finds the stylesheet; "/css" stays the
+  // explicit alternative for tooling that does not follow the condition.
   const css = '@import "tailwindcss";\n@import "@peakui/styles";\n';
   const {context, findings} = inspect(consumer({"src/index.css": css}));
 
-  assert.deepEqual(
-    findings.map((finding) => finding.id),
-    ["css-wrong-specifier"],
-  );
-  assert.equal(findings[0].where, "src/index.css:2");
-  assert.match(findings[0].fix, /@peakui\/styles\/css/);
+  assert.deepEqual(findings, []);
   assert.equal(context.cssEntry, "src/index.css");
 });
 
@@ -271,13 +267,4 @@ test("parts imported before Tailwind are the same order mistake", () => {
     findings.map((finding) => finding.id),
     ["css-import-order"],
   );
-});
-
-test("the bare specifier finding claims only what is certain", () => {
-  const css = '@import "tailwindcss";\n@import "@peakui/styles";\n';
-  const [finding] = inspect(consumer({"src/index.css": css})).findings;
-
-  // Which file the bare name resolves to depends on the bundler and on the package's export map.
-  assert.match(finding.what, /can resolve to/);
-  assert.doesNotMatch(`${finding.what} ${finding.fix}`, /is not a stylesheet|the build fails/);
 });

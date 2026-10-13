@@ -46,3 +46,7 @@ jobs:
           publish: node scripts/publish-release.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # First releases publish with this token. Once trusted publishers are attached on
+          # npmjs for both packages, delete the NPM_TOKEN secret and this line: with no token
+          # in the environment npm authenticates through OIDC instead.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
