@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsdown",
     "lint": "eslint . --max-warnings=0",
-    "lint:package": "publint --strict && attw --pack . --profile esm-only",
+    "lint:package": "publint --strict && node scripts/attw-packed.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
@@ -55,6 +55,24 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "src"
-  ]
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peakui-dev/peakui.git",
+    "directory": "packages/react"
+  },
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs",
+        "default": "./dist/index.mjs"
+      },
+      "./package.json": "./package.json"
+    }
+  }
 }

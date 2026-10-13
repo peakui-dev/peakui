@@ -7,7 +7,7 @@
 | @peakui/react | packages/react |
 | @peakui/styles | packages/styles |
 
-`@peakui/react` does not exist yet; it arrives with the core. Read the version from the
-package's own `package.json` — a number copied here goes stale on the next release.
+Read a package's version from its own `package.json` — a number copied here goes stale on the
+next release.
 
 When bumping a lower-level package, consider whether dependent packages need a patch bump too

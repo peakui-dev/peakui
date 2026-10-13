@@ -1,0 +1,3 @@
+# This file only needs to exist: its presence stops npm/pnpm pack from falling back to
+# .gitignore, which would silently drop the gitignored dist/ from the tarball. The published
+# file set is governed by the `files` whitelist in package.json.
