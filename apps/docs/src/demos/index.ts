@@ -687,6 +687,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./popover/with-arrow").then((m) => m.WithArrow),
     file: "popover/with-arrow.tsx",
   },
+  // progress-bar
+  "progress-bar-basic": {
+    loader: () => import("./progress-bar/basic").then((m) => m.Basic),
+    file: "progress-bar/basic.tsx",
+  },
+  "progress-bar-colors": {
+    loader: () => import("./progress-bar/colors").then((m) => m.Colors),
+    file: "progress-bar/colors.tsx",
+  },
+  "progress-bar-custom-styles": {
+    loader: () => import("./progress-bar/custom-styles").then((m) => m.CustomStyles),
+    file: "progress-bar/custom-styles.tsx",
+  },
+  "progress-bar-custom-value": {
+    loader: () => import("./progress-bar/custom-value").then((m) => m.CustomValue),
+    file: "progress-bar/custom-value.tsx",
+  },
+  "progress-bar-indeterminate": {
+    loader: () => import("./progress-bar/indeterminate").then((m) => m.Indeterminate),
+    file: "progress-bar/indeterminate.tsx",
+  },
+  "progress-bar-sizes": {
+    loader: () => import("./progress-bar/sizes").then((m) => m.Sizes),
+    file: "progress-bar/sizes.tsx",
+  },
+  "progress-bar-without-label": {
+    loader: () => import("./progress-bar/without-label").then((m) => m.WithoutLabel),
+    file: "progress-bar/without-label.tsx",
+  },
   // radio-group
   "radio-group-basic": {
     loader: () => import("./radio-group/basic").then((m) => m.Basic),

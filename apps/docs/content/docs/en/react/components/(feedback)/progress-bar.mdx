@@ -1,0 +1,187 @@
+---
+title: ProgressBar
+description: Shows determinate or indeterminate progress of an operation
+links:
+  rac: ProgressBar
+  source: progress-bar/progress-bar.tsx
+  styles: progress-bar.css
+---
+
+## Usage
+
+```tsx
+import {Label, ProgressBar} from "@peakui/react";
+```
+
+<ComponentPreview name="progress-bar-basic" />
+
+### Anatomy
+
+```tsx
+import {Label, ProgressBar} from "@peakui/react";
+
+export default () => (
+  <ProgressBar value={60}>
+    <Label />
+    <ProgressBar.Output />
+    <ProgressBar.Track>
+      <ProgressBar.Fill />
+    </ProgressBar.Track>
+  </ProgressBar>
+);
+```
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="progress-bar-sizes" />
+
+### Colors
+
+<ComponentPreview name="progress-bar-colors" />
+
+### Without Label
+
+Without a visible `Label`, `aria-label` names the progress bar.
+
+<ComponentPreview name="progress-bar-without-label" />
+
+### Indeterminate
+
+`isIndeterminate` removes the value and animates the fill.
+
+<ComponentPreview name="progress-bar-indeterminate" />
+
+### Custom Value
+
+`minValue`, `maxValue` and `formatOptions` set the range and the display format.
+
+<ComponentPreview name="progress-bar-custom-value" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="progress-bar-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .progress-bar__track {
+    @apply h-3 rounded-full;
+  }
+
+  .progress-bar__fill {
+    @apply rounded-full;
+  }
+
+  .progress-bar--success {
+    --progress-bar-fill: var(--color-success);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ProgressBar component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/progress-bar.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.progress-bar` - Base container (grid layout)
+- `.progress-bar__output` - Value text display
+- `.progress-bar__track` - Track background
+- `.progress-bar__fill` - Filled portion of the track
+
+#### Size Classes [!toc]
+
+- `.progress-bar--sm` - Small size, thinner track
+- `.progress-bar--md` - Medium size, the default
+- `.progress-bar--lg` - Large size, thicker track
+
+#### Color Classes [!toc]
+
+- `.progress-bar--default`
+- `.progress-bar--accent`
+- `.progress-bar--success`
+- `.progress-bar--warning`
+- `.progress-bar--danger`
+
+### Slots
+
+- `[data-slot="progress-bar"]`
+- `[data-slot="progress-bar-output"]`
+- `[data-slot="progress-bar-track"]`
+- `[data-slot="progress-bar-fill"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--progress-bar-fill` | Fill color, set by the color classes |
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Indeterminate**: `:not([aria-valuenow])`
+- **Disabled**: `:disabled`, `[data-disabled="true"]` or `[aria-disabled="true"]`
+
+## API Reference
+
+### ProgressBar
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `number` | `0` | The current value |
+| `minValue` | `number` | `0` | The smallest value |
+| `maxValue` | `number` | `100` | The largest value |
+| `isIndeterminate` | `boolean` | - | Whether progress is unknown; leaves out `aria-valuenow` and the fill width |
+| `formatOptions` | `Intl.NumberFormatOptions` | `{style: 'percent'}` | Display format of the value |
+| `valueLabel` | `ReactNode` | - | Text announced as the value, such as "2 of 5" |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | `'accent'` | Color of the fill |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Height of the track |
+| `children` | `ReactNode \| (values: ProgressBarRenderProps) => ReactNode` | - | Content, or a function of the render props |
+| `className` | `string \| (values: ProgressBarRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `...rest` | | | Every React Aria `ProgressBar` attribute is accepted, including `aria-label` |
+
+### ProgressBar.Output
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | formatted value | Replaces the formatted value |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### ProgressBar.Track
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Holds `ProgressBar.Fill` |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'` |
+| `...rest` | | | Every `<div>` attribute is accepted |
+
+### ProgressBar.Fill
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Content inside the fill |
+| `className` | `string` | - | Additional classes |
+| `style` | `CSSProperties` | - | Merged under the computed `width` |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'` |
+| `...rest` | | | Every `<div>` attribute is accepted |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `percentage` | `number \| undefined` | The value as a percentage between `minValue` and `maxValue` |
+| `valueText` | `string \| undefined` | The formatted value |
+| `isIndeterminate` | `boolean` | Whether progress is unknown |

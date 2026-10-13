@@ -35,6 +35,7 @@
     "(overlays)/modal",
     "(forms)/number-field",
     "(overlays)/popover",
+    "(feedback)/progress-bar",
     "(forms)/radio-group",
     "(utilities)/scroll-shadow",
     "(forms)/search-field",
