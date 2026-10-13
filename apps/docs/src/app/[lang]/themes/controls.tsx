@@ -20,11 +20,11 @@ const RADIUS_OPTIONS: [RadiusId, string][] = [
 ];
 
 /*
- * Surfaces consume the scale at 1.5x, where the XS step is imperceptible on a card — the
- * control offers the reference's five steps instead. XS stays a valid codec value for presets.
+ * Controls and surfaces consume the scale at 3x, so past large a surface only meets its 32px
+ * clamp — the control stops there, as the reference's does. XL stays a valid codec value.
  */
 const SURFACE_RADIUS_OPTIONS: [RadiusId, string][] = RADIUS_OPTIONS.filter(
-  ([id]) => id !== "extra-small",
+  ([id]) => id !== "extra-large",
 );
 
 /** RAC Slider supports multi-thumb values; this slider has exactly one thumb. */

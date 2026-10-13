@@ -83,7 +83,7 @@
 }
 
 .tag--lg {
-  @apply rounded-md px-2.5 py-1.5 text-sm;
+  @apply rounded-2xl px-2.5 py-1.5 text-sm;
 }
 
 /* Variant */

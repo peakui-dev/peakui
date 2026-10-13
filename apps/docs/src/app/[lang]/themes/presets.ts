@@ -17,7 +17,7 @@ export const BUILDER_THEME_ID = "builder";
 export const DEFAULT_VALUES: BuilderValues = {
   accent: "oklch(0.555 0.215 262)",
   grayChroma: 0.006,
-  radius: "extra-large",
+  radius: "medium",
   formRadius: "large",
 };
 
