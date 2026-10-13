@@ -16,11 +16,11 @@
    * Theming seam — the public override contract, ahead of any tv({extend}).
    */
   --segmented-control-bg: var(--color-default);
-  --segmented-control-radius: var(--radius-lg);
+  --segmented-control-radius: var(--radius-3xl);
   --segmented-control-item-fg: var(--color-muted);
   --segmented-control-item-fg-selected: var(--color-segment-foreground);
   --segmented-control-indicator-bg: var(--color-segment);
-  --segmented-control-indicator-radius: var(--radius-lg);
+  --segmented-control-indicator-radius: var(--radius-3xl);
   --segmented-control-indicator-shadow: var(--shadow-surface);
 
   @apply inline-flex w-fit items-center p-1;
@@ -176,8 +176,8 @@
    Icon-only modifier
    ==========================================================================
    A square segment, so the capsule reads as a circle instead of an oval. The radius needs no
-   change: it is --radius-lg and a browser clamps a radius to half the box, so a square
-   segment is already round. Widths mirror the heights of each size, the same way
+   change: it is --radius-3xl (24px) and a browser clamps a radius to half the box, so a 24-32px
+   square is already round. Widths mirror the heights of each size, the same way
    .button--icon-only and .toggle-button--icon-only pair theirs. */
 
 .segmented-control__item--icon-only {
@@ -217,8 +217,9 @@
  *    writes explicit values (`[data-selected="true"]`). The value-less form is the house form,
  *    recorded in toggle-button.css's deviation list, item 5. tabs.css is left alone.
  *
- * 3. The radius comes from `--segmented-control-radius` / `--radius-lg`, staying on the token
- *    scale (tabs.css once used an off-scale `calc(var(--radius) * 2.5)`, since aligned).
+ * 3. The radius comes from `--segmented-control-radius` / `--radius-3xl`, not from the off-scale
+ *    `calc(var(--radius) * 2.5)` that tabs.css:23 uses. Browsers clamp a radius to half the box,
+ *    so all three sizes read as a pill, and the value stays on the token scale.
  *
  * 4. A forced-colors block, which tabs.css has none of. The selected state is carried by the
  *    indicator's background, and forced-colors flattens backgrounds; the Highlight/HighlightText

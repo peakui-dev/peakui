@@ -1,3 +1,5 @@
+"use client";
+
 import type {CheckboxVariants} from "../checkbox/index.ts";
 
 import {createContext} from "react";

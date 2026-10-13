@@ -11,14 +11,14 @@ import type {ThemePreset} from "../src/generator/preset.ts";
  * ring drops below 3:1 on the deepest dark surface. 0.555 gives the foreground 4.66:1 and keeps the
  * ring at 3.02:1 or better on every surface level in both schemes.
  *
- * The radius sits on the scale's top step on purpose: the reference's strongly-rounded controls
- * are the default look, and controls consume the scale at 1x, so every lower step stays visually
- * distinct instead of saturating (see components/*.css).
+ * The radius stays on the medium step: `--radius` is also the unit of the Tailwind radius scale,
+ * so this is what keeps `rounded-lg` at 8px for every utility a consumer writes. Components reach
+ * their look through multiples of it (see components/*.css).
  */
 export const defaultPreset: ThemePreset = {
   id: "default",
   accent: "oklch(0.555 0.215 262)",
   grayChroma: 0.006,
-  radius: "extra-large",
+  radius: "medium",
   formRadius: "large",
 };

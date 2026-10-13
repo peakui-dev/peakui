@@ -3,7 +3,7 @@
 /* Base popover styles */
 .popover {
   @apply origin-(--trigger-anchor-point) bg-overlay p-0 text-sm;
-  border-radius: var(--radius-xl);
+  border-radius: min(32px, var(--radius-3xl));
   box-shadow: var(--overlay-shadow);
 
   /*

@@ -28,6 +28,7 @@ export const COMPONENT_GROUPS = [
     components: [
       "(feedback)/alert",
       "(feedback)/empty-state",
+      "(feedback)/progress-bar",
       "(feedback)/skeleton",
       "(feedback)/spinner",
     ],

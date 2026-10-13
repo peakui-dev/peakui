@@ -7,6 +7,7 @@
     "---Overview---",
     "index",
     "(overview)/quick-start",
+    "(overview)/design-principles",
     "---Handbook---",
     "(handbook)/theming",
     "(handbook)/dark-mode",
@@ -14,6 +15,7 @@
     "(handbook)/composition",
     "---UI for Agents---",
     "(ui-for-agents)/llms-txt",
+    "(ui-for-agents)/mcp-server",
     "(ui-for-agents)/agent-skills"
   ]
 }

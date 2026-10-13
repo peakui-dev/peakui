@@ -1,0 +1,282 @@
+---
+title: Design Principles
+description: The ten principles behind PeakUI's API, accessibility and styling decisions.
+---
+
+PeakUI follows ten principles. Each one is a decision you can see in the API.
+
+## Core Principles
+
+### 1. Semantic Intent Over Visual Style
+
+A variant names the role of an action, not how it looks. Choose it by what the action means on the screen:
+
+```tsx
+import {Button} from "@peakui/react";
+
+<Button variant="primary">Save</Button>
+<Button variant="secondary">Edit</Button>
+<Button variant="tertiary">Cancel</Button>
+<Button variant="danger">Delete</Button>
+```
+
+| Variant | Purpose | Usage |
+|---------|---------|-------|
+| `primary` | The main action that moves the task forward | One per context |
+| `secondary` | Alternative actions | Several allowed |
+| `tertiary` | Dismissive actions such as cancel or skip | Sparingly |
+| `danger` | Destructive actions | When needed |
+
+`Button` also has `outline`, `ghost` and `danger-soft` for lower-emphasis placements.
+
+### 2. Accessibility as Foundation
+
+Behavior comes from [React Aria Components](https://react-aria.adobe.com/): ARIA attributes, keyboard interaction and focus management are built in. The floor is WCAG 2.2 AA, including `forced-colors` mode.
+
+```tsx
+import {Tabs} from "@peakui/react";
+
+<Tabs defaultSelectedKey="profile">
+  <Tabs.ListContainer>
+    <Tabs.List aria-label="Settings">
+      <Tabs.Tab id="profile">
+        Profile
+        <Tabs.Indicator />
+      </Tabs.Tab>
+      <Tabs.Tab id="security">
+        Security
+        <Tabs.Indicator />
+      </Tabs.Tab>
+    </Tabs.List>
+  </Tabs.ListContainer>
+  <Tabs.Panel id="profile">Profile settings</Tabs.Panel>
+  <Tabs.Panel id="security">Security settings</Tabs.Panel>
+</Tabs>
+```
+
+### 3. Composition Over Configuration
+
+A component is a root plus named parts. Rearrange them, restyle one, or leave one out: the library never assembles them behind a single prop.
+
+```tsx
+import {Disclosure} from "@peakui/react";
+
+<Disclosure>
+  <Disclosure.Heading>
+    <Disclosure.Trigger>
+      Shipping details
+      <Disclosure.Indicator />
+    </Disclosure.Trigger>
+  </Disclosure.Heading>
+  <Disclosure.Content>
+    <Disclosure.Body>Orders ship within two business days.</Disclosure.Body>
+  </Disclosure.Content>
+</Disclosure>
+```
+
+See [Composition](/docs/react/getting-started/composition) for fields, the `render` prop and custom components.
+
+### 4. Progressive Disclosure
+
+A component works with no props. Add them only as the requirement grows:
+
+```tsx
+import {Check} from "@gravity-ui/icons";
+import {Button, Spinner} from "@peakui/react";
+
+// Level 1: minimal
+<Button>Save</Button>
+
+// Level 2: variant, size and an icon
+<Button size="lg" variant="secondary">
+  <Check />
+  Save
+</Button>
+
+// Level 3: pending state
+<Button isPending={isSaving}>
+  {isSaving ? <Spinner aria-hidden color="current" size="sm" /> : null}
+  Save
+</Button>
+```
+
+### 5. Predictable Behavior
+
+The same prop means the same thing on every component: `size`, `variant` and `className`, with state exposed as `data-*` attributes.
+
+```tsx
+import {Button, Chip, Spinner} from "@peakui/react";
+
+<Button className="w-32" size="lg" variant="secondary">Invite</Button>
+<Chip className="w-32" size="lg" variant="secondary">Pending</Chip>
+<Spinner className="text-muted" size="lg" />
+```
+
+Every part of a compound component is available in dot notation and as a named export:
+
+```tsx
+import {Alert, AlertIndicator} from "@peakui/react";
+
+// Dot notation
+<Alert>
+  <Alert.Indicator />
+</Alert>
+
+// Named export
+<Alert>
+  <AlertIndicator />
+</Alert>
+```
+
+### 6. Type Safety First
+
+Props, variants and event handlers are typed, and every component exports its props type for you to extend.
+
+```tsx
+import type {ButtonProps} from "@peakui/react";
+
+import {Button} from "@peakui/react";
+
+<Button
+  size="md" // "sm" | "md" | "lg"
+  variant="primary" // "primary" | "secondary" | "tertiary" | "outline" | "ghost" | "danger" | "danger-soft"
+  onPress={(event) => console.log(event.pointerType)} // event is a PressEvent
+>
+  Save
+</Button>
+
+// Extend the props type for your own component
+interface IntentButtonProps extends Omit<ButtonProps, "variant"> {
+  intent: "save" | "cancel" | "delete";
+}
+```
+
+### 7. Separation of Styles and Logic
+
+`@peakui/styles` holds the CSS and the variant functions and has no React dependency; `@peakui/react` adds the behavior. The classes work in any framework and in plain HTML:
+
+```html
+<button class="button button--md button--primary">Save</button>
+```
+
+In React, the variant function returns the same class string:
+
+```tsx
+import {buttonVariants} from "@peakui/styles";
+
+<a className={buttonVariants({variant: "primary"})} href="/home">
+  Home
+</a>
+```
+
+### 8. Developer Experience Excellence
+
+One import root, typed APIs, and documentation an AI assistant can read: every page has a markdown version listed in [`/llms.txt`](/docs/react/getting-started/llms-txt), and the [`peakui-react` skill](/docs/react/getting-started/agent-skills) teaches a coding agent the conventions.
+
+```tsx
+import {Button, Tabs, TextField} from "@peakui/react";
+```
+
+### 9. Complete Customization
+
+Change the whole theme with CSS variables, or one component through its BEM classes and its own variables.
+
+```css title="globals.css"
+/* Theme-wide: every component follows */
+:root {
+  --accent: oklch(0.6 0.2 250);
+  --radius: 0.75rem;
+}
+
+/* One component */
+@layer components {
+  .button {
+    @apply font-semibold tracking-wide;
+  }
+
+  .button--secondary {
+    --button-bg: var(--color-surface);
+    --button-fg: var(--color-surface-foreground);
+  }
+}
+```
+
+See [Theming](/docs/react/getting-started/theming) for the tokens and [Styling](/docs/react/getting-started/styling) for classes, slots and state selectors.
+
+### 10. Open and Extensible
+
+Wrap, extend and restyle components to fit your product. Four techniques cover most cases.
+
+**Apply styles with a variant function:**
+
+```tsx
+import {Link, linkVariants} from "@peakui/react";
+import NextLink from "next/link";
+
+const slots = linkVariants();
+
+<NextLink className={slots.base()} href="/about">
+  About
+  <Link.Icon className={slots.icon()} />
+</NextLink>
+```
+
+**Apply BEM classes directly:**
+
+```tsx
+import Link from "next/link";
+
+<Link className="button button--md button--primary" href="/dashboard">
+  Dashboard
+</Link>
+```
+
+**Create a wrapper component:**
+
+```tsx
+import type {ButtonProps} from "@peakui/react";
+
+import {Button} from "@peakui/react";
+
+interface CTAButtonProps extends Omit<ButtonProps, "variant"> {
+  intent?: "primary-cta" | "secondary-cta" | "minimal";
+}
+
+const variantByIntent = {
+  minimal: "ghost",
+  "primary-cta": "primary",
+  "secondary-cta": "secondary",
+} as const;
+
+export function CTAButton({intent = "primary-cta", ...props}: CTAButtonProps) {
+  return <Button variant={variantByIntent[intent]} {...props} />;
+}
+```
+
+**Extend a variant function:**
+
+```tsx
+import {buttonVariants, tv} from "@peakui/react";
+
+// For an element that is not a Button; a Button wrapper adds its own variants instead
+const linkButtonVariants = tv({
+  extend: buttonVariants,
+  variants: {
+    radius: {
+      full: "rounded-full",
+      sm: "rounded-sm",
+    },
+  },
+});
+
+<a className={linkButtonVariants({radius: "full", variant: "secondary"})} href="/pricing">
+  See pricing
+</a>
+```
+
+## Next Steps
+
+- [Quick Start](/docs/react/getting-started/quick-start) – install the packages and render a component.
+- [Composition](/docs/react/getting-started/composition) – compound parts, the `render` prop and custom components.
+- [Styling](/docs/react/getting-started/styling) – class names, state selectors and variant functions.
+- [Theming](/docs/react/getting-started/theming) – the tokens and how to change them.

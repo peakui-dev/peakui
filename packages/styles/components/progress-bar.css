@@ -1,0 +1,198 @@
+/*
+ * ProgressBar. Class names come from src/components/progress-bar/progress-bar.styles.ts; all
+ * Tailwind lives here. Ported line by line from the vendored reference
+ * styles/components/progress-bar.css. The differences that remain are listed at the end of the
+ * file, each with its reason.
+ */
+
+/* ==========================================================================
+   ProgressBar - Shows determinate or indeterminate progress
+   ========================================================================== */
+
+/* Base styles */
+.progress-bar {
+  @apply grid w-full gap-1;
+  grid-template-areas:
+    "label output"
+    "track track";
+  grid-template-columns: 1fr auto;
+
+  /* Theming seam: the fill colour. The default is the accent token. */
+  --progress-bar-fill: var(--color-accent);
+
+  [data-slot="label"] {
+    @apply w-fit text-sm font-medium;
+
+    grid-area: label;
+  }
+
+  .progress-bar__output {
+    @apply text-sm font-medium tabular-nums;
+
+    grid-area: output;
+  }
+
+  .progress-bar__track {
+    @apply relative overflow-hidden rounded-sm bg-default;
+
+    grid-area: track;
+
+    /* Default height (matches --md) */
+    @apply h-2;
+
+    /*
+     * Forced colors: the track is a ButtonFace background and the fill a Highlight background, and
+     * forced-colors flattens every background that is not a system colour, so a bar whose fill is
+     * not Highlight vanishes into the track. Both surfaces get a system colour below; the outline
+     * keeps the track's extent visible. An outline takes no space, so nothing shifts between modes.
+     */
+    @media (forced-colors: active) {
+      outline: 1px solid ButtonBorder;
+    }
+  }
+
+  .progress-bar__fill {
+    @apply absolute start-0 top-0 h-full rounded-sm;
+
+    background-color: var(--progress-bar-fill);
+
+    /**
+     * Transitions
+     * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+     */
+    transition: width 300ms var(--ease-out);
+    @apply motion-reduce:transition-none;
+
+    @media (forced-colors: active) {
+      background-color: Highlight;
+    }
+  }
+
+  /*
+   * No label and no output: the "label / output" row is empty, yet the grid still pays the row gap
+   * for it. The selector names exactly the two things grid-area places in that row.
+   */
+  &:not(:has([data-slot="label"], .progress-bar__output)) {
+    row-gap: 0;
+  }
+
+  /* Indeterminate state - when no aria-valuenow is set */
+  &:not([aria-valuenow]) {
+    .progress-bar__fill {
+      @apply w-2/5;
+
+      animation: progress-bar-indeterminate 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+
+      @apply motion-reduce:animate-none;
+    }
+  }
+
+  /* Disabled state */
+  &:disabled,
+  &[data-disabled="true"],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+
+    [data-slot="label"] {
+      @apply opacity-100;
+    }
+  }
+}
+
+/* ==========================================================================
+   Indeterminate animation
+   ========================================================================== */
+
+@keyframes progress-bar-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+/* ==========================================================================
+   Size variants
+   ========================================================================== */
+
+.progress-bar--sm {
+  .progress-bar__track {
+    @apply h-1 rounded-xs;
+  }
+
+  .progress-bar__fill {
+    @apply rounded-xs;
+  }
+}
+
+.progress-bar--md {
+  /* No styles as this is the default size */
+}
+
+.progress-bar--lg {
+  .progress-bar__track {
+    @apply h-3 rounded-md;
+  }
+
+  .progress-bar__fill {
+    @apply rounded-md;
+  }
+}
+
+/* ==========================================================================
+   Color variants
+   ========================================================================== */
+
+.progress-bar--default {
+  --progress-bar-fill: var(--color-default-foreground);
+}
+
+.progress-bar--accent {
+  --progress-bar-fill: var(--color-accent);
+}
+
+.progress-bar--success {
+  --progress-bar-fill: var(--color-success);
+}
+
+.progress-bar--warning {
+  --progress-bar-fill: var(--color-warning);
+}
+
+.progress-bar--danger {
+  --progress-bar-fill: var(--color-danger);
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` token prefix on every token (`--color-accent`, `--color-default-foreground`,
+ *    `--color-success`, `--color-warning`, `--color-danger`): that is how the peakui token layer
+ *    is spelled (reaffirmed in docs/superpowers/specs/2026-10-02-react-package-button-design.md,
+ *    section 12).
+ *
+ * 2. forced-colors blocks on the track and the fill: the reference has none. The decision to
+ *    support forced colors is recorded in docs/superpowers/specs/2026-10-01-design-tokens-design.md.
+ *    The theme block remaps --accent and --default to system colours but leaves --success,
+ *    --warning and --danger as plain colours, which forced-colors flattens to the page background;
+ *    the fill is therefore pinned to the system colour Highlight and the track gets a ButtonBorder
+ *    outline so the bar stays visible and its extent readable. The colour variants collapse to one
+ *    appearance in this mode by design: the value is always also present as text in the output
+ *    part and as aria-valuenow.
+ *
+ * 3. Reduced motion for the indeterminate animation: the reference already carries
+ *    `motion-reduce:animate-none` after the animation and `motion-reduce:transition-none` after the
+ *    width transition, and both are kept as written. Nothing was added; under reduced motion the
+ *    indeterminate fill rests as a static 40% segment at the start of the track.
+ *
+ * 4. `@keyframes progress-bar-indeterminate` is kept in this file rather than moved to the theme:
+ *    it is specific to this component, as the keyframes in input-otp.css and toast.css are. The
+ *    theme owns only the animations shared between components (skeleton, caret-blink).
+ *
+ * 5. `row-gap: 0` on a bar that holds neither a label nor an output: the reference keeps the
+ *    gap, and with an empty "label / output" row the grid still spends it, so the track of a bar
+ *    that carries only a track (named by aria-label) sits 4px below the top of the component.
+ *    Measured in Chromium on the WithoutLabel story: 4px before, 0 after
+ *    (apps/storybook/e2e/ProgressBar.spec.ts). Bars with a label or an output keep the gap.
+ */

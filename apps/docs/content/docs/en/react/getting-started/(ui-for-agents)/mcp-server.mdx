@@ -1,0 +1,200 @@
+---
+title: MCP Server
+description: Give your AI assistant direct access to the PeakUI documentation.
+---
+
+The PeakUI MCP server gives an AI coding assistant the component documentation, component stylesheets, theme variables and guides. It is published as `@peakui/mcp`, runs over [stdio](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#stdio) and fetches what it serves on demand, so an answer matches the current documentation.
+
+The server holds facts, not rules. The conventions for composing and styling PeakUI live in the [`peakui-react` skill](/docs/react/getting-started/agent-skills), which works alongside it.
+
+## Quick Setup
+
+Every snippet sets `PEAKUI_DOCS_URL`, the address of the documentation site the server reads.
+
+### Cursor
+
+Add the server to `.cursor/mcp.json` in your project, or to `~/.cursor/mcp.json` for every project:
+
+```json title=".cursor/mcp.json"
+{
+  "mcpServers": {
+    "peakui": {
+      "command": "npx",
+      "args": ["-y", "@peakui/mcp@latest"],
+      "env": {
+        "PEAKUI_DOCS_URL": "https://peakui.dev"
+      }
+    }
+  }
+}
+```
+
+See the [Cursor MCP documentation](https://cursor.com/docs/context/mcp) for more details.
+
+### Claude Code
+
+Run this command in your terminal:
+
+```bash
+claude mcp add peakui -e PEAKUI_DOCS_URL=https://peakui.dev -- npx -y @peakui/mcp@latest
+```
+
+Or add the server to your project's `.mcp.json` file:
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "peakui": {
+      "command": "npx",
+      "args": ["-y", "@peakui/mcp@latest"],
+      "env": {
+        "PEAKUI_DOCS_URL": "https://peakui.dev"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code and run `/mcp`: the `peakui` server is in the list, marked as connected.
+
+See the [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp) for more details.
+
+### Zed
+
+Add the server to your `settings.json`:
+
+```json title="settings.json"
+{
+  "context_servers": {
+    "peakui": {
+      "command": "npx",
+      "args": ["-y", "@peakui/mcp@latest"],
+      "env": {
+        "PEAKUI_DOCS_URL": "https://peakui.dev"
+      }
+    }
+  }
+}
+```
+
+Open **Settings** → **AI** → **MCP Servers**: a green indicator next to the server means it is active.
+
+See the [Zed MCP documentation](https://zed.dev/docs/ai/mcp) for more details.
+
+### VS Code
+
+Add the server to your project's `.vscode/mcp.json` file:
+
+```json title=".vscode/mcp.json"
+{
+  "servers": {
+    "peakui": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@peakui/mcp@latest"],
+      "env": {
+        "PEAKUI_DOCS_URL": "https://peakui.dev"
+      }
+    }
+  }
+}
+```
+
+Start the server from the inline action above its entry in `mcp.json`.
+
+See the [VS Code MCP documentation](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) for more details.
+
+### Codex
+
+Add the server to `~/.codex/config.toml`:
+
+```toml title="config.toml"
+[mcp_servers.peakui]
+command = "npx"
+args = ["-y", "@peakui/mcp@latest"]
+
+[mcp_servers.peakui.env]
+PEAKUI_DOCS_URL = "https://peakui.dev"
+```
+
+See the [Codex MCP documentation](https://developers.openai.com/codex/mcp) for more details.
+
+### OpenCode
+
+Add the server to your project's `opencode.json` file:
+
+```json title="opencode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "peakui": {
+      "type": "local",
+      "command": ["npx", "-y", "@peakui/mcp@latest"],
+      "environment": {
+        "PEAKUI_DOCS_URL": "https://peakui.dev"
+      }
+    }
+  }
+}
+```
+
+See the [OpenCode MCP documentation](https://opencode.ai/docs/mcp-servers/) for more details.
+
+### Other Clients
+
+Any client that starts a stdio server needs the same three things: the command `npx`, the arguments `-y @peakui/mcp@latest` and the `PEAKUI_DOCS_URL` environment variable.
+
+## Usage
+
+Once configured, ask your AI assistant questions like:
+
+- "Show me all PeakUI components"
+- "What props does the Button component have?"
+- "Give me an example of using the Tabs component"
+- "Show me the CSS classes and variables of Card"
+- "What are the theme variables for dark mode?"
+- "How do I install PeakUI in my app?"
+
+## Available Tools
+
+Every tool is read-only.
+
+| Tool | Description |
+|------|-------------|
+| `list_components` | Every PeakUI component with its name and a one-line description |
+| `get_component_docs` | The documentation page of one to ten components as markdown: usage, examples, styling reference and API reference |
+| `get_component_styles` | The stylesheet of one to ten components: BEM classes, data attributes and CSS custom properties |
+| `get_theme_variables` | The default theme: every CSS custom property with its light and dark value |
+| `get_docs` | A guide as markdown, such as `/docs/react/getting-started/quick-start`, or the list of guides when called without a path |
+
+## Configuration
+
+The server is configured with environment variables.
+
+| Variable | Meaning |
+|----------|---------|
+| `PEAKUI_DOCS_URL` | Address of the PeakUI documentation site: an `http` or `https` URL with an optional path, and no query string, fragment or credentials |
+| `PEAKUI_TELEMETRY_DISABLED` | Set to `1` to disable telemetry |
+| `DO_NOT_TRACK` | Set to `1` to disable telemetry |
+
+No telemetry is sent today. A future release may send the client name and version, the tool name, the names of the components asked for and the server version. Source code, file paths, project names and arguments are never collected.
+
+## Offline Behavior
+
+- The server starts without the network and makes no request until a tool is called.
+- Pages are cached in memory for five minutes.
+- When the documentation site is unreachable, a cached copy is served with a note saying how old it is.
+- Styles and theme variables are read from the `@peakui/styles` package installed in your project, and from the repository when it is not installed.
+
+## Troubleshooting
+
+**Requirements:** Node.js 20 or later. `npx` downloads the package the first time it runs.
+
+**The server does not start:** check `PEAKUI_DOCS_URL`. An invalid address is the one error reported at startup; every other failure comes back from the tool call as a message that says what to check.
+
+**Need help?** [GitHub Issues](https://github.com/peakui-dev/peakui-mcp/issues)
+
+## Links
+
+- [npm Package](https://www.npmjs.com/package/@peakui/mcp)
+- [GitHub Repository](https://github.com/peakui-dev/peakui-mcp)
