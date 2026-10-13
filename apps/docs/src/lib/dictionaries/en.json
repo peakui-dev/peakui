@@ -1,17 +1,48 @@
 {
   "home": {
-    "titleMain": "Accessible by default.",
-    "titleMuted": "Styled with plain CSS.",
-    "description": "PeakUI is a React component library built on React Aria Components and Tailwind CSS v4. Compound parts, BEM class names and CSS custom properties keep every component easy to restyle.",
     "metaTitle": "PeakUI - Accessible React components, styled with plain CSS.",
     "metaDescription": "Accessible React components built on React Aria Components and Tailwind CSS v4, styled with BEM classes and CSS custom properties.",
+    "title": "React components that take on your brand.",
+    "description": "PeakUI is an open-source library of {count} accessible React components. Give it one color and it builds the whole theme, light and dark, with readable contrast.",
     "getStarted": "Get started",
-    "viewComponents": "View components",
+    "viewComponents": "Browse components",
     "sourceOnGithub": "Source on GitHub",
-    "overviewTitle": "Build accessible products with PeakUI",
-    "overview": "PeakUI is an open-source component library for React. It combines React Aria Components with Tailwind CSS v4 to provide accessible behavior, typed APIs, compound composition and CSS you can read and override.",
-    "agentsTitle": "Documentation for developers and coding agents",
-    "agents": "The documentation covers installation, component APIs, examples and styling references. Coding agents can read the generated llms.txt indexes, request any documentation page as markdown, and fetch the components index as JSON."
+    "brands": {
+      "title": "See it in another brand's colors",
+      "hint": "Pick one and the whole page follows.",
+      "openBuilder": "Tune this theme in the builder"
+    },
+    "features": {
+      "title": "What you get",
+      "accessible": {
+        "title": "Accessible without extra work",
+        "body": "Keyboard support, focus handling and screen-reader labels are built in, on top of React Aria. Every component targets WCAG 2.2 AA.",
+        "try": "Try it: Tab into the list, then use the arrow keys."
+      },
+      "theme": {
+        "title": "A whole theme from one color",
+        "body": "Give the engine an accent. It derives every color for light and dark, and keeps text contrast at 4.5:1 or better.",
+        "caption": "Text on each of these colors is chosen and checked by the engine."
+      },
+      "css": {
+        "title": "CSS you can read and override",
+        "body": "Styles ship as plain CSS files. Each part of a component has a class name and its own CSS variables, so a restyle is a few lines."
+      },
+      "agents": {
+        "title": "Docs your AI assistant can read",
+        "body": "Every page is also published as Markdown, next to an index for assistants and a JSON list of components.",
+        "index": "Documentation index",
+        "markdown": "Any page as Markdown",
+        "json": "Components as JSON"
+      }
+    },
+    "start": {
+      "title": "Start in three steps",
+      "install": "Install the packages",
+      "styles": "Import the styles, after Tailwind",
+      "use": "Use a component",
+      "more": "Read the quick start"
+    }
   },
   "nav": {
     "documentation": "Documentation",
