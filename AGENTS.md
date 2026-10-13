@@ -102,8 +102,9 @@ what all three actually wire, not merely that they exist.
 
 Binding library choices for the core, not a description of what is installed: RAC for behavior and
 a11y (react-aria / react-stately hooks only where RAC lacks a primitive), `tailwind-variants` for BEM
-names, `@tanstack/react-table` + `react-virtual`, Recharts, `@internationalized/date`, vitest +
-`@testing-library/react`, Playwright.
+names, `@tanstack/react-table` + `react-virtual`, `@internationalized/date`, vitest +
+`@testing-library/react`, Playwright. Charts are not the core's: they live in `peakui-pro`, on
+Recharts.
 
 The jsdom setup those tests need, and the `render` / `setupUser` / `ssrSmoke` helpers, live in the
 private `packages/testing` — never published, and not optional: without `installPointerEvent()` and
