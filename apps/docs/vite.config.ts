@@ -4,6 +4,7 @@ import {readFileSync, readdirSync} from "node:fs";
 import {join, resolve} from "node:path";
 
 import {cloudflare} from "@cloudflare/vite-plugin";
+import {staticAssetsAdapter} from "@vinext/cloudflare/cache/static-assets-adapter";
 import {imagesOptimizer} from "@vinext/cloudflare/images/images-optimizer";
 import mdx from "fumadocs-mdx/vite";
 import vinext from "vinext";
@@ -69,6 +70,16 @@ export default defineConfig(async () => ({
     await mdx(await import("./source.config")),
     rawSources(),
     vinext({
+      /*
+       * vinext 1.1.0 refuses to deploy an app with ISR / caching unless a cache backend is
+       * declared here; it no longer scaffolds one into the Worker entry. Every route of this
+       * site is `revalidate = false` — the content changes on deploy and never in between — so
+       * the read-only adapter over the existing ASSETS binding is the whole requirement: its
+       * runtime writes are no-ops and a new deployment replaces its contents. KV (what the
+       * error message suggests) would add a namespace, a binding and a quota to back a data
+       * cache nothing here writes to.
+       */
+      cache: {data: staticAssetsAdapter()},
       images: {optimizer: imagesOptimizer()},
     }),
     cloudflare({

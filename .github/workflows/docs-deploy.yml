@@ -6,10 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       base-url:
-        description: "Base URL for the post-deploy contract smoke"
+        description: "Site origin to build and smoke against; defaults to the DOCS_SITE_URL variable"
         required: false
         type: string
-        default: https://peakui.dev
 
 jobs:
   deploy:
@@ -20,47 +19,76 @@ jobs:
     concurrency:
       group: docs-deploy
       cancel-in-progress: false
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Empty until peakui.dev is a zone in the account. It is read here, not inline in the
+      # purge step, because a step `if` cannot see the `secrets` context — only `env`.
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: pnpm
 
+      # One origin for the build and the smoke. NEXT_PUBLIC_SITE_URL is inlined at build time
+      # into every absolute URL in /llms*.txt and /api/components, so a smoke run against a
+      # different host would be checking bytes that were never built for it. The dispatch input
+      # wins over the repository variable, which holds workers.dev until the custom domain is
+      # attached and peakui.dev afterwards.
+      - name: Resolve the site origin
+        env:
+          INPUT_BASE_URL: ${{ inputs.base-url }}
+          VAR_SITE_URL: ${{ vars.DOCS_SITE_URL }}
+        run: |
+          origin="${INPUT_BASE_URL:-$VAR_SITE_URL}"
+          origin="${origin%/}"
+
+          if [ -z "$origin" ]; then
+            echo "::error::No site origin: set the DOCS_SITE_URL repository variable or pass base-url."
+            exit 1
+          fi
+
+          echo "SITE_URL=$origin" >> "$GITHUB_ENV"
+          echo "Site origin: $origin"
+
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter @peakui/docs run build:vinext
-        env:
-          NEXT_PUBLIC_SITE_URL: https://peakui.dev
-
+      # `vinext-cloudflare deploy` runs the vite build itself and then hands the output to
+      # `cf deploy`, so a preceding `build:vinext` step would build the app twice and ship
+      # the second build — the one whose environment this step owns.
       - name: Deploy
-        id: deploy
         run: pnpm --filter @peakui/docs run deploy
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          NEXT_PUBLIC_SITE_URL: ${{ env.SITE_URL }}
 
       # The contract's s-maxage=3600 would otherwise keep serving the previous deploy's
-      # llms-* and .md bytes; the smoke must validate this deploy, not the cache.
+      # llms-* and .md bytes; the smoke must validate this deploy, not the cache. Skipped
+      # while the site answers on workers.dev, which no zone fronts and nothing caches.
       - name: Purge edge cache
+        if: env.CLOUDFLARE_ZONE_ID != ''
         run: >
           curl -sf -X POST
-          "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/cache/purge_everything"
-          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/cache/purge_everything"
+          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"
           -H "Content-Type: application/json"
           --data '{"purge_everything":true}'
 
       - name: Contract smoke
-        run: node apps/docs/scripts/verify-site-contract.mjs "${{ inputs.base-url || 'https://peakui.dev' }}"
+        run: node apps/docs/scripts/verify-site-contract.mjs "$SITE_URL"
 
-      # Best effort: only when something was actually deployed.
-      - name: Rollback
-        if: failure() && steps.deploy.outcome == 'success'
-        continue-on-error: true
-        run: pnpm --filter @peakui/docs exec wrangler rollback
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # No automatic rollback. `wrangler` is not a dependency of this repository — the
+      # Cloudflare CLI here is `cf` — so a step shelling out to it only pretends to revert,
+      # silently, under continue-on-error. A real rollback is `cf workers versions list` plus
+      # `cf workers deployments create` on the previous version; until that is written and
+      # proven, a red smoke leaves the deployed version live and says so.
+      - name: Explain a red deploy
+        if: failure()
+        run: >
+          echo "::warning::This version stays live. Revert the commit and let the next deploy
+          win, or roll back by hand: Cloudflare dashboard -> Workers -> peakui-docs ->
+          Deployments."
