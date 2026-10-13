@@ -32,19 +32,8 @@ export type GalleryPreset = {
  * added to @peakui/styles (spec, "Boundaries").
  */
 export const GALLERY: GalleryPreset[] = [
+  // PeakUI's own palettes first, the brand-inspired ones after: the picker shows them as two rows.
   {name: "Default", values: DEFAULT_VALUES},
-  {
-    name: "Spotify",
-    values: {accent: "#1db954", grayChroma: 0.008, radius: "medium", formRadius: "large"},
-  },
-  {
-    name: "Netflix",
-    values: {accent: "#e50914", grayChroma: 0.005, radius: "small", formRadius: "small"},
-    semanticOverrides: {
-      light: {danger: {color: "#e50914"}},
-      dark: {danger: {color: "#e50914"}},
-    },
-  },
   {
     name: "Mint",
     values: {
@@ -72,6 +61,26 @@ export const GALLERY: GalleryPreset[] = [
       radius: "small",
       formRadius: "small",
     },
+  },
+  {
+    name: "Spotify",
+    values: {accent: "#1db954", grayChroma: 0.008, radius: "medium", formRadius: "large"},
+  },
+  {
+    name: "Netflix",
+    values: {accent: "#e50914", grayChroma: 0.005, radius: "small", formRadius: "small"},
+    semanticOverrides: {
+      light: {danger: {color: "#e50914"}},
+      dark: {danger: {color: "#e50914"}},
+    },
+  },
+  {
+    name: "Airbnb",
+    values: {accent: "#ff385c", grayChroma: 0.004, radius: "medium", formRadius: "medium"},
+  },
+  {
+    name: "Discord",
+    values: {accent: "#5865f2", grayChroma: 0.015, radius: "medium", formRadius: "medium"},
   },
 ];
 

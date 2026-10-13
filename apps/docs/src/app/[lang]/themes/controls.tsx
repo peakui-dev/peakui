@@ -1,22 +1,24 @@
 "use client";
 
 import type {BuilderState} from "./url-codec";
-import type {ContrastFix, RadiusId} from "@peakui/styles/generator";
+import type {ContrastFix, RadiusId, TokenSet} from "@peakui/styles/generator";
 import type {ReactNode} from "react";
 
-import {Label, SegmentedControl, Separator, Slider} from "@peakui/react";
+import {Label, SegmentedControl, Slider} from "@peakui/react";
+import {RADIUS_BASE} from "@peakui/styles/generator";
 
-import {AccentPopover} from "./accent-popover";
-import {ContrastChips} from "./contrast-chips";
-import {GALLERY, matchGalleryPreset} from "./presets";
+import {AccentControls} from "./accent-controls";
+import {ContrastLedger} from "./contrast-ledger";
+import {PresetPicker} from "./preset-picker";
+import {matchGalleryPreset} from "./presets";
 
 const RADIUS_OPTIONS: [RadiusId, string][] = [
   ["none", "None"],
-  ["extra-small", "XS"],
-  ["small", "S"],
-  ["medium", "M"],
-  ["large", "L"],
-  ["extra-large", "XL"],
+  ["extra-small", "Extra small"],
+  ["small", "Small"],
+  ["medium", "Medium"],
+  ["large", "Large"],
+  ["extra-large", "Extra large"],
 ];
 
 /*
@@ -30,127 +32,120 @@ const SURFACE_RADIUS_OPTIONS: [RadiusId, string][] = RADIUS_OPTIONS.filter(
 /** RAC Slider supports multi-thumb values; this slider has exactly one thumb. */
 const single = (value: number | number[]): number => (Array.isArray(value) ? value[0]! : value);
 
-/** A labelled group of the panel: the micro-caption names the axis the group controls. */
-function Group({children, label}: {children: ReactNode; label: string}) {
+/*
+ * One axis of the theme. Groups are set apart by space alone: the caption is quiet, so the
+ * controls — not the headings — are what the eye lands on.
+ */
+function Group({children, title}: {children: ReactNode; title: string}) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted">
-        {label}
-      </span>
+    <section className="flex flex-col gap-3.5">
+      <h2 className="text-xs font-medium text-muted">{title}</h2>
       {children}
+    </section>
+  );
+}
+
+/** A radius scale whose segments draw the corner they set, at its real size. */
+function RadiusScale({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  options: [RadiusId, string][];
+  value: RadiusId;
+  onChange: (value: RadiusId) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between text-[13px]">
+        <span className="text-muted">{label}</span>
+        <span>{options.find(([id]) => id === value)?.[1]}</span>
+      </div>
+      <SegmentedControl
+        aria-label={`${label} radius`}
+        className="w-full"
+        selectedKey={value}
+        size="sm"
+        onSelectionChange={(key) => onChange(key as RadiusId)}
+      >
+        {options.map(([id, name]) => (
+          <SegmentedControl.Item key={id} aria-label={name} className="px-0" id={id}>
+            <span
+              aria-hidden="true"
+              className="size-3.5 border-s-[1.5px] border-t-[1.5px] border-current"
+              style={{borderStartStartRadius: RADIUS_BASE[id]}}
+            />
+          </SegmentedControl.Item>
+        ))}
+      </SegmentedControl>
     </div>
   );
 }
 
 export function ControlsPanel({
+  className,
   fixes,
   set,
   state,
-  variant = "card",
+  tokens,
 }: {
+  className?: string;
   fixes: ContrastFix[];
   state: BuilderState;
   set: (patch: Partial<BuilderState>) => void;
-  /** "card" floats on the themed page; "plain" sits inside a drawer that has its own surface. */
-  variant?: "card" | "plain";
+  /** The derived tokens of the scheme on screen — what the contrast ledger measures. */
+  tokens: TokenSet;
 }) {
-  const {scheme: _scheme, ...values} = state;
+  const {scheme, ...values} = state;
   const {formRadius, grayChroma, radius} = state;
-  const activeName = matchGalleryPreset(values)?.name ?? "Custom";
-
-  const body = (
-    <>
-      <Group label="Presets">
-        <div className="grid grid-cols-2 gap-1.5">
-          {GALLERY.map((preset) => (
-            <button
-              key={preset.name}
-              aria-pressed={preset.name === activeName}
-              type="button"
-              className={
-                preset.name === activeName
-                  ? "flex items-center gap-2 rounded-field bg-default px-2.5 py-1.5 text-xs text-foreground"
-                  : "flex items-center gap-2 rounded-field bg-background px-2.5 py-1.5 text-xs text-muted hover:text-foreground"
-              }
-              onClick={() => set({...preset.values, darkAccent: preset.values.darkAccent})}
-            >
-              <span
-                aria-hidden="true"
-                className="size-2.5 shrink-0 rounded-full"
-                style={{background: preset.values.accent}}
-              />
-              {preset.name}
-            </button>
-          ))}
-        </div>
-      </Group>
-      <Group label="Accent">
-        <AccentPopover values={values} onChange={set} />
-      </Group>
-      <Separator />
-      <Group label="Neutral tint">
-        <Slider
-          maxValue={0.03}
-          minValue={0}
-          step={0.001}
-          value={grayChroma}
-          onChange={(g) => set({grayChroma: single(g)})}
-        >
-          <Label>Neutral tint</Label>
-          <Slider.Output />
-          <Slider.Track>
-            <Slider.Fill />
-            <Slider.Thumb />
-          </Slider.Track>
-        </Slider>
-        <p className="text-[11px] leading-snug text-muted">
-          Accent hue in neutrals — 0 is pure gray.
-        </p>
-      </Group>
-      <Separator />
-      <Group label="Surface radius">
-        <SegmentedControl
-          aria-label="Radius"
-          selectedKey={radius}
-          size="sm"
-          onSelectionChange={(key) => set({radius: key as RadiusId})}
-        >
-          {SURFACE_RADIUS_OPTIONS.map(([id, label]) => (
-            <SegmentedControl.Item key={id} id={id}>
-              {label}
-            </SegmentedControl.Item>
-          ))}
-        </SegmentedControl>
-      </Group>
-      <Group label="Field radius">
-        <SegmentedControl
-          aria-label="Form radius"
-          selectedKey={formRadius}
-          size="sm"
-          onSelectionChange={(key) => set({formRadius: key as RadiusId})}
-        >
-          {RADIUS_OPTIONS.map(([id, label]) => (
-            <SegmentedControl.Item key={id} id={id}>
-              {label}
-            </SegmentedControl.Item>
-          ))}
-        </SegmentedControl>
-      </Group>
-      <Separator />
-      <ContrastChips fixes={fixes} />
-    </>
-  );
-
-  if (variant === "plain") {
-    return <div className="flex flex-col gap-6">{body}</div>;
-  }
+  const activeName = matchGalleryPreset(values)?.name;
 
   return (
-    <aside
-      aria-label="Theme controls"
-      className="flex h-full flex-col gap-6 overflow-y-auto rounded-xl bg-surface p-6"
-    >
-      {body}
+    <aside aria-label="Theme controls" className={`flex flex-col gap-7 p-5 ${className ?? ""}`}>
+      <Group title="Presets">
+        <PresetPicker
+          activeName={activeName}
+          scheme={scheme}
+          onSelect={(preset) => set({...preset.values, darkAccent: preset.values.darkAccent})}
+        />
+      </Group>
+      <Group title="Color">
+        <AccentControls values={values} onChange={set}>
+          <Slider
+            maxValue={0.03}
+            minValue={0}
+            step={0.001}
+            value={grayChroma}
+            onChange={(g) => set({grayChroma: single(g)})}
+          >
+            <Label className="text-[13px] font-normal text-muted">Tint in the grays</Label>
+            <Slider.Output className="text-[13px] font-normal" />
+            <Slider.Track>
+              <Slider.Fill />
+              <Slider.Thumb />
+            </Slider.Track>
+          </Slider>
+        </AccentControls>
+      </Group>
+      <Group title="Corners">
+        <RadiusScale
+          label="Surfaces"
+          options={SURFACE_RADIUS_OPTIONS}
+          value={radius}
+          onChange={(next) => set({radius: next})}
+        />
+        <RadiusScale
+          label="Fields"
+          options={RADIUS_OPTIONS}
+          value={formRadius}
+          onChange={(next) => set({formRadius: next})}
+        />
+      </Group>
+      <Group title="Contrast">
+        <ContrastLedger fixes={fixes} tokens={tokens} />
+      </Group>
     </aside>
   );
 }
