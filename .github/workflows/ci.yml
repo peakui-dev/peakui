@@ -5,13 +5,16 @@ on:
     branches: [main]
   pull_request:
 
+# Cost profile (GitHub Free, private repo — decided 2026-10-13, see
+# peakui-company docs/ecosystem/backlog.md): cheap gates only, single node. The builds —
+# classic docs, vinext docs, packages — run in the Release and Docs deploy workflows, where
+# they execute per release / per deploy instead of on every PR. The node matrix is dropped:
+# node >= 22.18 is declared in engines; re-add a slim second leg if a node-22 regression
+# ever shows up. E2E stays parked as well (`pnpm test:e2e` locally).
+
 jobs:
   verify:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -28,31 +31,9 @@ jobs:
 
       - run: pnpm test
 
-      # The docs app prerenders its llms files at build time and fails without a site URL; the
-      # value here only has to be obviously not production.
-      - run: pnpm build:docs
-        env:
-          NEXT_PUBLIC_SITE_URL: https://docs.ci.invalid
-
-      # Production builds through vinext; a PR that breaks only this path must not
-      # merge green and strand main undeployable.
-      - run: pnpm --filter @peakui/docs run build:vinext
-        env:
-          NEXT_PUBLIC_SITE_URL: https://docs.ci.invalid
-
       # Гейты слоя токенов: дрейф, контраст, висящие токены, полнота тем, литеральные цвета.
       - run: pnpm check:tokens
-
-      # The package gates validate the dist-based publish form (publishConfig), so the build
-      # must exist before they pack.
-      - run: pnpm build:packages
-
-      - run: pnpm lint:package
 
       # Тесты скриптов харнеса: bootstrap и агентские хуки. Без этого шага регрессия в
       # compareVersions или collectFindings проходит в main зелёной.
       - run: pnpm test:ai
-
-# E2E (Playwright против статической сборки Storybook) сознательно не в CI: джоба примерно
-# удваивает время проверки. Локально — `pnpm test:e2e` / `pnpm test:e2e:ci`. Отсрочка
-# записана в peakui-company docs/ecosystem/backlog.md; возвращается, когда стоимость оправдана.
