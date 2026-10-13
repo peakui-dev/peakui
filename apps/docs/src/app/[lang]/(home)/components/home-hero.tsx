@@ -3,7 +3,6 @@
 import type {GalleryPreset} from "@/app/[lang]/themes/presets";
 import type {Scheme} from "@peakui/styles/generator";
 
-import {Chip, SegmentedControl, Switch} from "@peakui/react";
 import {buttonVariants} from "@peakui/styles";
 import {deriveTheme, emitVariablesCss} from "@peakui/styles/generator";
 import LinkRoot from "fumadocs-core/link";
@@ -13,7 +12,8 @@ import {PresetPicker} from "@/app/[lang]/themes/preset-picker";
 import {DEFAULT_VALUES, toPreset} from "@/app/[lang]/themes/presets";
 import {ThemePreview} from "@/app/[lang]/themes/theme-preview";
 import {encodeBuilderState} from "@/app/[lang]/themes/url-codec";
-import {WorkspaceCard} from "@/components/demo/workspace-card";
+
+import {TeamScene} from "./team-scene";
 
 /*
  * The site's scheme, read from the class next-themes keeps on <html>. An external store, so
@@ -104,33 +104,7 @@ export function HomeHero({copy, version}: {copy: HomeHeroCopy; version: string})
         </div>
       </div>
       <div className="flex flex-col justify-center gap-5 bg-background p-3 sm:p-8">
-        <WorkspaceCard />
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 px-1">
-          <SegmentedControl aria-label="View" defaultSelectedKey="grid" size="sm">
-            <SegmentedControl.Item id="grid">Grid</SegmentedControl.Item>
-            <SegmentedControl.Item id="list">List</SegmentedControl.Item>
-            <SegmentedControl.Item id="table">Table</SegmentedControl.Item>
-          </SegmentedControl>
-          <div className="flex items-center gap-2">
-            <Chip color="accent" variant="soft">
-              New
-            </Chip>
-            <Chip color="success" variant="soft">
-              Stable
-            </Chip>
-            <Chip color="warning" variant="soft">
-              Beta
-            </Chip>
-          </div>
-          <Switch defaultSelected>
-            <Switch.Content>
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-              Public
-            </Switch.Content>
-          </Switch>
-        </div>
+        <TeamScene />
       </div>
       <div className="flex flex-col gap-5 bg-background p-6 sm:px-10 lg:col-span-2 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
         <div className="flex flex-col gap-1">

@@ -13,6 +13,7 @@ import {i18n} from "@/lib/i18n";
 import {source} from "@/lib/source";
 import {currentVersion} from "@/utils/version";
 
+import {CopyCode} from "./components/copy-code";
 import {HomeHero} from "./components/home-hero";
 import {KeyboardProof} from "./components/keyboard-proof";
 
@@ -81,14 +82,6 @@ const PROOF_TOKENS: [name: string, className: string][] = [
   ["success", "bg-success text-success-foreground"],
   ["danger", "bg-danger text-danger-foreground"],
 ];
-
-function Code({children}: {children: string}) {
-  return (
-    <pre className="overflow-x-auto rounded-xl bg-default p-4 font-mono text-[13px] leading-relaxed text-default-foreground">
-      <code className="border-none p-0">{children}</code>
-    </pre>
-  );
-}
 
 /* One claim of the sheet: what it is in a sentence, then the thing itself as proof. */
 function Feature({body, children, title}: {body: string; children: ReactNode; title: string}) {
@@ -172,7 +165,7 @@ export default async function HomePage({params}: {params: Promise<{lang: string}
             </div>
           </Feature>
           <Feature body={features.css.body} title={features.css.title}>
-            <Code>{OVERRIDE}</Code>
+            <CopyCode code={OVERRIDE} />
           </Feature>
           <Feature body={features.agents.body} title={features.agents.title}>
             <ul className="flex flex-col divide-y divide-separator rounded-xl border border-separator text-sm">
@@ -234,7 +227,7 @@ export default async function HomePage({params}: {params: Promise<{lang: string}
                   </span>
                   {title}
                 </h3>
-                <Code>{code}</Code>
+                <CopyCode code={code} />
               </li>
             ))}
           </ol>
