@@ -199,10 +199,17 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
   does not reach them (checked against `next start`). The host must vary cached HTML docs pages on
   `Accept`, or run the proxy before its cache. Without that a shared cache can hand HTML to an agent
   that asked for markdown, or the reverse.
-- **Production** — Cloudflare Workers, Worker `peakui-docs`, custom domain `peakui.dev`. The
-  `Docs deploy` workflow ships `main` (plus manual dispatch with a `base-url` smoke input);
-  every deploy purges the zone cache and must pass the contract smoke
-  `apps/docs/scripts/verify-site-contract.mjs`, and a red smoke attempts `wrangler rollback`.
+- **Production** — Cloudflare Workers, Worker `peakui-docs`, served on
+  `peakui-docs.<subdomain>.workers.dev` until the `peakui.dev` custom domain is attached. The
+  `Docs deploy` workflow ships `main` (plus manual dispatch with a `base-url` override); the
+  origin it builds and smokes against is the `DOCS_SITE_URL` repository variable — one value for
+  both, because `NEXT_PUBLIC_SITE_URL` is inlined at build time. `pnpm --filter @peakui/docs run
+  deploy` runs the vite build itself, so the workflow never builds separately. Every deploy must
+  pass the contract smoke `apps/docs/scripts/verify-site-contract.mjs`; the edge purge is skipped
+  while `CLOUDFLARE_ZONE_ID` is unset, and there is no automatic rollback — a red smoke leaves
+  the deployed version live and says so. vinext refuses to deploy without a cache adapter on the
+  `vinext()` plugin: `staticAssetsAdapter()` over the existing `ASSETS` binding, since every
+  route is `revalidate = false`.
   Two dual-mode seams keep one codebase on both hosts: `src/lib/read-source.ts` (fs) is swapped
   for `read-source.worker.ts` (bundled raw sources) by a vite alias, and the proxy answers
   markdown itself instead of rewriting to an internal route. Design:

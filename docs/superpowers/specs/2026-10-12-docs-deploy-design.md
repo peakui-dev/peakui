@@ -48,7 +48,8 @@ Whatever `vinext init` generates, the committed configuration must satisfy:
 - Worker name `peakui-docs` (stable, referenced by the custom domain and the deploy workflow).
 - `nodejs_compat` compatibility flag and a current compatibility date.
 - Static assets bound per the adapter's layout; no KV/R2/D1 bindings — the site is build-output
-  only.
+  only. A cache adapter over that same assets binding is nonetheless mandatory; see the
+  amendment at the end of this document.
 - **The proxy must run before asset serving for negotiated paths.** Workers serves a matching
   static asset *without invoking the Worker* unless the assets binding says otherwise (for
   example `run_worker_first`): prerendered HTML must never bypass `proxy.ts` content
@@ -157,3 +158,44 @@ steps change.
 - Analytics, rate limiting, WAF rules.
 - Cache tuning beyond what the contract requires.
 - Redirect policy between `www.peakui.dev` / apex — `peakui.dev` is the single documented host.
+
+## Amendment — 2026-10-13, after the first deploy attempt
+
+The first `Docs deploy` run on `main` (38453758612) never reached Cloudflare. It failed inside
+`vinext-cloudflare deploy` on a gate this design did not anticipate:
+
+> This app uses ISR / caching but no cache adapter is configured in vite.config.ts
+
+vinext 1.1.0 no longer scaffolds a cache backend into the Worker entry, and every route of this
+site carries `revalidate = false`, which counts as caching. The deploy therefore requires an
+explicit `cache.cdn` or `cache.data` adapter on the `vinext()` plugin. Three corrections follow.
+
+**A cache adapter is required, but no new resource is.** `staticAssetsAdapter()` fills the
+`data` slot over the `ASSETS` binding the Worker already has: its runtime writes are no-ops and a
+deployment replaces its contents, which matches content that only ever changes on deploy. The
+"no KV/R2/D1 bindings" constraint above therefore still holds — `kvDataAdapter()`, which the
+error message suggests, would add a namespace and a quota to back a data cache nothing writes
+to. Page-level edge caching via `workersCacheCdnAdapter()` is the next step, deliberately
+separate: it rebuilds the Worker as a multi-stage entry with named response entrypoints, which
+is not something to combine with a first deploy.
+
+**The deploy builds; the workflow must not.** `vinext-cloudflare deploy` runs the vite build
+itself before handing the output to `cf deploy`. The workflow's separate `build:vinext` step
+built the app a second time, and the build that actually shipped was the one inside `deploy` —
+the one that had no `NEXT_PUBLIC_SITE_URL`. The build step is gone and the environment belongs
+to the deploy step.
+
+**Rollback was fiction.** The workflow called `wrangler rollback`, and `wrangler` is not a
+dependency of this repository — the Cloudflare CLI here is `cf`. Under `continue-on-error: true`
+the step failed silently on every red deploy. It is removed; a red smoke now says plainly that
+the deployed version stays live. A real rollback is `cf workers versions list` plus
+`cf workers deployments create` on the previous version, to be written once version ids from a
+live deployment can be read.
+
+**Two further points of this design are not in force.** The `peakui.dev` zone does not exist
+yet, so the site is served on `peakui-docs.<subdomain>.workers.dev`; the origin lives in the
+`DOCS_SITE_URL` repository variable, which feeds both the build and the smoke, and the edge
+purge step is skipped while `CLOUDFLARE_ZONE_ID` is unset. And the Testing section's requirement
+that `ci.yml` run the vinext docs build was dropped by the cheap-gates-only CI profile
+(`dbc115b`); this failure reaching `main` green is the cost of that trade, knowingly accepted.
+

@@ -668,14 +668,19 @@ passes.
 - Consumes: Tasks 3–4 (Worker exists after first dispatch).
 - Produces: live `https://peakui.dev` passing the smoke.
 
-- [ ] **Step 1: Secrets.** On `peakui-dev/peakui` → Settings → Secrets → Actions, add:
-  `CLOUDFLARE_API_TOKEN` (custom token: Workers Scripts edit/deploy **and** Zone Cache Purge
-  for the `peakui.dev` zone), `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID`.
+- [x] **Step 1: Secrets and the origin variable.** On `peakui-dev/peakui` → Settings → Secrets
+  and variables → Actions, two repository secrets: `CLOUDFLARE_API_TOKEN` (custom token, Account
+  → Workers Scripts → Edit, plus Account Settings → Read) and `CLOUDFLARE_ACCOUNT_ID`. One
+  repository variable `DOCS_SITE_URL`, the origin the workflow builds and smokes against —
+  `https://peakui-docs.<your-subdomain>.workers.dev` for now. `CLOUDFLARE_ZONE_ID` is **not**
+  created yet: no zone exists, and the purge step skips itself while the secret is empty. Add it,
+  and Zone → Cache Purge to the token, together with the custom domain in Step 3.
 
-- [ ] **Step 2: First dispatch (creates the Worker).** Merge this branch's PR first (after the
-  release-pipeline PR #2). Then Actions → Docs deploy → Run workflow with
-  `base-url = https://peakui-docs.<your-subdomain>.workers.dev` (subdomain visible in the
-  Cloudflare dashboard). Watch the job: deploy, purge, smoke all green.
+- [ ] **Step 2: First dispatch (creates the Worker).** Merge the PR of
+  `fix/docs-deploy-cache-adapter` first — before it, the deploy cannot pass vinext's cache-adapter
+  gate (see the amendment in the design). Then Actions → Docs deploy → Run workflow, no input:
+  `base-url` is only an override, the default is `DOCS_SITE_URL`. Watch the job: deploy green,
+  purge skipped, smoke green.
 
 - [ ] **Step 3: Attach the domain.** Cloudflare dashboard → Workers → `peakui-docs` →
   Settings → Domains & Routes → Add → Custom domain `peakui.dev` (requires the zone in CF
