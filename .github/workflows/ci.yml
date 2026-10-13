@@ -47,21 +47,6 @@ jobs:
       # compareVersions или collectFindings проходит в main зелёной.
       - run: pnpm test:ai
 
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm --filter @peakui/storybook exec playwright install --with-deps chromium
-
-      # Собирает статику и гоняет e2e против неё, включая аудит WCAG 2.2 AA.
-      - run: pnpm test:e2e:ci
+# E2E (Playwright против статической сборки Storybook) сознательно не в CI: джоба примерно
+# удваивает время проверки. Локально — `pnpm test:e2e` / `pnpm test:e2e:ci`. Отсрочка
+# записана в peakui-company docs/ecosystem/backlog.md; возвращается, когда стоимость оправдана.
