@@ -19,7 +19,7 @@ manual Releases page in `apps/docs`, and the CI that ties them together.
 | CI → npm authentication | OIDC trusted publishing (npm ≥ 11.5, GitHub environment `npm-publish`, no long-lived tokens). Same pattern as `heroui/.github/workflows/release.yml`. |
 | Docs Releases page | Hand-written MDX per release plus an index page, following `heroui/apps/docs/content/docs/en/react/releases/`. Not generated. |
 | License | **Apache-2.0** (matches heroui; explicit patent grant suits a company building a commercial ecosystem on top). *The owner is still deciding between Apache-2.0 and MIT — flip at spec review if MIT wins; the swap is one LICENSE file plus one `license` field.* |
-| Docs deployment | Out of scope: `peakui.dev` is not live. Recorded intent: deploy from release tags (`v*`), never from `main`, so docs always match the published version. |
+| Docs deployment | Out of scope here — superseded by `docs/superpowers/specs/2026-10-12-docs-deploy-design.md`: Cloudflare Workers, deploy on `main` + manual dispatch (docs changes must not wait for npm releases). |
 
 ## Published packages
 
@@ -217,6 +217,7 @@ index entry.
 
 ## Out of scope
 
-- Docs deployment (decision recorded above: from release tags when introduced).
+- Docs deployment — superseded by `docs/superpowers/specs/2026-10-12-docs-deploy-design.md`
+  (Cloudflare Workers, deploy on `main` + manual dispatch).
 - `@peakui/codemodes` (contract-mentioned, does not exist yet; first breaking API change is far).
 - Provenance beyond npm's automatic attestation, npm star/2FA policy, publishing `evals`.

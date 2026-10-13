@@ -8,6 +8,8 @@ coverage/
 storybook-static/
 .next/
 .source/
+.cloudflare/
+.vinext/
 next-env.d.ts
 test-results/
 playwright-report/

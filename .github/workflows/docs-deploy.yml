@@ -1,0 +1,66 @@
+name: Docs deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base-url:
+        description: "Base URL for the post-deploy contract smoke"
+        required: false
+        type: string
+        default: https://peakui.dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    concurrency:
+      group: docs-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @peakui/docs run build:vinext
+        env:
+          NEXT_PUBLIC_SITE_URL: https://peakui.dev
+
+      - name: Deploy
+        id: deploy
+        run: pnpm --filter @peakui/docs run deploy
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      # The contract's s-maxage=3600 would otherwise keep serving the previous deploy's
+      # llms-* and .md bytes; the smoke must validate this deploy, not the cache.
+      - name: Purge edge cache
+        run: >
+          curl -sf -X POST
+          "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/cache/purge_everything"
+          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          -H "Content-Type: application/json"
+          --data '{"purge_everything":true}'
+
+      - name: Contract smoke
+        run: node apps/docs/scripts/verify-site-contract.mjs "${{ inputs.base-url || 'https://peakui.dev' }}"
+
+      # Best effort: only when something was actually deployed.
+      - name: Rollback
+        if: failure() && steps.deploy.outcome == 'success'
+        continue-on-error: true
+        run: pnpm --filter @peakui/docs exec wrangler rollback
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

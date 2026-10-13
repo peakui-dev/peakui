@@ -1,9 +1,7 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import * as React from "react";
 
 import {getDemo} from "@/demos";
+import {readDemoSource} from "@/lib/read-source";
 import {cn} from "@/utils/cn";
 
 import {CodeBlock} from "./codeblock";
@@ -33,7 +31,7 @@ export async function ComponentSource({
 
   if (src) {
     try {
-      const file = await fs.readFile(path.join(process.cwd(), "src", "demos", src), "utf-8");
+      const file = await readDemoSource(src);
 
       code = file;
     } catch {

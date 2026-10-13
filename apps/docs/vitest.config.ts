@@ -9,6 +9,8 @@ import * as mdxConfig from "./source.config.ts";
 const root = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  // @ts-expect-error mdx()'s plugin is typed against vite 8 (installed for vinext), while
+  // vitest resolves vite 7 declarations; runtime-compatible, declarations are not.
   plugins: [mdx(mdxConfig)],
   resolve: {
     alias: [
