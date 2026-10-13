@@ -38,8 +38,8 @@
   },
   "exports": {
     ".": {
-      "style": "./index.css",
       "types": "./src/index.ts",
+      "style": "./index.css",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
