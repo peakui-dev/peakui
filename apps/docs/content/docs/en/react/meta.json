@@ -1,5 +1,5 @@
 {
   "title": "Documentation",
   "description": "PeakUI Documentation",
-  "pages": ["getting-started", "components"]
+  "pages": ["getting-started", "components", "releases"]
 }

@@ -84,6 +84,19 @@ formats differ, so change both. Agent hooks are wired separately: `.claude/setti
 `hooks` block of `.zcode/config.json`. `.mcp.json` holds no hooks. `pnpm bootstrap --check` reports
 what all three actually wire, not merely that they exist.
 
+## Releases
+
+Publishing runs through changesets. Every PR touching a publishable package lands with a
+`.changeset/*.md` file — `.agents/skills/changeset-release/` owns the routine.
+
+The `Release` workflow tends a **Version Packages** PR on every push to `main`; merging it is
+the release: npm publish (OIDC trusted publishing via the `npm-publish` environment), tag
+`v<version>`, GitHub Release, and a hand-written notes page under
+`apps/docs/content/docs/en/react/releases/`. Rehearse safely with the workflow's `dry_run`
+input.
+
+Design and decisions: `docs/superpowers/specs/2026-10-12-release-pipeline-design.md`.
+
 ## Architecture
 
 **Mandatory standard:** implementing, reviewing or refactoring a UI component goes through the

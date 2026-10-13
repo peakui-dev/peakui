@@ -42,8 +42,8 @@ describe("exports", () => {
     });
   });
 
-  it("держит sideEffects: false", () => {
-    expect(pkg.sideEffects).toBe(false);
+  it("declares CSS files as side effects so bundlers keep style imports", () => {
+    expect(pkg.sideEffects).toEqual(["**/*.css"]);
   });
 
   it("экспортирует генератор как публичный API для Pro", () => {

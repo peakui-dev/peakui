@@ -2,7 +2,18 @@
   "name": "@peakui/styles",
   "version": "0.0.0",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peakui-dev/peakui.git",
+    "directory": "packages/styles"
+  },
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "check:tokens": "node scripts/check-tokens.ts",
     "lint": "eslint . --max-warnings=0",
@@ -27,9 +38,9 @@
   },
   "exports": {
     ".": {
+      "style": "./index.css",
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "style": "./index.css",
       "default": "./src/index.ts"
     },
     "./base": "./base/base.css",

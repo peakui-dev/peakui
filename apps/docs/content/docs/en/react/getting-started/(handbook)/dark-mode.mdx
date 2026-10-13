@@ -118,7 +118,7 @@ Tailwind's `dark:` variant follows `prefers-color-scheme` unless you redefine it
 
 ```css title="globals.css"
 @import "tailwindcss";
-@import "@peakui/styles/css";
+@import "@peakui/styles";
 
 @custom-variant dark (&:where(.default-dark, .default-dark *, [data-theme="default-dark"], [data-theme="default-dark"] *));
 ```
