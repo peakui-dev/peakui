@@ -34,6 +34,7 @@ export * from "./menu-section/index.ts";
 export * from "./modal/index.ts";
 export * from "./number-field/index.ts";
 export * from "./popover/index.ts";
+export * from "./progress-bar/index.ts";
 export * from "./radio-group/index.ts";
 export * from "./radio/index.ts";
 export * from "./scroll-shadow/index.ts";
