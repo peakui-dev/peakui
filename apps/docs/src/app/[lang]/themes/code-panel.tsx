@@ -3,7 +3,7 @@
 import type {BuilderValues} from "./presets";
 import type {ThemePreset, deriveTheme} from "@peakui/styles/generator";
 
-import {Button, Input, Label, SegmentedControl, TextField} from "@peakui/react";
+import {Button, CloseButton, Input, Label, SegmentedControl, TextField} from "@peakui/react";
 import {emitVariablesCss} from "@peakui/styles/generator";
 import {useDeferredValue, useEffect, useMemo, useState} from "react";
 
@@ -110,11 +110,9 @@ export function CodePanel({
       aria-label="Export panel"
       className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col gap-4 border-l border-separator bg-surface p-6 shadow-overlay"
     >
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-medium text-foreground">Export</h2>
-        <Button isIconOnly aria-label="Close export panel" variant="ghost" onPress={onClose}>
-          ✕
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-foreground">Export</h2>
+        <CloseButton aria-label="Close export panel" onPress={onClose} />
       </div>
       <TextField className="w-full" value={name} onChange={setName}>
         <Label>Theme name</Label>
