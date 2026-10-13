@@ -6,11 +6,13 @@
  * imports Tailwind first, and the order is load-bearing:
  *
  *     @import "tailwindcss";
- *     @import "@peakui/styles/css";
+ *     @import "@peakui/styles";
  *
  * Reversed or with Tailwind missing, nothing here compiles and there is no error — the
  * utilities are simply absent. `@heroui/styles` does import Tailwind itself; we do not, so
- * every consumer owns that line.
+ * every consumer owns that line. The bare package name resolves through the "style" export
+ * condition, which the export map lists first; `@peakui/styles/css` is the same file by an
+ * explicit subpath, for tooling that does not follow the condition.
  *
  * Corollary for anything consuming these classes: Tailwind finds classes by scanning source
  * text, so a name built by interpolation never reaches the CSS. Write the whole class string

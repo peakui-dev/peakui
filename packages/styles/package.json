@@ -38,9 +38,9 @@
   },
   "exports": {
     ".": {
+      "style": "./index.css",
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "style": "./index.css",
       "default": "./src/index.ts"
     },
     "./base": "./base/base.css",
