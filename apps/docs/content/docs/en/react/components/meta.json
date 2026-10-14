@@ -16,6 +16,7 @@
     "(forms)/checkbox-group",
     "(data-display)/chip",
     "(buttons)/close-button",
+    "(colors)/color-swatch",
     "(forms)/description",
     "(navigation)/disclosure",
     "(navigation)/disclosure-group",

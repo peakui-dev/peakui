@@ -229,6 +229,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
     file: "close-button/with-custom-icon.tsx",
   },
+  // color-swatch
+  "color-swatch-accessibility": {
+    loader: () => import("./color-swatch/accessibility").then((m) => m.Accessibility),
+    file: "color-swatch/accessibility.tsx",
+  },
+  "color-swatch-basic": {
+    loader: () => import("./color-swatch/basic").then((m) => m.Basic),
+    file: "color-swatch/basic.tsx",
+  },
+  "color-swatch-custom-styles": {
+    loader: () => import("./color-swatch/custom-styles").then((m) => m.CustomStyles),
+    file: "color-swatch/custom-styles.tsx",
+  },
+  "color-swatch-render-function": {
+    loader: () => import("./color-swatch/render-function").then((m) => m.RenderFunction),
+    file: "color-swatch/render-function.tsx",
+  },
+  "color-swatch-shapes": {
+    loader: () => import("./color-swatch/shapes").then((m) => m.Shapes),
+    file: "color-swatch/shapes.tsx",
+  },
+  "color-swatch-sizes": {
+    loader: () => import("./color-swatch/sizes").then((m) => m.Sizes),
+    file: "color-swatch/sizes.tsx",
+  },
+  "color-swatch-transparency": {
+    loader: () => import("./color-swatch/transparency").then((m) => m.Transparency),
+    file: "color-swatch/transparency.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

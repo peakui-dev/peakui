@@ -1,0 +1,131 @@
+---
+title: ColorSwatch
+description: A visual preview of a color value
+links:
+  rac: ColorSwatch
+  source: color-swatch/color-swatch.tsx
+  styles: color-swatch.css
+---
+
+## Usage
+
+```tsx
+import {ColorSwatch} from "@peakui/react";
+```
+
+<ComponentPreview
+  name="color-swatch-basic"
+/>
+
+## Examples
+
+### Sizes
+
+<ComponentPreview
+  name="color-swatch-sizes"
+/>
+
+### Shapes
+
+<ComponentPreview
+  name="color-swatch-shapes"
+/>
+
+### Transparency
+
+<ComponentPreview
+  name="color-swatch-transparency"
+/>
+
+### Render Function
+
+`render` replaces the rendered element; the swatch's props and custom property flow into it.
+
+<ComponentPreview
+  name="color-swatch-render-function"
+/>
+
+### Accessibility
+
+Use `colorName` to provide a custom accessible name for the color, and `aria-label` to add context about how the color is used.
+
+<ComponentPreview
+  name="color-swatch-accessibility"
+/>
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="color-swatch-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .color-swatch {
+    @apply border-2 border-white;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorSwatch component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-swatch.css)):
+
+#### Base Classes [!toc]
+
+- `.color-swatch` - Base swatch styles with checkered background for transparency
+
+#### Shape Classes [!toc]
+
+- `.color-swatch--circle` - Circular shape (default)
+- `.color-swatch--square` - Square shape with rounded corners
+
+#### Size Classes [!toc]
+
+- `.color-swatch--xs` - Extra small (16px)
+- `.color-swatch--sm` - Small (24px)
+- `.color-swatch--md` - Medium (32px, default)
+- `.color-swatch--lg` - Large (36px)
+- `.color-swatch--xl` - Extra large (40px)
+
+### Slots
+
+- `[data-slot="color-swatch"]`
+
+### CSS Variables
+
+| Variable                   | Purpose                                        |
+| -------------------------- | ---------------------------------------------- |
+| `--color-swatch-current`   | The swatch's color, set from the `color` prop  |
+
+## API Reference
+
+### ColorSwatch
+
+| Prop         | Type                                                                                           | Default    | Description                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
+| `color`      | `string \| Color`                                                                              | -          | The color value to display (hex, rgb, hsl, etc.)                                |
+| `colorName`  | `string`                                                                                       | -          | Accessible name for the color (overrides auto-generated description)            |
+| `shape`      | `"circle" \| "square"`                                                                         | `"circle"` | Shape of the swatch                                                             |
+| `size`       | `"xs" \| "sm" \| "md" \| "lg" \| "xl"`                                                         | `"md"`     | Size of the swatch                                                              |
+| `className`  | `string \| ((values: ColorSwatchRenderProps) => string)`                                       | -          | Additional classes, or a function of the render props                           |
+| `style`      | `CSSProperties \| ((values: ColorSwatchRenderProps) => CSSProperties)`                         | -          | Inline styles, or a function of the render props                                |
+| `render`     | `DOMRenderFunction<keyof React.JSX.IntrinsicElements, ColorSwatchRenderProps>`                 | -          | Replaces the rendered element with a custom render function                     |
+| `aria-label` | `string`                                                                                       | -          | Context about how the color is used; appended to the color's own description     |
+| `...rest`    |                                                                                                |            | Every `<div>` attribute is accepted, including `aria-labelledby` and `id`       |
+
+### Render Props
+
+`className` and `style` functions receive these values:
+
+| Prop    | Type    | Description                                  |
+| ------- | ------- | -------------------------------------------- |
+| `color` | `Color` | The parsed color value, from the color prop |
+
+The `color` object provides methods like `color.toString("css")`, `color.toString("hex")` and `color.getChannelValue("alpha")`.
