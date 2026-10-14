@@ -1,3 +1,6 @@
+"use client";
+
+/* Client module: composes react-aria-components' editors directly, as the basic demo does. */
 import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
 import {ColorSlider, ColorThumb, SliderTrack} from "react-aria-components/ColorSlider";
 import {ColorSwatchPicker, ColorSwatchPickerItem} from "react-aria-components/ColorSwatchPicker";
