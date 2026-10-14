@@ -74,12 +74,15 @@ export default defineConfig(async () => ({
        * vinext 1.1.0 refuses to deploy an app with ISR / caching unless a cache backend is
        * declared here; it no longer scaffolds one into the Worker entry. Every route of this
        * site is `revalidate = false` — the content changes on deploy and never in between — so
-       * the read-only adapter over the existing ASSETS binding is the whole requirement: its
-       * runtime writes are no-ops and a new deployment replaces its contents. KV (what the
-       * error message suggests) would add a namespace, a binding and a quota to back a data
-       * cache nothing here writes to.
+       * the whole requirement is met by prerendering into Workers Static Assets: the build
+       * copies rendered HTML/RSC/metadata into the client assets under /_vinext/static-cache
+       * and a request reads them through the existing ASSETS binding. Nothing renders in the
+       * Worker per request — SSR there kept hitting the Workers Free CPU limit (error 1102,
+       * ~10 ms/invocation) on fumadocs page renders. KV (what the deploy error suggests) would
+       * add a namespace, a binding and a quota to back a data cache nothing here writes to.
        */
-      cache: {data: staticAssetsAdapter()},
+      prerender: true,
+      cache: {cdn: staticAssetsAdapter()},
       images: {optimizer: imagesOptimizer()},
     }),
     cloudflare({
