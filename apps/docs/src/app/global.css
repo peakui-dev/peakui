@@ -11,6 +11,18 @@
  */
 @import "@peakui/styles";
 
+/*
+ * Fumadocs ships its component utilities as `@source inline(...)` lists inside
+ * fumadocs-ui/css/preset.css. The Next.js pipeline honours them, but the Vite/vinext one loses
+ * the directives while inlining imports — every class referenced only from fumadocs-ui's dist
+ * JS (invisible, h-(--radix-navigation-menu-viewport-height), the group-data-[state=open]
+ * chevron rotation, …) then silently never generates. Scanning the dist sources directly keeps
+ * the candidate set identical in both builds; without it the mobile sidebar drawer stays
+ * visible (its closed state hides via `invisible`) and the home mobile menu renders at
+ * height 0.
+ */
+@source "../../node_modules/fumadocs-ui/dist";
+
 /* ============================================================================
    CSS VARIABLES - ROOT & THEMES
    ============================================================================ */
