@@ -1,16 +1,14 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
-# Cost profile (GitHub Free, private repo — decided 2026-10-13, see
-# peakui-company docs/ecosystem/backlog.md): cheap gates only, single node. The builds —
-# classic docs, vinext docs, packages — run in the Release and Docs deploy workflows, where
-# they execute per release / per deploy instead of on every PR. The node matrix is dropped:
-# node >= 22.18 is declared in engines; re-add a slim second leg if a node-22 regression
-# ever shows up. E2E stays parked as well (`pnpm test:e2e` locally).
+# Cost posture (GitHub Free, private repo — decided 2026-10-14, recorded in
+# peakui-company docs/ecosystem/backlog.md): nothing runs on push or on PRs. The gates
+# below run locally before a push; dispatch this workflow to run the same set on a clean
+# runner, e.g. ahead of a release. The builds — classic docs, vinext docs, packages —
+# belong to the Release and Docs deploy workflows. E2E stays parked (`pnpm test:e2e`
+# locally).
 
 jobs:
   verify:
