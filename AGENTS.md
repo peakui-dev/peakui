@@ -89,11 +89,12 @@ what all three actually wire, not merely that they exist.
 Publishing runs through changesets. Every PR touching a publishable package lands with a
 `.changeset/*.md` file — `.agents/skills/changeset-release/` owns the routine.
 
-The `Release` workflow tends a **Version Packages** PR on every push to `main`; merging it is
-the release: npm publish (OIDC trusted publishing via the `npm-publish` environment), tag
-`v<version>`, GitHub Release, and a hand-written notes page under
-`apps/docs/content/docs/en/react/releases/`. Rehearse safely with the workflow's `dry_run`
-input.
+The `Release` workflow runs on manual dispatch only (GitHub Free cost posture, 2026-10-14):
+once changesets are on `main`, dispatch it and it tends a **Version Packages** PR; merging that
+PR and dispatching again is the release: npm publish (OIDC trusted publishing via the
+`npm-publish` environment), tag `v<version>`, GitHub Release, and a hand-written notes page
+under `apps/docs/content/docs/en/react/releases/`. Rehearse safely with the workflow's
+`dry_run` input.
 
 Design and decisions: `docs/superpowers/specs/2026-10-12-release-pipeline-design.md`.
 
@@ -201,7 +202,8 @@ reference's docs app — attribution in `apps/docs/NOTICE`.
   that asked for markdown, or the reverse.
 - **Production** — Cloudflare Workers, Worker `peakui-docs`, served on
   `peakui-docs.<subdomain>.workers.dev` until the `peakui.dev` custom domain is attached. The
-  `Docs deploy` workflow ships `main` (plus manual dispatch with a `base-url` override); the
+  `Docs deploy` workflow runs on manual dispatch only (GitHub Free cost posture, 2026-10-14),
+  with a `base-url` override input; the
   origin it builds and smokes against is the `DOCS_SITE_URL` repository variable — one value for
   both, because `NEXT_PUBLIC_SITE_URL` is inlined at build time. `pnpm --filter @peakui/docs run
   deploy` runs the vite build itself, so the workflow never builds separately. Every deploy must
