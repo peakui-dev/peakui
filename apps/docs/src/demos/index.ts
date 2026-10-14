@@ -229,6 +229,23 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
     file: "close-button/with-custom-icon.tsx",
   },
+  // color-picker
+  "color-picker-basic": {
+    loader: () => import("./color-picker/basic").then((m) => m.Basic),
+    file: "color-picker/basic.tsx",
+  },
+  "color-picker-controlled": {
+    loader: () => import("./color-picker/controlled").then((m) => m.Controlled),
+    file: "color-picker/controlled.tsx",
+  },
+  "color-picker-custom-styles": {
+    loader: () => import("./color-picker/custom-styles").then((m) => m.CustomStyles),
+    file: "color-picker/custom-styles.tsx",
+  },
+  "color-picker-with-swatches": {
+    loader: () => import("./color-picker/with-swatches").then((m) => m.WithSwatches),
+    file: "color-picker/with-swatches.tsx",
+  },
   // color-swatch
   "color-swatch-accessibility": {
     loader: () => import("./color-swatch/accessibility").then((m) => m.Accessibility),
