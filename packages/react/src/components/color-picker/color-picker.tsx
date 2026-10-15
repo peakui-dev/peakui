@@ -44,6 +44,11 @@ const ColorPickerRoot = ({children, className, ...props}: ColorPickerRootProps) 
   return (
     <ColorPickerContext value={contextValue}>
       <ColorPickerPrimitive {...props}>
+        {/*
+         * RAC's ColorPicker manages the color value but has no popover of its own, unlike its
+         * Select. DialogTrigger supplies what the popover consumes: the press-to-open wiring
+         * from the trigger and the dialog semantics (focus trap, dismissal) for ColorPicker.Popover.
+         */}
         <DialogTriggerPrimitive>
           <div className={composeSlotClassName(slots?.base, className)} data-slot="color-picker">
             {children}
@@ -92,6 +97,11 @@ const ColorPickerPopover = ({
   const {slots} = use(ColorPickerContext);
 
   return (
+    /*
+     * Declares the popover an overlay surface: nested surface-aware parts inside it re-base
+     * their fills onto this surface level instead of the page background. Same seam as
+     * Select.Popover.
+     */
     <SurfaceContext
       value={{
         variant: "default" as SurfaceVariants["variant"],
