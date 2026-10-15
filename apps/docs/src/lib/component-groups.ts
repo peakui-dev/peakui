@@ -20,6 +20,10 @@ export const COMPONENT_GROUPS = [
     components: ["(pickers)/select"],
   },
   {
+    category: "Colors",
+    components: ["(colors)/color-picker", "(colors)/color-swatch"],
+  },
+  {
     category: "Controls",
     components: ["(controls)/slider"],
   },

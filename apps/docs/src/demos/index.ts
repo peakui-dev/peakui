@@ -229,6 +229,52 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
     file: "close-button/with-custom-icon.tsx",
   },
+  // color-picker
+  "color-picker-basic": {
+    loader: () => import("./color-picker/basic").then((m) => m.Basic),
+    file: "color-picker/basic.tsx",
+  },
+  "color-picker-controlled": {
+    loader: () => import("./color-picker/controlled").then((m) => m.Controlled),
+    file: "color-picker/controlled.tsx",
+  },
+  "color-picker-custom-styles": {
+    loader: () => import("./color-picker/custom-styles").then((m) => m.CustomStyles),
+    file: "color-picker/custom-styles.tsx",
+  },
+  "color-picker-with-swatches": {
+    loader: () => import("./color-picker/with-swatches").then((m) => m.WithSwatches),
+    file: "color-picker/with-swatches.tsx",
+  },
+  // color-swatch
+  "color-swatch-accessibility": {
+    loader: () => import("./color-swatch/accessibility").then((m) => m.Accessibility),
+    file: "color-swatch/accessibility.tsx",
+  },
+  "color-swatch-basic": {
+    loader: () => import("./color-swatch/basic").then((m) => m.Basic),
+    file: "color-swatch/basic.tsx",
+  },
+  "color-swatch-custom-styles": {
+    loader: () => import("./color-swatch/custom-styles").then((m) => m.CustomStyles),
+    file: "color-swatch/custom-styles.tsx",
+  },
+  "color-swatch-render-function": {
+    loader: () => import("./color-swatch/render-function").then((m) => m.RenderFunction),
+    file: "color-swatch/render-function.tsx",
+  },
+  "color-swatch-shapes": {
+    loader: () => import("./color-swatch/shapes").then((m) => m.Shapes),
+    file: "color-swatch/shapes.tsx",
+  },
+  "color-swatch-sizes": {
+    loader: () => import("./color-swatch/sizes").then((m) => m.Sizes),
+    file: "color-swatch/sizes.tsx",
+  },
+  "color-swatch-transparency": {
+    loader: () => import("./color-swatch/transparency").then((m) => m.Transparency),
+    file: "color-swatch/transparency.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

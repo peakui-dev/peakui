@@ -1,0 +1,163 @@
+---
+title: ColorPicker
+description: A composable color picker container with popover
+links:
+  rac: ColorPicker
+  source: color-picker/color-picker.tsx
+  styles: color-picker.css
+---
+
+## Usage
+
+```tsx
+import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
+```
+
+<ComponentPreview
+  name="color-picker-basic"
+/>
+
+### Anatomy
+
+The ColorPicker is a container: it owns the value and the popover, and any React Aria editor composed inside reads and writes that value through the picker's state.
+
+```tsx
+import {ColorSlider, ColorThumb, SliderTrack} from "react-aria-components/ColorSlider";
+import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
+
+export default () => (
+  <ColorPicker defaultValue="#0485F7">
+    <ColorPicker.Trigger>
+      <ColorSwatch />
+      <Label>Pick a color</Label>
+    </ColorPicker.Trigger>
+    <ColorPicker.Popover>
+      <ColorSlider channel="hue" colorSpace="hsb">
+        <SliderTrack>
+          <ColorThumb />
+        </SliderTrack>
+      </ColorSlider>
+    </ColorPicker.Popover>
+  </ColorPicker>
+);
+```
+
+## Examples
+
+### Controlled
+
+<ComponentPreview
+  name="color-picker-controlled"
+/>
+
+### With Swatches
+
+<ComponentPreview
+  name="color-picker-with-swatches"
+/>
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="color-picker-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .color-picker {
+    @apply inline-flex;
+  }
+
+  .color-picker__trigger {
+    @apply inline-flex items-center gap-4 rounded-lg;
+  }
+
+  .color-picker__popover {
+    @apply p-4 rounded-xl;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorPicker component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-picker.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.color-picker` - Base container
+- `.color-picker__trigger` - Trigger button
+- `.color-picker__popover` - Popover container
+
+### Slots
+
+- `[data-slot="color-picker"]`
+- `[data-slot="color-picker-trigger"]`
+- `[data-slot="color-picker-popover"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on trigger
+- **Disabled**: `:disabled`, `[data-disabled="true"]` or `[aria-disabled="true"]` on trigger
+
+## API Reference
+
+### ColorPicker
+
+Inherits from [React Aria ColorPicker](https://react-spectrum.adobe.com/react-aria/ColorPicker.html).
+
+| Prop           | Type                                    | Default | Description                                    |
+| -------------- | --------------------------------------- | ------- | ---------------------------------------------- |
+| `value`        | `string \| Color`                       | -       | The current color value (controlled)           |
+| `defaultValue` | `string \| Color`                       | -       | The default color value (uncontrolled)         |
+| `onChange`     | `(color: Color) => void`                | -       | Handler called when the color changes          |
+| `children`     | `ReactNode`                             | -       | Content of the color picker (Trigger, Popover) |
+| `className`    | `string`                                | -       | Additional class name for the wrapper element  |
+| `...rest`      |                                         |         | Every React Aria `ColorPicker` attribute is accepted, including `isDisabled` and `aria-label` |
+
+### ColorPicker.Trigger
+
+| Prop        | Type                                                    | Default | Description                                    |
+| ----------- | ------------------------------------------------------- | ------- | ---------------------------------------------- |
+| `className` | `string`                                                | -       | Additional classes                             |
+| `children`  | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | -     | Trigger content, or a function of the render props |
+| `...rest`   |                                                         |         | Every React Aria `Button` attribute is accepted |
+
+### ColorPicker.Popover
+
+| Prop        | Type                                                                                                                                                                                                               | Default         | Description                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- | ------------------------------------------------ |
+| `placement` | `"bottom" \| "bottom left" \| "bottom right" \| "bottom start" \| "bottom end" \| "top" \| "top left" \| "top right" \| "top start" \| "top end" \| "left" \| "left top" \| "left bottom" \| "start" \| "start top" \| "start bottom" \| "right" \| "right top" \| "right bottom" \| "end" \| "end top" \| "end bottom"` | `"bottom left"` | Placement of the popover relative to the trigger |
+| `className` | `string`                                                                                                                                                                                                           | -               | Additional classes                               |
+| `children`  | `ReactNode`                                                                                                                                                                                                        | -               | Popover content                                  |
+| `...rest`   |                                                                                                                                                                                                                    |                 | Every React Aria `Popover` attribute is accepted |
+
+### Related Types
+
+#### Color
+
+Represents a color value. See [React Aria Color](https://react-spectrum.adobe.com/react-aria/ColorPicker.html#color) for the full API.
+
+| Method                     | Description                                                            |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `toString(format)`         | Converts the color to a string in the given format (hex, rgb, hsl, hsb, css) |
+| `toFormat(format)`         | Converts the color to the given format and returns a new Color         |
+| `getChannelValue(channel)` | Returns the numeric value for a given channel                          |
+| `withChannelValue(channel, value)` | Sets the numeric value for a channel and returns a new Color   |
+
+#### parseColor
+
+```tsx
+import {parseColor} from "react-aria-components";
+
+// Parse from string
+const color = parseColor("#ff0000");
+const hslColor = parseColor("hsl(0, 100%, 50%)");
+```

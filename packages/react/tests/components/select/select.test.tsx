@@ -1,6 +1,7 @@
 import type {SelectRootProps} from "@/components/select/index.ts";
 
 import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {useState} from "react";
 
 import {ListBox} from "@/components/list-box/index.ts";
 import {Select, SelectRoot} from "@/components/select/index.ts";
@@ -113,6 +114,87 @@ describe("Select", () => {
     expect(onSelectionChange).toHaveBeenCalledWith("banana");
   });
 
+  it("opens with Space and lands typeahead on the matching option", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    render(<FruitSelect />);
+
+    const trigger = getTrigger();
+
+    trigger.focus();
+    /*
+     * A literal " ", not "{Space}": this userEvent emits key "Space" for the bracket form,
+     * while RAC's open shortcut matches the browser's real key, a single space character.
+     */
+    await user.keyboard(" ");
+    runAllTimers();
+
+    /* Space toggles the trigger like Enter: the listbox mounts and takes focus. */
+    expect(screen.getByRole("listbox")).toBeVisible();
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+    /* One typeahead keystroke jumps focus to the first option starting with "b". */
+    await user.keyboard("b");
+    runAllTimers();
+
+    expect(screen.getByRole("option", {name: "Banana"})).toHaveFocus();
+  });
+
+  it("follows a controlled value across rerenders", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+    const onChange = vi.fn();
+    const {rerender} = render(<FruitSelect value="apple" onChange={onChange} />);
+
+    expect(getTrigger()).toHaveTextContent("Apple");
+
+    /* Only the parent's value moves the selection, with no user event involved. */
+    rerender(<FruitSelect value="banana" onChange={onChange} />);
+
+    expect(getTrigger()).toHaveTextContent("Banana");
+    expect(onChange).not.toHaveBeenCalled();
+
+    /* Selecting against a controlled value reports and defers: the parent's value wins. */
+    await user.click(getTrigger());
+    runAllTimers();
+    await user.click(screen.getByRole("option", {name: "Apple"}));
+    runAllTimers();
+
+    expect(onChange).toHaveBeenCalledWith("apple");
+    expect(getTrigger()).toHaveTextContent("Banana");
+
+    rerender(<FruitSelect value="apple" onChange={onChange} />);
+
+    expect(getTrigger()).toHaveTextContent("Apple");
+  });
+
+  it("holds the popover under isOpen and onOpenChange control", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    function ControlledOpenSelect() {
+      const [isOpen, setIsOpen] = useState(false);
+
+      return <FruitSelect isOpen={isOpen} onOpenChange={setIsOpen} />;
+    }
+
+    render(<ControlledOpenSelect />);
+
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    /* The press reaches the parent through onOpenChange; its state opens the popover. */
+    await user.click(getTrigger());
+    runAllTimers();
+
+    expect(getTrigger()).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("listbox")).toBeVisible();
+
+    /* Escape reports the close back, the parent flips isOpen, the popover unmounts. */
+    await user.keyboard("{Escape}");
+    runAllTimers();
+
+    expect(getTrigger()).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  });
+
   it("clears through the clear button and reports onClear", async () => {
     const user = setupUser({advanceTimers: vi.advanceTimersByTime});
     const onClear = vi.fn();
@@ -153,7 +235,8 @@ describe("Select", () => {
 
   it("Backspace on the trigger clears only when a clear button is composed", async () => {
     const user = setupUser({advanceTimers: vi.advanceTimersByTime});
-    const {rerender} = render(<FruitSelect defaultSelectedKey="apple" />);
+    const onClear = vi.fn();
+    const {rerender} = render(<FruitSelect defaultSelectedKey="apple" onClear={onClear} />);
 
     const trigger = getTrigger();
 
@@ -161,9 +244,11 @@ describe("Select", () => {
     await user.keyboard("{Backspace}");
     runAllTimers();
     expect(trigger).toHaveTextContent("Apple");
+    /* Without a composed clear button the shortcut is inert, and onClear stays untouched. */
+    expect(onClear).not.toHaveBeenCalled();
 
     rerender(
-      <FruitSelect defaultSelectedKey="apple">
+      <FruitSelect defaultSelectedKey="apple" onClear={onClear}>
         <Select.Trigger>
           <Select.Value />
           <Select.Indicator />
@@ -186,6 +271,8 @@ describe("Select", () => {
     await user.keyboard("{Backspace}");
     runAllTimers();
     expect(getTrigger()).not.toHaveTextContent("Apple");
+    /* The clearing shortcut reports through onClear, exactly like the click path. */
+    expect(onClear).toHaveBeenCalledOnce();
   });
 
   it("marks the indicator with the open state", async () => {
