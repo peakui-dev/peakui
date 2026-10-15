@@ -949,6 +949,39 @@ export const AsynchronousLoading: Story = {
   },
 };
 
+/*
+ * A dynamic `items` collection with function children — the collection contract jsdom refuses
+ * (RAC's Select never reports the dynamic collection ready there), so the unit suite composes
+ * static item children instead and the e2e spec in apps/storybook/e2e/select.spec.ts proves
+ * this story in a real browser. The `Collection` inside the ListBox is RAC's dynamic-collection
+ * mechanism: the Select builds its collection from children, not from a root `items` prop.
+ */
+export const DynamicItems: Story = {
+  render: () => (
+    <Showcase title="DynamicItems">
+      <Select className="w-[256px]" placeholder="Select one">
+        <Label>State</Label>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox>
+            <Collection items={STATES}>
+              {(state) => (
+                <ListBox.Item id={state.id} textValue={state.name}>
+                  {state.name}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              )}
+            </Collection>
+          </ListBox>
+        </Select.Popover>
+      </Select>
+    </Showcase>
+  ),
+};
+
 export const Disabled: Story = {
   render: () => (
     <Showcase title="Disabled">
