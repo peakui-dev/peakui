@@ -857,6 +857,79 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./segmented-control/sizes").then((m) => m.Sizes),
     file: "segmented-control/sizes.tsx",
   },
+  // select
+  "select-asynchronous-loading": {
+    loader: () => import("./select/asynchronous-loading").then((m) => m.AsynchronousLoading),
+    file: "select/asynchronous-loading.tsx",
+  },
+  "select-basic": {
+    loader: () => import("./select/basic").then((m) => m.Basic),
+    file: "select/basic.tsx",
+  },
+  "select-controlled": {
+    loader: () => import("./select/controlled").then((m) => m.Controlled),
+    file: "select/controlled.tsx",
+  },
+  "select-controlled-multiple": {
+    loader: () => import("./select/controlled-multiple").then((m) => m.ControlledMultiple),
+    file: "select/controlled-multiple.tsx",
+  },
+  "select-controlled-open-state": {
+    loader: () => import("./select/controlled-open-state").then((m) => m.ControlledOpenState),
+    file: "select/controlled-open-state.tsx",
+  },
+  "select-custom-indicator": {
+    loader: () => import("./select/custom-indicator").then((m) => m.CustomIndicator),
+    file: "select/custom-indicator.tsx",
+  },
+  "select-custom-styles": {
+    loader: () => import("./select/custom-styles").then((m) => m.CustomStyles),
+    file: "select/custom-styles.tsx",
+  },
+  "select-custom-value": {
+    loader: () => import("./select/custom-value").then((m) => m.CustomValue),
+    file: "select/custom-value.tsx",
+  },
+  "select-custom-value-multiple": {
+    loader: () => import("./select/custom-value-multiple").then((m) => m.CustomValueMultiple),
+    file: "select/custom-value-multiple.tsx",
+  },
+  "select-disabled": {
+    loader: () => import("./select/disabled").then((m) => m.Disabled),
+    file: "select/disabled.tsx",
+  },
+  "select-full-width": {
+    loader: () => import("./select/full-width").then((m) => m.FullWidth),
+    file: "select/full-width.tsx",
+  },
+  "select-multiple-select": {
+    loader: () => import("./select/multiple-select").then((m) => m.MultipleSelect),
+    file: "select/multiple-select.tsx",
+  },
+  "select-required": {
+    loader: () => import("./select/required").then((m) => m.Required),
+    file: "select/required.tsx",
+  },
+  "select-variants": {
+    loader: () => import("./select/variants").then((m) => m.Variants),
+    file: "select/variants.tsx",
+  },
+  "select-with-clear-button": {
+    loader: () => import("./select/with-clear-button").then((m) => m.WithClearButton),
+    file: "select/with-clear-button.tsx",
+  },
+  "select-with-description": {
+    loader: () => import("./select/with-description").then((m) => m.WithDescription),
+    file: "select/with-description.tsx",
+  },
+  "select-with-disabled-options": {
+    loader: () => import("./select/with-disabled-options").then((m) => m.WithDisabledOptions),
+    file: "select/with-disabled-options.tsx",
+  },
+  "select-with-sections": {
+    loader: () => import("./select/with-sections").then((m) => m.WithSections),
+    file: "select/with-sections.tsx",
+  },
   // separator
   "separator-basic": {
     loader: () => import("./separator/basic").then((m) => m.Basic),
