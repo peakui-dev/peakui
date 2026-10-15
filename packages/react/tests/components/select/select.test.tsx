@@ -1,8 +1,7 @@
 import type {SelectRootProps} from "@/components/select/index.ts";
 
-import {useState} from "react";
-
 import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {useState} from "react";
 
 import {ListBox} from "@/components/list-box/index.ts";
 import {Select, SelectRoot} from "@/components/select/index.ts";
@@ -144,12 +143,12 @@ describe("Select", () => {
   it("follows a controlled value across rerenders", async () => {
     const user = setupUser({advanceTimers: vi.advanceTimersByTime});
     const onChange = vi.fn();
-    const {rerender} = render(<FruitSelect onChange={onChange} value="apple" />);
+    const {rerender} = render(<FruitSelect value="apple" onChange={onChange} />);
 
     expect(getTrigger()).toHaveTextContent("Apple");
 
     /* Only the parent's value moves the selection, with no user event involved. */
-    rerender(<FruitSelect onChange={onChange} value="banana" />);
+    rerender(<FruitSelect value="banana" onChange={onChange} />);
 
     expect(getTrigger()).toHaveTextContent("Banana");
     expect(onChange).not.toHaveBeenCalled();
@@ -163,7 +162,7 @@ describe("Select", () => {
     expect(onChange).toHaveBeenCalledWith("apple");
     expect(getTrigger()).toHaveTextContent("Banana");
 
-    rerender(<FruitSelect onChange={onChange} value="apple" />);
+    rerender(<FruitSelect value="apple" onChange={onChange} />);
 
     expect(getTrigger()).toHaveTextContent("Apple");
   });
