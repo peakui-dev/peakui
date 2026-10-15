@@ -1,0 +1,113 @@
+/*
+ * ColorSwatch. Class names come from src/components/color-swatch/color-swatch.styles.ts; all
+ * Tailwind lives here. Ported line by line from the vendored reference
+ * styles/components/color-swatch.css. The differences that remain are listed at the end of the
+ * file, each with its reason.
+ */
+
+/* Base color-swatch styles */
+.color-swatch {
+  @apply relative box-border size-8 shrink-0;
+
+  /*
+   * The component sets this channel inline from its colour. Declared here so the class also
+   * stands alone: RAC's own fallback colour for a missing value is fully transparent, so
+   * `transparent` keeps the same semantics (check-tokens gate 6 wants the declaration too).
+   */
+  --color-swatch-current: transparent;
+
+  /*
+   * Checkered background pattern for transparency. The reference writes #efefef and #f7f7f7;
+   * component CSS may not carry raw hex (check-tokens gate 5), so the same two light greys
+   * come from the theme's white and black through oklab mixes.
+   */
+  background:
+    linear-gradient(var(--color-swatch-current), var(--color-swatch-current)),
+    repeating-conic-gradient(
+      color-mix(in oklab, var(--color-white) 93%, var(--color-black)) 0% 25%,
+      color-mix(in oklab, var(--color-white) 97%, var(--color-black)) 0% 50%
+    )
+    50% / 16px 16px;
+
+  /*
+   * Default border for visibility against similar backgrounds. The reference writes
+   * rgba(0, 0, 0, 0.1); the same 10% black comes from the theme token (check-tokens gate 5).
+   */
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-black) 10%, transparent);
+
+  /*
+   * Forced colors: RAC's inline forcedColorAdjust: none keeps the swatch's own colour
+   * un-flattened, so the reference needs no boundary here — but its 10% black inset ring
+   * disappears against a dark colour on a dark surface. A CanvasText ring in forced colors
+   * keeps the swatch visible on any surface; inset, so the geometry never shifts between modes.
+   */
+  @media (forced-colors: active) {
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+}
+
+/* Shape variants */
+.color-swatch--circle {
+  @apply rounded-2xl;
+}
+
+.color-swatch--square {
+  @apply rounded-md;
+}
+
+/* Size variants */
+.color-swatch--xs {
+  @apply size-4;
+
+  &.color-swatch--circle {
+    @apply rounded-lg;
+  }
+}
+
+.color-swatch--sm {
+  @apply size-6;
+
+  &.color-swatch--circle {
+    @apply rounded-xl;
+  }
+}
+
+.color-swatch--md {
+  /* No additional styles — default size (32px) uses circle's base rounded-2xl */
+}
+
+.color-swatch--lg {
+  @apply size-9;
+
+  &.color-swatch--circle {
+    @apply rounded-3xl;
+  }
+}
+
+.color-swatch--xl {
+  @apply size-10;
+
+  &.color-swatch--circle {
+    @apply rounded-3xl;
+  }
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. forced-colors block: the reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md; RAC already opts the element out
+ *    of the forced palette (inline forcedColorAdjust: none), so this block only restores a
+ *    boundary the reference loses to its 10% black inset ring on dark surfaces. Inset, so the
+ *    swatch's geometry never shifts between modes.
+ *
+ * 2. No raw colours (check-tokens gate 5): the reference's checkerboard hexes (#efefef, #f7f7f7)
+ *    and its rgba(0, 0, 0, 0.1) ring are rebuilt from the theme's white and black tokens through
+ *    color-mix(in oklab, …) — the same repair skeleton.css makes for its shimmer.
+ *
+ * 3. `--color-swatch-current` is declared (as transparent) on the class: the reference only
+ *    consumes it, which leaves the whole background declaration dropped whenever the property is
+ *    missing — exactly the silent failure check-tokens gate 6 exists for. RAC's own fallback for
+ *    a missing colour is fully transparent, so the default keeps its semantics; the component's
+ *    inline channel still wins.
+ */

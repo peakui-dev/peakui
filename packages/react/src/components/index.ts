@@ -11,6 +11,8 @@ export * from "./checkbox-group/index.ts";
 export * from "./checkbox/index.ts";
 export * from "./chip/index.ts";
 export * from "./close-button/index.ts";
+export * from "./color-picker/index.ts";
+export * from "./color-swatch/index.ts";
 export * from "./description/index.ts";
 export * from "./disclosure-group/index.ts";
 export * from "./disclosure/index.ts";

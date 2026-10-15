@@ -1,0 +1,127 @@
+"use client";
+
+import type {SurfaceVariants} from "../surface/index.ts";
+import type {ColorPickerVariants} from "@peakui/styles";
+import type {ComponentPropsWithRef} from "react";
+import type {ColorPickerProps as ColorPickerPrimitiveProps} from "react-aria-components/ColorPicker";
+
+import {colorPickerVariants} from "@peakui/styles";
+import React, {createContext, use} from "react";
+import {Button as ButtonPrimitive} from "react-aria-components/Button";
+import {ColorPicker as ColorPickerPrimitive} from "react-aria-components/ColorPicker";
+import {
+  DialogTrigger as DialogTriggerPrimitive,
+  Popover as PopoverPrimitive,
+} from "react-aria-components/Popover";
+
+import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
+import {SurfaceContext} from "../surface/index.ts";
+
+/* -------------------------------------------------------------------------------------------------
+ * ColorPicker Context
+ * -----------------------------------------------------------------------------------------------*/
+type ColorPickerContext = {
+  slots?: ReturnType<typeof colorPickerVariants>;
+};
+
+const ColorPickerContext = createContext<ColorPickerContext>({});
+
+/* -------------------------------------------------------------------------------------------------
+ * ColorPicker Root
+ * -----------------------------------------------------------------------------------------------*/
+interface ColorPickerRootProps
+  extends Omit<ColorPickerPrimitiveProps, "children">, ColorPickerVariants {
+  /** Additional class name for the wrapper element */
+  className?: string;
+  /** Content of the color picker (Trigger, Popover, etc.) */
+  children?: React.ReactNode;
+}
+
+const ColorPickerRoot = ({children, className, ...props}: ColorPickerRootProps) => {
+  const slots = React.useMemo(() => colorPickerVariants(), []);
+  const contextValue = React.useMemo(() => ({slots}), [slots]);
+
+  return (
+    <ColorPickerContext value={contextValue}>
+      <ColorPickerPrimitive {...props}>
+        {/*
+         * RAC's ColorPicker manages the color value but has no popover of its own, unlike its
+         * Select. DialogTrigger supplies what the popover consumes: the press-to-open wiring
+         * from the trigger and the dialog semantics (focus trap, dismissal) for ColorPicker.Popover.
+         */}
+        <DialogTriggerPrimitive>
+          <div className={composeSlotClassName(slots?.base, className)} data-slot="color-picker">
+            {children}
+          </div>
+        </DialogTriggerPrimitive>
+      </ColorPickerPrimitive>
+    </ColorPickerContext>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ColorPicker Trigger
+ * -----------------------------------------------------------------------------------------------*/
+interface ColorPickerTriggerProps extends ComponentPropsWithRef<typeof ButtonPrimitive> {}
+
+const ColorPickerTrigger = ({children, className, ...props}: ColorPickerTriggerProps) => {
+  const {slots} = use(ColorPickerContext);
+
+  return (
+    <ButtonPrimitive
+      {...props}
+      className={composeTwRenderProps(className, slots?.trigger())}
+      data-slot="color-picker-trigger"
+    >
+      {(values) => <>{typeof children === "function" ? children(values) : children}</>}
+    </ButtonPrimitive>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ColorPicker Popover
+ * -----------------------------------------------------------------------------------------------*/
+interface ColorPickerPopoverProps extends Omit<
+  ComponentPropsWithRef<typeof PopoverPrimitive>,
+  "children"
+> {
+  children: React.ReactNode;
+}
+
+const ColorPickerPopover = ({
+  children,
+  className,
+  placement = "bottom left",
+  ...props
+}: ColorPickerPopoverProps) => {
+  const {slots} = use(ColorPickerContext);
+
+  return (
+    /*
+     * Declares the popover an overlay surface: nested surface-aware parts inside it re-base
+     * their fills onto this surface level instead of the page background. Same seam as
+     * Select.Popover.
+     */
+    <SurfaceContext
+      value={{
+        variant: "default" as SurfaceVariants["variant"],
+      }}
+    >
+      <PopoverPrimitive
+        {...props}
+        className={composeTwRenderProps(className, slots?.popover())}
+        data-slot="color-picker-popover"
+        placement={placement}
+      >
+        {children}
+      </PopoverPrimitive>
+    </SurfaceContext>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Exports
+ * -----------------------------------------------------------------------------------------------*/
+export {ColorPickerRoot, ColorPickerTrigger, ColorPickerPopover};
+
+export type {ColorPickerRootProps, ColorPickerTriggerProps, ColorPickerPopoverProps};
