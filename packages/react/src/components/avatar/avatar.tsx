@@ -1,5 +1,6 @@
 "use client";
 
+import type {DOMRenderProps} from "../../utils/dom.tsx";
 import type {AvatarVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef} from "react";
 
@@ -8,6 +9,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import React, {createContext, use} from "react";
 
 import {composeSlotClassName} from "../../utils/compose.ts";
+import {dom} from "../../utils/dom.tsx";
 import {
   AVATAR_GROUP_CHILD,
   AVATAR_SLOT,
@@ -27,8 +29,8 @@ const AvatarContext = createContext<AvatarContext>({});
  * Avatar Root
  * -----------------------------------------------------------------------------------------------*/
 /*
- * `asChild` is omitted: polymorphism in this library is a `render` prop, and Radix's root cannot
- * take one. It stays on `Avatar.Image`, where a framework image component is the one real use.
+ * `asChild` is omitted: polymorphism in this library is a `render` prop. Only `Avatar.Image` has
+ * one, mapped onto `asChild` below; a root that is a different element has no use in an avatar.
  */
 interface AvatarRootProps
   extends
@@ -82,17 +84,28 @@ const AvatarRoot = ({
 /* -------------------------------------------------------------------------------------------------
  * Avatar Image
  * -----------------------------------------------------------------------------------------------*/
-interface AvatarImageProps extends ComponentPropsWithRef<typeof AvatarPrimitive.Image> {}
+/*
+ * `render` replaces Radix's `asChild`: the house pattern for polymorphism. It is mapped onto
+ * `asChild` here, with a `dom.img` as the single child that Radix merges its props into, so the
+ * loading status is still tracked from `src` and the image still appears only once loaded.
+ */
+interface AvatarImageProps
+  extends
+    Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Image>, "asChild">,
+    DOMRenderProps<"img", undefined> {}
 
-const AvatarImage = ({className, ...props}: AvatarImageProps) => {
+const AvatarImage = ({className, render, ...props}: AvatarImageProps) => {
   const {slots} = use(AvatarContext);
 
   return (
     <AvatarPrimitive.Image
       {...props}
+      asChild={render ? true : undefined}
       className={composeSlotClassName(slots?.image, className)}
       data-slot="avatar-image"
-    />
+    >
+      {render ? <dom.img render={render} /> : undefined}
+    </AvatarPrimitive.Image>
   );
 };
 

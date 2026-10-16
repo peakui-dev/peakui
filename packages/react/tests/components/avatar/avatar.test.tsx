@@ -1,4 +1,5 @@
 import {render, screen} from "@peakui/testing/helpers";
+import {createRef} from "react";
 
 import {AVATAR_GROUP_CHILD, AVATAR_SLOT, Avatar, AvatarRoot} from "@/components/avatar/index.ts";
 import {AvatarGroupContext} from "@/components/avatar-group/avatar-group-context.ts";
@@ -67,6 +68,61 @@ describe("Avatar", () => {
     render(
       <Avatar>
         <Avatar.Image alt="Jane Doe" src="https://example.test/missing.png" />
+        <Avatar.Fallback>JD</Avatar.Fallback>
+      </Avatar>,
+    );
+
+    expect(await screen.findByText("JD")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
+
+  it("renders the image through the render prop once it has loaded", async () => {
+    const render_ = vi.fn((props: React.ComponentProps<"img">) => (
+      <img {...props} data-testid="custom" />
+    ));
+
+    render(
+      <Avatar>
+        <Avatar.Image alt="Jane Doe" render={render_} src="https://example.test/jane.png" />
+        <Avatar.Fallback>JD</Avatar.Fallback>
+      </Avatar>,
+    );
+
+    const image = await screen.findByRole("img", {name: "Jane Doe"});
+
+    expect(image).toHaveAttribute("data-testid", "custom");
+    expect(image).toHaveAttribute("data-slot", "avatar-image");
+    expect(image).toHaveAttribute("src", "https://example.test/jane.png");
+    expect(image.className).toContain("avatar__image");
+    expect(screen.queryByText("JD")).not.toBeInTheDocument();
+  });
+
+  it("passes the ref of Avatar.Image to the element the render prop returns", async () => {
+    const ref = createRef<HTMLImageElement>();
+
+    render(
+      <Avatar>
+        <Avatar.Image
+          ref={ref}
+          alt="Jane Doe"
+          render={(props) => <img {...props} />}
+          src="https://example.test/jane.png"
+        />
+      </Avatar>,
+    );
+
+    expect(await screen.findByRole("img")).toBe(ref.current);
+  });
+
+  it("still shows the fallback when the image fails and a render prop is given", async () => {
+    imageOutcome = "error";
+    render(
+      <Avatar>
+        <Avatar.Image
+          alt="Jane Doe"
+          render={(props) => <img {...props} />}
+          src="https://example.test/missing.png"
+        />
         <Avatar.Fallback>JD</Avatar.Fallback>
       </Avatar>,
     );

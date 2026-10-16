@@ -68,7 +68,7 @@ difference. Each one that touches a stylesheet is repeated at the end of its `.c
 | 1 | Radix is a plain dependency | Same, `1.2.6`. The roadmap spec says `AGENTS.md` names it as a binding choice; `AGENTS.md` does not (it lists RAC and no Radix). The roadmap spec is where the decision is recorded. RAC has no avatar primitive, which is the standard's condition for reaching down. | Reported, not silently settled |
 | 2 | No `data-slot` on any Avatar element | `data-slot` `avatar`, `avatar-image`, `avatar-fallback`; group: `avatar-group`, `avatar-group-count`, placed **after** the props spread | Standard: every rendered element, after the spread |
 | 3 | `AvatarGroupCount` sets `data-slot` before its spread, then hands it to `Avatar` | The root takes an internal marker prop `AVATAR_SLOT` for the one case where a different part owns the root element; otherwise `avatar` | A root that sets `data-slot` after its spread would otherwise erase the Count's slot |
-| 4 | `Avatar.Root`, `.Image`, `.Fallback` inherit Radix's `asChild` | `asChild` is omitted from the Root and Fallback prop types; kept on `Avatar.Image`, where a framework image component is the one real use | Standard: polymorphism by `render`, not `as`; Radix's `Image` cannot take a render function |
+| 4 | `Avatar.Root`, `.Image`, `.Fallback` inherit Radix's `asChild` | `asChild` is omitted from all three prop types. `Avatar.Image` takes `render` (`DOMRenderProps<"img", undefined>`) instead, mapped internally onto Radix's `asChild` with a `dom.img` child | Standard: polymorphism by `render`, never `as` or `asChild`; decided by the controller after review of the first cut, which had kept `asChild` on the Image |
 | 5 | Every visible child of the group is cloned with the group marker | Host elements (`typeof child.type === "string"`) are not cloned | The marker would reach the DOM as an unknown attribute |
 | 6 | `displayName = "HeroUI.AvatarGroup.Count"`; remote CDN images; Iconify icons | No `displayName` (inferred; `isCountElement` compares by identity); stories and demos use inline SVG data-URI images and an inline glyph | Names the reference; offline, deterministic VRT |
 | 7 | CSS tokens spelled `var(--background)` | `var(--color-background)`; the md size lives in the base class (already so); a `forced-colors` block | `--color-` prefix, `css-authoring.md`, design-tokens spec |
@@ -124,7 +124,7 @@ interface AvatarRootProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimit
   [AVATAR_GROUP_CHILD]?: boolean;
   [AVATAR_SLOT]?: string;
 }
-interface AvatarImageProps extends ComponentPropsWithRef<typeof AvatarPrimitive.Image> {}
+interface AvatarImageProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Image>, "asChild">, DOMRenderProps<"img", undefined> {}
 interface AvatarFallbackProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Fallback>, "asChild"> {
   color?: AvatarVariants["color"];
 }
@@ -155,6 +155,9 @@ export const Avatar = Object.assign(AvatarRoot, {Root: AvatarRoot, Image: Avatar
     (`getByRole("img", {name: "Jane Doe"})`; `queryByText("JD")` is null)
   - `shows the fallback when the image fails to load` (`getByText("JD")`; no `img` role)
   - `puts data-slot on the root, the image and the fallback` (`avatar`, `avatar-image`, `avatar-fallback`)
+  - `renders the image through the render prop once it has loaded` (keeps `data-slot`, `src`, the BEM class; hides the fallback)
+  - `passes the ref of Avatar.Image to the element the render prop returns`
+  - `still shows the fallback when the image fails and a render prop is given`
   - `puts the color on the fallback and the size on the root` (`avatar__fallback--accent`, `avatar--lg`)
   - `lets Fallback override the color of its Avatar` (root `success`, fallback `danger`)
   - `passes data attributes and a consumer className to the root`
@@ -264,7 +267,7 @@ Reference; Anatomy for both (compound); no `links.rac` (Radix is not RAC). One d
 stories, in English, importing only `@peakui/react`, `@gravity-ui/icons` and `react`. Avatar demos: `basic`,
 `sizes`, `colors`, `variants`, `fallback`, `custom-styles`; group: `basic`, `max`, `count`, `sizes`, `grid`,
 `overlap`, `custom-styles`. The reference's `custom-image-component` demo needs Next.js and is not ported; the
-`asChild` prop is a row in the API table. The group page carries the reference's accessibility note (no default
+`render` prop is a row in the API table. The group page carries the reference's accessibility note (no default
 `role="group"`; pass one with `aria-label`).
 
 - [ ] **Step 1: Write the pages and demos; run `pnpm registries`.**

@@ -131,7 +131,7 @@ The Avatar component uses these CSS classes ([view source styles](https://github
 | `sizes` | `string` | - | Responsive image sizes |
 | `crossOrigin` | `'anonymous' \| 'use-credentials'` | - | CORS setting of the request |
 | `referrerPolicy` | `HTMLAttributeReferrerPolicy` | - | Referrer policy of the request |
-| `asChild` | `boolean` | `false` | Merges the props onto the child, such as a framework image component, instead of an `<img>`; pass `src` so loading is still tracked |
+| `render` | `DOMRenderFunction<'img', undefined>` | - | Replaces the rendered `<img>`, such as with a framework image component; pass `src` so loading is still tracked |
 | `onLoadingStatusChange` | `(status: 'idle' \| 'loading' \| 'loaded' \| 'error') => void` | - | Called as the loading status changes |
 | `className` | `string` | - | Additional classes |
 | `...rest` | | | Every `<img>` attribute is accepted |
