@@ -35,23 +35,30 @@ const AvatarContext = createContext<AvatarContext>({});
 interface AvatarRootProps
   extends
     Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Root>, "asChild" | "color">,
-    AvatarVariants {
-  /** Set by `AvatarGroup` on its direct children; not for consumers. */
+    AvatarVariants {}
+
+/*
+ * The two markers `AvatarGroup` writes onto its parts. They are not part of `AvatarRootProps`, so
+ * no consumer type, `Avatar["Props"]` or `AvatarGroup.Count` prop list carries them, and neither
+ * constant leaves the package: `AvatarRoot` reads them from the props object it is handed.
+ */
+interface AvatarMarkers {
   [AVATAR_GROUP_CHILD]?: boolean;
-  /** Names the `data-slot` when another part owns the root, as `AvatarGroup.Count` does. */
   [AVATAR_SLOT]?: string;
 }
 
-const AvatarRoot = ({
-  children,
-  className,
-  color,
-  size,
-  variant,
-  [AVATAR_GROUP_CHILD]: isAvatarGroupChild,
-  [AVATAR_SLOT]: slot,
-  ...props
-}: AvatarRootProps) => {
+const AvatarRoot = (allProps: AvatarRootProps) => {
+  const {
+    children,
+    className,
+    color,
+    size,
+    variant,
+    [AVATAR_GROUP_CHILD]: isAvatarGroupChild,
+    [AVATAR_SLOT]: slot,
+    ...props
+  } = allProps as AvatarRootProps & AvatarMarkers;
+
   const avatarGroupContext = use(AvatarGroupContext);
 
   // Only use group context when this avatar is a direct child of AvatarGroup

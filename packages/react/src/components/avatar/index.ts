@@ -1,7 +1,5 @@
 import type {ComponentProps} from "react";
 
-import {AVATAR_GROUP_CHILD, AVATAR_SLOT} from "../avatar-group/avatar-group-context.ts";
-
 import {AvatarFallback, AvatarImage, AvatarRoot} from "./avatar.tsx";
 
 /* -------------------------------------------------------------------------------------------------
@@ -31,13 +29,6 @@ export type {
   AvatarImageProps,
   AvatarFallbackProps,
 } from "./avatar.tsx";
-
-/* -------------------------------------------------------------------------------------------------
- * Markers
- *
- * Re-exported for the type declarations of the props that carry them.
- * -----------------------------------------------------------------------------------------------*/
-export {AVATAR_GROUP_CHILD, AVATAR_SLOT};
 
 /* -------------------------------------------------------------------------------------------------
  * Variants

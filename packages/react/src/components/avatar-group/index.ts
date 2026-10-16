@@ -30,7 +30,7 @@ export type {
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
-export {AVATAR_GROUP_CHILD, AVATAR_SLOT, AvatarGroupContext} from "./avatar-group-context.ts";
+export {AvatarGroupContext} from "./avatar-group-context.ts";
 
 export type {AvatarGroupContextValue} from "./avatar-group-context.ts";
 

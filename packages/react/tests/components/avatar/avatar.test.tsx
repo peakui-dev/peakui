@@ -1,8 +1,15 @@
+import type {ComponentProps} from "react";
+
 import {render, screen} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
-import {AVATAR_GROUP_CHILD, AVATAR_SLOT, Avatar, AvatarRoot} from "@/components/avatar/index.ts";
-import {AvatarGroupContext} from "@/components/avatar-group/avatar-group-context.ts";
+import * as avatarBarrel from "@/components/avatar/index.ts";
+import {
+  AVATAR_GROUP_CHILD,
+  AVATAR_SLOT,
+  AvatarGroupContext,
+} from "@/components/avatar-group/avatar-group-context.ts";
+import * as groupBarrel from "@/components/avatar-group/index.ts";
 
 /*
  * jsdom never loads an image, and Radix's Image renders its <img> only once a preload through
@@ -37,6 +44,8 @@ beforeEach(() => {
 afterEach(() => {
   window.Image = RealImage;
 });
+
+const {Avatar, AvatarRoot} = avatarBarrel;
 
 describe("Avatar", () => {
   it("renders the fallback text when there is no image", () => {
@@ -243,6 +252,30 @@ describe("Avatar", () => {
       expect(screen.getByTestId("root").className).toContain("avatar--lg");
       expect(screen.getByTestId("root").className).not.toContain("avatar--sm");
     });
+  });
+
+  it("keeps the internal markers out of the public barrels", () => {
+    for (const name of ["AVATAR_GROUP_CHILD", "AVATAR_SLOT"]) {
+      expect(avatarBarrel).not.toHaveProperty(name);
+      expect(groupBarrel).not.toHaveProperty(name);
+    }
+  });
+
+  it("does not accept the markers as props of Avatar", () => {
+    // @ts-expect-error the marker is not in the public props: a consumer cannot name it
+    const props: ComponentProps<typeof Avatar> = {__avatar_slot: "mine"};
+
+    expect(props).toBeDefined();
+  });
+
+  it("forwards role and aria-label so a fallback-only avatar can be named", () => {
+    render(
+      <Avatar aria-label="Jane Doe" role="img">
+        <Avatar.Fallback>JD</Avatar.Fallback>
+      </Avatar>,
+    );
+
+    expect(screen.getByRole("img", {name: "Jane Doe"})).toHaveAttribute("data-slot", "avatar");
   });
 
   it("behaves identically as Avatar.Root and AvatarRoot", () => {
