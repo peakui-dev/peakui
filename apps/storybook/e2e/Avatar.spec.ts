@@ -86,17 +86,21 @@ test.describe("Avatar (browser)", () => {
 
         await injectAxe(page);
         /*
-         * One exclusion, with its measurement: `color="danger"` in the dark theme puts
-         * --color-danger-soft-foreground (#cf6f66) on --color-default (#26272a) at 14px, 4.35:1
-         * against the 4.5:1 floor (axe-core 4.13). Every other color, in both themes and both
-         * variants, passes. It is the token layer's known pair, the one chip.css (deviation 5)
-         * and button.css measured for accent at 4.44:1: check:tokens guarantees X / X-foreground
-         * and never *-soft-foreground on --color-default. Reported to the core's owner, not
-         * restyled here. Lift the exclusion when the token layer is fixed.
+         * One exclusion, with its measurement: the default variant with `color="danger"` in the dark
+         * theme puts --color-danger-soft-foreground (#cf6f66) on --color-default (#26272a) at 14px,
+         * 4.35:1 against the 4.5:1 floor (axe-core 4.13; about 4.33:1 recomputed from the OKLCH
+         * tokens). Soft danger passes, and so do accent, success, warning and default in the default
+         * variant (4.97, 7.78, 9.34, 14.05), in both themes. The selector therefore names only the
+         * non-soft case, so a regression anywhere else stays visible. It is the token layer's known
+         * pair, listed in chip.css (deviation 5) and avatar.css: check:tokens guarantees X / X-foreground
+         * and never *-soft-foreground on --color-default. Reported to the core's owner, not restyled
+         * here. Lift the exclusion when the token layer is fixed.
          */
         await checkA11y(
           page,
-          theme === "default-dark" ? {exclude: [[".avatar__fallback--danger"]]} : undefined,
+          theme === "default-dark"
+            ? {exclude: [[".avatar:not(.avatar--soft) .avatar__fallback--danger"]]}
+            : undefined,
           {
             axeOptions: {runOnly: {type: "tag", values: ["wcag2a", "wcag2aa", "wcag22aa"]}},
             detailedReport: true,

@@ -110,7 +110,17 @@
  *    absolutely positioned image, and a border would shrink the image by two pixels in every
  *    theme to make room for a boundary only forced colors draws.
  *
- * 2. Nothing else. The reference's utilities already use semantic tokens, which resolve through
+ * 2. Known contrast defect, not fixable here: in the dark theme the default variant with
+ *    `color="danger"` puts `--color-danger-soft-foreground` (#cf6f66) on `--color-default`
+ *    (#26272a) at 14px (`.avatar--md`, `text-sm`): 4.35:1 measured by axe-core 4.13 (about 4.33:1
+ *    recomputed from the OKLCH tokens) against the 4.5:1 floor. Light theme, the soft variant, and
+ *    the accent, success, warning and default colors pass (4.97, 7.78, 9.34 and 14.05:1 in the
+ *    dark theme). The mapping is the reference's own, the same `*-soft-foreground` on
+ *    `--color-default` composition chip.css lists in its deviation 5; the values live in
+ *    themes/default/variables.css. Reported for the backlog rather than forked, and the browser spec
+ *    excludes exactly that pair.
+ *
+ * 3. Nothing else. The reference's utilities already use semantic tokens, which resolve through
  *    the `--color-*` names of the peakui token layer, and its default (md) size already lives in
  *    the base class with an empty `.avatar--md`.
  */
