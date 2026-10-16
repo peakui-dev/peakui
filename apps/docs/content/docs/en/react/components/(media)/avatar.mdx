@@ -51,6 +51,12 @@ export default () => (
 
 <ComponentPreview name="avatar-fallback" />
 
+### Accessible Name
+
+A fallback-only avatar has no accessible name; `role="img"` with `aria-label` gives it one.
+
+<ComponentPreview name="avatar-accessible-name" />
+
 ## Customization
 
 ### Tailwind CSS
@@ -59,10 +65,13 @@ export default () => (
 
 ### Global CSS
 
+Set `--avatar-size` whenever you resize an avatar: `AvatarGroup`'s clip mask is cut from it.
+
 ```css
 @layer components {
-  .avatar {
-    @apply size-16 border-2 border-accent;
+  .avatar--lg {
+    --avatar-size: 4rem;
+    @apply size-16;
   }
 
   .avatar__fallback {
@@ -108,6 +117,12 @@ The Avatar component uses these CSS classes ([view source styles](https://github
 - `[data-slot="avatar"]`
 - `[data-slot="avatar-image"]`
 - `[data-slot="avatar-fallback"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--avatar-size` | Diameter, set by the size classes (`2rem`, `2.5rem`, `3rem`); read by the `AvatarGroup` clip mask |
 
 ## API Reference
 

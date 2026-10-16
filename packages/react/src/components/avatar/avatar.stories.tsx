@@ -200,3 +200,17 @@ export const WithDelay: Story = {
     </Showcase>
   ),
 };
+
+export const Labelled: Story = {
+  args: {children: null},
+  render: () => (
+    <Showcase title="Labelled">
+      <div className="flex items-center gap-4">
+        {/* A fallback-only avatar has no accessible name; role and aria-label give it one */}
+        <Avatar aria-label="Jane Doe" role="img">
+          <Avatar.Fallback>JD</Avatar.Fallback>
+        </Avatar>
+      </div>
+    </Showcase>
+  ),
+};

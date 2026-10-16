@@ -119,6 +119,55 @@ export const Sizes: Story = {
   ),
 };
 
+const COLORS = ["default", "accent", "success", "warning", "danger"] as const;
+
+const letters = () =>
+  ["A", "B", "C", "D"].map((letter) => (
+    <Avatar key={letter}>
+      <Avatar.Fallback>{letter}</Avatar.Fallback>
+    </Avatar>
+  ));
+
+/* Each color at md and at sm: the small size sets its fallback at text-xs, the tightest contrast case. */
+export const Colors: Story = {
+  render: () => (
+    <Showcase title="Colors">
+      <div className="flex flex-col gap-4">
+        {COLORS.map((color) => (
+          <div key={color} className="flex items-center gap-6">
+            <span className="w-16 text-sm text-muted">{color}</span>
+            <AvatarGroup color={color}>{letters()}</AvatarGroup>
+            <AvatarGroup color={color} size="sm">
+              {letters()}
+            </AvatarGroup>
+          </div>
+        ))}
+      </div>
+    </Showcase>
+  ),
+};
+
+export const Variants: Story = {
+  render: () => (
+    <Showcase title="Variants">
+      <div className="flex flex-col gap-4">
+        {(["default", "soft"] as const).map((variant) => (
+          <div key={variant} className="flex flex-col gap-2">
+            <p className="text-sm text-muted">{variant}</p>
+            <div className="flex items-center gap-6">
+              {COLORS.map((color) => (
+                <AvatarGroup key={color} color={color} size="sm" variant={variant}>
+                  {letters()}
+                </AvatarGroup>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Showcase>
+  ),
+};
+
 export const Grid: Story = {
   render: () => (
     <Showcase title="Grid">

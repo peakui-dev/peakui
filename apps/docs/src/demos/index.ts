@@ -34,6 +34,10 @@ export const demos: Record<string, DemoItem> = {
     file: "alert/without-description.tsx",
   },
   // avatar
+  "avatar-accessible-name": {
+    loader: () => import("./avatar/accessible-name").then((m) => m.AccessibleName),
+    file: "avatar/accessible-name.tsx",
+  },
   "avatar-basic": {
     loader: () => import("./avatar/basic").then((m) => m.Basic),
     file: "avatar/basic.tsx",
@@ -63,6 +67,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./avatar-group/basic").then((m) => m.Basic),
     file: "avatar-group/basic.tsx",
   },
+  "avatar-group-colors": {
+    loader: () => import("./avatar-group/colors").then((m) => m.Colors),
+    file: "avatar-group/colors.tsx",
+  },
   "avatar-group-count": {
     loader: () => import("./avatar-group/count").then((m) => m.Count),
     file: "avatar-group/count.tsx",
@@ -86,6 +94,10 @@ export const demos: Record<string, DemoItem> = {
   "avatar-group-sizes": {
     loader: () => import("./avatar-group/sizes").then((m) => m.Sizes),
     file: "avatar-group/sizes.tsx",
+  },
+  "avatar-group-variants": {
+    loader: () => import("./avatar-group/variants").then((m) => m.Variants),
+    file: "avatar-group/variants.tsx",
   },
   // breadcrumbs
   "breadcrumbs-basic": {
