@@ -184,12 +184,9 @@ export const Avatar = Object.assign(AvatarRoot, {Root: AvatarRoot, Image: Avatar
   that fails so `delayMs` is visible. No network.
 - [ ] **Step 9: Gates for this task:** `pnpm lint`, `pnpm typecheck`, `pnpm --filter @peakui/react test`,
   `pnpm registries --check`. Expected: pass. (The AvatarGroup scaffold's placeholder tests still pass.)
-- [ ] **Step 10: Commit** `feat(react): Avatar`, including the AvatarGroup scaffold and the dependency:
-
-```bash
-git add -A packages apps/docs pnpm-lock.yaml   # after checking git status shows nothing foreign
-git commit -m "feat(react): Avatar"
-```
+- [ ] **Step 10: Do not commit yet.** The group's placeholder tests cannot stay green once
+  `avatar-group.css` and `avatarGroupVariants` are ported, and the generated registries already list both
+  components, so the pair lands as one commit at the end of Task 2.
 
 ---
 
@@ -250,7 +247,8 @@ export const AvatarGroup = Object.assign(AvatarGroupRoot, {Root: AvatarGroupRoot
 - [ ] **Step 6: Stories** `Default`, `Max`, `WithCount`, `Sizes`, `Grid`, `Overlap` (both overlaps on a striped
   backdrop so the seam is visible) under `Components/AvatarGroup`.
 - [ ] **Step 7: Gates for this task** as Task 1 Step 9. Expected: pass.
-- [ ] **Step 8: Commit** `feat(react): AvatarGroup`.
+- [ ] **Step 8: Commit** both components together, `feat(react): Avatar and AvatarGroup` (the dependency,
+  the lockfile, the registries and the scaffolded placeholder docs ride with it).
 
 ---
 
@@ -294,3 +292,9 @@ justified (`references/testing.md`): it covers Review Focus 5 and 6 and the grou
 - [ ] **Step 2: Run it.** `pnpm test:e2e -- Avatar` (add `STORYBOOK_PORT=<free>` if 6007 is held). Expected: PASS.
 - [ ] **Step 3: All gates**, in the order of Global Constraints. Expected: all pass; paste the output in the report.
 - [ ] **Step 4: Commit** `test(storybook): Avatar and AvatarGroup browser tier`, then write the report and stop. Do not merge, do not push.
+
+Run on this machine, three gates are red for reasons outside this work and are reported as such, not fixed:
+root `pnpm lint` (about 41k warnings, all from the git-ignored `apps/docs/.cloudflare` build output; run
+`pnpm exec eslint . --ignore-pattern "apps/docs/.cloudflare/**" --max-warnings=0`), `pnpm test:ai` (seven
+failures in the AGENTS.md/CLAUDE.md sync and the `peakui-react` skill checks) and the `evals` package tests
+(34 failures in process and symlink handling).
