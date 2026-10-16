@@ -38,10 +38,54 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./avatar/basic").then((m) => m.Basic),
     file: "avatar/basic.tsx",
   },
+  "avatar-colors": {
+    loader: () => import("./avatar/colors").then((m) => m.Colors),
+    file: "avatar/colors.tsx",
+  },
+  "avatar-custom-styles": {
+    loader: () => import("./avatar/custom-styles").then((m) => m.CustomStyles),
+    file: "avatar/custom-styles.tsx",
+  },
+  "avatar-fallback": {
+    loader: () => import("./avatar/fallback").then((m) => m.Fallback),
+    file: "avatar/fallback.tsx",
+  },
+  "avatar-sizes": {
+    loader: () => import("./avatar/sizes").then((m) => m.Sizes),
+    file: "avatar/sizes.tsx",
+  },
+  "avatar-variants": {
+    loader: () => import("./avatar/variants").then((m) => m.Variants),
+    file: "avatar/variants.tsx",
+  },
   // avatar-group
   "avatar-group-basic": {
     loader: () => import("./avatar-group/basic").then((m) => m.Basic),
     file: "avatar-group/basic.tsx",
+  },
+  "avatar-group-count": {
+    loader: () => import("./avatar-group/count").then((m) => m.Count),
+    file: "avatar-group/count.tsx",
+  },
+  "avatar-group-custom-styles": {
+    loader: () => import("./avatar-group/custom-styles").then((m) => m.CustomStyles),
+    file: "avatar-group/custom-styles.tsx",
+  },
+  "avatar-group-grid": {
+    loader: () => import("./avatar-group/grid").then((m) => m.Grid),
+    file: "avatar-group/grid.tsx",
+  },
+  "avatar-group-max": {
+    loader: () => import("./avatar-group/max").then((m) => m.Max),
+    file: "avatar-group/max.tsx",
+  },
+  "avatar-group-overlap": {
+    loader: () => import("./avatar-group/overlap").then((m) => m.Overlap),
+    file: "avatar-group/overlap.tsx",
+  },
+  "avatar-group-sizes": {
+    loader: () => import("./avatar-group/sizes").then((m) => m.Sizes),
+    file: "avatar-group/sizes.tsx",
   },
   // breadcrumbs
   "breadcrumbs-basic": {

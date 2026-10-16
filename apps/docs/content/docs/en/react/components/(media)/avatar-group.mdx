@@ -1,6 +1,6 @@
 ---
 title: AvatarGroup
-description: AvatarGroup component
+description: Stacks or tiles avatars with an overflow count
 links:
   source: avatar-group/avatar-group.tsx
   styles: avatar-group.css
@@ -9,7 +9,134 @@ links:
 ## Usage
 
 ```tsx
-import {AvatarGroup} from "@peakui/react";
+import {Avatar, AvatarGroup} from "@peakui/react";
 ```
 
 <ComponentPreview name="avatar-group-basic" />
+
+### Anatomy
+
+```tsx
+import {Avatar, AvatarGroup} from "@peakui/react";
+
+export default () => (
+  <AvatarGroup>
+    <Avatar>
+      <Avatar.Image />
+      <Avatar.Fallback />
+    </Avatar>
+    <AvatarGroup.Count /> {/* Optional */}
+  </AvatarGroup>
+);
+```
+
+## Examples
+
+### Max
+
+`max` renders that many avatars and a `+N` count of the rest.
+
+<ComponentPreview name="avatar-group-max" />
+
+### With Count
+
+An explicit `AvatarGroup.Count` suits a total the server knows. It is not truncated by `max` and replaces the automatic count.
+
+<ComponentPreview name="avatar-group-count" />
+
+### Sizes
+
+<ComponentPreview name="avatar-group-sizes" />
+
+### Grid
+
+<ComponentPreview name="avatar-group-grid" />
+
+### Overlap
+
+<ComponentPreview name="avatar-group-overlap" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="avatar-group-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .avatar-group {
+    --avatar-group-overlap: 0.75rem;
+    --avatar-group-seam: 2px;
+  }
+
+  .avatar-group__count {
+    @apply font-semibold;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The AvatarGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/avatar-group.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.avatar-group` - Base container
+- `.avatar-group__count` - Overflow count avatar
+
+#### Layout Classes [!toc]
+
+- `.avatar-group--grid` - Wrapping grid, no overlap
+
+#### Overlap Classes [!toc]
+
+- `.avatar-group--clip` - Crescent mask with a transparent seam, the default
+- `.avatar-group--ring` - Solid outline in the background color
+
+### Slots
+
+- `[data-slot="avatar-group"]`
+- `[data-slot="avatar-group-count"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--avatar-group-overlap` | How far each avatar sits over its neighbour (`0.5rem`) |
+| `--avatar-group-seam` | Width of the seam or ring between avatars (`2px`) |
+
+## API Reference
+
+### AvatarGroup
+
+Only direct `Avatar` children receive `size`, `color`, `variant` and the `max` cut: an `Avatar` inside a wrapper component is left alone. The group has no default `role`; pass `role="group"` with `aria-label` when the stack is meaningful.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size given to children that omit `size` |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | - | Color given to children that omit `color` |
+| `variant` | `'default' \| 'soft'` | - | Variant given to children that omit `variant` |
+| `max` | `number` | - | Most avatars to render; omit to render all |
+| `overlap` | `'clip' \| 'ring'` | `'clip'` | Stacked overlap style; ignored when `isGrid` |
+| `isGrid` | `boolean` | `false` | Wraps the avatars in a grid without overlap |
+| `children` | `ReactNode` | - | `Avatar` elements and an optional `AvatarGroup.Count` |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'` |
+| `...rest` | | | Every `<div>` attribute is accepted |
+
+### AvatarGroup.Count
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Count content, such as `+3` |
+| `size` | `'sm' \| 'md' \| 'lg'` | group's | Overrides the group's size |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | group's | Overrides the group's color |
+| `variant` | `'default' \| 'soft'` | group's | Overrides the group's variant |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every `<span>` attribute is accepted |
