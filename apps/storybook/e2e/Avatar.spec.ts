@@ -22,6 +22,13 @@ const iframe = (id: string, theme: "default-dark" | "default-light" = "default-l
 /* A cold dev server compiles the preview on the first request, longer than the default window. */
 const COLD = {timeout: 60_000} as const;
 
+/*
+ * One worker for the file: every test here opens a story, and a cold dev server compiling the
+ * preview for six simultaneous first visits leaves the iframe on its loading spinner past any
+ * timeout worth setting. Serial, the first test pays for the compile and the rest find it warm.
+ */
+test.describe.configure({mode: "serial"});
+
 test.describe("Avatar (browser)", () => {
   test.setTimeout(150_000);
 
