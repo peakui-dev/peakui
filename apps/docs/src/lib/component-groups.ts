@@ -16,6 +16,14 @@ export const COMPONENT_GROUPS = [
     components: ["(collections)/dropdown", "(collections)/list-box", "(collections)/tag-group"],
   },
   {
+    category: "Pickers",
+    components: ["(pickers)/select"],
+  },
+  {
+    category: "Colors",
+    components: ["(colors)/color-picker", "(colors)/color-swatch"],
+  },
+  {
     category: "Controls",
     components: ["(controls)/slider"],
   },

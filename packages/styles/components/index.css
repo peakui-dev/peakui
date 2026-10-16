@@ -12,6 +12,8 @@
 @import "./checkbox.css";
 @import "./chip.css";
 @import "./close-button.css";
+@import "./color-picker.css";
+@import "./color-swatch.css";
 @import "./description.css";
 @import "./disclosure-group.css";
 @import "./disclosure.css";
@@ -41,6 +43,7 @@
 @import "./scroll-shadow.css";
 @import "./search-field.css";
 @import "./segmented-control.css";
+@import "./select.css";
 @import "./separator.css";
 @import "./skeleton.css";
 @import "./slider.css";
