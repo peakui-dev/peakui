@@ -33,6 +33,16 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./alert/without-description").then((m) => m.WithoutDescription),
     file: "alert/without-description.tsx",
   },
+  // avatar
+  "avatar-basic": {
+    loader: () => import("./avatar/basic").then((m) => m.Basic),
+    file: "avatar/basic.tsx",
+  },
+  // avatar-group
+  "avatar-group-basic": {
+    loader: () => import("./avatar-group/basic").then((m) => m.Basic),
+    file: "avatar-group/basic.tsx",
+  },
   // breadcrumbs
   "breadcrumbs-basic": {
     loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),

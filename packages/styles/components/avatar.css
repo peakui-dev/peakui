@@ -1,0 +1,116 @@
+/* Base avatar styles */
+.avatar {
+  @apply relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-default;
+
+  /*
+   * Forced colors flattens backgrounds, and the avatar's edge is carried by its background alone.
+   * An inset outline draws the boundary without taking layout space, so nothing shifts when it
+   * appears (css-authoring.md).
+   */
+  @media (forced-colors: active) {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+}
+
+/* Avatar fallback element */
+.avatar__fallback {
+  @apply flex size-full items-center justify-center bg-default text-sm font-medium;
+}
+
+/* Avatar image element */
+.avatar__image {
+  @apply absolute inset-0 aspect-square size-full;
+
+  /**
+   * Transitions
+   */
+  @apply transition-opacity duration-250 motion-reduce:transition-none;
+}
+
+/* Size modifiers */
+.avatar--sm {
+  --avatar-size: 2rem; /* size-8 */
+
+  @apply size-8 rounded-2xl;
+
+  .avatar__fallback {
+    @apply text-xs;
+  }
+}
+
+.avatar--md {
+  --avatar-size: 2.5rem; /* size-10 — same as base */
+
+  /* No layout styles as this is the default size */
+}
+
+.avatar--lg {
+  --avatar-size: 3rem; /* size-12 */
+
+  @apply size-12 rounded-3xl;
+
+  .avatar__fallback {
+    @apply text-base;
+  }
+}
+
+/* Color modifiers for fallback */
+.avatar__fallback--accent {
+  @apply text-accent-soft-foreground;
+}
+
+.avatar__fallback--default {
+  @apply text-default-soft-foreground;
+}
+
+.avatar__fallback--success {
+  @apply text-success-soft-foreground;
+}
+
+.avatar__fallback--warning {
+  @apply text-warning-soft-foreground;
+}
+
+.avatar__fallback--danger {
+  @apply text-danger-soft-foreground;
+}
+
+/* Variant modifiers */
+.avatar--soft {
+  @apply bg-transparent;
+}
+
+.avatar--soft .avatar__fallback--accent {
+  @apply bg-accent-soft text-accent-soft-foreground;
+}
+
+.avatar--soft .avatar__fallback--success {
+  @apply bg-success-soft text-success-soft-foreground;
+}
+
+.avatar--soft .avatar__fallback--warning {
+  @apply bg-warning-soft text-warning-soft-foreground;
+}
+
+.avatar--soft .avatar__fallback--default {
+  @apply bg-default-soft text-default-soft-foreground;
+}
+
+.avatar--soft .avatar__fallback--danger {
+  @apply bg-danger-soft text-danger-soft-foreground;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. forced-colors block on `.avatar`: the reference has none. The decision is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md. The boundary is an inset outline
+ *    rather than the border the chip and button use: an avatar is a fixed `size-*` box with an
+ *    absolutely positioned image, and a border would shrink the image by two pixels in every
+ *    theme to make room for a boundary only forced colors draws.
+ *
+ * 2. Nothing else. The reference's utilities already use semantic tokens, which resolve through
+ *    the `--color-*` names of the peakui token layer, and its default (md) size already lives in
+ *    the base class with an empty `.avatar--md`.
+ */

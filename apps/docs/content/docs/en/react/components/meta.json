@@ -8,6 +8,8 @@
     "index",
     "---Components---",
     "(feedback)/alert",
+    "(media)/avatar",
+    "(media)/avatar-group",
     "(navigation)/breadcrumbs",
     "(buttons)/button",
     "(buttons)/button-group",
