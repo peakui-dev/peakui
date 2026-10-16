@@ -4,6 +4,8 @@
  */
 
 @import "./alert.css";
+@import "./avatar-group.css";
+@import "./avatar.css";
 @import "./breadcrumbs.css";
 @import "./button-group.css";
 @import "./button.css";

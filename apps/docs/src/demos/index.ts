@@ -33,6 +33,72 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./alert/without-description").then((m) => m.WithoutDescription),
     file: "alert/without-description.tsx",
   },
+  // avatar
+  "avatar-accessible-name": {
+    loader: () => import("./avatar/accessible-name").then((m) => m.AccessibleName),
+    file: "avatar/accessible-name.tsx",
+  },
+  "avatar-basic": {
+    loader: () => import("./avatar/basic").then((m) => m.Basic),
+    file: "avatar/basic.tsx",
+  },
+  "avatar-colors": {
+    loader: () => import("./avatar/colors").then((m) => m.Colors),
+    file: "avatar/colors.tsx",
+  },
+  "avatar-custom-styles": {
+    loader: () => import("./avatar/custom-styles").then((m) => m.CustomStyles),
+    file: "avatar/custom-styles.tsx",
+  },
+  "avatar-fallback": {
+    loader: () => import("./avatar/fallback").then((m) => m.Fallback),
+    file: "avatar/fallback.tsx",
+  },
+  "avatar-sizes": {
+    loader: () => import("./avatar/sizes").then((m) => m.Sizes),
+    file: "avatar/sizes.tsx",
+  },
+  "avatar-variants": {
+    loader: () => import("./avatar/variants").then((m) => m.Variants),
+    file: "avatar/variants.tsx",
+  },
+  // avatar-group
+  "avatar-group-basic": {
+    loader: () => import("./avatar-group/basic").then((m) => m.Basic),
+    file: "avatar-group/basic.tsx",
+  },
+  "avatar-group-colors": {
+    loader: () => import("./avatar-group/colors").then((m) => m.Colors),
+    file: "avatar-group/colors.tsx",
+  },
+  "avatar-group-count": {
+    loader: () => import("./avatar-group/count").then((m) => m.Count),
+    file: "avatar-group/count.tsx",
+  },
+  "avatar-group-custom-styles": {
+    loader: () => import("./avatar-group/custom-styles").then((m) => m.CustomStyles),
+    file: "avatar-group/custom-styles.tsx",
+  },
+  "avatar-group-grid": {
+    loader: () => import("./avatar-group/grid").then((m) => m.Grid),
+    file: "avatar-group/grid.tsx",
+  },
+  "avatar-group-max": {
+    loader: () => import("./avatar-group/max").then((m) => m.Max),
+    file: "avatar-group/max.tsx",
+  },
+  "avatar-group-overlap": {
+    loader: () => import("./avatar-group/overlap").then((m) => m.Overlap),
+    file: "avatar-group/overlap.tsx",
+  },
+  "avatar-group-sizes": {
+    loader: () => import("./avatar-group/sizes").then((m) => m.Sizes),
+    file: "avatar-group/sizes.tsx",
+  },
+  "avatar-group-variants": {
+    loader: () => import("./avatar-group/variants").then((m) => m.Variants),
+    file: "avatar-group/variants.tsx",
+  },
   // breadcrumbs
   "breadcrumbs-basic": {
     loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),

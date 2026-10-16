@@ -68,6 +68,10 @@ export const COMPONENT_GROUPS = [
     components: ["(layout)/card", "(layout)/separator", "(layout)/surface"],
   },
   {
+    category: "Media",
+    components: ["(media)/avatar", "(media)/avatar-group"],
+  },
+  {
     category: "Navigation",
     components: [
       "(navigation)/breadcrumbs",

@@ -1,0 +1,38 @@
+import type {ComponentProps} from "react";
+
+import {AvatarFallback, AvatarImage, AvatarRoot} from "./avatar.tsx";
+
+/* -------------------------------------------------------------------------------------------------
+ * Compound Component
+ * -----------------------------------------------------------------------------------------------*/
+export const Avatar = Object.assign(AvatarRoot, {
+  Root: AvatarRoot,
+  Image: AvatarImage,
+  Fallback: AvatarFallback,
+});
+
+export type Avatar = {
+  Props: ComponentProps<typeof AvatarRoot>;
+  RootProps: ComponentProps<typeof AvatarRoot>;
+  ImageProps: ComponentProps<typeof AvatarImage>;
+  FallbackProps: ComponentProps<typeof AvatarFallback>;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Named Component
+ * -----------------------------------------------------------------------------------------------*/
+export {AvatarRoot, AvatarImage, AvatarFallback};
+
+export type {
+  AvatarRootProps,
+  AvatarRootProps as AvatarProps,
+  AvatarImageProps,
+  AvatarFallbackProps,
+} from "./avatar.tsx";
+
+/* -------------------------------------------------------------------------------------------------
+ * Variants
+ * -----------------------------------------------------------------------------------------------*/
+export {avatarVariants} from "@peakui/styles";
+
+export type {AvatarVariants} from "@peakui/styles";

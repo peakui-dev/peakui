@@ -1,0 +1,161 @@
+---
+title: Avatar
+description: Shows a profile image with a fallback
+links:
+  source: avatar/avatar.tsx
+  styles: avatar.css
+---
+
+## Usage
+
+```tsx
+import {Avatar} from "@peakui/react";
+```
+
+<ComponentPreview name="avatar-basic" />
+
+### Anatomy
+
+```tsx
+import {Avatar} from "@peakui/react";
+
+export default () => (
+  <Avatar>
+    <Avatar.Image />
+    <Avatar.Fallback />
+  </Avatar>
+);
+```
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="avatar-sizes" />
+
+### Colors
+
+`color` sets the fallback text color.
+
+<ComponentPreview name="avatar-colors" />
+
+### Variants
+
+`soft` adds a tinted fallback background.
+
+<ComponentPreview name="avatar-variants" />
+
+### Fallback Content
+
+`Avatar.Fallback` shows while the image loads, fails, or is absent.
+
+<ComponentPreview name="avatar-fallback" />
+
+### Accessible Name
+
+A fallback-only avatar has no accessible name; `role="img"` with `aria-label` gives it one.
+
+<ComponentPreview name="avatar-accessible-name" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="avatar-custom-styles" />
+
+### Global CSS
+
+Set `--avatar-size` whenever you resize an avatar: `AvatarGroup`'s clip mask is cut from it.
+
+```css
+@layer components {
+  .avatar--lg {
+    --avatar-size: 4rem;
+    @apply size-16;
+  }
+
+  .avatar__fallback {
+    @apply bg-accent text-accent-foreground;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Avatar component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/avatar.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.avatar` - Base container with the default size (`size-10`)
+- `.avatar__image` - Image, stretched over the container
+- `.avatar__fallback` - Centered fallback content
+
+#### Size Classes [!toc]
+
+- `.avatar--sm` - Small size (`size-8`)
+- `.avatar--md` - Medium size, the default
+- `.avatar--lg` - Large size (`size-12`)
+
+#### Variant Classes [!toc]
+
+- `.avatar--soft` - Soft variant with a tinted fallback
+
+#### Color Classes [!toc]
+
+- `.avatar__fallback--default`
+- `.avatar__fallback--accent`
+- `.avatar__fallback--success`
+- `.avatar__fallback--warning`
+- `.avatar__fallback--danger`
+
+### Slots
+
+- `[data-slot="avatar"]`
+- `[data-slot="avatar-image"]`
+- `[data-slot="avatar-fallback"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--avatar-size` | Diameter, set by the size classes (`2rem`, `2.5rem`, `3rem`); read by the `AvatarGroup` clip mask |
+
+## API Reference
+
+### Avatar
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of the avatar |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | `'default'` | Color of the fallback |
+| `variant` | `'default' \| 'soft'` | `'default'` | Visual style |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### Avatar.Image
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `src` | `string` | - | Image address; the image renders once it has loaded |
+| `alt` | `string` | - | Alternative text |
+| `srcSet` | `string` | - | Responsive image sources |
+| `sizes` | `string` | - | Responsive image sizes |
+| `crossOrigin` | `'anonymous' \| 'use-credentials'` | - | CORS setting of the request |
+| `referrerPolicy` | `HTMLAttributeReferrerPolicy` | - | Referrer policy of the request |
+| `render` | `DOMRenderFunction<'img', undefined>` | - | Replaces the rendered `<img>`, such as with a framework image component; pass `src` so loading is still tracked |
+| `onLoadingStatusChange` | `(status: 'idle' \| 'loading' \| 'loaded' \| 'error') => void` | - | Called as the loading status changes |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every `<img>` attribute is accepted |
+
+### Avatar.Fallback
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `delayMs` | `number` | - | Delay before the fallback renders, so a fast image never flashes it |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | - | Overrides the color of the `Avatar` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every `<span>` attribute is accepted |

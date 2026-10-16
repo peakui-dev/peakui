@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@peakui/styles": "workspace:*",
+    "@radix-ui/react-avatar": "1.2.6",
     "input-otp": "1.5.0",
     "tailwind-variants": "^3.3.1"
   },
