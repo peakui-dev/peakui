@@ -67,7 +67,7 @@ difference. Each one that touches a stylesheet is repeated at the end of its `.c
 | --- | --- | --- | --- |
 | 1 | Radix is a plain dependency | Same, `1.2.6`. The roadmap spec says `AGENTS.md` names it as a binding choice; `AGENTS.md` does not (it lists RAC and no Radix). The roadmap spec is where the decision is recorded. RAC has no avatar primitive, which is the standard's condition for reaching down. | Reported, not silently settled |
 | 2 | No `data-slot` on any Avatar element | `data-slot` `avatar`, `avatar-image`, `avatar-fallback`; group: `avatar-group`, `avatar-group-count`, placed **after** the props spread | Standard: every rendered element, after the spread |
-| 3 | `AvatarGroupCount` sets `data-slot` before its spread, then hands it to `Avatar` | The root takes an internal marker prop `AVATAR_SLOT` for the one case where a different part owns the root element; otherwise `avatar` | A root that sets `data-slot` after its spread would otherwise erase the Count's slot |
+| 3 | `AvatarGroupCount` sets `data-slot` before its spread, then hands it to `Avatar` | The root reads an internal marker, `AVATAR_SLOT`, from its props object (not from its public type, and not exported from a barrel) for the one case where a different part owns the root element; otherwise `avatar` | A root that sets `data-slot` after its spread would otherwise erase the Count's slot |
 | 4 | `Avatar.Root`, `.Image`, `.Fallback` inherit Radix's `asChild` | `asChild` is omitted from all three prop types. `Avatar.Image` takes `render` (`DOMRenderProps<"img", undefined>`) instead, mapped internally onto Radix's `asChild` with a `dom.img` child | Standard: polymorphism by `render`, never `as` or `asChild`; decided by the controller after review of the first cut, which had kept `asChild` on the Image |
 | 5 | Every visible child of the group is cloned with the group marker | Host elements (`typeof child.type === "string"`) are not cloned | The marker would reach the DOM as an unknown attribute |
 | 6 | `displayName = "HeroUI.AvatarGroup.Count"`; remote CDN images; Iconify icons | No `displayName` (inferred; `isCountElement` compares by identity); stories and demos use inline SVG data-URI images and an inline glyph | Names the reference; offline, deterministic VRT |
@@ -120,10 +120,7 @@ export interface AvatarGroupContextValue {
 export const AvatarGroupContext: Context<AvatarGroupContextValue>; // default {}
 
 // avatar.tsx
-interface AvatarRootProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Root>, "asChild" | "color">, AvatarVariants {
-  [AVATAR_GROUP_CHILD]?: boolean;
-  [AVATAR_SLOT]?: string;
-}
+interface AvatarRootProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Root>, "asChild" | "color">, AvatarVariants {} // the two markers are not here: Decisions 3
 interface AvatarImageProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Image>, "asChild">, DOMRenderProps<"img", undefined> {}
 interface AvatarFallbackProps extends Omit<ComponentPropsWithRef<typeof AvatarPrimitive.Fallback>, "asChild"> {
   color?: AvatarVariants["color"];
@@ -177,11 +174,13 @@ export const Avatar = Object.assign(AvatarRoot, {Root: AvatarRoot, Image: Avatar
 - [ ] **Step 6: Implement** `avatar-group-context.ts` and `avatar.tsx` as the Interfaces block says.
   Import with the `.ts`/`.tsx` extensions, `use()` not `useContext()`, `"use client"` on both files,
   `data-slot` after the spread (Root: `props[AVATAR_SLOT] ?? "avatar"`), inheritance only when
-  `AVATAR_GROUP_CHILD === true`, props beat context. `index.ts` has the three export sections; it
-  re-exports `AVATAR_GROUP_CHILD` and `AVATAR_SLOT` as the reference's does.
+  `AVATAR_GROUP_CHILD === true`, props beat context. `index.ts` has the three export sections. The two
+  markers are **not** in `AvatarRootProps` and **not** exported from either barrel: `AvatarRoot` reads them
+  from `allProps as AvatarRootProps & AvatarMarkers` (a local interface), and tests import them from
+  `avatar-group-context.ts`. A consumer cannot name them, and a `@ts-expect-error` test pins that.
 - [ ] **Step 7: Run them.** Same command. Expected: PASS. Also `avatar.ssr.test.tsx` with
   `ssrSmoke(<Avatar><Avatar.Fallback>JD</Avatar.Fallback></Avatar>)` asserting `data-slot="avatar"`.
-- [ ] **Step 8: Stories** `Default`, `Sizes`, `Colors`, `Variants`, `Fallback`, `WithDelay` under
+- [ ] **Step 8: Stories** `Default`, `Sizes`, `Colors`, `Variants`, `Fallback`, `WithDelay`, `Labelled` under
   `Components/Avatar`, each wrapped in the scaffold's `Showcase`. Images are inline SVG data URIs built
   by a small helper in the story file; the icon fallback is an inline SVG. `WithDelay` uses an image
   that fails so `delayMs` is visible. No network.
@@ -247,7 +246,7 @@ export const AvatarGroup = Object.assign(AvatarGroupRoot, {Root: AvatarGroupRoot
   `{...props}` comes before the contract attributes. Root: `dom.div`, `data-slot="avatar-group"` after the spread.
 - [ ] **Step 5: Run them.** Expected: PASS. `avatar-group.ssr.test.tsx`: `ssrSmoke` of a three-avatar
   group with `max={2}`, asserting `data-slot="avatar-group"` and the `+1` text.
-- [ ] **Step 6: Stories** `Default`, `Max`, `WithCount`, `Sizes`, `Grid`, `Overlap` (both overlaps on a striped
+- [ ] **Step 6: Stories** `Default`, `Max`, `WithCount`, `Sizes`, `Colors`, `Variants`, `Grid`, `Overlap`, `Labelled` (`Overlap` shows both overlaps on a striped
   backdrop so the seam is visible) under `Components/AvatarGroup`.
 - [ ] **Step 7: Gates for this task** as Task 1 Step 9. Expected: pass.
 - [ ] **Step 8: Commit** both components together, `feat(react): Avatar and AvatarGroup` (the dependency,
@@ -265,7 +264,7 @@ both pages); registries by `pnpm registries`.
 Through the `peakui-docs` skill: page order Usage, Examples, Customization, Styling Reference, API
 Reference; Anatomy for both (compound); no `links.rac` (Radix is not RAC). One demo per story, adapted from the
 stories, in English, importing only `@peakui/react`, `@gravity-ui/icons` and `react`. Avatar demos: `basic`,
-`sizes`, `colors`, `variants`, `fallback`, `custom-styles`; group: `basic`, `max`, `count`, `sizes`, `grid`,
+`sizes`, `colors`, `variants`, `fallback`, `accessible-name`, `custom-styles`; group: `basic`, `max`, `count`, `sizes`, `colors`, `variants`, `grid`,
 `overlap`, `custom-styles`. The reference's `custom-image-component` demo needs Next.js and is not ported; the
 `render` prop is a row in the API table. The group page carries the reference's accessibility note (no default
 `role="group"`; pass one with `aria-label`).
