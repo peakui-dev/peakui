@@ -23,6 +23,7 @@
     "lint": "eslint . --max-warnings=0",
     "lint:package": "pnpm -r lint:package",
     "registries": "node scripts/registries.mjs",
+    "release:version": "changeset version && node scripts/sync-versions.mjs && pnpm install --lockfile-only",
     "test": "pnpm -r test",
     "test:ai": "node --test \"scripts/**/*.test.mjs\"",
     "test:coverage": "pnpm -r test:coverage",
