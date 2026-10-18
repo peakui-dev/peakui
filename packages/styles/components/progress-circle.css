@@ -1,0 +1,146 @@
+/*
+ * ProgressCircle. Class names come from src/components/progress-circle/progress-circle.styles.ts;
+ * all Tailwind lives here. Ported line by line from the vendored reference
+ * styles/components/progress-circle.css. The differences that remain are listed at the end of the
+ * file, each with its reason.
+ */
+
+/* ==========================================================================
+   ProgressCircle - Circular progress indicator
+   ========================================================================== */
+
+/* Base styles */
+.progress-circle {
+  @apply inline-flex items-center justify-center;
+
+  /* Theming seams: the arc and the ring behind it. The defaults are the accent and default tokens. */
+  --progress-circle-stroke: var(--color-accent);
+  --progress-circle-track-stroke: var(--color-default);
+
+  .progress-circle__track {
+    /* Default size (matches --md) */
+    @apply size-7;
+  }
+
+  .progress-circle__track-circle {
+    stroke: var(--progress-circle-track-stroke);
+
+    /* See difference 2 at the end of the file. */
+    @media (forced-colors: active) {
+      stroke: ButtonBorder;
+    }
+  }
+
+  .progress-circle__fill-circle {
+    stroke: var(--progress-circle-stroke);
+
+    /**
+     * Transitions
+     * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+     */
+    transition: stroke-dashoffset 300ms var(--ease-out);
+    @apply motion-reduce:transition-none;
+
+    @media (forced-colors: active) {
+      stroke: Highlight;
+    }
+  }
+
+  /* Indeterminate state - when no aria-valuenow is set */
+  &:not([aria-valuenow]) {
+    .progress-circle__track {
+      animation: progress-circle-spin 1s linear infinite;
+
+      @apply motion-reduce:animate-none;
+    }
+  }
+
+  /* Disabled state */
+  &:disabled,
+  &[data-disabled="true"],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+}
+
+/* ==========================================================================
+   Indeterminate animation
+   ========================================================================== */
+
+@keyframes progress-circle-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   Size variants
+   ========================================================================== */
+
+.progress-circle--sm {
+  .progress-circle__track {
+    @apply size-5;
+  }
+}
+
+.progress-circle--md {
+  /* No styles as this is the default size */
+}
+
+.progress-circle--lg {
+  .progress-circle__track {
+    @apply size-9;
+  }
+}
+
+/* ==========================================================================
+   Color variants
+   ========================================================================== */
+
+.progress-circle--default {
+  --progress-circle-stroke: var(--color-default-foreground);
+}
+
+.progress-circle--accent {
+  --progress-circle-stroke: var(--color-accent);
+}
+
+.progress-circle--success {
+  --progress-circle-stroke: var(--color-success);
+}
+
+.progress-circle--warning {
+  --progress-circle-stroke: var(--color-warning);
+}
+
+.progress-circle--danger {
+  --progress-circle-stroke: var(--color-danger);
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` token prefix on every token (`--color-accent`, `--color-default`,
+ *    `--color-default-foreground`, `--color-success`, `--color-warning`, `--color-danger`): that
+ *    is how the peakui token layer is spelled
+ *    (docs/superpowers/specs/2026-10-02-react-package-button-design.md, section 12).
+ *
+ * 2. forced-colors blocks on the ring and the arc: the reference has none. Support is recorded in
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md. forced-colors flattens a stroke
+ *    that is not a system colour, and the theme leaves --success, --warning and --danger as plain
+ *    colours, so an arc not pinned to Highlight would vanish. The arc takes Highlight and the ring
+ *    ButtonBorder, so the circle stays readable. The colour variants collapse to one appearance in
+ *    this mode by design: the value is also available as aria-valuenow. Same decision as
+ *    progress-bar.css.
+ *
+ * 3. Reduced motion: the reference already carries `motion-reduce:animate-none` after the spin and
+ *    `motion-reduce:transition-none` after the dash-offset transition, and both are kept as
+ *    written. Nothing was added; under reduced motion the indeterminate arc rests as a static
+ *    quarter-circle.
+ *
+ * 4. `@keyframes progress-circle-spin` stays in this file rather than the theme, as
+ *    progress-bar.css does with its own keyframes.
+ */
