@@ -1,0 +1,166 @@
+---
+title: Badge
+description: A small indicator anchored over another element, such as a count or a status dot
+links:
+  source: badge/badge.tsx
+  styles: badge.css
+---
+
+## Usage
+
+```tsx
+import {Badge} from "@peakui/react";
+```
+
+<ComponentPreview name="badge-basic" />
+
+### Anatomy
+
+```tsx
+import {Badge} from "@peakui/react";
+
+export default () => (
+  <Badge.Anchor>
+    {/* the element the badge sits over */}
+    <Badge>
+      <Badge.Label>5</Badge.Label>
+    </Badge>
+  </Badge.Anchor>
+);
+```
+
+A string or a number passed as `children` is wrapped in `Badge.Label` for you.
+
+### Badge or Chip
+
+`Badge` is positioned over a sibling inside `Badge.Anchor`: an avatar with a count, an icon with a
+dot. `Chip` is an inline label that takes its own place in the flow.
+
+### Accessibility
+
+A badge has no role and is not announced when it changes. Its meaning is not carried by the
+badge alone: put it in the accessible name of the element it sits over, as in `aria-label="Inbox,
+5 unread"`, or give the badge an `aria-label` when it is the only carrier.
+
+## Examples
+
+### Placements
+
+The names are physical: `top-right` is the top right corner in every writing direction.
+
+<ComponentPreview name="badge-placements" />
+
+### Colors
+
+<ComponentPreview name="badge-colors" />
+
+### Variants
+
+<ComponentPreview name="badge-variants" />
+
+### Sizes
+
+<ComponentPreview name="badge-sizes" />
+
+### Dot
+
+A badge without children is a dot.
+
+<ComponentPreview name="badge-dot" />
+
+### On a Button
+
+<ComponentPreview name="badge-on-button" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="badge-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .badge {
+    --badge-border: var(--color-surface);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Badge component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/badge.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.badge-anchor` - The wrapper the badge is positioned against
+- `.badge` - The indicator
+- `.badge__label` - The text inside it
+
+#### Size Classes [!toc]
+
+- `.badge--sm`, `.badge--md` (default), `.badge--lg`
+
+#### Color Classes [!toc]
+
+- `.badge--default`, `.badge--accent`, `.badge--success`, `.badge--warning`, `.badge--danger`
+
+#### Variant Classes [!toc]
+
+- `.badge--primary` (default), `.badge--secondary`, `.badge--soft`
+
+#### Placement Classes [!toc]
+
+- `.badge--top-right` (default), `.badge--top-left`, `.badge--bottom-right`, `.badge--bottom-left`
+
+### Slots
+
+- `[data-slot="badge-anchor"]`
+- `[data-slot="badge"]`
+- `[data-slot="badge-label"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--badge-bg` | Fill, set by the variant and color classes |
+| `--badge-fg` | Text color |
+| `--badge-border` | The ring that separates the badge from what it covers; the page background by default |
+
+## API Reference
+
+### Badge
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | `'default'` | Color role |
+| `variant` | `'primary' \| 'secondary' \| 'soft'` | `'primary'` | Fill style |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size |
+| `placement` | `'top-right' \| 'top-left' \| 'bottom-right' \| 'bottom-left'` | `'top-right'` | Corner of the anchor |
+| `children` | `ReactNode` | - | A string or number is wrapped in `Badge.Label`; omit it for a dot |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### Badge.Anchor
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The element the badge sits over, and the badge |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### Badge.Label
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
