@@ -52,29 +52,39 @@ test.describe("Meter (browser)", () => {
     expect(track).toBe(root);
   });
 
-  test("the fill and the track stay distinguishable under forced colors", async ({page}) => {
-    await page.emulateMedia({forcedColors: "active"});
-    await page.goto(iframe(STORY.default));
+  /*
+   * The accent fill is Highlight under forced colors through the theme alone, so it proves
+   * nothing about this component's rules. The success, warning and danger fills are plain colours
+   * that forced colors flattens, and those are the ones the pinned Highlight fill exists for.
+   */
+  for (const color of ["success", "warning", "danger"] as const) {
+    test(`the ${color} fill stays distinguishable from the track under forced colors`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({forcedColors: "active"});
+      await page.goto(iframe(STORY.colors));
 
-    const meter = page.getByRole("meter");
+      const meter = page.getByRole("meter", {name: color});
 
-    await expect(meter).toBeVisible(COLD);
+      await expect(meter).toBeVisible(COLD);
 
-    const {fill, outline} = await meter.evaluate((element) => {
-      const fillElement = element.querySelector('[data-slot="meter-fill"]');
-      const trackElement = element.querySelector('[data-slot="meter-track"]');
+      const {fill, outline, track} = await meter.evaluate((element) => {
+        const fillElement = element.querySelector('[data-slot="meter-fill"]');
+        const trackElement = element.querySelector('[data-slot="meter-track"]');
 
-      if (!fillElement || !trackElement) throw new Error("the meter lacks a fill or a track");
+        if (!fillElement || !trackElement) throw new Error("the meter lacks a fill or a track");
 
-      return {
-        fill: getComputedStyle(fillElement).backgroundColor,
-        outline: getComputedStyle(trackElement).outlineStyle,
-      };
+        return {
+          fill: getComputedStyle(fillElement).backgroundColor,
+          outline: getComputedStyle(trackElement).outlineStyle,
+          track: getComputedStyle(trackElement).backgroundColor,
+        };
+      });
+
+      expect(outline).toBe("solid");
+      expect(fill).not.toBe(track);
     });
-
-    expect(outline).toBe("solid");
-    expect(fill).not.toBe("rgba(0, 0, 0, 0)");
-  });
+  }
 
   test("on an RTL page the fill grows from the inline start, the right edge", async ({page}) => {
     await page.goto(iframe(STORY.default));

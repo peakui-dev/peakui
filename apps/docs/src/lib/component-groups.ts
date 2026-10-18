@@ -36,6 +36,7 @@ export const COMPONENT_GROUPS = [
     components: [
       "(feedback)/alert",
       "(feedback)/empty-state",
+      "(feedback)/meter",
       "(feedback)/progress-bar",
       "(feedback)/skeleton",
       "(feedback)/spinner",
