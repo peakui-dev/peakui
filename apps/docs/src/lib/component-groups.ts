@@ -29,7 +29,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Data Display",
-    components: ["(data-display)/chip"],
+    components: ["(data-display)/badge", "(data-display)/chip"],
   },
   {
     category: "Feedback",
