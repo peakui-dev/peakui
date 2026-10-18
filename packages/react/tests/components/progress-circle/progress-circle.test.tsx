@@ -126,3 +126,24 @@ describe("ProgressCircle", () => {
     }
   });
 });
+
+describe("ProgressCircle SVG overrides", () => {
+  it("keeps the arc's dash geometry for the default circle when only strokeWidth changes", () => {
+    render(
+      <ProgressCircle aria-label="Loading" value={50}>
+        <ProgressCircle.Track>
+          <ProgressCircle.TrackCircle strokeWidth={2} />
+          {/* testid: the arc has no role, name or text */}
+          <ProgressCircle.FillCircle data-testid="fill" strokeWidth={2} />
+        </ProgressCircle.Track>
+      </ProgressCircle>,
+    );
+
+    const fill = screen.getByTestId("fill");
+
+    expect(fill).toHaveAttribute("stroke-width", "2");
+    expect(Number(fill.getAttribute("stroke-dasharray"))).toBeCloseTo(CIRCUMFERENCE, 4);
+    expect(fill).toHaveAttribute("transform", "rotate(-90 18 18)");
+    expect(fill).toHaveAttribute("r", "16");
+  });
+});

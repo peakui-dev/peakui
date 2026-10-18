@@ -57,7 +57,9 @@ value attributes, so assistive technology announces it as progress. Give it a na
 
 ### Custom SVG Props
 
-Each part is a composable component, so SVG attributes such as `strokeWidth`, `r`, `cx`, `cy` and `viewBox` can be overridden directly.
+Each part is a composable component, so SVG attributes such as `strokeWidth` can be overridden directly.
+
+The arc's length and rotation are computed for the default geometry, a circle of radius 16 centred at 18 in a 36 by 36 box. Changing `r`, `cx`, `cy` or `viewBox` therefore also needs `strokeDasharray`, `strokeDashoffset` and `transform` on `ProgressCircle.FillCircle`, or the arc will not match the ring or the value.
 
 <ComponentPreview name="progress-circle-custom-svg" />
 

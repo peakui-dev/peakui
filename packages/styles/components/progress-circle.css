@@ -129,12 +129,11 @@
  *    (docs/superpowers/specs/2026-10-02-react-package-button-design.md, section 12).
  *
  * 2. forced-colors blocks on the ring and the arc: the reference has none. Support is recorded in
- *    docs/superpowers/specs/2026-10-01-design-tokens-design.md. forced-colors flattens a stroke
- *    that is not a system colour, and the theme leaves --success, --warning and --danger as plain
- *    colours, so an arc not pinned to Highlight would vanish. The arc takes Highlight and the ring
- *    ButtonBorder, so the circle stays readable. The colour variants collapse to one appearance in
- *    this mode by design: the value is also available as aria-valuenow. Same decision as
- *    progress-bar.css.
+ *    docs/superpowers/specs/2026-10-01-design-tokens-design.md. Measured in Chromium's forced-colors
+ *    emulation: an SVG stroke is not adjusted, so the success, warning and danger arcs keep the
+ *    theme's own colour and ignore the user's palette. The arc takes Highlight and the ring
+ *    ButtonBorder, so both follow it. The colour variants collapse to one appearance in this mode
+ *    by design: the value is also available as aria-valuenow. Same decision as progress-bar.css.
  *
  * 3. Reduced motion: the reference already carries `motion-reduce:animate-none` after the spin and
  *    `motion-reduce:transition-none` after the dash-offset transition, and both are kept as
