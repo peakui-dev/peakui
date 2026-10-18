@@ -1,0 +1,154 @@
+/*
+ * Meter. Class names come from src/components/meter/meter.styles.ts; all Tailwind lives here.
+ * Ported line by line from the vendored reference styles/components/meter.css. The differences
+ * that remain are listed at the end of the file, each with its reason.
+ */
+
+/* ==========================================================================
+   Meter - A quantity indicator within a known range
+   ========================================================================== */
+
+/* Base styles */
+.meter {
+  @apply grid w-full gap-1;
+  grid-template-areas:
+    "label output"
+    "track track";
+  grid-template-columns: 1fr auto;
+
+  /* Theming seam: the fill colour. The default is the accent token. */
+  --meter-fill: var(--color-accent);
+
+  [data-slot="label"] {
+    @apply w-fit text-sm font-medium;
+
+    grid-area: label;
+  }
+
+  .meter__output {
+    @apply text-sm font-medium tabular-nums;
+
+    grid-area: output;
+  }
+
+  .meter__track {
+    @apply relative overflow-hidden rounded-sm bg-default;
+
+    grid-area: track;
+
+    /* Default height (matches --md) */
+    @apply h-2;
+
+    /* See difference 2 at the end of the file. */
+    @media (forced-colors: active) {
+      outline: 1px solid ButtonBorder;
+    }
+  }
+
+  .meter__fill {
+    @apply absolute start-0 top-0 h-full rounded-sm;
+
+    background-color: var(--meter-fill);
+
+    /**
+     * Transitions
+     * CRITICAL: motion-reduce must be AFTER transition for correct override specificity
+     */
+    transition: width 300ms var(--ease-out);
+    @apply motion-reduce:transition-none;
+
+    @media (forced-colors: active) {
+      background-color: Highlight;
+    }
+  }
+
+  /* See difference 3 at the end of the file. */
+  &:not(:has([data-slot="label"], .meter__output)) {
+    row-gap: 0;
+  }
+
+  /* Disabled state */
+  &:disabled,
+  &[data-disabled="true"],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+
+    [data-slot="label"] {
+      @apply opacity-100;
+    }
+  }
+}
+
+/* ==========================================================================
+   Size variants
+   ========================================================================== */
+
+.meter--sm {
+  .meter__track {
+    @apply h-1 rounded-xs;
+  }
+
+  .meter__fill {
+    @apply rounded-xs;
+  }
+}
+
+.meter--md {
+  /* No styles as this is the default size */
+}
+
+.meter--lg {
+  .meter__track {
+    @apply h-3 rounded-md;
+  }
+
+  .meter__fill {
+    @apply rounded-md;
+  }
+}
+
+/* ==========================================================================
+   Color variants
+   ========================================================================== */
+
+.meter--default {
+  --meter-fill: var(--color-default-foreground);
+}
+
+.meter--accent {
+  --meter-fill: var(--color-accent);
+}
+
+.meter--success {
+  --meter-fill: var(--color-success);
+}
+
+.meter--warning {
+  --meter-fill: var(--color-warning);
+}
+
+.meter--danger {
+  --meter-fill: var(--color-danger);
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` token prefix on every token (`--color-accent`, `--color-default-foreground`,
+ *    `--color-success`, `--color-warning`, `--color-danger`): that is how the peakui token layer
+ *    is spelled (docs/superpowers/specs/2026-10-02-react-package-button-design.md, section 12).
+ *    The theming seam is `--meter-fill`, as in the reference.
+ *
+ * 2. forced-colors blocks on the track and the fill: the reference has none. Support is recorded
+ *    in docs/superpowers/specs/2026-10-01-design-tokens-design.md. forced-colors flattens every
+ *    background that is not a system colour, and the theme leaves --success, --warning and
+ *    --danger as plain colours, so a fill not pinned to Highlight vanishes into the track. The
+ *    track gets a ButtonBorder outline (it takes no space, so nothing shifts between modes). The
+ *    colour variants collapse to one appearance here by design: the value is also present as
+ *    text in the output part and as aria-valuenow. Same decision as progress-bar.css.
+ *
+ * 3. `row-gap: 0` on a meter that holds neither a label nor an output: with that row empty the
+ *    grid still spends the gap, so the track of a meter named only by aria-label sits 4px below
+ *    the top of the component. Same decision as progress-bar.css; bars with a label or an output
+ *    keep the gap.
+ */
