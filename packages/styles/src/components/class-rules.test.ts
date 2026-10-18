@@ -28,7 +28,9 @@ const componentDirs = readdirSync("src/components", {withFileTypes: true})
 
 const classesOf = (name: string): string[] => {
   const source = stripComments(readFileSync(`src/components/${name}/${name}.styles.ts`, "utf8"));
-  const literals = [...source.matchAll(/"([^"\n]+)"/g)].flatMap((match) => match[1].split(/\s+/));
+  const literals = [...source.matchAll(/"([^"\n]+)"/g)].flatMap((match) =>
+    (match[1] ?? "").split(/\s+/),
+  );
 
   return [...new Set(literals.filter((literal) => literal.startsWith(name)))].sort();
 };
