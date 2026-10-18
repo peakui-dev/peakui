@@ -92,7 +92,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Typography",
-    components: ["(typography)/kbd"],
+    components: ["(typography)/kbd", "(typography)/typography"],
   },
   {
     category: "Utilities",

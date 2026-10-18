@@ -25,6 +25,26 @@ test.describe.configure({mode: "default"});
 test.describe("Typography (browser)", () => {
   test.setTimeout(150_000);
 
+  test("heading levels get distinct sizes from the type scale", async ({page}) => {
+    await page.goto("/iframe.html?id=components-typography--headings&globals=theme:default-light");
+
+    const first = page.locator('[data-slot="typography"][data-type="h1"]');
+
+    await expect(first).toBeVisible(COLD);
+
+    const sizes = await page
+      .locator('[data-slot="typography"]')
+      .evaluateAll((elements) =>
+        elements.map((element) => parseFloat(getComputedStyle(element).fontSize)),
+      );
+
+    /* text-4xl down to text-base: six levels, strictly shrinking, none the 16px body default. */
+    expect(sizes).toHaveLength(6);
+    expect(sizes[0]).toBe(36);
+    expect(sizes).toEqual([...sizes].sort((a, b) => b - a));
+    expect(new Set(sizes.slice(0, 5)).size).toBe(5);
+  });
+
   for (const theme of ["default-light", "default-dark"] as const) {
     for (const [name, id] of STORIES) {
       test(`${name} breaks no WCAG 2.2 AA rule in ${theme}`, async ({page}) => {
