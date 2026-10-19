@@ -1547,6 +1547,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./tooltip/with-arrow").then((m) => m.WithArrow),
     file: "tooltip/with-arrow.tsx",
   },
+  // typography
+  "typography-basic": {
+    loader: () => import("./typography/basic").then((m) => m.Basic),
+    file: "typography/basic.tsx",
+  },
+  "typography-code": {
+    loader: () => import("./typography/code").then((m) => m.Inline),
+    file: "typography/code.tsx",
+  },
+  "typography-headings": {
+    loader: () => import("./typography/headings").then((m) => m.Headings),
+    file: "typography/headings.tsx",
+  },
+  "typography-muted-and-weights": {
+    loader: () => import("./typography/muted-and-weights").then((m) => m.MutedAndWeights),
+    file: "typography/muted-and-weights.tsx",
+  },
+  "typography-paragraphs": {
+    loader: () => import("./typography/paragraphs").then((m) => m.Paragraphs),
+    file: "typography/paragraphs.tsx",
+  },
+  "typography-prose": {
+    loader: () => import("./typography/prose").then((m) => m.ProseDemo),
+    file: "typography/prose.tsx",
+  },
+  "typography-truncate": {
+    loader: () => import("./typography/truncate").then((m) => m.Truncate),
+    file: "typography/truncate.tsx",
+  },
 };
 
 export function getDemo(name: string): DemoItem | undefined {

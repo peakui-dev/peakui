@@ -1,0 +1,141 @@
+---
+title: Typography
+description: Headings, paragraphs and code with the type scale, weights and colors of the design system
+links:
+  rac: Text
+  source: typography/typography.tsx
+  styles: typography.css
+---
+
+## Usage
+
+```tsx
+import {Code, Heading, Paragraph, Prose, Typography} from "@peakui/react";
+```
+
+<ComponentPreview name="typography-basic" />
+
+### Anatomy
+
+```tsx
+import {Code, Heading, Paragraph, Prose, Typography} from "@peakui/react";
+
+export default () => (
+  <>
+    <Heading level={2}>Title</Heading>
+    <Paragraph>
+      Body text with <Code>code</Code>.
+    </Paragraph>
+    <Typography type="body-sm" color="muted">
+      Any type, set directly.
+    </Typography>
+    <Prose>{/* plain HTML, styled */}</Prose>
+  </>
+);
+```
+
+`Heading`, `Paragraph` and `Code` are presets of `Typography`: each one fixes its `type`. The
+element rendered follows the type, so a `type="h3"` renders an `h3`. To make text look like a
+heading without being one, use a body type; to keep a heading level for the outline and look
+different, style it with a `className`.
+
+## Examples
+
+### Headings
+
+<ComponentPreview name="typography-headings" />
+
+### Paragraphs
+
+<ComponentPreview name="typography-paragraphs" />
+
+### Code
+
+<ComponentPreview name="typography-code" />
+
+### Muted and Weights
+
+<ComponentPreview name="typography-muted-and-weights" />
+
+### Truncate
+
+<ComponentPreview name="typography-truncate" />
+
+### Prose
+
+`Prose` styles the plain HTML elements inside it, for content you do not control, such as rendered markdown.
+
+<ComponentPreview name="typography-prose" />
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Typography component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/typography.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.typography` - Base class
+- `.typography-prose` - The `Prose` wrapper
+
+#### Type Classes [!toc]
+
+- `.typography--h1` to `.typography--h6`
+- `.typography--body`, `.typography--body-sm`, `.typography--body-xs`
+- `.typography--code`
+
+#### Modifier Classes [!toc]
+
+- `.typography--align-start`, `-center`, `-end`, `-justify`
+- `.typography--color-default`, `.typography--color-muted`
+- `.typography--weight-normal`, `-medium`, `-semibold`, `-bold`
+- `.typography--truncate`
+
+### Slots
+
+- `[data-slot="typography"]`, with `data-type` holding the type
+- `[data-slot="prose"]`
+
+## API Reference
+
+### Typography
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `type` | `'h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6' \| 'body' \| 'body-sm' \| 'body-xs' \| 'code'` | `'body'` | The style, and the element it renders |
+| `align` | `'start' \| 'center' \| 'end' \| 'justify'` | `'start'` | Text alignment |
+| `color` | `'default' \| 'muted'` | `'default'` | Text color |
+| `weight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | - | Font weight; the type sets one when this is omitted |
+| `truncate` | `boolean` | - | Cut a single line with an ellipsis |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every React Aria `Text` attribute is accepted |
+
+### Heading
+
+Takes every `Typography` prop except `type`, plus:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `1` | The heading level, which is also the element |
+
+### Paragraph
+
+Takes every `Typography` prop except `type`, plus:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'base' \| 'sm' \| 'xs'` | `'base'` | The body size |
+
+### Code
+
+Takes every `Typography` prop except `type`.
+
+### Prose
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The plain HTML to style |
+| `className` | `string` | - | Additional classes |
+| `...rest` | | | Every `<div>` attribute is accepted |
