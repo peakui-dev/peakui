@@ -733,6 +733,31 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./list-box/with-sections").then((m) => m.WithSections),
     file: "list-box/with-sections.tsx",
   },
+  // meter
+  "meter-basic": {
+    loader: () => import("./meter/basic").then((m) => m.Basic),
+    file: "meter/basic.tsx",
+  },
+  "meter-colors": {
+    loader: () => import("./meter/colors").then((m) => m.Colors),
+    file: "meter/colors.tsx",
+  },
+  "meter-custom-styles": {
+    loader: () => import("./meter/custom-styles").then((m) => m.CustomStyles),
+    file: "meter/custom-styles.tsx",
+  },
+  "meter-custom-value": {
+    loader: () => import("./meter/custom-value").then((m) => m.CustomValue),
+    file: "meter/custom-value.tsx",
+  },
+  "meter-sizes": {
+    loader: () => import("./meter/sizes").then((m) => m.Sizes),
+    file: "meter/sizes.tsx",
+  },
+  "meter-without-label": {
+    loader: () => import("./meter/without-label").then((m) => m.WithoutLabel),
+    file: "meter/without-label.tsx",
+  },
   // modal
   "modal-backdrop-variants": {
     loader: () => import("./modal/backdrop-variants").then((m) => m.BackdropVariants),
