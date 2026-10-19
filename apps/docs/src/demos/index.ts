@@ -99,6 +99,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./avatar-group/variants").then((m) => m.Variants),
     file: "avatar-group/variants.tsx",
   },
+  // badge
+  "badge-basic": {
+    loader: () => import("./badge/basic").then((m) => m.Basic),
+    file: "badge/basic.tsx",
+  },
+  "badge-colors": {
+    loader: () => import("./badge/colors").then((m) => m.Colors),
+    file: "badge/colors.tsx",
+  },
+  "badge-custom-styles": {
+    loader: () => import("./badge/custom-styles").then((m) => m.CustomStyles),
+    file: "badge/custom-styles.tsx",
+  },
+  "badge-dot": {
+    loader: () => import("./badge/dot").then((m) => m.Dot),
+    file: "badge/dot.tsx",
+  },
+  "badge-on-button": {
+    loader: () => import("./badge/on-button").then((m) => m.OnButton),
+    file: "badge/on-button.tsx",
+  },
+  "badge-placements": {
+    loader: () => import("./badge/placements").then((m) => m.Placements),
+    file: "badge/placements.tsx",
+  },
+  "badge-sizes": {
+    loader: () => import("./badge/sizes").then((m) => m.Sizes),
+    file: "badge/sizes.tsx",
+  },
+  "badge-variants": {
+    loader: () => import("./badge/variants").then((m) => m.Variants),
+    file: "badge/variants.tsx",
+  },
   // breadcrumbs
   "breadcrumbs-basic": {
     loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),
