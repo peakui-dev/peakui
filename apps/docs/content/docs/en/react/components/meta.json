@@ -42,6 +42,7 @@
     "(forms)/number-field",
     "(overlays)/popover",
     "(feedback)/progress-bar",
+    "(feedback)/progress-circle",
     "(forms)/radio-group",
     "(utilities)/scroll-shadow",
     "(forms)/search-field",

@@ -38,6 +38,7 @@ export const COMPONENT_GROUPS = [
       "(feedback)/empty-state",
       "(feedback)/meter",
       "(feedback)/progress-bar",
+      "(feedback)/progress-circle",
       "(feedback)/skeleton",
       "(feedback)/spinner",
     ],

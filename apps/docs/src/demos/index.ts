@@ -886,6 +886,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./progress-bar/without-label").then((m) => m.WithoutLabel),
     file: "progress-bar/without-label.tsx",
   },
+  // progress-circle
+  "progress-circle-basic": {
+    loader: () => import("./progress-circle/basic").then((m) => m.Basic),
+    file: "progress-circle/basic.tsx",
+  },
+  "progress-circle-colors": {
+    loader: () => import("./progress-circle/colors").then((m) => m.Colors),
+    file: "progress-circle/colors.tsx",
+  },
+  "progress-circle-custom-styles": {
+    loader: () => import("./progress-circle/custom-styles").then((m) => m.CustomStyles),
+    file: "progress-circle/custom-styles.tsx",
+  },
+  "progress-circle-custom-svg": {
+    loader: () => import("./progress-circle/custom-svg").then((m) => m.CustomSvg),
+    file: "progress-circle/custom-svg.tsx",
+  },
+  "progress-circle-indeterminate": {
+    loader: () => import("./progress-circle/indeterminate").then((m) => m.Indeterminate),
+    file: "progress-circle/indeterminate.tsx",
+  },
+  "progress-circle-sizes": {
+    loader: () => import("./progress-circle/sizes").then((m) => m.Sizes),
+    file: "progress-circle/sizes.tsx",
+  },
+  "progress-circle-with-label": {
+    loader: () => import("./progress-circle/with-label").then((m) => m.WithLabel),
+    file: "progress-circle/with-label.tsx",
+  },
   // radio-group
   "radio-group-basic": {
     loader: () => import("./radio-group/basic").then((m) => m.Basic),

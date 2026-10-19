@@ -1,0 +1,174 @@
+---
+title: ProgressCircle
+description: A circular indicator for determinate or indeterminate progress
+links:
+  rac: ProgressBar
+  source: progress-circle/progress-circle.tsx
+  styles: progress-circle.css
+---
+
+## Usage
+
+```tsx
+import {ProgressCircle} from "@peakui/react";
+```
+
+<ComponentPreview name="progress-circle-basic" />
+
+### Anatomy
+
+```tsx
+import {ProgressCircle} from "@peakui/react";
+
+export default () => (
+  <ProgressCircle aria-label="Loading" value={60}>
+    <ProgressCircle.Track>
+      <ProgressCircle.TrackCircle />
+      <ProgressCircle.FillCircle />
+    </ProgressCircle.Track>
+  </ProgressCircle>
+);
+```
+
+`ProgressCircle` is a React Aria `ProgressBar`: it has the `progressbar` role and the same
+value attributes, so assistive technology announces it as progress. Give it a name with
+`aria-label` or `aria-labelledby`. When the indicator must be announced as progress, prefer
+`ProgressCircle` to `Spinner`, which is a plain status region.
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="progress-circle-sizes" />
+
+### Colors
+
+<ComponentPreview name="progress-circle-colors" />
+
+### Indeterminate
+
+`isIndeterminate` removes the value and spins the circle.
+
+<ComponentPreview name="progress-circle-indeterminate" />
+
+### With Label
+
+<ComponentPreview name="progress-circle-with-label" />
+
+### Custom SVG Props
+
+Each part is a composable component, so SVG attributes such as `strokeWidth` can be overridden directly.
+
+The arc's length and rotation are computed for the default geometry, a circle of radius 16 centred at 18 in a 36 by 36 box. Changing `r`, `cx`, `cy` or `viewBox` therefore also needs `strokeDasharray`, `strokeDashoffset` and `transform` on `ProgressCircle.FillCircle`, or the arc will not match the ring or the value.
+
+<ComponentPreview name="progress-circle-custom-svg" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="progress-circle-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .progress-circle__track {
+    @apply size-12;
+  }
+
+  .progress-circle__fill-circle {
+    stroke: var(--color-success);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ProgressCircle component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/progress-circle.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.progress-circle` - Base container
+- `.progress-circle__track` - The SVG element
+- `.progress-circle__track-circle` - The ring behind the arc
+- `.progress-circle__fill-circle` - The progress arc
+
+#### Size Classes [!toc]
+
+- `.progress-circle--sm` - Small size
+- `.progress-circle--md` - Medium size, the default
+- `.progress-circle--lg` - Large size
+
+#### Color Classes [!toc]
+
+- `.progress-circle--default`
+- `.progress-circle--accent`
+- `.progress-circle--success`
+- `.progress-circle--warning`
+- `.progress-circle--danger`
+
+### Slots
+
+- `[data-slot="progress-circle"]`
+- `[data-slot="progress-circle-track"]`
+- `[data-slot="progress-circle-track-circle"]`
+- `[data-slot="progress-circle-fill-circle"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--progress-circle-stroke` | Arc color, set by the color classes |
+| `--progress-circle-track-stroke` | Ring color |
+
+### Interactive States
+
+- **Indeterminate**: `:not([aria-valuenow])`
+- **Disabled**: `:disabled`, `[data-disabled="true"]` or `[aria-disabled="true"]`
+
+## API Reference
+
+### ProgressCircle
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `number` | `0` | The current value |
+| `minValue` | `number` | `0` | The smallest value |
+| `maxValue` | `number` | `100` | The largest value |
+| `isIndeterminate` | `boolean` | - | Whether progress is unknown; leaves out `aria-valuenow` |
+| `formatOptions` | `Intl.NumberFormatOptions` | `{style: 'percent'}` | Display format of the value |
+| `color` | `'default' \| 'accent' \| 'success' \| 'warning' \| 'danger'` | `'accent'` | Color of the arc |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of the circle |
+| `children` | `ReactNode \| (values: ProgressBarRenderProps) => ReactNode` | - | Content, or a function of the render props |
+| `className` | `string \| (values: ProgressBarRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `...rest` | | | Every React Aria `ProgressBar` attribute is accepted, including `aria-label` |
+
+### ProgressCircle.Track
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Holds the two circles |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'svg'` |
+| `...rest` | | | Every `<svg>` attribute is accepted, such as `viewBox` |
+
+### ProgressCircle.TrackCircle and ProgressCircle.FillCircle
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'circle'` |
+| `...rest` | | | Every `<circle>` attribute is accepted, such as `r`, `cx`, `cy` and `strokeWidth` |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `percentage` | `number \| undefined` | The value as a percentage between `minValue` and `maxValue` |
+| `valueText` | `string \| undefined` | The formatted value |
+| `isIndeterminate` | `boolean` | Whether progress is unknown |
