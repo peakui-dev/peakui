@@ -1,8 +1,6 @@
 "use client";
 
-/* Client module: composes react-aria-components' editor directly, as the basic demo does. */
-import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
-import {ColorSlider, ColorThumb, SliderTrack} from "react-aria-components/ColorSlider";
+import {ColorPicker, ColorSlider, ColorSwatch, Label} from "@peakui/react";
 
 export function CustomStyles() {
   return (
@@ -12,16 +10,12 @@ export function CustomStyles() {
         <Label className="font-medium text-foreground">Theme color</Label>
       </ColorPicker.Trigger>
       <ColorPicker.Popover className="bg-surface">
-        {/* Editor stand-in, as in the basic demo: RAC editors until wave 3.5 lands. */}
-        <ColorSlider aria-label="Hue" channel="hue" className="w-56 px-1" colorSpace="hsb">
-          <SliderTrack
-            className="relative h-2 overflow-hidden rounded-full"
-            style={{
-              background: "linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red)",
-            }}
-          >
-            <ColorThumb className="size-4 rounded-full border-2 border-white shadow" />
-          </SliderTrack>
+        <ColorSlider channel="hue" className="w-56" colorSpace="hsb">
+          <Label>Hue</Label>
+          <ColorSlider.Output />
+          <ColorSlider.Track>
+            <ColorSlider.Thumb />
+          </ColorSlider.Track>
         </ColorSlider>
       </ColorPicker.Popover>
     </ColorPicker>

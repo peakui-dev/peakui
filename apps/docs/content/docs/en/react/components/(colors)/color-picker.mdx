@@ -19,11 +19,10 @@ import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
 
 ### Anatomy
 
-The ColorPicker is a container: it owns the value and the popover, and any React Aria editor composed inside reads and writes that value through the picker's state.
+The ColorPicker is a container: it owns the value and the popover, and the editors composed inside it ([ColorArea](/docs/react/components/color-area), [ColorSlider](/docs/react/components/color-slider), [ColorSwatchPicker](/docs/react/components/color-swatch-picker), [ColorField](/docs/react/components/color-field)) read and write that value through the picker's state.
 
 ```tsx
-import {ColorSlider, ColorThumb, SliderTrack} from "react-aria-components/ColorSlider";
-import {ColorPicker, ColorSwatch, Label} from "@peakui/react";
+import {ColorPicker, ColorSlider, ColorSwatch, Label} from "@peakui/react";
 
 export default () => (
   <ColorPicker defaultValue="#0485F7">
@@ -33,9 +32,11 @@ export default () => (
     </ColorPicker.Trigger>
     <ColorPicker.Popover>
       <ColorSlider channel="hue" colorSpace="hsb">
-        <SliderTrack>
-          <ColorThumb />
-        </SliderTrack>
+        <Label>Hue</Label>
+        <ColorSlider.Output />
+        <ColorSlider.Track>
+          <ColorSlider.Thumb />
+        </ColorSlider.Track>
       </ColorSlider>
     </ColorPicker.Popover>
   </ColorPicker>
