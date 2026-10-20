@@ -790,6 +790,39 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./date-field/with-validation").then((m) => m.WithValidation),
     file: "date-field/with-validation.tsx",
   },
+  // date-picker
+  "date-picker-basic": {
+    loader: () => import("./date-picker/basic").then((m) => m.Basic),
+    file: "date-picker/basic.tsx",
+  },
+  "date-picker-controlled": {
+    loader: () => import("./date-picker/controlled").then((m) => m.Controlled),
+    file: "date-picker/controlled.tsx",
+  },
+  "date-picker-custom-indicator": {
+    loader: () => import("./date-picker/custom-indicator").then((m) => m.CustomIndicator),
+    file: "date-picker/custom-indicator.tsx",
+  },
+  "date-picker-disabled": {
+    loader: () => import("./date-picker/disabled").then((m) => m.Disabled),
+    file: "date-picker/disabled.tsx",
+  },
+  "date-picker-granularity": {
+    loader: () => import("./date-picker/granularity").then((m) => m.Granularity),
+    file: "date-picker/granularity.tsx",
+  },
+  "date-picker-with-description": {
+    loader: () => import("./date-picker/with-description").then((m) => m.WithDescription),
+    file: "date-picker/with-description.tsx",
+  },
+  "date-picker-with-validation": {
+    loader: () => import("./date-picker/with-validation").then((m) => m.WithValidation),
+    file: "date-picker/with-validation.tsx",
+  },
+  "date-picker-with-year-picker": {
+    loader: () => import("./date-picker/with-year-picker").then((m) => m.WithYearPicker),
+    file: "date-picker/with-year-picker.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

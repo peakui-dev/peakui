@@ -32,6 +32,7 @@
     "(colors)/color-swatch-picker",
     "(pickers)/combo-box",
     "(date-and-time)/date-field",
+    "(pickers)/date-picker",
     "(forms)/description",
     "(navigation)/disclosure",
     "(navigation)/disclosure-group",
