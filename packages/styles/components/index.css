@@ -3,6 +3,7 @@
  * hand. src/components/index.test.ts gates completeness.
  */
 
+@import "./alert-dialog.css";
 @import "./alert.css";
 @import "./avatar-group.css";
 @import "./avatar.css";
