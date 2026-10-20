@@ -8,6 +8,7 @@
     "index",
     "---Components---",
     "(feedback)/alert",
+    "(pickers)/autocomplete",
     "(media)/avatar",
     "(media)/avatar-group",
     "(data-display)/badge",
