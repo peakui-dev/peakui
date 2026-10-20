@@ -823,6 +823,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./date-picker/with-year-picker").then((m) => m.WithYearPicker),
     file: "date-picker/with-year-picker.tsx",
   },
+  // date-range-picker
+  "date-range-picker-basic": {
+    loader: () => import("./date-range-picker/basic").then((m) => m.Basic),
+    file: "date-range-picker/basic.tsx",
+  },
+  "date-range-picker-controlled": {
+    loader: () => import("./date-range-picker/controlled").then((m) => m.Controlled),
+    file: "date-range-picker/controlled.tsx",
+  },
+  "date-range-picker-custom-indicator": {
+    loader: () => import("./date-range-picker/custom-indicator").then((m) => m.CustomIndicator),
+    file: "date-range-picker/custom-indicator.tsx",
+  },
+  "date-range-picker-disabled": {
+    loader: () => import("./date-range-picker/disabled").then((m) => m.Disabled),
+    file: "date-range-picker/disabled.tsx",
+  },
+  "date-range-picker-with-description": {
+    loader: () => import("./date-range-picker/with-description").then((m) => m.WithDescription),
+    file: "date-range-picker/with-description.tsx",
+  },
+  "date-range-picker-with-validation": {
+    loader: () => import("./date-range-picker/with-validation").then((m) => m.WithValidation),
+    file: "date-range-picker/with-validation.tsx",
+  },
+  "date-range-picker-with-year-picker": {
+    loader: () => import("./date-range-picker/with-year-picker").then((m) => m.WithYearPicker),
+    file: "date-range-picker/with-year-picker.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

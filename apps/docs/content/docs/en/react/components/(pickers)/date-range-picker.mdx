@@ -1,0 +1,225 @@
+---
+title: DateRangePicker
+description: Selects a date range from fields or a popover calendar
+links:
+  rac: DateRangePicker
+  source: date-range-picker/date-range-picker.tsx
+  styles: date-range-picker.css
+---
+
+## Usage
+
+```tsx
+import {DateField, DateRangePicker, Label, RangeCalendar} from "@peakui/react";
+```
+
+<ComponentPreview name="date-range-picker-basic" />
+
+### Anatomy
+
+```tsx
+import {
+  DateField,
+  DateRangePicker,
+  Description,
+  FieldError,
+  Label,
+  RangeCalendar,
+} from "@peakui/react";
+
+export default () => (
+  <DateRangePicker>
+    <Label />
+    <DateField.Group>
+      <DateField.Input slot="start">
+        {(segment) => <DateField.Segment segment={segment} />}
+      </DateField.Input>
+      <DateRangePicker.RangeSeparator />
+      <DateField.Input slot="end">
+        {(segment) => <DateField.Segment segment={segment} />}
+      </DateField.Input>
+      <DateField.Suffix>
+        <DateRangePicker.Trigger>
+          <DateRangePicker.TriggerIndicator />
+        </DateRangePicker.Trigger>
+      </DateField.Suffix>
+    </DateField.Group>
+    <Description />
+    <FieldError />
+    <DateRangePicker.Popover>
+      <RangeCalendar />
+    </DateRangePicker.Popover>
+  </DateRangePicker>
+);
+```
+
+## Examples
+
+### With Description
+
+<ComponentPreview name="date-range-picker-with-description" />
+
+### With Year Picker
+
+<ComponentPreview name="date-range-picker-with-year-picker" />
+
+### Controlled
+
+<ComponentPreview name="date-range-picker-controlled" />
+
+### With Validation
+
+`minValue` also limits the dates the calendar offers.
+
+<ComponentPreview name="date-range-picker-with-validation" />
+
+### Custom Indicator
+
+<ComponentPreview name="date-range-picker-custom-indicator" />
+
+### Disabled
+
+<ComponentPreview name="date-range-picker-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<DateRangePicker className="w-80">
+  <DateRangePicker.Popover className="p-4">{/* RangeCalendar */}</DateRangePicker.Popover>
+</DateRangePicker>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .date-range-picker {
+    @apply flex flex-col gap-2;
+  }
+
+  .date-range-picker__trigger {
+    @apply rounded-lg text-accent;
+  }
+
+  .date-range-picker__range-separator {
+    @apply px-2;
+  }
+
+  .date-range-picker__popover {
+    @apply rounded-lg border border-border p-4;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The DateRangePicker component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/date-range-picker.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.date-range-picker` - Column of label, field and messages
+- `.date-range-picker__trigger` - The button that opens the popover
+- `.date-range-picker__trigger-indicator` - The icon inside the trigger
+- `.date-range-picker__range-separator` - The mark between the start and end inputs
+- `.date-range-picker__popover` - The popover container
+
+### Slots
+
+- `[data-slot="date-range-picker"]`
+- `[data-slot="date-range-picker-trigger"]`
+- `[data-slot="date-range-picker-trigger-indicator"]`
+- `[data-slot="date-range-picker-range-separator"]`
+- `[data-slot="date-range-picker-popover"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible]` on trigger
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]` on trigger
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on picker
+- **Entering**: `[data-entering]` on popover
+- **Exiting**: `[data-exiting]` on popover
+
+## API Reference
+
+### DateRangePicker
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `RangeValue<DateValue> \| null` | - | Current value (controlled) |
+| `defaultValue` | `RangeValue<DateValue> \| null` | - | Default value (uncontrolled) |
+| `onChange` | `(value: RangeValue<MappedDateValue<T>> \| null) => void` | - | Handler called when the range changes |
+| `minValue` | `DateValue \| null` | - | Minimum selectable date, also applied to the calendar |
+| `maxValue` | `DateValue \| null` | - | Maximum selectable date, also applied to the calendar |
+| `isDateUnavailable` | `(date: DateValue) => boolean` | - | Whether a date is unavailable |
+| `allowsNonContiguousRanges` | `boolean` | - | Whether a range may span unavailable dates |
+| `granularity` | `"day" \| "hour" \| "minute" \| "second"` | - | Smallest unit the fields show |
+| `isOpen` | `boolean` | - | Open state of the popover (controlled) |
+| `defaultOpen` | `boolean` | - | Default open state of the popover (uncontrolled) |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Handler called when the popover opens or closes |
+| `isDisabled` | `boolean` | - | Whether the picker is disabled |
+| `isReadOnly` | `boolean` | - | Whether the value can be selected but not changed |
+| `isRequired` | `boolean` | - | Whether user input is required |
+| `isInvalid` | `boolean` | - | Whether the value is invalid |
+| `startName` | `string` | - | Name of the hidden start input, used when submitting an HTML form |
+| `endName` | `string` | - | Name of the hidden end input, used when submitting an HTML form |
+| `className` | `string \| (values: DateRangePickerRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode \| (values: DateRangePickerRenderProps & {defaultChildren: ReactNode \| undefined}) => ReactNode` | - | Picker content, or a function of the render props |
+| `...rest` | | | Every React Aria `DateRangePicker` attribute is accepted, including `aria-label` |
+
+### DateRangePicker.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string \| (values: ButtonRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode \| (values: ButtonRenderProps & {defaultChildren: ReactNode \| undefined}) => ReactNode` | - | Trigger content, or a function of the render props |
+| `...rest` | | | Every React Aria `Button` attribute is accepted |
+
+### DateRangePicker.TriggerIndicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | - | Additional classes |
+| `children` | `ReactNode` | calendar icon | Custom indicator content |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### DateRangePicker.RangeSeparator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | - | Additional classes |
+| `children` | `ReactNode` | en dash | Custom separator content |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### DateRangePicker.Popover
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placement` | `"bottom" \| "bottom left" \| "bottom right" \| "bottom start" \| "bottom end" \| "top" \| "top left" \| "top right" \| "top start" \| "top end" \| "left" \| "left top" \| "left bottom" \| "start" \| "start top" \| "start bottom" \| "right" \| "right top" \| "right bottom" \| "end" \| "end top" \| "end bottom"` | `"bottom"` | Placement of the popover relative to the field |
+| `className` | `string \| (values: PopoverRenderProps & {defaultClassName: string \| undefined}) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode` | - | Popover content, usually a `RangeCalendar` |
+| `...rest` | | | Every React Aria `Popover` attribute is accepted |
+
+### Render Props
+
+`DateRangePicker` accepts function `children` and `className`, and receives these values:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `state` | `DateRangePickerState` | The state of the picker |
+| `isFocusWithin` | `boolean` | Whether focus is inside the picker |
+| `isFocusVisible` | `boolean` | Whether keyboard focus is visible inside the picker |
+| `isDisabled` | `boolean` | Whether the picker is disabled |
+| `isInvalid` | `boolean` | Whether the value is invalid |
+| `isOpen` | `boolean` | Whether the popover is open |
+| `isReadOnly` | `boolean` | Whether the picker is read-only |
+| `isRequired` | `boolean` | Whether the picker is required |
