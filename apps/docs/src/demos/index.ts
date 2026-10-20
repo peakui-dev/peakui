@@ -62,6 +62,43 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./alert/without-description").then((m) => m.WithoutDescription),
     file: "alert/without-description.tsx",
   },
+  // alert-dialog
+  "alert-dialog-backdrop-variants": {
+    loader: () => import("./alert-dialog/backdrop-variants").then((m) => m.BackdropVariants),
+    file: "alert-dialog/backdrop-variants.tsx",
+  },
+  "alert-dialog-basic": {
+    loader: () => import("./alert-dialog/basic").then((m) => m.Basic),
+    file: "alert-dialog/basic.tsx",
+  },
+  "alert-dialog-controlled": {
+    loader: () => import("./alert-dialog/controlled").then((m) => m.Controlled),
+    file: "alert-dialog/controlled.tsx",
+  },
+  "alert-dialog-custom-icon": {
+    loader: () => import("./alert-dialog/custom-icon").then((m) => m.CustomIcon),
+    file: "alert-dialog/custom-icon.tsx",
+  },
+  "alert-dialog-custom-trigger": {
+    loader: () => import("./alert-dialog/custom-trigger").then((m) => m.CustomTrigger),
+    file: "alert-dialog/custom-trigger.tsx",
+  },
+  "alert-dialog-dismiss-behavior": {
+    loader: () => import("./alert-dialog/dismiss-behavior").then((m) => m.DismissBehavior),
+    file: "alert-dialog/dismiss-behavior.tsx",
+  },
+  "alert-dialog-placements": {
+    loader: () => import("./alert-dialog/placements").then((m) => m.Placements),
+    file: "alert-dialog/placements.tsx",
+  },
+  "alert-dialog-sizes": {
+    loader: () => import("./alert-dialog/sizes").then((m) => m.Sizes),
+    file: "alert-dialog/sizes.tsx",
+  },
+  "alert-dialog-statuses": {
+    loader: () => import("./alert-dialog/statuses").then((m) => m.Statuses),
+    file: "alert-dialog/statuses.tsx",
+  },
   // avatar
   "avatar-accessible-name": {
     loader: () => import("./avatar/accessible-name").then((m) => m.AccessibleName),

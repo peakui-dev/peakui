@@ -3,6 +3,7 @@
  * it: never edited by hand. src/components/index.test.ts gates completeness.
  */
 export * from "./accordion/index.ts";
+export * from "./alert-dialog/index.ts";
 export * from "./alert/index.ts";
 export * from "./avatar-group/index.ts";
 export * from "./avatar/index.ts";

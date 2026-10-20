@@ -9,6 +9,7 @@
     "---Components---",
     "(navigation)/accordion",
     "(feedback)/alert",
+    "(overlays)/alert-dialog",
     "(media)/avatar",
     "(media)/avatar-group",
     "(data-display)/badge",
