@@ -19,6 +19,7 @@ export const COMPONENT_GROUPS = [
     category: "Pickers",
     components: ["(pickers)/calendar", "(pickers)/select"],
     components: ["(pickers)/combo-box", "(pickers)/select"],
+    components: ["(pickers)/autocomplete", "(pickers)/select"],
   },
   {
     category: "Colors",

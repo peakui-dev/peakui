@@ -10,6 +10,7 @@
     "(navigation)/accordion",
     "(feedback)/alert",
     "(overlays)/alert-dialog",
+    "(pickers)/autocomplete",
     "(media)/avatar",
     "(media)/avatar-group",
     "(data-display)/badge",

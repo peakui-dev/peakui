@@ -98,6 +98,71 @@ export const demos: Record<string, DemoItem> = {
   "alert-dialog-statuses": {
     loader: () => import("./alert-dialog/statuses").then((m) => m.Statuses),
     file: "alert-dialog/statuses.tsx",
+  // autocomplete
+  "autocomplete-asynchronous-filtering": {
+    loader: () =>
+      import("./autocomplete/asynchronous-filtering").then((m) => m.AsynchronousFiltering),
+    file: "autocomplete/asynchronous-filtering.tsx",
+  },
+  "autocomplete-basic": {
+    loader: () => import("./autocomplete/basic").then((m) => m.Basic),
+    file: "autocomplete/basic.tsx",
+  },
+  "autocomplete-controlled": {
+    loader: () => import("./autocomplete/controlled").then((m) => m.Controlled),
+    file: "autocomplete/controlled.tsx",
+  },
+  "autocomplete-controlled-open-state": {
+    loader: () => import("./autocomplete/controlled-open-state").then((m) => m.ControlledOpenState),
+    file: "autocomplete/controlled-open-state.tsx",
+  },
+  "autocomplete-custom-indicator": {
+    loader: () => import("./autocomplete/custom-indicator").then((m) => m.CustomIndicator),
+    file: "autocomplete/custom-indicator.tsx",
+  },
+  "autocomplete-custom-styles": {
+    loader: () => import("./autocomplete/custom-styles").then((m) => m.CustomStyles),
+    file: "autocomplete/custom-styles.tsx",
+  },
+  "autocomplete-disabled": {
+    loader: () => import("./autocomplete/disabled").then((m) => m.Disabled),
+    file: "autocomplete/disabled.tsx",
+  },
+  "autocomplete-full-width": {
+    loader: () => import("./autocomplete/full-width").then((m) => m.FullWidth),
+    file: "autocomplete/full-width.tsx",
+  },
+  "autocomplete-multiple-select": {
+    loader: () => import("./autocomplete/multiple-select").then((m) => m.MultipleSelect),
+    file: "autocomplete/multiple-select.tsx",
+  },
+  "autocomplete-required": {
+    loader: () => import("./autocomplete/required").then((m) => m.Required),
+    file: "autocomplete/required.tsx",
+  },
+  "autocomplete-user-selection": {
+    loader: () => import("./autocomplete/user-selection").then((m) => m.UserSelection),
+    file: "autocomplete/user-selection.tsx",
+  },
+  "autocomplete-variants": {
+    loader: () => import("./autocomplete/variants").then((m) => m.Variants),
+    file: "autocomplete/variants.tsx",
+  },
+  "autocomplete-with-clear-button": {
+    loader: () => import("./autocomplete/with-clear-button").then((m) => m.WithClearButton),
+    file: "autocomplete/with-clear-button.tsx",
+  },
+  "autocomplete-with-description": {
+    loader: () => import("./autocomplete/with-description").then((m) => m.WithDescription),
+    file: "autocomplete/with-description.tsx",
+  },
+  "autocomplete-with-disabled-options": {
+    loader: () => import("./autocomplete/with-disabled-options").then((m) => m.WithDisabledOptions),
+    file: "autocomplete/with-disabled-options.tsx",
+  },
+  "autocomplete-with-sections": {
+    loader: () => import("./autocomplete/with-sections").then((m) => m.WithSections),
+    file: "autocomplete/with-sections.tsx",
   },
   // avatar
   "avatar-accessible-name": {
