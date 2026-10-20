@@ -20,6 +20,7 @@
   "dependencies": {
     "@gravity-ui/icons": "2.22.0",
     "@iconify-json/gravity-ui": "1.2.14",
+    "@internationalized/date": "3.12.4",
     "@peakui/react": "workspace:*",
     "@peakui/styles": "workspace:*",
     "@react-aria/utils": "3.34.1",

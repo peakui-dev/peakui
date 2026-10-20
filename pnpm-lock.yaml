@@ -209,6 +209,9 @@ importers:
       '@iconify-json/gravity-ui':
         specifier: 1.2.14
         version: 1.2.14
+      '@internationalized/date':
+        specifier: 3.12.4
+        version: 3.12.4
       '@peakui/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -435,6 +438,9 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.0
         version: 0.18.5
+      '@internationalized/date':
+        specifier: 3.12.4
+        version: 3.12.4
       '@peakui/standard':
         specifier: workspace:*
         version: link:../standard
@@ -483,6 +489,9 @@ importers:
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
+      react-stately:
+        specifier: ^3.50.0
+        version: 3.50.0(react@19.3.0)
       tsdown:
         specifier: ^0.23.0
         version: 0.23.0(@arethetypeswrong/core@0.18.5)(oxc-resolver@11.21.2)(publint@0.3.24)(typescript@5.9.3)

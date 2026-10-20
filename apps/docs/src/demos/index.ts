@@ -227,6 +227,67 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./button-group/without-separator").then((m) => m.WithoutSeparator),
     file: "button-group/without-separator.tsx",
   },
+  // calendar
+  "calendar-basic": {
+    loader: () => import("./calendar/basic").then((m) => m.Basic),
+    file: "calendar/basic.tsx",
+  },
+  "calendar-controlled": {
+    loader: () => import("./calendar/controlled").then((m) => m.Controlled),
+    file: "calendar/controlled.tsx",
+  },
+  "calendar-custom-nav-icons": {
+    loader: () => import("./calendar/custom-nav-icons").then((m) => m.CustomNavIcons),
+    file: "calendar/custom-nav-icons.tsx",
+  },
+  "calendar-day-view": {
+    loader: () => import("./calendar/day-view").then((m) => m.DayView),
+    file: "calendar/day-view.tsx",
+  },
+  "calendar-default-value": {
+    loader: () => import("./calendar/default-value").then((m) => m.DefaultValue),
+    file: "calendar/default-value.tsx",
+  },
+  "calendar-disabled": {
+    loader: () => import("./calendar/disabled").then((m) => m.Disabled),
+    file: "calendar/disabled.tsx",
+  },
+  "calendar-international-calendar": {
+    loader: () => import("./calendar/international-calendar").then((m) => m.InternationalCalendar),
+    file: "calendar/international-calendar.tsx",
+  },
+  "calendar-min-max-dates": {
+    loader: () => import("./calendar/min-max-dates").then((m) => m.MinMaxDates),
+    file: "calendar/min-max-dates.tsx",
+  },
+  "calendar-multiple-months": {
+    loader: () => import("./calendar/multiple-months").then((m) => m.MultipleMonths),
+    file: "calendar/multiple-months.tsx",
+  },
+  "calendar-multiple-selection": {
+    loader: () => import("./calendar/multiple-selection").then((m) => m.MultipleSelection),
+    file: "calendar/multiple-selection.tsx",
+  },
+  "calendar-read-only": {
+    loader: () => import("./calendar/read-only").then((m) => m.ReadOnly),
+    file: "calendar/read-only.tsx",
+  },
+  "calendar-unavailable-dates": {
+    loader: () => import("./calendar/unavailable-dates").then((m) => m.UnavailableDates),
+    file: "calendar/unavailable-dates.tsx",
+  },
+  "calendar-week-view": {
+    loader: () => import("./calendar/week-view").then((m) => m.WeekView),
+    file: "calendar/week-view.tsx",
+  },
+  "calendar-with-indicators": {
+    loader: () => import("./calendar/with-indicators").then((m) => m.WithIndicators),
+    file: "calendar/with-indicators.tsx",
+  },
+  "calendar-with-year-picker": {
+    loader: () => import("./calendar/with-year-picker").then((m) => m.WithYearPicker),
+    file: "calendar/with-year-picker.tsx",
+  },
   // card
   "card-basic": {
     loader: () => import("./card/basic").then((m) => m.Basic),
