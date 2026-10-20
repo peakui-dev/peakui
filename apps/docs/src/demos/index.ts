@@ -467,6 +467,51 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./color-swatch-picker/stack").then((m) => m.Stack),
     file: "color-swatch-picker/stack.tsx",
   },
+  // date-field
+  "date-field-basic": {
+    loader: () => import("./date-field/basic").then((m) => m.Basic),
+    file: "date-field/basic.tsx",
+  },
+  "date-field-controlled": {
+    loader: () => import("./date-field/controlled").then((m) => m.Controlled),
+    file: "date-field/controlled.tsx",
+  },
+  "date-field-disabled": {
+    loader: () => import("./date-field/disabled").then((m) => m.Disabled),
+    file: "date-field/disabled.tsx",
+  },
+  "date-field-full-width": {
+    loader: () => import("./date-field/full-width").then((m) => m.FullWidth),
+    file: "date-field/full-width.tsx",
+  },
+  "date-field-granularity": {
+    loader: () => import("./date-field/granularity").then((m) => m.Granularity),
+    file: "date-field/granularity.tsx",
+  },
+  "date-field-invalid": {
+    loader: () => import("./date-field/invalid").then((m) => m.Invalid),
+    file: "date-field/invalid.tsx",
+  },
+  "date-field-required": {
+    loader: () => import("./date-field/required").then((m) => m.Required),
+    file: "date-field/required.tsx",
+  },
+  "date-field-variants": {
+    loader: () => import("./date-field/variants").then((m) => m.Variants),
+    file: "date-field/variants.tsx",
+  },
+  "date-field-with-description": {
+    loader: () => import("./date-field/with-description").then((m) => m.WithDescription),
+    file: "date-field/with-description.tsx",
+  },
+  "date-field-with-prefix-and-suffix": {
+    loader: () => import("./date-field/with-prefix-and-suffix").then((m) => m.WithPrefixAndSuffix),
+    file: "date-field/with-prefix-and-suffix.tsx",
+  },
+  "date-field-with-validation": {
+    loader: () => import("./date-field/with-validation").then((m) => m.WithValidation),
+    file: "date-field/with-validation.tsx",
+  },
   // description
   "description-basic": {
     loader: () => import("./description/basic").then((m) => m.Basic),

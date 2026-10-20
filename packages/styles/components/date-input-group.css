@@ -1,0 +1,217 @@
+/*
+ * DateInputGroup. Class names come from src/components/date-input-group/date-input-group.styles.ts.
+ *
+ * The shared shell of DateField, TimeField and the pickers: the shell carries the fill, border,
+ * radius and focus ring; the segmented input inside is transparent and borderless, so focus is
+ * drawn once. Built on the same custom properties and utilities as .input-group and
+ * .color-input-group, and checked against the vendored reference
+ * styles/components/date-input-group.css. What differs is listed at the end of the file.
+ */
+
+.date-input-group {
+  --date-input-group-bg: var(--color-field);
+  --date-input-group-bg-hover: var(--color-field-hover);
+  --date-input-group-bg-focus: var(--color-field-focus);
+  --date-input-group-fg: var(--color-field-foreground);
+  --date-input-group-placeholder: var(--color-field-placeholder);
+  --date-input-group-border: var(--color-field-border);
+  --date-input-group-border-hover: var(--color-field-border-hover);
+  --date-input-group-border-focus: var(--color-field-border-focus);
+  --date-input-group-radius: var(--radius-field);
+  --date-input-group-shadow: var(--shadow-field);
+
+  @apply inline-flex items-center outline-none;
+  /* The prefix touches the edge of the shell, so its outer corners need a concentric radius. */
+  @apply concentric-host;
+
+  --concentric-radius: var(--date-input-group-radius);
+  --concentric-border: var(--border-width-field);
+  /* Same line as .input and .button: 40px on narrow viewports, 36px from md. */
+  @apply min-h-10 md:min-h-9;
+  @apply text-sm;
+
+  border: var(--border-width-field) solid var(--date-input-group-border);
+  border-radius: var(--date-input-group-radius);
+  background-color: var(--date-input-group-bg);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent), var(--date-input-group-shadow);
+  color: var(--date-input-group-fg);
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    background-color 150ms var(--ease-smooth),
+    border-color 150ms var(--ease-smooth),
+    box-shadow 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  @media (hover: hover) {
+    &:hover:not(:focus-within) {
+      background-color: var(--date-input-group-bg-hover);
+      border-color: var(--date-input-group-border-hover);
+    }
+  }
+
+  &[data-hovered]:not(:focus-within):not([data-focus-within]) {
+    background-color: var(--date-input-group-bg-hover);
+    border-color: var(--date-input-group-border-hover);
+  }
+
+  /*
+   * Focus inside a segment draws the ring on the shell. A picker trigger inside the group owns
+   * its own ring, so focus on it leaves the shell alone.
+   */
+  &:focus-within:not(:has([data-slot$="-picker-trigger"]:focus)),
+  &[data-focus-within]:not(:has([data-slot$="-picker-trigger"][data-focused])) {
+    @apply status-focused-field;
+    background-color: var(--date-input-group-bg-focus);
+    border-color: var(--date-input-group-border-focus);
+  }
+
+  &[aria-invalid="true"],
+  &[data-invalid] {
+    @apply status-invalid-field;
+    background-color: var(--date-input-group-bg-focus);
+  }
+
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /* The theme leaves --border-width-field at 0px; forced colors need a visible edge. */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
+}
+
+.date-input-group__input {
+  @apply flex min-w-0 flex-1 cursor-text items-center gap-px border-0 bg-transparent px-3 py-2 shadow-none outline-none;
+  /* 16px on narrow viewports: Safari on iOS zooms the page on focus into anything smaller. */
+  @apply text-base sm:text-sm;
+  @apply rounded-none;
+
+  color: inherit;
+
+  /* Next to a slot the input gives up its own inner padding. */
+  .date-input-group:has([data-slot="date-input-group-prefix"]) & {
+    @apply ps-0;
+  }
+
+  .date-input-group:has([data-slot="date-input-group-suffix"]) & {
+    @apply pe-0;
+  }
+
+  /* A range sits in two inputs around a separator; the inner paddings meet at the separator. */
+  &[slot="start"]:not(:last-child) {
+    @apply flex-none pe-0;
+  }
+
+  &[slot="end"]:not(:first-child) {
+    @apply ps-0;
+  }
+
+  /* Focus is drawn by the shell. */
+  &:focus,
+  &:focus-visible,
+  &[data-focused],
+  &[data-focus-visible] {
+    @apply outline-none;
+  }
+}
+
+/* A scroll container for inputs that outgrow the shell (long granularity, narrow viewports). */
+.date-input-group__input-container {
+  @apply flex min-w-0 flex-1 scrollbar-none items-center;
+
+  overflow-x: auto;
+  overflow-y: clip;
+}
+
+.date-input-group__segment {
+  @apply inline-block rounded-md px-0.5 text-end text-nowrap outline-none;
+
+  /* The separators between segments: "/", ":", ",". */
+  &[data-type="literal"] {
+    @apply p-0 text-muted;
+  }
+
+  &[data-placeholder] {
+    color: var(--date-input-group-placeholder);
+  }
+
+  &:focus,
+  &[data-focused] {
+    @apply bg-accent-soft text-accent-soft-foreground;
+  }
+
+  &[data-disabled] {
+    @apply opacity-50;
+  }
+
+  &[data-invalid] {
+    @apply text-danger-soft-foreground;
+
+    &:focus,
+    &[data-focused] {
+      @apply bg-danger-soft text-danger-soft-foreground;
+    }
+  }
+
+  /* A highlighted segment loses its fill in forced colors; the system highlight takes over. */
+  @media (forced-colors: active) {
+    &:focus,
+    &[data-focused] {
+      forced-color-adjust: none;
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+}
+
+.date-input-group__prefix,
+.date-input-group__suffix {
+  @apply flex h-full shrink-0 items-center justify-center bg-transparent px-3;
+  @apply concentric-inner;
+
+  color: var(--date-input-group-placeholder);
+}
+
+.date-input-group--primary {
+  /* No styles: the default variant lives in .date-input-group. */
+}
+
+/* A group on a surface: neutral fill, no shadow. */
+.date-input-group--secondary {
+  --date-input-group-bg: var(--color-default);
+  --date-input-group-bg-hover: var(--color-default-hover);
+  --date-input-group-bg-focus: var(--color-default);
+  /* A transparent shadow, not none: none cannot be a member of the shadow list beside the ring. */
+  --date-input-group-shadow: 0 0 0 0 transparent;
+}
+
+.date-input-group--full-width {
+  @apply flex w-full;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. Built on the shell of .input-group (custom properties, concentric geometry, the focus ring on
+ *    the shell through --focus-ring) instead of the reference overflow-hidden shell:
+ *    overflow-hidden clips the focus ring of an interactive suffix (SC 2.4.11).
+ *
+ * 2. min-h-10 md:min-h-9 instead of a fixed h-9: one line with .input, .button and .input-group.
+ *
+ * 3. Prefix and suffix are static slots with a concentric radius and no pointer-events: none, so an
+ *    interactive suffix (a picker trigger) stays clickable. The reference makes both inert.
+ *
+ * 4. The picker-trigger exclusion matches the slot by suffix ([data-slot$="-picker-trigger"]), which
+ *    covers every picker with one rule, instead of listing each trigger.
+ *
+ * 5. The reference paints the invalid border with --color-field-border-invalid, which no theme
+ *    declares; status-invalid-field supplies it, as in .input-group. The invalid segment text uses
+ *    --color-danger-soft-foreground, the tone status-invalid-field is measured against.
+ *
+ * 6. Segment placeholder and range-separator rules read the group's own custom properties, and the
+ *    forced-colors blocks (shell edge, focused segment) have no counterpart in the reference.
+ */

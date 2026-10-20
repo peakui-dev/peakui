@@ -40,6 +40,10 @@ export const COMPONENT_GROUPS = [
     components: ["(data-display)/badge", "(data-display)/chip"],
   },
   {
+    category: "Date and Time",
+    components: ["(date-and-time)/date-field"],
+  },
+  {
     category: "Feedback",
     components: [
       "(feedback)/alert",
