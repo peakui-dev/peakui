@@ -1,0 +1,134 @@
+/*
+ * Accordion. Class names come from src/components/accordion/accordion.styles.ts.
+ * Theming seam: --accordion-radius (surface variant).
+ */
+
+.accordion {
+  --accordion-radius: min(32px, var(--radius-3xl));
+
+  @apply w-full;
+
+  /* Layout and style changes inside an item never reflow the page around the accordion. */
+  contain: layout style;
+}
+
+.accordion__heading {
+  @apply flex;
+}
+
+.accordion__item {
+  @apply relative border-none;
+
+  &::after {
+    content: "";
+    @apply absolute start-0 bottom-0 h-px w-full rounded-xs bg-separator;
+  }
+
+  &:last-child::after {
+    content: none;
+  }
+
+  &[data-hide-separator="true"]::after {
+    display: none;
+  }
+}
+
+.accordion__trigger {
+  cursor: var(--cursor-interactive);
+
+  @apply flex flex-1 items-center justify-between px-4 py-4 text-start text-sm font-medium no-highlight;
+
+  /* motion-reduce must follow the transition for the override to win */
+  transition:
+    opacity 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  /* Keyed off :hover alone: data-hovered outlives :hover by a frame and would flash the fill. */
+  @media (hover: hover) {
+    &:hover:not([aria-expanded="true"]) {
+      background-color: color-mix(in oklab, var(--foreground) 3%, transparent);
+    }
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+}
+
+.accordion__indicator {
+  @apply ms-auto size-4 shrink-0 text-muted;
+  @apply transition duration-250 motion-reduce:transition-none;
+
+  &[data-expanded="true"] {
+    @apply -rotate-180;
+  }
+}
+
+.accordion__panel {
+  opacity: 0;
+  /* Set inline by React Aria while animating, auto at rest; the fallback covers pre-hydration. */
+  height: var(--disclosure-panel-height, auto);
+  overflow: clip;
+
+  transition:
+    height 200ms var(--ease-out-quad),
+    opacity 200ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  &[data-expanded="true"] {
+    will-change: height, opacity;
+    opacity: 1;
+  }
+}
+
+.accordion__body {
+  @apply text-sm;
+}
+
+.accordion__body-inner {
+  @apply px-4 pt-0 pb-4 text-muted;
+}
+
+/* Surface variant */
+.accordion--surface {
+  @apply bg-surface;
+  border-radius: var(--accordion-radius);
+
+  .accordion__trigger {
+    @media (hover: hover) {
+      &:hover:not([aria-expanded="true"]) {
+        @apply bg-default;
+      }
+    }
+  }
+
+  .accordion__item {
+    &::after {
+      @apply start-[3%] w-[94%] bg-surface-foreground/6;
+    }
+
+    /* The first and last triggers follow the container's corners. */
+    &:first-child .accordion__trigger {
+      border-start-start-radius: var(--accordion-radius);
+      border-start-end-radius: var(--accordion-radius);
+    }
+
+    &:last-child:not(:has(.accordion__trigger[aria-expanded="true"])) .accordion__trigger {
+      border-end-start-radius: var(--accordion-radius);
+      border-end-end-radius: var(--accordion-radius);
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .accordion__item::after {
+    background-color: CanvasText;
+  }
+}

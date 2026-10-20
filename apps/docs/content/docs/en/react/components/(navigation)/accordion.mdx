@@ -1,0 +1,213 @@
+---
+title: Accordion
+description: Vertically stacked expandable sections
+links:
+  rac: DisclosureGroup
+  source: accordion/accordion.tsx
+  styles: accordion.css
+---
+
+## Usage
+
+```tsx
+import {Accordion} from "@peakui/react";
+```
+
+<ComponentPreview name="accordion-basic" />
+
+### Anatomy
+
+```tsx
+import {Accordion} from "@peakui/react";
+
+export default () => (
+  <Accordion>
+    <Accordion.Item>
+      <Accordion.Heading>
+        <Accordion.Trigger>
+          <Accordion.Indicator />
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Panel>
+        <Accordion.Body />
+      </Accordion.Panel>
+    </Accordion.Item>
+  </Accordion>
+);
+```
+
+## Examples
+
+### Multiple Expanded
+
+<ComponentPreview name="accordion-multiple-expanded" />
+
+### Surface
+
+<ComponentPreview name="accordion-surface" />
+
+### Without Separator
+
+<ComponentPreview name="accordion-without-separator" />
+
+### Default Expanded
+
+<ComponentPreview name="accordion-default-expanded" />
+
+### Controlled
+
+<ComponentPreview name="accordion-controlled" />
+
+### Disabled
+
+<ComponentPreview name="accordion-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Accordion.Trigger className="px-2 py-3 text-base">
+  Title
+  <Accordion.Indicator className="text-accent" />
+</Accordion.Trigger>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .accordion {
+    --accordion-radius: 1rem;
+  }
+
+  .accordion__trigger {
+    @apply font-semibold;
+  }
+
+  .accordion__body-inner {
+    @apply text-foreground;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Accordion component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/accordion.css)):
+
+#### Base Classes [!toc]
+
+- `.accordion` - Group container
+- `.accordion__item` - Item, draws the separator
+- `.accordion__heading` - Heading wrapper
+- `.accordion__trigger` - Trigger button
+- `.accordion__indicator` - Chevron indicator
+- `.accordion__panel` - Collapsible panel with the height animation
+- `.accordion__body` - Body wrapper
+- `.accordion__body-inner` - Inner wrapper receiving the consumer `className`
+
+#### Variant Classes [!toc]
+
+- `.accordion--surface` - Filled, rounded container
+
+### Slots
+
+- `[data-slot="accordion"]` - The group element
+- `[data-slot="accordion-item"]` - An item
+- `[data-slot="accordion-heading"]` - The heading
+- `[data-slot="accordion-trigger"]` - The trigger button
+- `[data-slot="accordion-indicator"]` - The chevron indicator
+- `[data-slot="accordion-panel"]` - The collapsible panel
+- `[data-slot="accordion-body"]` - The body wrapper
+- `[data-slot="accordion-body-inner"]` - The inner body wrapper
+
+### CSS Variables
+
+- `--accordion-radius` - Corner radius of the `surface` variant. Defaults to `min(32px, var(--radius-3xl))`
+
+### Interactive States
+
+- **Expanded**: `[data-expanded="true"]` on the panel and the indicator; `[aria-expanded="true"]` on the trigger
+- **Hover**: `:hover` on the trigger, pointer devices only
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the trigger
+- **Disabled**: `:disabled` or `[aria-disabled="true"]` on the trigger
+- **No separator**: `[data-hide-separator="true"]` on the item
+
+## API Reference
+
+### Accordion
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'default' \| 'surface'` | `'default'` | Visual variant |
+| `hideSeparator` | `boolean` | `false` | Hides the line between items |
+| `allowsMultipleExpanded` | `boolean` | `false` | Lets several items stay open |
+| `expandedKeys` | `Iterable<Key>` | - | Controlled set of open item ids |
+| `defaultExpandedKeys` | `Iterable<Key>` | - | Item ids open on first render |
+| `onExpandedChange` | `(keys: Set<Key>) => any` | - | Called when the open items change |
+| `isDisabled` | `boolean` | `false` | Disables every item |
+| `children` | `ReactNode \| ((values: DisclosureGroupRenderProps) => ReactNode)` | - | Items, or a function of the render props |
+| `className` | `string \| ((values: DisclosureGroupRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `...rest` | `DisclosureGroupProps` | - | Every other React Aria `DisclosureGroup` attribute |
+
+### Accordion.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | Item id, matched against `expandedKeys` |
+| `isDisabled` | `boolean` | `false` | Disables this item |
+| `children` | `ReactNode \| ((values: DisclosureRenderProps) => ReactNode)` | - | Heading and panel, or a function of the render props |
+| `className` | `string \| ((values: DisclosureRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `...rest` | `DisclosureProps` | - | Every other React Aria `Disclosure` attribute |
+
+### Accordion.Heading
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `level` | `number` | `3` | The heading level |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `HeadingProps` | - | Every other attribute of a heading |
+
+### Accordion.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | - | Trigger content, or a function of the render props |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `...rest` | `ButtonProps` | - | Every other React Aria `Button` attribute |
+
+### Accordion.Indicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Replaces the built-in chevron `<svg>` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `SVGProps` | - | Every other attribute of an `<svg>` |
+
+### Accordion.Panel
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Content to show and hide |
+| `className` | `string \| ((values: DisclosurePanelRenderProps) => string)` | - | Additional classes, or a function of the render props |
+| `...rest` | `DisclosurePanelProps` | - | Every other React Aria `DisclosurePanel` attribute |
+
+### Accordion.Body
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The body content |
+| `className` | `string` | - | Additional classes, applied to the inner wrapper |
+| `render` | `DOMRenderFunction<'div', undefined>` | - | Replaces the rendered `<div>` with your own |
+| `...rest` | `HTMLAttributes<HTMLDivElement>` | - | Every other attribute of a `<div>` |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: DisclosureGroupRenderProps) => ReactNode` | Receives `expandedKeys`, `isDisabled` |
+| `className` | `(values: DisclosureGroupRenderProps) => string` | Same values as `children` |

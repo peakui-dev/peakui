@@ -84,6 +84,7 @@ export const COMPONENT_GROUPS = [
   {
     category: "Navigation",
     components: [
+      "(navigation)/accordion",
       "(navigation)/breadcrumbs",
       "(navigation)/disclosure",
       "(navigation)/disclosure-group",
