@@ -59,6 +59,7 @@ export * from "./progress-bar/index.ts";
 export * from "./progress-circle/index.ts";
 export * from "./radio-group/index.ts";
 export * from "./radio/index.ts";
+export * from "./range-calendar/index.ts";
 export * from "./scroll-shadow/index.ts";
 export * from "./search-field/index.ts";
 export * from "./segmented-control/index.ts";

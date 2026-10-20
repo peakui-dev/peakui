@@ -1,0 +1,394 @@
+/*
+ * RangeCalendar. Class names come from src/components/range-calendar/range-calendar.styles.ts; all
+ * the Tailwind lives here. Ported from the vendored reference styles/components/range-calendar.css
+ * and kept in step with calendar.css, whose header, grid and navigation it shares in shape. The
+ * differences that remain are listed at the end of the file, each with its reason.
+ */
+
+.range-calendar {
+  --range-calendar-width: calc(var(--spacing) * 63);
+  --range-calendar-cell-bg-hover: var(--color-default);
+  --range-calendar-cell-bg-today: var(--color-accent-soft);
+  --range-calendar-cell-bg-today-hover: var(--color-accent-soft-hover);
+  --range-calendar-cell-bg-range: var(--color-accent-soft);
+  --range-calendar-cell-bg-cap: var(--color-accent);
+  --range-calendar-cell-fg-cap: var(--color-accent-foreground);
+
+  width: var(--range-calendar-width);
+  max-width: var(--range-calendar-width);
+  container-type: inline-size;
+}
+
+/* Week view: visibleDuration={{weeks: n}} */
+.range-calendar--week-view {
+  .range-calendar__cell {
+    /* Keep the cells circular on the 7-column grid; only filled cells take space. */
+    @apply aspect-square size-auto w-full place-self-center;
+  }
+}
+
+/* Day view: visibleDuration={{days: n}} */
+.range-calendar--day-view {
+  .range-calendar__cell {
+    @apply aspect-square size-auto w-full place-self-center;
+  }
+
+  /*
+   * Header and body become separate 7-column grids. With display: contents on the root grid,
+   * fewer than seven weekday headers would flow into the same row as the dates.
+   */
+  .range-calendar__grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .range-calendar__grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    @apply w-full;
+
+    & > tr {
+      display: contents;
+    }
+  }
+
+  .range-calendar__grid-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    @apply mt-1 w-full;
+
+    & > tr {
+      display: contents;
+    }
+
+    & > tr:first-child > td {
+      @apply mt-0;
+    }
+  }
+}
+
+/* Header */
+.range-calendar__header {
+  @apply flex items-center justify-between px-0.5 pb-4;
+
+  /* The month navigation steps aside while the year picker covers the grid. */
+  &:has(.calendar-year-picker__trigger[data-open="true"]) {
+    .range-calendar__nav-button {
+      @apply pointer-events-none opacity-0;
+    }
+  }
+}
+
+.range-calendar__heading {
+  @apply flex-1 text-sm font-medium;
+}
+
+.range-calendar__nav-button {
+  @apply flex size-6 items-center justify-center rounded-2xl text-accent-soft-foreground;
+
+  will-change: scale;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    transform 250ms var(--ease-out),
+    background-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  cursor: var(--cursor-interactive);
+
+  /* Hover: only where the device can hover, so touch does not stick. */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not(:is(:disabled, [data-disabled="true"])) {
+      @apply bg-default text-accent-soft-foreground;
+    }
+  }
+
+  &:is(:active, [data-pressed="true"]) {
+    transform: scale(0.95);
+  }
+
+  &:is(:focus-visible, [data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+
+  &:is(:disabled, [data-disabled="true"]) {
+    @apply status-disabled;
+  }
+
+  @media (forced-colors: active) {
+    border: 1px solid ButtonBorder;
+  }
+}
+
+.range-calendar__nav-button-icon {
+  @apply size-4 rtl:rotate-180;
+}
+
+/* Grid */
+.range-calendar__grid {
+  /* The table becomes a CSS grid, which makes the cell spacing a plain margin. */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  @apply w-full;
+
+  &[aria-readonly="true"] {
+    .range-calendar__cell {
+      @apply pointer-events-none;
+    }
+  }
+}
+
+.range-calendar__grid-header {
+  display: contents;
+
+  & > tr {
+    display: contents;
+  }
+}
+
+.range-calendar__grid-body {
+  display: contents;
+
+  & > tr {
+    display: contents;
+  }
+
+  /* Space between the weekday names and the first row of dates. */
+  & > tr:first-child > td {
+    @apply mt-1;
+  }
+}
+
+.range-calendar__grid-row {
+  /* Lets the cells join the grid directly; a hook for custom row styling. */
+  display: contents;
+}
+
+.range-calendar__header-cell {
+  @apply flex items-center justify-center pb-2 text-xs font-medium text-muted;
+}
+
+/*
+ * Cells. The cell is the range track; its inner __cell-button is the round day and the caps.
+ */
+.range-calendar__cell {
+  @apply relative z-1 mx-0 my-[2px] rounded-3xl p-0 outline-none;
+
+  cursor: var(--cursor-interactive);
+
+  will-change: background-color, border-color;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    box-shadow 100ms var(--ease-out),
+    border-color 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  .range-calendar__cell-button {
+    @apply flex aspect-square w-full items-center justify-center rounded-3xl text-sm font-medium text-foreground no-highlight;
+
+    will-change: scale;
+    transition: scale 200ms var(--ease-out);
+    @apply transform-gpu motion-reduce:transition-none;
+  }
+
+  /* Focus */
+  &:is(:focus-visible:not([data-focused]), [data-focus-visible="true"]) {
+    @apply z-2;
+
+    .range-calendar__cell-button {
+      @apply status-focused;
+    }
+  }
+
+  /* Today */
+  &[data-today="true"] {
+    .range-calendar__cell-button {
+      background-color: var(--range-calendar-cell-bg-today);
+      @apply text-accent-soft-foreground;
+    }
+
+    @media (hover: hover) {
+      &:is(:hover, [data-hovered="true"]):not([data-selected="true"]) {
+        .range-calendar__cell-button {
+          background-color: var(--range-calendar-cell-bg-today-hover);
+        }
+      }
+    }
+  }
+
+  /* The range track: every selected cell between and including the caps */
+  &[data-selected="true"]:not([data-outside-month="true"]) {
+    @apply rounded-none;
+
+    background-color: var(--range-calendar-cell-bg-range);
+  }
+
+  /* Round the row ends so the track reads as continuous across weeks */
+  &[data-selected="true"]:is(td:first-child > *, [aria-disabled] + td > *) {
+    @apply rounded-ss-lg rounded-es-lg;
+
+    &[data-selection-start="true"] {
+      @apply rounded-ss-3xl rounded-es-3xl;
+    }
+  }
+
+  &[data-selected="true"]:is(td:last-child > *, td:has(+ [aria-disabled]) > *) {
+    @apply rounded-se-lg rounded-ee-lg;
+
+    &[data-selection-end="true"] {
+      @apply rounded-se-3xl rounded-ee-3xl;
+    }
+  }
+
+  /* Range caps (start and end) */
+  &:is([data-selection-start="true"], [data-selection-end="true"]):not(
+      [data-outside-month="true"]
+    ) {
+    @apply z-2;
+
+    .range-calendar__cell-button {
+      background-color: var(--range-calendar-cell-bg-cap);
+      color: var(--range-calendar-cell-fg-cap);
+    }
+  }
+
+  &[data-selection-start="true"]:not([data-outside-month="true"]) {
+    @apply rounded-ss-3xl rounded-es-3xl;
+  }
+
+  &[data-selection-end="true"]:not([data-outside-month="true"]) {
+    @apply rounded-se-3xl rounded-ee-3xl;
+  }
+
+  /* Pressed */
+  &:is(:active, [data-pressed="true"]) {
+    .range-calendar__cell-button {
+      scale: 0.9;
+    }
+
+    &:is([data-selection-start="true"], [data-selection-end="true"]) {
+      .range-calendar__cell-button {
+        @apply bg-accent-hover;
+      }
+    }
+  }
+
+  /* Hover: only where the device can hover. */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not([data-selected="true"]) {
+      .range-calendar__cell-button {
+        background-color: var(--range-calendar-cell-bg-hover);
+      }
+    }
+  }
+
+  /* Days of the neighbouring months */
+  &[data-outside-month="true"] {
+    @apply text-muted opacity-50;
+  }
+
+  &[data-selected="true"][data-outside-month="true"]:not(
+      [data-selection-start="true"],
+      [data-selection-end="true"]
+    ) {
+    @apply bg-default/20;
+  }
+
+  &[data-unavailable="true"] {
+    @apply status-disabled;
+  }
+
+  &:is(:disabled, [data-disabled="true"]):not([data-outside-month="true"]) {
+    @apply status-disabled;
+
+    text-decoration: line-through;
+  }
+
+  /*
+   * Forced colors: the track and the caps are carried by backgrounds alone, and forced-colors
+   * flattens backgrounds. The system Highlight pair marks the caps, the track keeps a border, and
+   * today keeps a border.
+   */
+  @media (forced-colors: active) {
+    &[data-selected="true"]:not([data-outside-month="true"]) {
+      border-block: 1px solid Highlight;
+    }
+
+    &:is([data-selection-start="true"], [data-selection-end="true"]):not(
+        [data-outside-month="true"]
+      ) {
+      .range-calendar__cell-button {
+        background-color: Highlight;
+        color: HighlightText;
+      }
+    }
+
+    &[data-today="true"]:not([data-selected="true"]) .range-calendar__cell-button {
+      border: 1px solid CanvasText;
+    }
+
+    &[data-unavailable="true"],
+    &:is(:disabled, [data-disabled="true"]) {
+      color: GrayText;
+    }
+  }
+}
+
+/* A neighbouring-month cell next to a selected cell: close the track with round ends. */
+.range-calendar__grid-body
+  td:has(> .range-calendar__cell[data-outside-month="true"])
+  + td
+  > .range-calendar__cell[data-selected="true"] {
+  @apply rounded-ss-lg rounded-es-lg;
+
+  &:is([data-outside-month="true"], [data-selection-start="true"]) {
+    @apply rounded-ss-3xl rounded-es-3xl;
+  }
+}
+
+.range-calendar__grid-body
+  td:has(> .range-calendar__cell[data-selected="true"]):has(
+    + td > .range-calendar__cell[data-outside-month="true"]
+  )
+  > .range-calendar__cell[data-selected="true"] {
+  @apply rounded-se-lg rounded-ee-lg;
+
+  &:is([data-outside-month="true"], [data-selection-end="true"]) {
+    @apply rounded-se-3xl rounded-ee-3xl;
+  }
+}
+
+/* Small dot at the bottom centre of a cell */
+.range-calendar__cell-indicator {
+  @apply absolute bottom-1 left-1/2 size-[3px] -translate-x-1/2 rounded-xs bg-muted;
+
+  /* The cell button's data-selected is set on the caps only. */
+  [data-selected="true"] > & {
+    @apply bg-accent-foreground;
+  }
+
+  @media (forced-colors: active) {
+    background-color: CanvasText;
+
+    [data-selected="true"] > & {
+      background-color: HighlightText;
+    }
+  }
+}
+
+/*
+ * What differs from the reference, and why:
+ *
+ * 1. Every interactive state carries the pseudo-class and the data-* form, so the stylesheet
+ *    works without React. The reference writes some of them in one form only.
+ * 2. The colours that vary by state are custom properties (--range-calendar-*), the theming seam.
+ *    The reference hard-wires the utilities.
+ * 3. forced-colors is handled for the nav button, the track, the caps and the indicator. The
+ *    reference has none (design-tokens spec).
+ * 4. The indicator turns light on the caps only. The reference keys it to any selected cell, but
+ *    the track behind a mid-range indicator is a soft fill, where a light dot would vanish.
+ * 5. The nav button radius matches calendar.css.
+ */

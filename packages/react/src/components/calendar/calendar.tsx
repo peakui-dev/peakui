@@ -311,12 +311,15 @@ interface CalendarDayViewGridHeaderProps {
   children: (day: string) => ReactElement;
   className?: string;
   context: CalendarDayViewContext;
+  /** `data-slot` of the rendered thead. RangeCalendar passes its own. */
+  dataSlot?: string;
 }
 
 const CalendarDayViewGridHeader = ({
   children,
   className,
   context,
+  dataSlot = "calendar-grid-header",
 }: CalendarDayViewGridHeaderProps) => {
   const {locale} = useLocale();
   const {firstDayOfWeek, timeZone, visibleRange, weekdayStyle = "short"} = context;
@@ -327,7 +330,7 @@ const CalendarDayViewGridHeader = ({
   );
 
   return (
-    <dom.thead aria-hidden className={className} data-slot="calendar-grid-header">
+    <dom.thead aria-hidden className={className} data-slot={dataSlot}>
       <tr>{weekDays.map((day, index) => cloneElement(children(day), {key: index}))}</tr>
     </dom.thead>
   );
@@ -337,9 +340,16 @@ interface CalendarDayViewGridBodyProps {
   children: (date: CalendarDate) => ReactElement;
   className?: string;
   context: CalendarDayViewContext;
+  /** `data-slot` of the rendered tbody. RangeCalendar passes its own. */
+  dataSlot?: string;
 }
 
-const CalendarDayViewGridBody = ({children, className, context}: CalendarDayViewGridBodyProps) => {
+const CalendarDayViewGridBody = ({
+  children,
+  className,
+  context,
+  dataSlot = "calendar-grid-body",
+}: CalendarDayViewGridBodyProps) => {
   const {locale} = useLocale();
   const {firstDayOfWeek, visibleRange} = context;
   const rows = useMemo(
@@ -348,7 +358,7 @@ const CalendarDayViewGridBody = ({children, className, context}: CalendarDayView
   );
 
   return (
-    <dom.tbody className={className} data-slot="calendar-grid-body">
+    <dom.tbody className={className} data-slot={dataSlot}>
       {rows.map((row, weekIndex) => (
         <tr key={weekIndex}>
           {row.map((date, dayIndex) =>
@@ -504,6 +514,8 @@ const CalendarCellIndicator = <E extends keyof JSX.IntrinsicElements = "span">({
 export {
   CalendarCell,
   CalendarCellIndicator,
+  CalendarDayViewGridBody,
+  CalendarDayViewGridHeader,
   CalendarGrid,
   CalendarGridBody,
   CalendarGridHeader,
@@ -515,6 +527,7 @@ export {
 };
 
 export type {
+  CalendarDayViewContext,
   CalendarCellIndicatorProps,
   CalendarCellProps,
   CalendarGridBodyProps,
