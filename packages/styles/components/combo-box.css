@@ -1,0 +1,210 @@
+/*
+ * ComboBox. Class names come from src/components/combo-box/combo-box.styles.ts; all the Tailwind
+ * lives here. The field surface itself (fill, border, focus, invalid, disabled) belongs to the
+ * Input inside the group, so this file only lays the group out and styles the trigger, the
+ * selected-value text and the popover.
+ */
+
+.combo-box {
+  @apply flex flex-col gap-1;
+
+  &[data-invalid="true"],
+  &[aria-invalid="true"] {
+    [data-slot="description"] {
+      @apply hidden;
+    }
+  }
+
+  [data-slot="label"] {
+    @apply w-fit;
+  }
+
+  [data-slot="input"] {
+    @apply min-w-0 flex-1;
+
+    /* Room for the trigger, which sits over the end of the input. */
+    &:has(+ .combo-box__trigger) {
+      @apply pe-7;
+    }
+  }
+}
+
+.combo-box__input-group {
+  @apply relative isolate inline-flex items-center;
+}
+
+.combo-box__value {
+  @apply text-sm wrap-break-word text-field-foreground empty:hidden;
+
+  &[data-placeholder="true"] {
+    @apply text-field-placeholder;
+  }
+
+  /* The item indicator is list chrome, not part of the selected value. */
+  [data-slot="list-box-item-indicator"] {
+    @apply hidden;
+  }
+}
+
+.combo-box__trigger {
+  @apply absolute end-0 top-1/2 flex h-full min-w-6 shrink-0 -translate-y-1/2 items-center justify-center pe-2 text-field-placeholder no-highlight;
+
+  /* Remove default button styles */
+  @apply border-none bg-transparent outline-none;
+
+  cursor: var(--cursor-interactive);
+
+  /* CRITICAL: motion-reduce must be AFTER transition for correct override specificity */
+  transition: color 150ms var(--ease-smooth);
+  @apply motion-reduce:transition-none;
+
+  @media (hover: hover) {
+    &:hover {
+      @apply text-field-foreground;
+    }
+  }
+
+  &[data-hovered="true"] {
+    @apply text-field-foreground;
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused rounded;
+  }
+
+  &:active,
+  &[data-pressed="true"] {
+    @apply opacity-70;
+  }
+
+  &:disabled,
+  &[data-disabled],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  [data-slot="combo-box-trigger-default-icon"] {
+    @apply size-4 transition-transform duration-150 motion-reduce:transition-none;
+  }
+
+  &[data-open="true"] [data-slot="combo-box-trigger-default-icon"] {
+    @apply rotate-180;
+  }
+
+  @media (forced-colors: active) {
+    color: ButtonText;
+  }
+}
+
+/* Similar to popover content styles */
+.combo-box__popover {
+  @apply min-w-(--trigger-width) origin-(--trigger-anchor-point) scroll-py-1 scrollbar overflow-y-auto overscroll-contain bg-overlay p-0 text-sm;
+  border-radius: min(32px, var(--radius-3xl));
+  box-shadow: var(--overlay-shadow);
+
+  /*
+   * Forced colors, the overlay-family policy (see popover.css): the surface flattens to Canvas
+   * through the theme block, so the boundary must carry the popover. The border is held
+   * transparent in the normal state so the geometry never shifts between modes.
+   */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply outline-none;
+  }
+
+  &[data-entering="true"] {
+    @apply animate-in duration-150 ease-smooth fade-in-0 zoom-in-95;
+
+    &[data-placement="top"] {
+      @apply slide-in-from-bottom-1;
+    }
+
+    &[data-placement="bottom"] {
+      @apply slide-in-from-top-1;
+    }
+
+    &[data-placement="left"] {
+      @apply slide-in-from-right-1;
+    }
+
+    &[data-placement="right"] {
+      @apply slide-in-from-left-1;
+    }
+  }
+
+  &[data-exiting="true"] {
+    @apply animate-out duration-100 ease-smooth zoom-out-95 fade-out;
+    /* Stays non-interactive while closing, even if the exit animation is interrupted. */
+    @apply pointer-events-none;
+  }
+
+  &[data-exiting="true"],
+  &[data-entering="true"] {
+    @apply transition-[opacity,transform] will-change-[opacity,transform];
+  }
+
+  & [data-slot="popover-overlay-arrow"] {
+    fill: var(--overlay);
+  }
+
+  &[data-placement="bottom"] [data-slot="popover-overlay-arrow"] {
+    rotate: 180deg;
+  }
+
+  &[data-placement="left"] [data-slot="popover-overlay-arrow"] {
+    rotate: -90deg;
+  }
+
+  &[data-placement="right"] [data-slot="popover-overlay-arrow"] {
+    rotate: 90deg;
+  }
+
+  [data-slot="list-box"] {
+    @apply p-1.5 outline-none;
+  }
+
+  [data-slot="list-box-item"] {
+    @apply px-2.5;
+  }
+
+  /* In single-select the popover closes too fast for the indicator transition to be seen. */
+  [data-slot="list-box"]:not([aria-multiselectable="true"]) [data-slot="list-box-item-indicator"],
+  [data-slot="list-box"]:not([aria-multiselectable="true"])
+    [data-slot="list-box-item-indicator"]
+    [data-slot="list-box-item-indicator--checkmark"] {
+    @apply transition-none;
+  }
+}
+
+/* Full width modifier */
+.combo-box--full-width {
+  @apply w-full;
+}
+
+.combo-box__input-group--full-width {
+  @apply w-full;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The `--color-*` token prefix on color tokens (docs/superpowers/specs/2026-10-02-react-package-button-design.md,
+ *    section 12). Non-color tokens keep the reference's names.
+ *
+ * 2. No focus/disabled override on the input: peakui's input.css already styles :focus,
+ *    [data-focused], [data-disabled] and the invalid ring, so repeating them here would be a
+ *    second source of truth.
+ *
+ * 3. The trigger takes `status-focused` and `status-disabled` instead of ring-* utilities, and a
+ *    24px minimum width (WCAG 2.2 target size). Its forced-colors rule maps the glyph to ButtonText.
+ *
+ * 4. forced-colors border on the popover: the reference has none. The overlay-family policy from
+ *    popover.css.
+ */
