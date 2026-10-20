@@ -19,8 +19,10 @@ import {
   CalendarGrid as CalendarGridPrimitive,
   CalendarHeaderCell as CalendarHeaderCellPrimitive,
   CalendarHeading as CalendarHeadingPrimitive,
+  RangeCalendarContext as RACRangeCalendarContext,
   RangeCalendar as RangeCalendarPrimitive,
 } from "react-aria-components/RangeCalendar";
+import {useSlottedContext} from "react-aria-components/slots";
 import {useControlledState} from "react-stately/useControlledState";
 import {cx} from "tailwind-variants";
 
@@ -102,6 +104,11 @@ function RangeCalendarRoot<T extends DateValue = DateValue>({
   const isDayView = visibleDuration?.days != null;
   const visibleDays = visibleDuration?.days;
   const {locale} = useLocale();
+  // A host (DateRangePicker) hands its bounds down through React Aria's context. The default
+  // bounds below are explicit props, which would win over the host's, so they only fill what
+  // neither the caller nor the host set.
+  const host = useSlottedContext(RACRangeCalendarContext, rest.slot) as
+    {maxValue?: T; minValue?: T} | null | undefined;
   const slots = useMemo(() => rangeCalendarVariants(), []);
   const calendarRef = useRef<HTMLDivElement>(null);
   const [isYearPickerOpen, setIsYearPickerOpen] = useControlledState(
@@ -120,17 +127,21 @@ function RangeCalendarRoot<T extends DateValue = DateValue>({
   );
   // React Aria memoizes the calendar state against minValue and maxValue identity, so these
   // bounds must be stable across renders. Without a bound the year picker would have no range.
+  const hostMinValue = host?.minValue;
+  const hostMaxValue = host?.maxValue;
   const minValue = useMemo(
     () =>
       minValueProp ??
+      hostMinValue ??
       (new CalendarDate(calendar, 1900 + gregorianYearOffset, 1, 1) as unknown as T),
-    [minValueProp, calendar, gregorianYearOffset],
+    [minValueProp, hostMinValue, calendar, gregorianYearOffset],
   );
   const maxValue = useMemo(
     () =>
       maxValueProp ??
+      hostMaxValue ??
       (new CalendarDate(calendar, 2099 + gregorianYearOffset, 12, 31) as unknown as T),
-    [maxValueProp, calendar, gregorianYearOffset],
+    [maxValueProp, hostMaxValue, calendar, gregorianYearOffset],
   );
   const dayViewBase = useMemo(
     () => (isDayView && visibleDays != null ? {days: visibleDays, firstDayOfWeek} : undefined),

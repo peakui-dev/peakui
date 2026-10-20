@@ -22,6 +22,7 @@ export const COMPONENT_GROUPS = [
       "(pickers)/calendar",
       "(pickers)/combo-box",
       "(pickers)/date-picker",
+      "(pickers)/date-range-picker",
       "(pickers)/range-calendar",
       "(pickers)/select",
     ],

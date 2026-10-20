@@ -30,6 +30,7 @@ export * from "./combo-box/index.ts";
 export * from "./date-field/index.ts";
 export * from "./date-input-group/index.ts";
 export * from "./date-picker/index.ts";
+export * from "./date-range-picker/index.ts";
 export * from "./description/index.ts";
 export * from "./disclosure-group/index.ts";
 export * from "./disclosure/index.ts";
