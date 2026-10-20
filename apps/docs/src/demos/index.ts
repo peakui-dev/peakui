@@ -12,6 +12,35 @@ export interface DemoItem {
  * edited by hand; the sort-keys rules are off for this file.
  */
 export const demos: Record<string, DemoItem> = {
+  // accordion
+  "accordion-basic": {
+    loader: () => import("./accordion/basic").then((m) => m.Basic),
+    file: "accordion/basic.tsx",
+  },
+  "accordion-controlled": {
+    loader: () => import("./accordion/controlled").then((m) => m.Controlled),
+    file: "accordion/controlled.tsx",
+  },
+  "accordion-default-expanded": {
+    loader: () => import("./accordion/default-expanded").then((m) => m.DefaultExpanded),
+    file: "accordion/default-expanded.tsx",
+  },
+  "accordion-disabled": {
+    loader: () => import("./accordion/disabled").then((m) => m.Disabled),
+    file: "accordion/disabled.tsx",
+  },
+  "accordion-multiple-expanded": {
+    loader: () => import("./accordion/multiple-expanded").then((m) => m.MultipleExpanded),
+    file: "accordion/multiple-expanded.tsx",
+  },
+  "accordion-surface": {
+    loader: () => import("./accordion/surface").then((m) => m.Surface),
+    file: "accordion/surface.tsx",
+  },
+  "accordion-without-separator": {
+    loader: () => import("./accordion/without-separator").then((m) => m.WithoutSeparator),
+    file: "accordion/without-separator.tsx",
+  },
   // alert
   "alert-basic": {
     loader: () => import("./alert/basic").then((m) => m.Basic),
