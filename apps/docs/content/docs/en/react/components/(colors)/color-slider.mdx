@@ -1,0 +1,161 @@
+---
+title: ColorSlider
+description: Slider for one color channel
+links:
+  rac: ColorSlider
+  source: color-slider/color-slider.tsx
+  styles: color-slider.css
+---
+
+## Usage
+
+```tsx
+import {ColorSlider, Label} from "@peakui/react";
+```
+
+<ComponentPreview name="color-slider-basic" />
+
+### Anatomy
+
+```tsx
+import {ColorSlider, Label} from "@peakui/react";
+
+export default () => (
+  <ColorSlider channel="hue" colorSpace="hsb">
+    <Label />
+    <ColorSlider.Output />
+    <ColorSlider.Track>
+      <ColorSlider.Thumb />
+    </ColorSlider.Track>
+  </ColorSlider>
+);
+```
+
+## Examples
+
+### Alpha
+
+<ComponentPreview name="color-slider-alpha" />
+
+### RGB
+
+<ComponentPreview name="color-slider-rgb" />
+
+### Vertical
+
+<ComponentPreview name="color-slider-vertical" />
+
+### Without Label
+
+<ComponentPreview name="color-slider-without-label" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ColorSlider className="w-64" channel="hue" colorSpace="hsb">
+  <ColorSlider.Track className="h-4">
+    <ColorSlider.Thumb />
+  </ColorSlider.Track>
+</ColorSlider>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .color-slider__track {
+    @apply h-6;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorSlider component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-slider.css)):
+
+#### Base Classes [!toc]
+
+- `.color-slider` - Grid of label, output and track
+- `.color-slider__track` - Gradient track with edge caps
+- `.color-slider__thumb` - Draggable thumb with a white border
+- `.color-slider__output` - Formatted channel value
+
+### Slots
+
+- `[data-slot="color-slider"]`
+- `[data-slot="color-slider-track"]`
+- `[data-slot="color-slider-thumb"]`
+- `[data-slot="color-slider-output"]`
+
+### CSS Variables
+
+| Variable                      | Purpose                                                 |
+| ----------------------------- | ------------------------------------------------------- |
+| `--track-start-color`         | Colour at the channel minimum, set by `ColorSlider.Track` |
+| `--track-end-color`           | Colour at the channel maximum, set by `ColorSlider.Track` |
+| `--color-slider-checker`      | Transparency checkerboard under the gradient            |
+| `--color-slider-ring`         | The inset ring on the track and its caps                |
+| `--color-slider-thumb-border` | The thumb border colour                                 |
+
+### Interactive States
+
+- **Focus**: `[data-focus-visible="true"]` on `.color-slider__thumb`
+- **Dragging**: `[data-dragging="true"]` on `.color-slider__thumb`
+- **Orientation**: `[data-orientation="horizontal"]` or `[data-orientation="vertical"]` on `.color-slider`
+- **Disabled**: `[data-disabled="true"]` on `.color-slider` and `.color-slider__thumb`
+
+## API Reference
+
+### ColorSlider
+
+| Prop          | Type                                                                | Default        | Description                                                              |
+| ------------- | ------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------ |
+| `channel`     | `"hue" \| "saturation" \| "lightness" \| "brightness" \| "red" \| "green" \| "blue" \| "alpha"` | - | The channel the slider edits; an invalid pair with `colorSpace` is corrected in development |
+| `colorSpace`  | `"rgb" \| "hsl" \| "hsb"`                                           | -              | The colour space of the channel                                          |
+| `orientation` | `"horizontal" \| "vertical"`                                        | `"horizontal"` | The slider axis                                                          |
+| `value`       | `string \| Color`                                                   | -              | The current colour (controlled)                                          |
+| `defaultValue` | `string \| Color`                                                  | -              | The initial colour (uncontrolled)                                        |
+| `onChange`    | `(value: Color) => void`                                            | -              | Called as the thumb moves                                                |
+| `onChangeEnd` | `(value: Color) => void`                                            | -              | Called when a drag or key press ends                                     |
+| `isDisabled`  | `boolean`                                                           | `false`        | Disables the slider                                                      |
+| `className`   | `string \| ((values: ColorSliderRenderProps) => string)`            | -              | Additional classes, or a function of the render props                    |
+| `...rest`     |                                                                     |                | Every React Aria `ColorSlider` prop, including `aria-label`              |
+
+### ColorSlider.Output
+
+| Prop        | Type                                                         | Default                        | Description                                           |
+| ----------- | ------------------------------------------------------------ | ------------------------------ | ----------------------------------------------------- |
+| `children`  | `ReactNode \| ((values: SliderRenderProps) => ReactNode)`    | The formatted channel value    | Replaces the value, for example `210°`                |
+| `className` | `string \| ((values: SliderRenderProps) => string)`          | -                              | Additional classes, or a function of the render props |
+| `...rest`   |                                                              |                                | Every React Aria `SliderOutput` prop                  |
+
+### ColorSlider.Track
+
+| Prop        | Type                                                                  | Default | Description                                           |
+| ----------- | --------------------------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `className` | `string \| ((values: SliderTrackRenderProps) => string)`              | -       | Additional classes, or a function of the render props |
+| `style`     | `CSSProperties \| ((values: SliderTrackRenderProps) => CSSProperties)` | -      | Inline styles, merged over the gradient               |
+| `...rest`   |                                                                       |         | Every React Aria `SliderTrack` prop                   |
+
+### ColorSlider.Thumb
+
+| Prop        | Type                                                   | Default | Description                                           |
+| ----------- | ------------------------------------------------------ | ------- | ----------------------------------------------------- |
+| `className` | `string \| ((values: ColorThumbRenderProps) => string)` | -       | Additional classes, or a function of the render props |
+| `...rest`   |                                                        |         | Every React Aria `ColorThumb` prop                    |
+
+### Render Props
+
+`children` and `className` functions on `ColorSlider` receive these values:
+
+| Prop          | Type                | Description                          |
+| ------------- | ------------------- | ------------------------------------ |
+| `orientation` | `Orientation`       | The slider axis                      |
+| `isDisabled`  | `boolean`           | Whether the slider is disabled       |
+| `state`       | `ColorSliderState`  | The state of the underlying slider   |

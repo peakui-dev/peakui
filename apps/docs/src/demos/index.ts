@@ -328,6 +328,53 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./close-button/with-custom-icon").then((m) => m.WithCustomIcon),
     file: "close-button/with-custom-icon.tsx",
   },
+  // color-area
+  "color-area-basic": {
+    loader: () => import("./color-area/basic").then((m) => m.Basic),
+    file: "color-area/basic.tsx",
+  },
+  "color-area-disabled": {
+    loader: () => import("./color-area/disabled").then((m) => m.Disabled),
+    file: "color-area/disabled.tsx",
+  },
+  "color-area-rgb-channels": {
+    loader: () => import("./color-area/rgb-channels").then((m) => m.RgbChannels),
+    file: "color-area/rgb-channels.tsx",
+  },
+  "color-area-with-dots": {
+    loader: () => import("./color-area/with-dots").then((m) => m.WithDots),
+    file: "color-area/with-dots.tsx",
+  },
+  // color-field
+  "color-field-basic": {
+    loader: () => import("./color-field/basic").then((m) => m.Basic),
+    file: "color-field/basic.tsx",
+  },
+  "color-field-invalid": {
+    loader: () => import("./color-field/invalid").then((m) => m.Invalid),
+    file: "color-field/invalid.tsx",
+  },
+  "color-field-with-swatch": {
+    loader: () => import("./color-field/with-swatch").then((m) => m.WithSwatch),
+    file: "color-field/with-swatch.tsx",
+  },
+  // color-input-group
+  "color-input-group-basic": {
+    loader: () => import("./color-input-group/basic").then((m) => m.Basic),
+    file: "color-input-group/basic.tsx",
+  },
+  "color-input-group-full-width": {
+    loader: () => import("./color-input-group/full-width").then((m) => m.FullWidth),
+    file: "color-input-group/full-width.tsx",
+  },
+  "color-input-group-secondary": {
+    loader: () => import("./color-input-group/secondary").then((m) => m.Secondary),
+    file: "color-input-group/secondary.tsx",
+  },
+  "color-input-group-with-suffix": {
+    loader: () => import("./color-input-group/with-suffix").then((m) => m.WithSuffix),
+    file: "color-input-group/with-suffix.tsx",
+  },
   // color-picker
   "color-picker-basic": {
     loader: () => import("./color-picker/basic").then((m) => m.Basic),
@@ -344,6 +391,27 @@ export const demos: Record<string, DemoItem> = {
   "color-picker-with-swatches": {
     loader: () => import("./color-picker/with-swatches").then((m) => m.WithSwatches),
     file: "color-picker/with-swatches.tsx",
+  },
+  // color-slider
+  "color-slider-alpha": {
+    loader: () => import("./color-slider/alpha").then((m) => m.Alpha),
+    file: "color-slider/alpha.tsx",
+  },
+  "color-slider-basic": {
+    loader: () => import("./color-slider/basic").then((m) => m.Basic),
+    file: "color-slider/basic.tsx",
+  },
+  "color-slider-rgb": {
+    loader: () => import("./color-slider/rgb").then((m) => m.Rgb),
+    file: "color-slider/rgb.tsx",
+  },
+  "color-slider-vertical": {
+    loader: () => import("./color-slider/vertical").then((m) => m.Vertical),
+    file: "color-slider/vertical.tsx",
+  },
+  "color-slider-without-label": {
+    loader: () => import("./color-slider/without-label").then((m) => m.WithoutLabel),
+    file: "color-slider/without-label.tsx",
   },
   // color-swatch
   "color-swatch-accessibility": {
@@ -373,6 +441,27 @@ export const demos: Record<string, DemoItem> = {
   "color-swatch-transparency": {
     loader: () => import("./color-swatch/transparency").then((m) => m.Transparency),
     file: "color-swatch/transparency.tsx",
+  },
+  // color-swatch-picker
+  "color-swatch-picker-basic": {
+    loader: () => import("./color-swatch-picker/basic").then((m) => m.Basic),
+    file: "color-swatch-picker/basic.tsx",
+  },
+  "color-swatch-picker-disabled": {
+    loader: () => import("./color-swatch-picker/disabled").then((m) => m.Disabled),
+    file: "color-swatch-picker/disabled.tsx",
+  },
+  "color-swatch-picker-shapes": {
+    loader: () => import("./color-swatch-picker/shapes").then((m) => m.Shapes),
+    file: "color-swatch-picker/shapes.tsx",
+  },
+  "color-swatch-picker-sizes": {
+    loader: () => import("./color-swatch-picker/sizes").then((m) => m.Sizes),
+    file: "color-swatch-picker/sizes.tsx",
+  },
+  "color-swatch-picker-stack": {
+    loader: () => import("./color-swatch-picker/stack").then((m) => m.Stack),
+    file: "color-swatch-picker/stack.tsx",
   },
   // description
   "description-basic": {

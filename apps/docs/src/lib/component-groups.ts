@@ -21,7 +21,15 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Colors",
-    components: ["(colors)/color-picker", "(colors)/color-swatch"],
+    components: [
+      "(colors)/color-area",
+      "(colors)/color-field",
+      "(colors)/color-input-group",
+      "(colors)/color-picker",
+      "(colors)/color-slider",
+      "(colors)/color-swatch",
+      "(colors)/color-swatch-picker",
+    ],
   },
   {
     category: "Controls",

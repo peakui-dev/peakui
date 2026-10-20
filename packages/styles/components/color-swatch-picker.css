@@ -1,0 +1,179 @@
+/*
+ * ColorSwatchPicker. Class names come from
+ * src/components/color-swatch-picker/color-swatch-picker.styles.ts; all Tailwind lives here.
+ * Checked line by line against the vendored reference styles/components/color-swatch-picker.css.
+ * What differs is listed at the end of the file, each with its reason.
+ */
+
+.color-swatch-picker {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.color-swatch-picker__item {
+  /* The item sets this from its colour; declared so the class also stands alone. */
+  --color-swatch-current: transparent;
+
+  @apply relative flex size-8 items-center justify-center rounded-2xl border-2 border-transparent outline-none no-highlight;
+
+  cursor: var(--cursor-interactive);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent);
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    border-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  &:focus-visible,
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  /* The selected ring takes the swatch colour; the swatch shrinks to leave a gap. */
+  &[data-selected="true"] {
+    border-color: var(--color-swatch-current);
+
+    .color-swatch-picker__swatch {
+      transform: scale(0.77);
+    }
+
+    @media (forced-colors: active) {
+      border-color: Highlight;
+    }
+  }
+}
+
+.color-swatch-picker__swatch {
+  @apply block size-full;
+
+  /* The radius follows the item. */
+  border-radius: inherit;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition: transform 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.color-swatch-picker__indicator {
+  @apply pointer-events-none absolute inset-0 z-10 flex items-center justify-center;
+
+  /* The check is white by default, for dark colours. */
+  & > * {
+    @apply size-1/3 text-white;
+
+    /* Scaled to nothing until the item is selected. translateZ keeps it on the GPU. */
+    transform: scale(0) translateZ(0);
+    transition: transform 150ms var(--ease-out);
+    @apply motion-reduce:transition-none;
+  }
+
+  /* Black on light colours. */
+  &[data-light-color="true"] > * {
+    @apply text-black;
+  }
+
+  .color-swatch-picker__item[data-selected="true"] & > * {
+    transform: scale(1) translateZ(0);
+  }
+}
+
+.color-swatch-picker--grid {
+  /* No styles: the flex-wrap base is the grid. */
+}
+
+.color-swatch-picker--stack {
+  @apply flex-col;
+}
+
+.color-swatch-picker--xs {
+  .color-swatch-picker__item {
+    @apply size-4 rounded-lg border;
+  }
+}
+
+.color-swatch-picker--sm {
+  .color-swatch-picker__item {
+    @apply size-6 rounded-xl border-2;
+  }
+}
+
+.color-swatch-picker--md {
+  .color-swatch-picker__item {
+    /* No styles: the default size lives in .color-swatch-picker__item. */
+  }
+}
+
+.color-swatch-picker--lg {
+  .color-swatch-picker__item {
+    @apply size-9 rounded-3xl border-3;
+  }
+}
+
+.color-swatch-picker--xl {
+  .color-swatch-picker__item {
+    @apply size-10 rounded-3xl border-3;
+  }
+}
+
+.color-swatch-picker--circle {
+  /* No styles: the radius is set per size. */
+}
+
+.color-swatch-picker--square {
+  .color-swatch-picker__item {
+    @apply rounded-xl;
+
+    .color-swatch-picker__swatch {
+      @apply rounded-lg;
+    }
+  }
+
+  &.color-swatch-picker--xs .color-swatch-picker__item {
+    @apply rounded-md;
+
+    .color-swatch-picker__swatch {
+      @apply rounded-md;
+    }
+  }
+
+  &.color-swatch-picker--sm .color-swatch-picker__item {
+    @apply rounded-lg;
+
+    .color-swatch-picker__swatch {
+      @apply rounded-lg;
+    }
+  }
+
+  &.color-swatch-picker--md .color-swatch-picker__item {
+    /* No styles: the default size lives in .color-swatch-picker__item. */
+  }
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. The selected state ends with the ring colour only. The reference also writes
+ *    box-shadow: var(--field-shadow) there, which no theme of this core declares; the shadow list
+ *    here holds the focus ring and nothing else, so focus and selection never fight over the
+ *    property.
+ *
+ * 2. Square variant rewritten as a single block with size modifiers nested under it. The reference
+ *    repeats a selected-state override per size that sets the same radius as the unselected one,
+ *    which the cascade already gives.
+ *
+ * 3. Forced colors: the selected ring takes Highlight, because the item colour is overridden there.
+ *    The reference has no forced-colors support.
+ *
+ * 4. --color-swatch-current is declared (as transparent) on the item: the reference
+ *    only consumes it (check-tokens gate 6).
+ */

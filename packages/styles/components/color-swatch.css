@@ -24,10 +24,10 @@
   background:
     linear-gradient(var(--color-swatch-current), var(--color-swatch-current)),
     repeating-conic-gradient(
-      color-mix(in oklab, var(--color-white) 93%, var(--color-black)) 0% 25%,
-      color-mix(in oklab, var(--color-white) 97%, var(--color-black)) 0% 50%
-    )
-    50% / 16px 16px;
+        color-mix(in oklab, var(--color-white) 93%, var(--color-black)) 0% 25%,
+        color-mix(in oklab, var(--color-white) 97%, var(--color-black)) 0% 50%
+      )
+      50% / 16px 16px;
 
   /*
    * Default border for visibility against similar backgrounds. The reference writes

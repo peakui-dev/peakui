@@ -1,0 +1,177 @@
+---
+title: ColorSwatchPicker
+description: A list of color swatches to choose from
+links:
+  rac: ColorSwatchPicker
+  source: color-swatch-picker/color-swatch-picker.tsx
+  styles: color-swatch-picker.css
+---
+
+## Usage
+
+```tsx
+import {ColorSwatchPicker} from "@peakui/react";
+```
+
+<ComponentPreview name="color-swatch-picker-basic" />
+
+### Anatomy
+
+```tsx
+import {ColorSwatchPicker} from "@peakui/react";
+
+export default () => (
+  <ColorSwatchPicker>
+    <ColorSwatchPicker.Item color="#0485F7">
+      <ColorSwatchPicker.Swatch />
+      <ColorSwatchPicker.Indicator />
+    </ColorSwatchPicker.Item>
+  </ColorSwatchPicker>
+);
+```
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="color-swatch-picker-sizes" />
+
+### Shapes
+
+<ComponentPreview name="color-swatch-picker-shapes" />
+
+### Stack
+
+<ComponentPreview name="color-swatch-picker-stack" />
+
+### Disabled
+
+<ComponentPreview name="color-swatch-picker-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ColorSwatchPicker className="gap-4" aria-label="Palette">
+  <ColorSwatchPicker.Item color="#0485F7">
+    <ColorSwatchPicker.Swatch />
+  </ColorSwatchPicker.Item>
+</ColorSwatchPicker>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .color-swatch-picker {
+    @apply gap-3;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorSwatchPicker component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-swatch-picker.css)):
+
+#### Base Classes [!toc]
+
+- `.color-swatch-picker` - Wrapping row of swatches
+- `.color-swatch-picker__item` - One selectable swatch
+- `.color-swatch-picker__swatch` - The coloured fill
+- `.color-swatch-picker__indicator` - Check shown when selected
+
+#### Layout Classes [!toc]
+
+- `.color-swatch-picker--grid` - Wrapping row (default)
+- `.color-swatch-picker--stack` - Single column
+
+#### Size Classes [!toc]
+
+- `.color-swatch-picker--xs` - Extra small (16px)
+- `.color-swatch-picker--sm` - Small (24px)
+- `.color-swatch-picker--md` - Medium (32px, default)
+- `.color-swatch-picker--lg` - Large (36px)
+- `.color-swatch-picker--xl` - Extra large (40px)
+
+#### Shape Classes [!toc]
+
+- `.color-swatch-picker--circle` - Circular items (default)
+- `.color-swatch-picker--square` - Rounded square items
+
+### Slots
+
+- `[data-slot="color-swatch-picker"]`
+- `[data-slot="color-swatch-picker-item"]`
+- `[data-slot="color-swatch-picker-swatch"]`
+- `[data-slot="color-swatch-picker-indicator"]`
+- `[data-slot="color-swatch-picker-checkmark"]`
+
+### CSS Variables
+
+| Variable                 | Purpose                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| `--color-swatch-current` | The item colour, set by `ColorSwatchPicker.Item`; colours the selected ring |
+
+### Interactive States
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on `.color-swatch-picker__item`
+- **Selected**: `[data-selected="true"]` on `.color-swatch-picker__item` shows the ring and the check
+- **Hover**: `:hover` on `.color-swatch-picker__swatch` enlarges the swatch
+- **Disabled**: `[data-disabled="true"]` on `.color-swatch-picker__item`
+
+## API Reference
+
+### ColorSwatchPicker
+
+| Prop           | Type                                                                | Default    | Description                                           |
+| -------------- | ------------------------------------------------------------------- | ---------- | ----------------------------------------------------- |
+| `size`         | `"xs" \| "sm" \| "md" \| "lg" \| "xl"`                              | `"md"`     | Size of the items                                     |
+| `variant`      | `"circle" \| "square"`                                              | `"circle"` | Shape of the items                                    |
+| `layout`       | `"grid" \| "stack"`                                                 | `"grid"`   | Row that wraps, or a single column                    |
+| `value`        | `string \| Color`                                                   | -          | The selected colour (controlled)                      |
+| `defaultValue` | `string \| Color`                                                   | -          | The initially selected colour (uncontrolled)          |
+| `onChange`     | `(value: Color) => void`                                            | -          | Called when the selection changes                     |
+| `className`    | `string \| ((values: ColorSwatchPickerRenderProps) => string)`      | -          | Additional classes, or a function of the render props |
+| `...rest`      |                                                                     |            | Every React Aria `ColorSwatchPicker` prop, including `aria-label` |
+
+### ColorSwatchPicker.Item
+
+| Prop        | Type                                                                      | Default | Description                                           |
+| ----------- | ------------------------------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `color`     | `string \| Color`                                                         | -       | The colour of the item                                |
+| `isDisabled` | `boolean`                                                                | `false` | Disables the item                                     |
+| `className` | `string \| ((values: ColorSwatchPickerItemRenderProps) => string)`        | -       | Additional classes, or a function of the render props |
+| `style`     | `CSSProperties \| ((values: ColorSwatchPickerItemRenderProps) => CSSProperties)` | - | Inline styles, merged over the item colour       |
+| `...rest`   |                                                                           |         | Every React Aria `ColorSwatchPickerItem` prop         |
+
+### ColorSwatchPicker.Swatch
+
+| Prop        | Type                                                  | Default | Description                                           |
+| ----------- | ----------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `className` | `string \| ((values: ColorSwatchRenderProps) => string)` | -    | Additional classes, or a function of the render props |
+| `...rest`   |                                                       |         | Every React Aria `ColorSwatch` prop                   |
+
+### ColorSwatchPicker.Indicator
+
+| Prop        | Type                                                                          | Default       | Description                                                  |
+| ----------- | ----------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------ |
+| `children`  | `ReactNode \| ((values: ColorSwatchPickerItemRenderProps) => ReactNode)`      | A check mark  | Replaces the check; black on light colours, white on dark ones |
+| `render`    | `DOMRenderFunction<E, undefined>`                                             | -             | Replaces the rendered element; `E` defaults to `"span"`      |
+| `className` | `string`                                                                      | -             | Additional classes                                           |
+| `...rest`   |                                                                               |               | Every attribute of the rendered element                      |
+
+### Render Props
+
+`children`, `className` and `style` functions on `ColorSwatchPicker.Item` receive these values:
+
+| Prop           | Type      | Description                         |
+| -------------- | --------- | ----------------------------------- |
+| `color`        | `Color`   | The colour of the item              |
+| `isSelected`   | `boolean` | Whether the item is selected        |
+| `isDisabled`   | `boolean` | Whether the item is disabled        |
+| `isFocusVisible` | `boolean` | Whether the item has keyboard focus |

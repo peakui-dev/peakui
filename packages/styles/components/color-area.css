@@ -1,0 +1,106 @@
+/*
+ * ColorArea. Class names come from src/components/color-area/color-area.styles.ts; all Tailwind
+ * lives here. Checked line by line against the vendored reference
+ * styles/components/color-area.css. What differs is listed at the end of the file, each with its
+ * reason.
+ */
+
+.color-area {
+  /* Theming seams: the ring on the area, and the border of the thumb. */
+  --color-area-ring: color-mix(in oklab, var(--color-black) 10%, transparent);
+  --color-area-thumb-border: var(--color-white);
+  /*
+   * RAC computes the gradient and the thumb colour per render and the component forwards them
+   * inline. Declared here so the class also stands alone: an undeclared custom property would
+   * drop the whole background declaration (check-tokens gate 6).
+   */
+  --color-area-background: transparent;
+
+  @apply relative w-full max-w-56 shrink-0 rounded-2xl no-highlight;
+
+  aspect-ratio: 1 / 1;
+  background: var(--color-area-background);
+  /* Inset ring so the area stays visible against a similar surface. */
+  box-shadow: inset 0 0 0 1px var(--color-area-ring);
+
+  &[data-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  @media (forced-colors: active) {
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+}
+
+/* A faint dot grid over the gradient, for choosing by eye on saturated colours. */
+.color-area--show-dots {
+  &::after {
+    content: "";
+
+    @apply pointer-events-none absolute inset-0 rounded-[inherit];
+
+    background-image: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-white) 20%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 8px 8px;
+  }
+}
+
+.color-area__thumb {
+  --color-area-thumb-color: transparent;
+
+  @apply size-4 rounded-xl will-change-[width,height];
+
+  background-color: var(--color-area-thumb-color);
+  border: 3px solid var(--color-area-thumb-border);
+  box-shadow:
+    var(--focus-ring, 0 0 0 0 transparent),
+    0 0 0 1px var(--color-area-ring),
+    inset 0 0 0 1px var(--color-area-ring);
+
+  /* CRITICAL: motion-reduce AFTER transition, or the transition wins on specificity. */
+  transition:
+    width 150ms var(--ease-out),
+    height 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  &:focus-visible,
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &[data-dragging="true"] {
+    @apply size-5;
+  }
+
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  /* Shadows are not drawn in forced colors, so the border carries the edge. */
+  @media (forced-colors: active) {
+    border-color: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. No raw colours (check-tokens gate 5): rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.2) and
+ *    white are rebuilt from --color-black and --color-white through color-mix, and exposed as
+ *    --color-area-ring and --color-area-thumb-border.
+ *
+ * 2. --color-area-background and --color-area-thumb-color are declared on their classes: the
+ *    reference only consumes them (check-tokens gate 6).
+ *
+ * 3. The thumb composes var(--focus-ring) into its shadow list, like the other focusable controls
+ *    of the core, so the ring shares one transition with the shadow instead of replacing it.
+ *
+ * 4. forced-colors blocks: the reference has none
+ *    (docs/superpowers/specs/2026-10-01-design-tokens-design.md).
+ */

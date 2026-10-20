@@ -1,0 +1,141 @@
+---
+title: ColorArea
+description: Two-channel color selection on a gradient area
+links:
+  rac: ColorArea
+  source: color-area/color-area.tsx
+  styles: color-area.css
+---
+
+## Usage
+
+```tsx
+import {ColorArea} from "@peakui/react";
+```
+
+<ComponentPreview name="color-area-basic" />
+
+### Anatomy
+
+```tsx
+import {ColorArea} from "@peakui/react";
+
+export default () => (
+  <ColorArea colorSpace="hsb" xChannel="saturation" yChannel="brightness">
+    <ColorArea.Thumb />
+  </ColorArea>
+);
+```
+
+## Examples
+
+### With Dots
+
+<ComponentPreview name="color-area-with-dots" />
+
+### RGB Channels
+
+<ComponentPreview name="color-area-rgb-channels" />
+
+### Disabled
+
+<ComponentPreview name="color-area-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ColorArea className="max-w-full rounded-lg" xChannel="saturation" yChannel="brightness">
+  <ColorArea.Thumb />
+</ColorArea>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .color-area {
+    @apply max-w-64;
+  }
+
+  .color-area__thumb {
+    @apply size-5;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorArea component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-area.css)):
+
+#### Base Classes [!toc]
+
+- `.color-area` - Gradient area, square, up to 224px wide
+- `.color-area__thumb` - Draggable thumb with a white border
+
+#### Modifier Classes [!toc]
+
+- `.color-area--show-dots` - Dot grid over the gradient
+
+### Slots
+
+- `[data-slot="color-area"]`
+- `[data-slot="color-area-thumb"]`
+
+### CSS Variables
+
+| Variable                    | Purpose                                                  |
+| --------------------------- | -------------------------------------------------------- |
+| `--color-area-background`   | The gradient, set by the component from the current value |
+| `--color-area-thumb-color`  | The thumb fill, set by the component from the current value |
+| `--color-area-ring`         | The inset ring on the area and the thumb                 |
+| `--color-area-thumb-border` | The thumb border colour                                  |
+
+### Interactive States
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on `.color-area__thumb`
+- **Dragging**: `[data-dragging="true"]` on `.color-area__thumb` enlarges the thumb
+- **Disabled**: `[data-disabled="true"]` on `.color-area` and `.color-area__thumb`
+
+## API Reference
+
+### ColorArea
+
+| Prop         | Type                                                    | Default    | Description                                                      |
+| ------------ | ------------------------------------------------------- | ---------- | ---------------------------------------------------------------- |
+| `showDots`   | `boolean`                                               | `false`    | Overlays a dot grid on the gradient                              |
+| `xChannel`   | `ColorChannel`                                          | -          | The channel on the horizontal axis                               |
+| `yChannel`   | `ColorChannel`                                          | -          | The channel on the vertical axis                                 |
+| `colorSpace` | `"rgb" \| "hsl" \| "hsb"`                               | -          | The color space of the area                                      |
+| `value`      | `string \| Color`                                       | -          | The current color (controlled)                                   |
+| `defaultValue` | `string \| Color`                                     | -          | The initial color (uncontrolled)                                 |
+| `onChange`   | `(value: Color) => void`                                | -          | Called as the thumb moves                                        |
+| `onChangeEnd` | `(value: Color) => void`                               | -          | Called when a drag or key press ends                             |
+| `isDisabled` | `boolean`                                               | `false`    | Disables the area                                                |
+| `className`  | `string \| ((values: ColorAreaRenderProps) => string)`  | -          | Additional classes, or a function of the render props            |
+| `style`      | `CSSProperties \| ((values: ColorAreaRenderProps) => CSSProperties)` | - | Inline styles, or a function of the render props            |
+| `...rest`    |                                                         |            | Every React Aria `ColorArea` prop, including `aria-label`        |
+
+### ColorArea.Thumb
+
+| Prop        | Type                                                   | Default | Description                                           |
+| ----------- | ------------------------------------------------------ | ------- | ----------------------------------------------------- |
+| `className` | `string \| ((values: ColorThumbRenderProps) => string)` | -       | Additional classes, or a function of the render props |
+| `style`     | `CSSProperties \| ((values: ColorThumbRenderProps) => CSSProperties)` | - | Inline styles, or a function of the render props |
+| `...rest`   |                                                        |         | Every React Aria `ColorThumb` prop                    |
+
+### Render Props
+
+`className` and `style` functions on `ColorArea.Thumb` receive these values:
+
+| Prop         | Type      | Description                              |
+| ------------ | --------- | ---------------------------------------- |
+| `isDragging` | `boolean` | Whether the thumb is being dragged       |
+| `isDisabled` | `boolean` | Whether the thumb is disabled            |
+| `isFocusVisible` | `boolean` | Whether the thumb has keyboard focus |
+| `defaultStyle` | `CSSProperties` | The position and colour RAC computes |

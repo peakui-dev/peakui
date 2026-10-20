@@ -1,0 +1,152 @@
+/*
+ * ColorInputGroup. Class names come from
+ * src/components/color-input-group/color-input-group.styles.ts.
+ *
+ * The shell carries the fill, border, radius and focus ring; the control inside is transparent and
+ * borderless, so focus is drawn once. Built on the same custom properties and utilities as
+ * .input-group, and checked against the vendored reference
+ * styles/components/color-input-group.css. What differs is listed at the end of the file.
+ */
+
+.color-input-group {
+  --color-input-group-bg: var(--color-field);
+  --color-input-group-bg-hover: var(--color-field-hover);
+  --color-input-group-bg-focus: var(--color-field-focus);
+  --color-input-group-fg: var(--color-field-foreground);
+  --color-input-group-placeholder: var(--color-field-placeholder);
+  --color-input-group-border: var(--color-field-border);
+  --color-input-group-border-hover: var(--color-field-border-hover);
+  --color-input-group-border-focus: var(--color-field-border-focus);
+  --color-input-group-radius: var(--radius-field);
+  --color-input-group-shadow: var(--shadow-field);
+
+  @apply inline-flex items-center outline-none;
+  /* The prefix touches the edge of the shell, so its outer corners need a concentric radius. */
+  @apply concentric-host;
+
+  --concentric-radius: var(--color-input-group-radius);
+  --concentric-border: var(--border-width-field);
+  /* Same line as .input and .button: 40px on narrow viewports, 36px from md. */
+  @apply min-h-10 md:min-h-9;
+  @apply text-sm;
+
+  border: var(--border-width-field) solid var(--color-input-group-border);
+  border-radius: var(--color-input-group-radius);
+  background-color: var(--color-input-group-bg);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent), var(--color-input-group-shadow);
+  color: var(--color-input-group-fg);
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    background-color 150ms var(--ease-smooth),
+    border-color 150ms var(--ease-smooth),
+    box-shadow 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+
+  @media (hover: hover) {
+    &:hover:not(:focus-within) {
+      background-color: var(--color-input-group-bg-hover);
+      border-color: var(--color-input-group-border-hover);
+    }
+  }
+
+  &[data-hovered]:not(:focus-within):not([data-focus-within]) {
+    background-color: var(--color-input-group-bg-hover);
+    border-color: var(--color-input-group-border-hover);
+  }
+
+  /* The ring sits on the shell, not on the control. :has() is the form that needs no React. */
+  &:has([data-slot="color-input-group-input"]:focus),
+  &:has([data-slot="color-input-group-input"][data-focused]) {
+    @apply status-focused-field;
+    background-color: var(--color-input-group-bg-focus);
+    border-color: var(--color-input-group-border-focus);
+  }
+
+  &[aria-invalid="true"],
+  &[data-invalid] {
+    @apply status-invalid-field;
+    background-color: var(--color-input-group-bg-focus);
+  }
+
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /* The theme leaves --border-width-field at 0px; forced colors need a visible edge. */
+  @media (forced-colors: active) {
+    border-width: 1px;
+    border-color: ButtonBorder;
+  }
+}
+
+.color-input-group__input {
+  @apply min-w-0 flex-1 appearance-none border-0 bg-transparent px-3 py-2 shadow-none outline-none;
+  /* 16px on narrow viewports: Safari on iOS zooms the page on focus into anything smaller. */
+  @apply text-base sm:text-sm;
+  @apply rounded-none;
+
+  color: inherit;
+
+  &::placeholder {
+    color: var(--color-input-group-placeholder);
+  }
+
+  /* Focus is drawn by the shell. */
+  &:focus,
+  &:focus-visible,
+  &[data-focused],
+  &[data-focus-visible] {
+    @apply outline-none;
+  }
+
+  /* Next to a slot the control gives up its own inner padding. */
+  .color-input-group:has([data-slot="color-input-group-prefix"]) & {
+    @apply ps-0;
+  }
+
+  .color-input-group:has([data-slot="color-input-group-suffix"]) & {
+    @apply pe-0;
+  }
+}
+
+.color-input-group__prefix,
+.color-input-group__suffix {
+  @apply flex h-full shrink-0 items-center justify-center bg-transparent px-3;
+  @apply concentric-inner;
+
+  color: var(--color-input-group-placeholder);
+}
+
+.color-input-group--primary {
+  /* No styles: the default variant lives in .color-input-group. */
+}
+
+/* A group on a surface: neutral fill, no shadow. */
+.color-input-group--secondary {
+  --color-input-group-bg: var(--color-default);
+  --color-input-group-bg-hover: var(--color-default-hover);
+  --color-input-group-bg-focus: var(--color-default);
+  /* A transparent shadow, not none: none cannot be a member of the shadow list beside the ring. */
+  --color-input-group-shadow: 0 0 0 0 transparent;
+}
+
+.color-input-group--full-width {
+  @apply flex w-full;
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. Built on the shell of .input-group (custom properties, concentric geometry, the focus ring on
+ *    the shell through --focus-ring) instead of the reference overflow-hidden shell:
+ *    overflow-hidden clips the focus ring of an interactive suffix (SC 2.4.11).
+ *
+ * 2. min-h-10 md:min-h-9 instead of a fixed h-9: one line with .input, .button and .input-group.
+ *
+ * 3. The reference paints the invalid border with --color-field-border-invalid, which no theme
+ *    declares; status-invalid-field supplies it, as in .input-group.
+ *
+ * 4. forced-colors block: the reference has none.
+ */

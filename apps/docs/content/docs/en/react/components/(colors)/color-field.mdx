@@ -1,0 +1,99 @@
+---
+title: ColorField
+description: Text field for editing a hex color
+links:
+  rac: ColorField
+  source: color-field/color-field.tsx
+  styles: color-field.css
+---
+
+## Usage
+
+```tsx
+import {ColorField, ColorInputGroup, Label} from "@peakui/react";
+```
+
+<ComponentPreview name="color-field-basic" />
+
+## Examples
+
+### With Swatch
+
+<ComponentPreview name="color-field-with-swatch" />
+
+### Invalid
+
+<ComponentPreview name="color-field-invalid" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ColorField className="w-48" defaultValue="#0485F7">
+  <Label>Colour</Label>
+  <ColorInputGroup>
+    <ColorInputGroup.Input />
+  </ColorInputGroup>
+</ColorField>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .color-field {
+    @apply gap-2;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorField component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-field.css)):
+
+#### Base Classes [!toc]
+
+- `.color-field` - Column of label, group and messages
+
+#### Modifier Classes [!toc]
+
+- `.color-field--full-width` - Fills the container width
+
+### Slots
+
+- `[data-slot="color-field"]`
+
+### Interactive States
+
+- **Invalid**: `[data-invalid="true"]` or `[aria-invalid="true"]` hides the description
+
+## API Reference
+
+### ColorField
+
+| Prop           | Type                                                    | Default | Description                                           |
+| -------------- | ------------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `fullWidth`    | `boolean`                                               | `false` | Makes the field fill its container                    |
+| `value`        | `string \| Color \| null`                               | -       | The current color (controlled)                        |
+| `defaultValue` | `string \| Color`                                       | -       | The initial color (uncontrolled)                      |
+| `onChange`     | `(color: Color \| null) => void`                        | -       | Called when a typed value is committed                |
+| `channel`      | `ColorChannel`                                          | -       | Edit one channel instead of the whole hex color       |
+| `isDisabled`   | `boolean`                                               | `false` | Disables the field                                    |
+| `isInvalid`    | `boolean`                                               | -       | Marks the field invalid                               |
+| `isRequired`   | `boolean`                                               | `false` | Requires a value; sets `data-required`                |
+| `className`    | `string \| ((values: ColorFieldRenderProps) => string)` | -       | Additional classes, or a function of the render props |
+| `...rest`      |                                                         |         | Every React Aria `ColorField` prop                    |
+
+### Render Props
+
+`className` and `children` functions receive these values:
+
+| Prop         | Type      | Description                      |
+| ------------ | --------- | -------------------------------- |
+| `isDisabled` | `boolean` | Whether the field is disabled    |
+| `isInvalid`  | `boolean` | Whether the field is invalid     |

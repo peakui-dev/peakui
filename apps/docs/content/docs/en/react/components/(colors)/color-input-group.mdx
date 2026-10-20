@@ -1,0 +1,166 @@
+---
+title: ColorInputGroup
+description: Hex input with a swatch prefix or suffix
+links:
+  rac: Group
+  source: color-input-group/color-input-group.tsx
+  styles: color-input-group.css
+---
+
+## Usage
+
+```tsx
+import {ColorField, ColorInputGroup, ColorSwatch} from "@peakui/react";
+```
+
+<ComponentPreview name="color-input-group-basic" />
+
+### Anatomy
+
+```tsx
+import {ColorField, ColorInputGroup, ColorSwatch} from "@peakui/react";
+
+export default () => (
+  <ColorField aria-label="Colour" defaultValue="#0485F7">
+    <ColorInputGroup>
+      <ColorInputGroup.Prefix>
+        <ColorSwatch size="xs" />
+      </ColorInputGroup.Prefix>
+      <ColorInputGroup.Input />
+      <ColorInputGroup.Suffix>hex</ColorInputGroup.Suffix>
+    </ColorInputGroup>
+  </ColorField>
+);
+```
+
+## Examples
+
+### Secondary
+
+<ComponentPreview name="color-input-group-secondary" />
+
+### With Suffix
+
+<ComponentPreview name="color-input-group-with-suffix" />
+
+### Full Width
+
+<ComponentPreview name="color-input-group-full-width" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ColorInputGroup className="w-40">
+  <ColorInputGroup.Input />
+</ColorInputGroup>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .color-input-group {
+    --color-input-group-radius: var(--radius-lg);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ColorInputGroup component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/color-input-group.css)):
+
+#### Base Classes [!toc]
+
+- `.color-input-group` - Shell with fill, border and focus ring
+- `.color-input-group__input` - Borderless, transparent control
+- `.color-input-group__prefix` - Slot before the control
+- `.color-input-group__suffix` - Slot after the control
+
+#### Variant Classes [!toc]
+
+- `.color-input-group--primary` - Field fill with shadow (default)
+- `.color-input-group--secondary` - Neutral fill without shadow
+
+#### Modifier Classes [!toc]
+
+- `.color-input-group--full-width` - Fills the container width
+
+### Slots
+
+- `[data-slot="color-input-group"]`
+- `[data-slot="color-input-group-input"]`
+- `[data-slot="color-input-group-prefix"]`
+- `[data-slot="color-input-group-suffix"]`
+
+### CSS Variables
+
+| Variable                              | Purpose                          |
+| ------------------------------------- | -------------------------------- |
+| `--color-input-group-bg`              | Fill                             |
+| `--color-input-group-bg-hover`        | Fill on hover                    |
+| `--color-input-group-bg-focus`        | Fill on focus                    |
+| `--color-input-group-fg`              | Text colour                      |
+| `--color-input-group-placeholder`     | Placeholder and slot colour      |
+| `--color-input-group-border`          | Border colour                    |
+| `--color-input-group-border-hover`    | Border colour on hover           |
+| `--color-input-group-border-focus`    | Border colour on focus           |
+| `--color-input-group-radius`          | Corner radius                    |
+| `--color-input-group-shadow`          | Field shadow                     |
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered]` on `.color-input-group`
+- **Focus**: the shell shows the ring while `.color-input-group__input` has `:focus` or `[data-focused]`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on `.color-input-group`
+- **Disabled**: `[data-disabled]` or `[aria-disabled="true"]` on `.color-input-group`
+
+## API Reference
+
+### ColorInputGroup
+
+| Prop        | Type                                              | Default     | Description                                           |
+| ----------- | ------------------------------------------------- | ----------- | ----------------------------------------------------- |
+| `variant`   | `"primary" \| "secondary"`                        | `"primary"` | Visual style of the group                             |
+| `fullWidth` | `boolean`                                         | `false`     | Makes the group fill its container                    |
+| `className` | `string \| ((values: GroupRenderProps) => string)` | -          | Additional classes, or a function of the render props |
+| `...rest`   |                                                   |             | Every React Aria `Group` prop                         |
+
+### ColorInputGroup.Prefix
+
+| Prop        | Type                                                                | Default | Description                                                          |
+| ----------- | ------------------------------------------------------------------- | ------- | -------------------------------------------------------------------- |
+| `render`    | `DOMRenderFunction<E, undefined>`                                   | -       | Replaces the rendered element; `E` defaults to `"div"`               |
+| `className` | `string`                                                            | -       | Additional classes                                                   |
+| `...rest`   |                                                                     |         | Every attribute of the rendered element                              |
+
+### ColorInputGroup.Input
+
+| Prop        | Type                                              | Default | Description                                           |
+| ----------- | ------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `className` | `string \| ((values: InputRenderProps) => string)` | -      | Additional classes, or a function of the render props |
+| `...rest`   |                                                   |         | Every React Aria `Input` prop                         |
+
+### ColorInputGroup.Suffix
+
+| Prop        | Type                              | Default | Description                                            |
+| ----------- | --------------------------------- | ------- | ------------------------------------------------------ |
+| `render`    | `DOMRenderFunction<E, undefined>` | -       | Replaces the rendered element; `E` defaults to `"div"` |
+| `className` | `string`                          | -       | Additional classes                                     |
+| `...rest`   |                                   |         | Every attribute of the rendered element                |
+
+### Render Props
+
+`className` on `ColorInputGroup` receives these values:
+
+| Prop            | Type      | Description                                 |
+| --------------- | --------- | ------------------------------------------- |
+| `isHovered`     | `boolean` | Whether the group is hovered                |
+| `isFocusWithin` | `boolean` | Whether focus is inside the group           |
+| `isDisabled`    | `boolean` | Whether the group is disabled               |
+| `isInvalid`     | `boolean` | Whether the group is invalid                |

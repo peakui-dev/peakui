@@ -1,0 +1,283 @@
+/*
+ * ColorSlider. Class names come from src/components/color-slider/color-slider.styles.ts; all
+ * Tailwind lives here. Checked line by line against the vendored reference
+ * styles/components/color-slider.css. What differs is listed at the end of the file, each with its
+ * reason.
+ */
+
+.color-slider {
+  /* Theming seams: the ring on the track and its caps, and the transparency checkerboard. */
+  --color-slider-ring: color-mix(in oklab, var(--color-black) 10%, transparent);
+  --color-slider-thumb-border: var(--color-white);
+  /*
+   * The checkerboard shows through a translucent track. The reference writes #efefef and #f7f7f7;
+   * component CSS may not carry raw colours (check-tokens gate 5), so the same two light greys
+   * come from the theme white and black through oklab mixes. The ColorSlider.Track part layers
+   * RAC gradient over this value inline.
+   */
+  --color-slider-checker: repeating-conic-gradient(
+      color-mix(in oklab, var(--color-white) 93%, var(--color-black)) 0% 25%,
+      color-mix(in oklab, var(--color-white) 97%, var(--color-black)) 0% 50%
+    )
+    50% / 16px 16px;
+  /* Set by ColorSlider.Track from the channel range; declared so the caps stand alone. */
+  --track-start-color: transparent;
+  --track-end-color: transparent;
+
+  @apply grid w-full gap-1;
+
+  grid-template-areas:
+    "label output"
+    "track track";
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+
+  /* Neither label nor output: collapse to the track alone. */
+  &:not(:has([data-slot="label"])):not(:has(.color-slider__output)) {
+    grid-template-areas: "track";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 0;
+  }
+
+  /* A label and no output. */
+  &:has([data-slot="label"]):not(:has(.color-slider__output)) {
+    grid-template-areas:
+      "label"
+      "track";
+    grid-template-columns: 1fr;
+  }
+
+  /* An output and no label. */
+  &:not(:has([data-slot="label"])):has(.color-slider__output) {
+    grid-template-areas:
+      "output"
+      "track";
+    grid-template-columns: 1fr;
+
+    .color-slider__output {
+      justify-self: end;
+    }
+  }
+
+  [data-slot="label"] {
+    @apply w-fit text-sm font-medium;
+
+    grid-area: label;
+  }
+
+  .color-slider__output {
+    @apply text-sm font-medium tabular-nums;
+
+    grid-area: output;
+  }
+
+  .color-slider__track {
+    @apply relative rounded-2xl;
+
+    grid-area: track;
+
+    /* Edge caps: the track ends under the thumb, so the gradient is extended past both ends. */
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      pointer-events: none;
+    }
+  }
+
+  .color-slider__thumb {
+    @apply absolute flex cursor-grab items-center justify-center rounded-2xl border-3 no-highlight;
+    @apply shadow-overlay;
+
+    border-color: var(--color-slider-thumb-border);
+    /* Above the edge caps. */
+    z-index: 1;
+
+    /* CRITICAL: motion-reduce AFTER transition. */
+    transition:
+      transform 250ms var(--ease-out),
+      box-shadow 150ms var(--ease-out);
+    @apply motion-reduce:transition-none;
+
+    &[data-dragging="true"] {
+      @apply cursor-grabbing;
+    }
+
+    &[data-focus-visible="true"] {
+      @apply z-10 status-focused;
+    }
+
+    &[data-disabled="true"] {
+      @apply cursor-default bg-default;
+    }
+
+    @media (forced-colors: active) {
+      border-color: CanvasText;
+      forced-color-adjust: none;
+    }
+  }
+
+  &:disabled,
+  &[data-disabled="true"],
+  &[aria-disabled="true"] {
+    @apply status-disabled;
+
+    [data-slot="label"] {
+      @apply opacity-100;
+    }
+  }
+
+  &[data-orientation="horizontal"] {
+    flex-direction: column;
+
+    .color-slider__track {
+      @apply h-5 justify-self-center rounded-none;
+
+      /* The track is inset by half a thumb on each side; the caps fill the gap. */
+      width: calc(100% - 1.25rem);
+      box-shadow:
+        inset 0 1px 0 0 var(--color-slider-ring),
+        inset 0 -1px 0 0 var(--color-slider-ring);
+
+      &::before,
+      &::after {
+        @apply top-0 h-full;
+
+        /* Half the thumb width plus a 2px gap. */
+        width: 0.625rem;
+      }
+
+      &::before {
+        @apply rounded-ss-2xl rounded-es-2xl;
+
+        inset-inline-start: -0.625rem;
+        box-shadow:
+          inset 1px 0 0 0 var(--color-slider-ring),
+          inset 0 1px 0 0 var(--color-slider-ring),
+          inset 0 -1px 0 0 var(--color-slider-ring);
+        background: linear-gradient(var(--track-start-color)), var(--color-slider-checker);
+      }
+
+      &::after {
+        @apply rounded-se-2xl rounded-ee-2xl;
+
+        inset-inline-end: -0.625rem;
+        box-shadow:
+          inset -1px 0 0 0 var(--color-slider-ring),
+          inset 0 1px 0 0 var(--color-slider-ring),
+          inset 0 -1px 0 0 var(--color-slider-ring);
+        background: linear-gradient(var(--track-end-color)), var(--color-slider-checker);
+      }
+    }
+
+    .color-slider__thumb {
+      @apply top-1/2 size-4;
+    }
+  }
+
+  &[data-orientation="vertical"] {
+    @apply h-full gap-2;
+
+    flex-direction: row;
+    grid-template-areas:
+      "output"
+      "track"
+      "label";
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: center;
+
+    &:not(:has([data-slot="label"])):not(:has(.color-slider__output)) {
+      grid-template-areas: "track";
+      grid-template-rows: 1fr;
+      gap: 0;
+    }
+
+    &:has([data-slot="label"]):not(:has(.color-slider__output)) {
+      grid-template-areas:
+        "track"
+        "label";
+      grid-template-rows: 1fr auto;
+    }
+
+    &:not(:has([data-slot="label"])):has(.color-slider__output) {
+      grid-template-areas:
+        "output"
+        "track";
+      grid-template-rows: auto 1fr;
+    }
+
+    .color-slider__output {
+      text-align: center;
+    }
+
+    [data-slot="label"] {
+      text-align: center;
+    }
+
+    .color-slider__track {
+      @apply w-5 justify-self-center rounded-none;
+
+      height: calc(100% - 1.25rem);
+      box-shadow:
+        inset 1px 0 0 0 var(--color-slider-ring),
+        inset -1px 0 0 0 var(--color-slider-ring);
+
+      &::before,
+      &::after {
+        @apply start-0 w-full;
+
+        /* Half the thumb height plus a 2px gap. */
+        height: 0.625rem;
+      }
+
+      &::before {
+        bottom: -0.625rem;
+        border-end-start-radius: 999px;
+        border-end-end-radius: 999px;
+        box-shadow:
+          inset 1px 0 0 0 var(--color-slider-ring),
+          inset -1px 0 0 0 var(--color-slider-ring),
+          inset 0 -1px 0 0 var(--color-slider-ring);
+        background: linear-gradient(var(--track-start-color)), var(--color-slider-checker);
+      }
+
+      &::after {
+        top: -0.625rem;
+        border-start-start-radius: 999px;
+        border-start-end-radius: 999px;
+        box-shadow:
+          inset 1px 0 0 0 var(--color-slider-ring),
+          inset -1px 0 0 0 var(--color-slider-ring),
+          inset 0 1px 0 0 var(--color-slider-ring);
+        background: linear-gradient(var(--track-end-color)), var(--color-slider-checker);
+      }
+    }
+
+    .color-slider__thumb {
+      /* RAC applies a physical translateX(-50%), so keep left-1/2 for RTL correctness. */
+      @apply left-1/2 size-4;
+    }
+  }
+}
+
+/*
+ * ---------- What differs from the reference, and why ----------
+ *
+ * 1. No raw colours (check-tokens gate 5): the checkerboard hexes, rgba(0, 0, 0, 0.1) and the
+ *    white thumb border are rebuilt from --color-black and --color-white, and exposed as
+ *    --color-slider-checker, --color-slider-ring and --color-slider-thumb-border. The Track part
+ *    reads --color-slider-checker instead of repeating the hexes inline.
+ *
+ * 2. Both end caps paint through the same linear-gradient plus checkerboard stack. The reference
+ *    gives the end cap a plain background-color, so a translucent end colour (the alpha channel)
+ *    shows no checkerboard under it.
+ *
+ * 3. --track-start-color and --track-end-color are declared (as transparent): the reference only
+ *    consumes them behind var() fallbacks.
+ *
+ * 4. forced-colors block on the thumb: the reference has none.
+ */

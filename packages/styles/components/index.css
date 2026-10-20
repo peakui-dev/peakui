@@ -15,7 +15,12 @@
 @import "./checkbox.css";
 @import "./chip.css";
 @import "./close-button.css";
+@import "./color-area.css";
+@import "./color-field.css";
+@import "./color-input-group.css";
 @import "./color-picker.css";
+@import "./color-slider.css";
+@import "./color-swatch-picker.css";
 @import "./color-swatch.css";
 @import "./description.css";
 @import "./disclosure-group.css";
