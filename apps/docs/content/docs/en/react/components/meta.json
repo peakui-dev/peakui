@@ -26,6 +26,7 @@
     "(colors)/color-slider",
     "(colors)/color-swatch",
     "(colors)/color-swatch-picker",
+    "(date-and-time)/date-field",
     "(forms)/description",
     "(navigation)/disclosure",
     "(navigation)/disclosure-group",

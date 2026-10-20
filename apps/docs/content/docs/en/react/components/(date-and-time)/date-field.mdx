@@ -1,0 +1,255 @@
+---
+title: DateField
+description: Segmented field for typing a date
+links:
+  rac: DateField
+  source: date-field/date-field.tsx
+  styles: date-field.css
+---
+
+## Usage
+
+```tsx
+import {DateField, Label} from "@peakui/react";
+```
+
+<ComponentPreview name="date-field-basic" />
+
+### Anatomy
+
+```tsx
+import {DateField, Description, FieldError, Label} from "@peakui/react";
+
+export default () => (
+  <DateField>
+    <Label />
+    <DateField.Group>
+      <DateField.Prefix />
+      <DateField.InputContainer>
+        <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+      </DateField.InputContainer>
+      <DateField.Suffix />
+    </DateField.Group>
+    <Description />
+    <FieldError />
+  </DateField>
+);
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="date-field-variants" />
+
+### With Prefix and Suffix
+
+<ComponentPreview name="date-field-with-prefix-and-suffix" />
+
+### With Description
+
+<ComponentPreview name="date-field-with-description" />
+
+### Required
+
+<ComponentPreview name="date-field-required" />
+
+### Disabled
+
+<ComponentPreview name="date-field-disabled" />
+
+### Full Width
+
+<ComponentPreview name="date-field-full-width" />
+
+### Invalid
+
+<ComponentPreview name="date-field-invalid" />
+
+### Granularity
+
+<ComponentPreview name="date-field-granularity" />
+
+### Controlled
+
+<ComponentPreview name="date-field-controlled" />
+
+### With Validation
+
+<ComponentPreview name="date-field-with-validation" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<DateField className="w-64">
+  <Label>Date</Label>
+  <DateField.Group className="rounded-full">
+    <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+  </DateField.Group>
+</DateField>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .date-input-group {
+    --date-input-group-radius: var(--radius-lg);
+  }
+
+  .date-input-group__segment {
+    @apply font-mono;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The DateField component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/date-field.css) and [group styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/date-input-group.css)):
+
+#### Field Classes [!toc]
+
+- `.date-field` - Column of label, group and messages
+- `.date-field--full-width` - Fills the container width
+
+#### Group Classes [!toc]
+
+- `.date-input-group` - Shell with fill, border and focus ring
+- `.date-input-group__input` - Borderless, transparent segmented input
+- `.date-input-group__input-container` - Horizontal scroll area around the input
+- `.date-input-group__segment` - One editable part of the date
+- `.date-input-group__prefix` - Slot before the input
+- `.date-input-group__suffix` - Slot after the input
+
+#### Variant Classes [!toc]
+
+- `.date-input-group--primary` - Field fill with shadow (default)
+- `.date-input-group--secondary` - Neutral fill without shadow
+
+#### Modifier Classes [!toc]
+
+- `.date-input-group--full-width` - Fills the container width
+
+### Slots
+
+- `[data-slot="date-field"]`
+- `[data-slot="date-input-group"]`
+- `[data-slot="date-input-group-input"]`
+- `[data-slot="date-input-group-input-container"]`
+- `[data-slot="date-input-group-segment"]`
+- `[data-slot="date-input-group-prefix"]`
+- `[data-slot="date-input-group-suffix"]`
+
+### CSS Variables
+
+| Variable                              | Purpose                     |
+| ------------------------------------- | --------------------------- |
+| `--date-input-group-bg`               | Fill                        |
+| `--date-input-group-bg-hover`         | Fill on hover               |
+| `--date-input-group-bg-focus`         | Fill on focus               |
+| `--date-input-group-fg`               | Text colour                 |
+| `--date-input-group-placeholder`      | Placeholder and slot colour |
+| `--date-input-group-border`           | Border colour               |
+| `--date-input-group-border-hover`     | Border colour on hover      |
+| `--date-input-group-border-focus`     | Border colour on focus      |
+| `--date-input-group-radius`           | Corner radius               |
+| `--date-input-group-shadow`           | Field shadow                |
+
+### Interactive States
+
+- **Hover**: `:hover` or `[data-hovered]` on `.date-input-group`
+- **Focus**: `:focus-within` or `[data-focus-within]` on `.date-input-group`; `:focus` or `[data-focused]` on `.date-input-group__segment`
+- **Placeholder**: `[data-placeholder]` on `.date-input-group__segment`
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on `.date-input-group`, `[data-invalid]` on the segment, and the field hides its description
+- **Disabled**: `[data-disabled]` or `[aria-disabled="true"]` on `.date-input-group`
+
+## API Reference
+
+### DateField
+
+| Prop                    | Type                                                    | Default | Description                                                    |
+| ----------------------- | ------------------------------------------------------- | ------- | -------------------------------------------------------------- |
+| `fullWidth`             | `boolean`                                               | `false` | Makes the field fill its container                             |
+| `value`                 | `DateValue \| null`                                     | -       | The current date (controlled)                                  |
+| `defaultValue`          | `DateValue \| null`                                     | -       | The initial date (uncontrolled)                                |
+| `onChange`              | `(value: MappedDateValue<T> \| null) => void`           | -       | Called when the date changes                                   |
+| `minValue`              | `DateValue \| null`                                     | -       | Earliest valid date                                            |
+| `maxValue`              | `DateValue \| null`                                     | -       | Latest valid date                                              |
+| `isDateUnavailable`     | `(date: DateValue) => boolean`                          | -       | Marks a date invalid                                           |
+| `placeholderValue`      | `DateValue \| null`                                     | -       | Date the empty segments start from when stepped                |
+| `granularity`           | `"day" \| "hour" \| "minute" \| "second"`               | -       | Smallest unit shown; `"day"` for dates, `"minute"` for times   |
+| `hourCycle`             | `12 \| 24`                                              | -       | Clock used for hours; follows the locale by default            |
+| `hideTimeZone`          | `boolean`                                               | `false` | Hides the time zone of a zoned value                           |
+| `shouldForceLeadingZeros` | `boolean`                                             | -       | Pads every segment to its full width                           |
+| `isDisabled`            | `boolean`                                               | `false` | Disables the field                                             |
+| `isReadOnly`            | `boolean`                                               | `false` | Keeps the value but blocks editing                             |
+| `isRequired`            | `boolean`                                               | `false` | Requires a value; sets `data-required`                         |
+| `isInvalid`             | `boolean`                                               | -       | Marks the field invalid                                        |
+| `name`                  | `string`                                                | -       | Name of the hidden input submitted with a form                 |
+| `className`             | `string \| ((values: DateFieldRenderProps) => string)`  | -       | Additional classes, or a function of the render props          |
+| `...rest`               |                                                         |         | Every React Aria `DateField` prop                              |
+
+### DateField.Group
+
+| Prop        | Type                                               | Default     | Description                                           |
+| ----------- | -------------------------------------------------- | ----------- | ----------------------------------------------------- |
+| `variant`   | `"primary" \| "secondary"`                         | `"primary"` | Visual style of the group                             |
+| `fullWidth` | `boolean`                                          | `false`     | Makes the group fill its container                    |
+| `className` | `string \| ((values: GroupRenderProps) => string)` | -           | Additional classes, or a function of the render props |
+| `...rest`   |                                                    |             | Every React Aria `Group` prop                         |
+
+### DateField.Input
+
+| Prop        | Type                                                   | Default | Description                                                   |
+| ----------- | ------------------------------------------------------ | ------- | ------------------------------------------------------------- |
+| `children`  | `(segment: DateSegment) => ReactElement`               | -       | Renders one segment; pass it to `DateField.Segment`           |
+| `className` | `string \| ((values: DateInputRenderProps) => string)` | -       | Additional classes, or a function of the render props         |
+| `...rest`   |                                                        |         | Every React Aria `DateInput` prop                             |
+
+### DateField.InputContainer
+
+| Prop        | Type                              | Default | Description                                            |
+| ----------- | --------------------------------- | ------- | ------------------------------------------------------ |
+| `render`    | `DOMRenderFunction<E, undefined>` | -       | Replaces the rendered element; `E` defaults to `"div"` |
+| `className` | `string`                          | -       | Additional classes                                     |
+| `...rest`   |                                   |         | Every attribute of the rendered element                |
+
+### DateField.Segment
+
+| Prop        | Type          | Default | Description                                  |
+| ----------- | ------------- | ------- | -------------------------------------------- |
+| `segment`   | `DateSegment` | -       | The segment passed by `DateField.Input`      |
+| `className` | `string`      | -       | Additional classes                           |
+| `...rest`   |               |         | Every React Aria `DateSegment` prop          |
+
+### DateField.Prefix
+
+| Prop        | Type                              | Default | Description                                            |
+| ----------- | --------------------------------- | ------- | ------------------------------------------------------ |
+| `render`    | `DOMRenderFunction<E, undefined>` | -       | Replaces the rendered element; `E` defaults to `"div"` |
+| `className` | `string`                          | -       | Additional classes                                     |
+| `...rest`   |                                   |         | Every attribute of the rendered element                |
+
+### DateField.Suffix
+
+| Prop        | Type                              | Default | Description                                            |
+| ----------- | --------------------------------- | ------- | ------------------------------------------------------ |
+| `render`    | `DOMRenderFunction<E, undefined>` | -       | Replaces the rendered element; `E` defaults to `"div"` |
+| `className` | `string`                          | -       | Additional classes                                     |
+| `...rest`   |                                   |         | Every attribute of the rendered element                |
+
+### Render Props
+
+`className` on `DateField` receives these values:
+
+| Prop         | Type      | Description                     |
+| ------------ | --------- | ------------------------------- |
+| `isInvalid`  | `boolean` | Whether the field is invalid    |
+| `isDisabled` | `boolean` | Whether the field is disabled   |
+| `isReadOnly` | `boolean` | Whether the field is read only  |

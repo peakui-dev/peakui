@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.0",
+    "@internationalized/date": "^3.12.4",
     "@peakui/standard": "workspace:*",
     "@peakui/testing": "workspace:*",
     "@react-aria/ssr": "^3.10.1",
@@ -40,6 +41,7 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
+    "@internationalized/date": "^3.12.4",
     "@react-aria/ssr": "^3.10.1",
     "@react-aria/utils": "^3.34.1",
     "react": ">=19.0.0",
