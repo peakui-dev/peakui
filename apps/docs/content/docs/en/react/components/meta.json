@@ -68,6 +68,7 @@
     "(overlays)/toast",
     "(buttons)/toggle-button",
     "(buttons)/toggle-button-group",
+    "(layout)/toolbar",
     "(overlays)/tooltip",
     "(typography)/typography"
   ]

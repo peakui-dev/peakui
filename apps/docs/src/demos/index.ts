@@ -1721,6 +1721,23 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./toggle-button-group/without-separator").then((m) => m.WithoutSeparator),
     file: "toggle-button-group/without-separator.tsx",
   },
+  // toolbar
+  "toolbar-attached": {
+    loader: () => import("./toolbar/attached").then((m) => m.Attached),
+    file: "toolbar/attached.tsx",
+  },
+  "toolbar-basic": {
+    loader: () => import("./toolbar/basic").then((m) => m.Basic),
+    file: "toolbar/basic.tsx",
+  },
+  "toolbar-vertical": {
+    loader: () => import("./toolbar/vertical").then((m) => m.Vertical),
+    file: "toolbar/vertical.tsx",
+  },
+  "toolbar-with-button-groups": {
+    loader: () => import("./toolbar/with-button-groups").then((m) => m.WithButtonGroups),
+    file: "toolbar/with-button-groups.tsx",
+  },
   // tooltip
   "tooltip-basic": {
     loader: () => import("./tooltip/basic").then((m) => m.Basic),

@@ -79,7 +79,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Layout",
-    components: ["(layout)/card", "(layout)/separator", "(layout)/surface"],
+    components: ["(layout)/card", "(layout)/separator", "(layout)/surface", "(layout)/toolbar"],
   },
   {
     category: "Media",
