@@ -1,0 +1,104 @@
+---
+title: Toolbar
+description: Groups controls with arrow key navigation
+links:
+  rac: Toolbar
+  source: toolbar/toolbar.tsx
+  styles: toolbar.css
+---
+
+## Usage
+
+```tsx
+import {Toolbar} from "@peakui/react";
+```
+
+<ComponentPreview name="toolbar-basic" />
+
+## Examples
+
+### Vertical
+
+<ComponentPreview name="toolbar-vertical" />
+
+### With Button Groups
+
+<ComponentPreview name="toolbar-with-button-groups" />
+
+### Attached
+
+<ComponentPreview name="toolbar-attached" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Toolbar aria-label="Actions" className="gap-4">
+  <Button>Save</Button>
+</Toolbar>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .toolbar {
+    --toolbar-gap: calc(var(--spacing) * 3);
+  }
+
+  .toolbar--attached {
+    --toolbar-bg: var(--color-overlay);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Toolbar component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/toolbar.css)):
+
+#### Base & Orientation Classes [!toc]
+
+- `.toolbar` - Base styles, laid out as a row
+- `.toolbar--horizontal` - Controls in a row (default)
+- `.toolbar--vertical` - Controls in a column
+
+#### Modifier Classes [!toc]
+
+- `.toolbar--attached` - Raised panel with padding around the controls
+
+### Slots
+
+- `[data-slot="toolbar"]`
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--toolbar-gap` | Space between controls |
+| `--toolbar-padding` | Padding of the attached panel |
+| `--toolbar-bg` | Background of the attached panel |
+
+## API Reference
+
+### Toolbar
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Arranges the controls and sets the arrow keys; a `Separator` or `ToggleButtonGroup` inside follows it |
+| `isAttached` | `boolean` | `false` | Wraps the controls in a raised panel |
+| `aria-label` | `string` | - | Names the toolbar; required unless `aria-labelledby` is set |
+| `children` | `React.ReactNode \| (values: ToolbarRenderProps) => React.ReactNode` | - | Controls to group, or a function of the toolbar's state |
+| `className` | `string \| (values: ToolbarRenderProps) => string` | - | Additional classes, or a function of the toolbar's state |
+| `render` | `DOMRenderFunction<'div', ToolbarRenderProps>` | - | Replaces the rendered element. It must still return a `<div>` |
+| `...rest` | `ToolbarProps` | - | Every other [React Aria Toolbar](https://react-spectrum.adobe.com/react-aria/Toolbar.html) prop |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `orientation` | `'horizontal' \| 'vertical'` | The orientation of the toolbar |

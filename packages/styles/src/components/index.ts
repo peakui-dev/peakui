@@ -68,5 +68,6 @@ export * from "./textfield/index.ts";
 export * from "./toast/index.ts";
 export * from "./toggle-button-group/index.ts";
 export * from "./toggle-button/index.ts";
+export * from "./toolbar/index.ts";
 export * from "./tooltip/index.ts";
 export * from "./typography/index.ts";

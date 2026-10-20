@@ -1,0 +1,47 @@
+/*
+ * Toolbar. Class names come from src/components/toolbar/toolbar.styles.ts; the whole Tailwind
+ * layer lives here. A container for interactive controls with arrow-key navigation.
+ */
+
+.toolbar {
+  --toolbar-gap: calc(var(--spacing) * 2);
+  --toolbar-padding: calc(var(--spacing) * 1);
+  --toolbar-bg: var(--color-surface);
+
+  @apply grid w-fit grid-flow-col items-center;
+  gap: var(--toolbar-gap);
+
+  /* A separator between groups runs across the flow: vertical in a row, horizontal in a column. */
+  .separator--vertical {
+    @apply h-1/2 self-center;
+  }
+
+  .separator--horizontal {
+    @apply w-1/2 justify-center justify-self-center;
+  }
+}
+
+.toolbar--horizontal {
+  /* The default orientation lives in the base class. */
+}
+
+.toolbar--vertical {
+  @apply grid-flow-row items-start justify-start;
+
+  .button-group {
+    @apply justify-start;
+  }
+}
+
+/* A raised panel around the controls. */
+.toolbar--attached {
+  @apply rounded-3xl shadow-overlay;
+  padding: var(--toolbar-padding);
+  background-color: var(--toolbar-bg);
+}
+
+@media (forced-colors: active) {
+  .toolbar--attached {
+    border: 1px solid CanvasText;
+  }
+}
