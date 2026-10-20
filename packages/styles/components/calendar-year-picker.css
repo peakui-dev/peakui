@@ -1,0 +1,148 @@
+/*
+ * CalendarYearPicker. Class names come from
+ * src/components/calendar-year-picker/calendar-year-picker.styles.ts; all the Tailwind lives here.
+ * Ported from the vendored reference styles/components/calendar-year-picker.css. The differences
+ * that remain are listed at the end of the file.
+ *
+ * Internal part shared by Calendar and RangeCalendar: a toggleable year selector. CSS :has() on
+ * the host calendar drives the crossfade. The year grid is absolutely positioned and sized by
+ * script to the day grid's box, which leaves the calendar's own block layout untouched.
+ */
+
+/* Positioning context for the overlay */
+.calendar:has(.calendar-year-picker__year-grid),
+.range-calendar:has(.calendar-year-picker__year-grid) {
+  position: relative;
+}
+
+/*
+ * The crossfade is staggered so both grids are never half-transparent at once. Opening: the day
+ * grid fades out first, then the year grid fades in. Closing: the year grid leaves at once, then
+ * the day grid fades in.
+ */
+.calendar:has(.calendar-year-picker__year-grid) > [data-slot="calendar-grid"],
+.range-calendar:has(.calendar-year-picker__year-grid) > [data-slot="range-calendar-grid"] {
+  will-change: opacity;
+  transition:
+    opacity 150ms var(--ease-out),
+    visibility 0ms linear;
+  @apply motion-reduce:transition-none;
+}
+
+.calendar:has(.calendar-year-picker__year-grid[data-open="true"]) > [data-slot="calendar-grid"],
+.range-calendar:has(.calendar-year-picker__year-grid[data-open="true"])
+  > [data-slot="range-calendar-grid"] {
+  @apply pointer-events-none opacity-0;
+  visibility: hidden;
+  transition:
+    opacity 150ms var(--ease-out),
+    visibility 0ms linear 150ms;
+  @apply motion-reduce:transition-none;
+}
+
+/* Trigger */
+.calendar-year-picker__trigger {
+  @apply flex flex-1 items-center justify-start gap-1 rounded-lg outline-none;
+
+  cursor: var(--cursor-interactive);
+  touch-action: manipulation;
+
+  &:is(:focus-visible, [data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+}
+
+.calendar-year-picker__trigger-heading {
+  @apply text-sm font-medium;
+
+  transition: color 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+}
+
+.calendar-year-picker__trigger-indicator {
+  @apply text-xs text-accent-soft-foreground rtl:[transform:rotate(180deg)];
+
+  transition: transform 150ms var(--ease-out);
+  @apply motion-reduce:transition-none;
+}
+
+/* The chevron turns while the picker is open. */
+.calendar-year-picker__trigger[data-open="true"] .calendar-year-picker__trigger-indicator {
+  transform: rotate(90deg);
+}
+
+.calendar-year-picker__trigger[data-open="true"] .calendar-year-picker__trigger-heading {
+  @apply text-accent-soft-foreground;
+}
+
+/* Year grid: laid over the day grid's area; top and height are set by script. */
+.calendar-year-picker__year-grid {
+  @apply pointer-events-none absolute start-0 end-0 grid scrollbar content-start gap-1 overflow-y-auto p-1 opacity-0;
+  grid-template-columns: repeat(3, 1fr);
+
+  /* Closing is instant: no transition on the base state. */
+  will-change: opacity;
+}
+
+.calendar-year-picker__year-grid[data-open="true"] {
+  @apply pointer-events-auto opacity-100;
+
+  /* Opening waits briefly so the day grid starts fading out first. */
+  transition: opacity 200ms var(--ease-out) 50ms;
+  @apply motion-reduce:transition-none;
+}
+
+/* Year cell */
+.calendar-year-picker__year-cell {
+  /* Height follows the pointer: 40px where input is coarse, 32px where it is fine. */
+  @apply relative inline-flex h-10 items-center justify-center rounded-3xl px-2.5 text-sm font-medium outline-none select-none no-highlight md:h-8;
+  touch-action: manipulation;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    color 100ms var(--ease-smooth),
+    scale 100ms var(--ease-smooth),
+    opacity 100ms var(--ease-smooth),
+    background-color 100ms var(--ease-smooth),
+    box-shadow 100ms var(--ease-out);
+  @apply origin-center transform-gpu motion-reduce:transition-none;
+
+  cursor: var(--cursor-interactive);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:is(:hover, [data-hovered="true"]):not([data-selected="true"]) {
+      @apply bg-default text-default-foreground;
+    }
+  }
+
+  /* Selected: the year the calendar is showing. */
+  &:is([data-selected="true"], [aria-selected="true"]) {
+    @apply bg-accent text-accent-foreground;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:is(:hover, [data-hovered="true"]) {
+        @apply bg-accent-hover;
+      }
+    }
+  }
+
+  &:is(:focus-visible, [data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+
+  @media (forced-colors: active) {
+    &:is([data-selected="true"], [aria-selected="true"]) {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+}
+
+/*
+ * What differs from the reference, and why:
+ *
+ * 1. The year cell is 40px tall where input is coarse and 32px where it is fine, so it meets the
+ *    24px minimum target (WCAG 2.2) on touch without a special case. The reference is 32px.
+ * 2. State rules carry the pseudo-class and the data-* form, and forced-colors marks the
+ *    selected year (design-tokens spec). The reference has neither.
+ */

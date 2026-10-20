@@ -1,0 +1,291 @@
+/*
+ * Calendar. Class names come from src/components/calendar/calendar.styles.ts; all the Tailwind
+ * lives here. Ported from the vendored reference styles/components/calendar.css. The differences
+ * that remain are listed at the end of the file, each with its reason.
+ */
+
+.calendar {
+  --calendar-width: calc(var(--spacing) * 63);
+  --calendar-cell-bg-hover: var(--color-default);
+  --calendar-cell-bg-today: var(--color-accent-soft);
+  --calendar-cell-bg-today-hover: var(--color-accent-soft-hover);
+  --calendar-cell-bg-selected: var(--color-accent);
+  --calendar-cell-fg-selected: var(--color-accent-foreground);
+
+  width: var(--calendar-width);
+  max-width: var(--calendar-width);
+  container-type: inline-size;
+}
+
+/* Week view: visibleDuration={{weeks: n}} */
+.calendar--week-view {
+  .calendar__cell {
+    /* Keep the cells circular on the 7-column grid; only filled cells take space. */
+    @apply aspect-square size-auto w-full place-self-center;
+  }
+}
+
+/* Day view: visibleDuration={{days: n}} */
+.calendar--day-view {
+  .calendar__cell {
+    @apply aspect-square size-auto w-full place-self-center;
+  }
+
+  /*
+   * Header and body become separate 7-column grids. With display: contents on the root grid,
+   * fewer than seven weekday headers would flow into the same row as the dates.
+   */
+  .calendar__grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .calendar__grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    @apply w-full;
+
+    & > tr {
+      display: contents;
+    }
+  }
+
+  .calendar__grid-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    @apply mt-1 w-full;
+
+    & > tr {
+      display: contents;
+    }
+
+    & > tr:first-child > td {
+      @apply mt-0;
+    }
+  }
+}
+
+/* Header */
+.calendar__header {
+  @apply flex items-center justify-between px-0.5 pb-4;
+
+  /* The month navigation steps aside while the year picker covers the grid. */
+  &:has(.calendar-year-picker__trigger[data-open="true"]) {
+    .calendar__nav-button {
+      @apply pointer-events-none opacity-0;
+    }
+  }
+}
+
+.calendar__heading {
+  @apply flex-1 text-sm font-medium;
+}
+
+.calendar__nav-button {
+  @apply flex size-6 items-center justify-center rounded-2xl text-accent-soft-foreground;
+
+  will-change: scale;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    transform 250ms var(--ease-out),
+    background-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  cursor: var(--cursor-interactive);
+
+  /* Hover: only where the device can hover, so touch does not stick. */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not(:is(:disabled, [data-disabled="true"])) {
+      @apply bg-default text-accent-soft-foreground;
+    }
+  }
+
+  &:is(:active, [data-pressed="true"]) {
+    transform: scale(0.95);
+  }
+
+  &:is(:focus-visible, [data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+
+  &:is(:disabled, [data-disabled="true"]) {
+    @apply status-disabled;
+  }
+
+  @media (forced-colors: active) {
+    border: 1px solid ButtonBorder;
+  }
+}
+
+.calendar__nav-button-icon {
+  @apply size-4 rtl:rotate-180;
+}
+
+/* Grid */
+.calendar__grid {
+  /* The table becomes a CSS grid, which makes the cell spacing a plain margin. */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  @apply w-full;
+
+  &[aria-readonly="true"] {
+    .calendar__cell {
+      @apply pointer-events-none;
+    }
+  }
+}
+
+.calendar__grid-header {
+  display: contents;
+
+  & > tr {
+    display: contents;
+  }
+}
+
+.calendar__grid-body {
+  display: contents;
+
+  & > tr {
+    display: contents;
+  }
+
+  /* Space between the weekday names and the first row of dates. */
+  & > tr:first-child > td {
+    @apply mt-1;
+  }
+}
+
+.calendar__grid-row {
+  /* Lets the cells join the grid directly; a hook for custom row styling. */
+  display: contents;
+}
+
+.calendar__header-cell {
+  @apply flex items-center justify-center pb-2 text-xs font-medium text-muted;
+}
+
+/* Cells */
+.calendar__cell {
+  @apply relative flex aspect-square size-full items-center justify-center rounded-3xl text-center text-sm font-medium outline-none no-highlight;
+
+  will-change: scale;
+
+  /* CRITICAL: motion-reduce AFTER transition. */
+  transition:
+    transform 250ms var(--ease-out),
+    box-shadow 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  cursor: var(--cursor-interactive);
+
+  &:is(:focus-visible:not([data-focused]), [data-focus-visible="true"]) {
+    @apply status-focused;
+  }
+
+  /* Today */
+  &[data-today="true"] {
+    background-color: var(--calendar-cell-bg-today);
+    @apply text-accent-soft-foreground;
+
+    @media (hover: hover) {
+      &:is(:hover, [data-hovered="true"]):not([data-selected="true"]) {
+        background-color: var(--calendar-cell-bg-today-hover);
+      }
+    }
+  }
+
+  /* Selected */
+  &[data-selected="true"] {
+    background-color: var(--calendar-cell-bg-selected);
+    color: var(--calendar-cell-fg-selected);
+  }
+
+  /* Pressed */
+  &:is(:active, [data-pressed="true"]) {
+    @apply bg-default;
+    transform: scale(0.95);
+
+    &[data-selected="true"] {
+      @apply bg-accent-hover;
+    }
+  }
+
+  /* Hover: only where the device can hover. */
+  @media (hover: hover) {
+    &:is(:hover, [data-hovered="true"]):not([data-selected="true"]) {
+      background-color: var(--calendar-cell-bg-hover);
+    }
+  }
+
+  /* Days of the neighbouring months */
+  &[data-outside-month="true"] {
+    @apply text-muted opacity-50;
+  }
+
+  &[data-selected="true"][data-outside-month="true"] {
+    @apply bg-default;
+  }
+
+  &[data-unavailable="true"] {
+    @apply status-disabled;
+  }
+
+  &:is(:disabled, [data-disabled="true"]):not([data-outside-month="true"]) {
+    @apply status-disabled;
+
+    text-decoration: line-through;
+  }
+
+  /*
+   * Forced colors: the selected and today states are carried by the background alone, and
+   * forced-colors flattens backgrounds. The system Highlight pair marks the selection; today
+   * keeps a border.
+   */
+  @media (forced-colors: active) {
+    &[data-selected="true"] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    &[data-today="true"]:not([data-selected="true"]) {
+      border: 1px solid CanvasText;
+    }
+
+    &[data-unavailable="true"],
+    &:is(:disabled, [data-disabled="true"]) {
+      color: GrayText;
+    }
+  }
+}
+
+/* Small dot at the bottom centre of a cell */
+.calendar__cell-indicator {
+  @apply absolute bottom-1 left-1/2 size-[3px] -translate-x-1/2 rounded-xs bg-muted;
+
+  [data-selected="true"] > & {
+    @apply bg-accent-foreground;
+  }
+
+  @media (forced-colors: active) {
+    background-color: CanvasText;
+
+    [data-selected="true"] > & {
+      background-color: HighlightText;
+    }
+  }
+}
+
+/*
+ * What differs from the reference, and why:
+ *
+ * 1. Every interactive state carries the pseudo-class and the data-* form, so the stylesheet
+ *    works without React. The reference writes some of them in one form only.
+ * 2. The cell colours that vary by state are custom properties (--calendar-cell-*), the theming
+ *    seam. The reference hard-wires the utilities.
+ * 3. forced-colors is handled for the nav button, the cells and the indicator. The reference
+ *    has none (design-tokens spec).
+ */

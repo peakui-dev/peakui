@@ -17,7 +17,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Pickers",
-    components: ["(pickers)/select"],
+    components: ["(pickers)/calendar", "(pickers)/select"],
   },
   {
     category: "Colors",
