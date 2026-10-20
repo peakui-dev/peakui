@@ -1,3 +1,5 @@
+"use client";
+
 import {Autocomplete, Description, EmptyState, Label, ListBox, SearchField} from "@peakui/react";
 
 export function WithDescription() {

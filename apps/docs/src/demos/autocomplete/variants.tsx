@@ -1,3 +1,5 @@
+"use client";
+
 import {Autocomplete, Label, ListBox, SearchField} from "@peakui/react";
 
 export function Variants() {

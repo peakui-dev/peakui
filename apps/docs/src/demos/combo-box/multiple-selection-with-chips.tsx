@@ -1,3 +1,5 @@
+"use client";
+
 import {Chip, ComboBox, Input, Label, ListBox} from "@peakui/react";
 
 interface Animal {

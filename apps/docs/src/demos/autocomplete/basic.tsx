@@ -1,3 +1,5 @@
+"use client";
+
 import {Autocomplete, EmptyState, Label, ListBox, SearchField} from "@peakui/react";
 
 export function Basic() {

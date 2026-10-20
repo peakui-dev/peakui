@@ -1,3 +1,5 @@
+"use client";
+
 import {ChevronsExpandVertical} from "@gravity-ui/icons";
 import {Autocomplete, EmptyState, Label, ListBox, SearchField} from "@peakui/react";
 

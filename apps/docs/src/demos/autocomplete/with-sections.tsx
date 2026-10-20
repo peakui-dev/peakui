@@ -1,3 +1,5 @@
+"use client";
+
 import {Autocomplete, EmptyState, Label, ListBox, SearchField, Separator} from "@peakui/react";
 
 export function WithSections() {
