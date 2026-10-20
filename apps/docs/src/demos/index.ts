@@ -638,6 +638,90 @@ export const demos: Record<string, DemoItem> = {
   "date-field-with-validation": {
     loader: () => import("./date-field/with-validation").then((m) => m.WithValidation),
     file: "date-field/with-validation.tsx",
+  // combo-box
+  "combo-box-allows-custom-value": {
+    loader: () => import("./combo-box/allows-custom-value").then((m) => m.AllowsCustomValue),
+    file: "combo-box/allows-custom-value.tsx",
+  },
+  "combo-box-basic": {
+    loader: () => import("./combo-box/basic").then((m) => m.Basic),
+    file: "combo-box/basic.tsx",
+  },
+  "combo-box-controlled": {
+    loader: () => import("./combo-box/controlled").then((m) => m.Controlled),
+    file: "combo-box/controlled.tsx",
+  },
+  "combo-box-controlled-input-value": {
+    loader: () => import("./combo-box/controlled-input-value").then((m) => m.ControlledInputValue),
+    file: "combo-box/controlled-input-value.tsx",
+  },
+  "combo-box-custom-filtering": {
+    loader: () => import("./combo-box/custom-filtering").then((m) => m.CustomFiltering),
+    file: "combo-box/custom-filtering.tsx",
+  },
+  "combo-box-custom-indicator": {
+    loader: () => import("./combo-box/custom-indicator").then((m) => m.CustomIndicator),
+    file: "combo-box/custom-indicator.tsx",
+  },
+  "combo-box-custom-styles": {
+    loader: () => import("./combo-box/custom-styles").then((m) => m.CustomStyles),
+    file: "combo-box/custom-styles.tsx",
+  },
+  "combo-box-default-selected-key": {
+    loader: () => import("./combo-box/default-selected-key").then((m) => m.DefaultSelectedKey),
+    file: "combo-box/default-selected-key.tsx",
+  },
+  "combo-box-disabled": {
+    loader: () => import("./combo-box/disabled").then((m) => m.Disabled),
+    file: "combo-box/disabled.tsx",
+  },
+  "combo-box-dynamic-items": {
+    loader: () => import("./combo-box/dynamic-items").then((m) => m.DynamicItems),
+    file: "combo-box/dynamic-items.tsx",
+  },
+  "combo-box-full-width": {
+    loader: () => import("./combo-box/full-width").then((m) => m.FullWidth),
+    file: "combo-box/full-width.tsx",
+  },
+  "combo-box-menu-trigger": {
+    loader: () => import("./combo-box/menu-trigger").then((m) => m.MenuTrigger),
+    file: "combo-box/menu-trigger.tsx",
+  },
+  "combo-box-multiple-selection": {
+    loader: () => import("./combo-box/multiple-selection").then((m) => m.MultipleSelection),
+    file: "combo-box/multiple-selection.tsx",
+  },
+  "combo-box-multiple-selection-controlled": {
+    loader: () =>
+      import("./combo-box/multiple-selection-controlled").then(
+        (m) => m.MultipleSelectionControlled,
+      ),
+    file: "combo-box/multiple-selection-controlled.tsx",
+  },
+  "combo-box-multiple-selection-with-chips": {
+    loader: () =>
+      import("./combo-box/multiple-selection-with-chips").then((m) => m.MultipleSelectionWithChips),
+    file: "combo-box/multiple-selection-with-chips.tsx",
+  },
+  "combo-box-required": {
+    loader: () => import("./combo-box/required").then((m) => m.Required),
+    file: "combo-box/required.tsx",
+  },
+  "combo-box-variants": {
+    loader: () => import("./combo-box/variants").then((m) => m.Variants),
+    file: "combo-box/variants.tsx",
+  },
+  "combo-box-with-description": {
+    loader: () => import("./combo-box/with-description").then((m) => m.WithDescription),
+    file: "combo-box/with-description.tsx",
+  },
+  "combo-box-with-disabled-options": {
+    loader: () => import("./combo-box/with-disabled-options").then((m) => m.WithDisabledOptions),
+    file: "combo-box/with-disabled-options.tsx",
+  },
+  "combo-box-with-sections": {
+    loader: () => import("./combo-box/with-sections").then((m) => m.WithSections),
+    file: "combo-box/with-sections.tsx",
   },
   // description
   "description-basic": {

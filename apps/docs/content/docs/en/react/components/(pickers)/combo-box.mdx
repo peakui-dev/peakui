@@ -1,0 +1,271 @@
+---
+title: ComboBox
+description: Text input with a filterable list of options
+links:
+  rac: ComboBox
+  source: combo-box/combo-box.tsx
+  styles: combo-box.css
+---
+
+## Usage
+
+```tsx
+import {ComboBox, Input, Label, ListBox} from "@peakui/react";
+```
+
+<ComponentPreview name="combo-box-basic" />
+
+### Anatomy
+
+```tsx
+import {ComboBox, Description, FieldError, Input, Label, ListBox} from "@peakui/react";
+
+export default () => (
+  <ComboBox>
+    <Label />
+    <ComboBox.InputGroup>
+      <Input />
+      <ComboBox.Trigger />
+    </ComboBox.InputGroup>
+    <ComboBox.Value />
+    <Description />
+    <FieldError />
+    <ComboBox.Popover>
+      <ListBox>
+        <ListBox.Item>
+          <ListBox.ItemIndicator />
+        </ListBox.Item>
+      </ListBox>
+    </ComboBox.Popover>
+  </ComboBox>
+);
+```
+
+## Examples
+
+### Variants
+
+<ComponentPreview name="combo-box-variants" />
+
+### Full Width
+
+<ComponentPreview name="combo-box-full-width" />
+
+### Default Selected Key
+
+<ComponentPreview name="combo-box-default-selected-key" />
+
+### With Description
+
+<ComponentPreview name="combo-box-with-description" />
+
+### With Sections
+
+<ComponentPreview name="combo-box-with-sections" />
+
+### With Disabled Options
+
+<ComponentPreview name="combo-box-with-disabled-options" />
+
+### Custom Indicator
+
+<ComponentPreview name="combo-box-custom-indicator" />
+
+### Required
+
+<ComponentPreview name="combo-box-required" />
+
+### Dynamic Items
+
+<ComponentPreview name="combo-box-dynamic-items" />
+
+### Custom Filtering
+
+<ComponentPreview name="combo-box-custom-filtering" />
+
+### Allows Custom Value
+
+<ComponentPreview name="combo-box-allows-custom-value" />
+
+### Menu Trigger
+
+<ComponentPreview name="combo-box-menu-trigger" />
+
+### Multiple Selection
+
+<ComponentPreview name="combo-box-multiple-selection" />
+
+### Multiple Selection With Chips
+
+<ComponentPreview name="combo-box-multiple-selection-with-chips" />
+
+### Controlled
+
+<ComponentPreview name="combo-box-controlled" />
+
+### Controlled Input Value
+
+<ComponentPreview name="combo-box-controlled-input-value" />
+
+### Controlled Multiple Selection
+
+<ComponentPreview name="combo-box-multiple-selection-controlled" />
+
+### Disabled
+
+<ComponentPreview name="combo-box-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="combo-box-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .combo-box {
+    @apply flex flex-col gap-1;
+  }
+
+  .combo-box__trigger {
+    @apply text-muted;
+  }
+
+  .combo-box__popover {
+    @apply rounded-lg border border-border bg-surface p-2;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ComboBox component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/combo-box.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.combo-box` - Base combo box container
+- `.combo-box__input-group` - Wraps the input and the trigger
+- `.combo-box__trigger` - The button that opens the list
+- `.combo-box__value` - The selected items in multiple selection
+- `.combo-box__popover` - The popover container
+
+#### Modifier Classes [!toc]
+
+- `.combo-box--full-width` - Takes the full width of the container
+- `.combo-box__input-group--full-width` - Full width on the input group itself
+
+The field surface comes from `Input`: `variant` reaches it through the root, so it styles `.input--primary` and `.input--secondary`.
+
+### Slots
+
+- `[data-slot="combo-box"]`
+- `[data-slot="combo-box-input-group"]`
+- `[data-slot="combo-box-trigger"]`
+- `[data-slot="combo-box-trigger-default-icon"]`
+- `[data-slot="combo-box-value"]`
+- `[data-slot="combo-box-popover"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]` on trigger
+- **Focus**: `:focus-visible` or `[data-focus-visible]` on trigger
+- **Pressed**: `:active` or `[data-pressed]` on trigger
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]` on trigger
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on combo box
+- **Placeholder**: `[data-placeholder]` on value
+- **Open**: `[data-open]` on trigger
+
+## API Reference
+
+### ComboBox
+
+| Prop                    | Type                                                    | Default     | Description                                                                              |
+| ----------------------- | ------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------- |
+| `selectionMode`         | `"single" \| "multiple"`                                | `"single"`  | Whether single or multiple selection is enabled                                          |
+| `selectedKey`           | `Key \| null`                                           | -           | Selected key (controlled), single selection                                              |
+| `defaultSelectedKey`    | `Key \| null`                                           | -           | Selected key (uncontrolled), single selection                                            |
+| `onSelectionChange`     | `(key: Key \| null) => void`                            | -           | Handler called when the selected key changes, single selection                           |
+| `value`                 | `Key[]`                                                 | -           | Selected keys (controlled), multiple selection                                           |
+| `defaultValue`          | `Key[]`                                                 | -           | Selected keys (uncontrolled), multiple selection                                         |
+| `onChange`              | `(value: Key[]) => void`                                | -           | Handler called when the selected keys change, multiple selection                         |
+| `inputValue`            | `string`                                                | -           | Text in the input (controlled)                                                           |
+| `defaultInputValue`     | `string`                                                | -           | Text in the input (uncontrolled)                                                         |
+| `onInputChange`         | `(value: string) => void`                               | -           | Handler called when the input text changes                                               |
+| `defaultItems`          | `Iterable<T>`                                           | -           | Items for a dynamic collection, filtered by the combo box                                |
+| `items`                 | `Iterable<T>`                                           | -           | Items for a dynamic collection, filtered by the consumer                                 |
+| `defaultFilter`         | `(textValue: string, inputValue: string) => boolean`    | `contains`  | Decides whether an option stays in the list                                              |
+| `menuTrigger`           | `"focus" \| "input" \| "manual"`                        | `"focus"`   | What opens the list: focusing the input, typing, or only the trigger and arrow keys      |
+| `allowsCustomValue`     | `boolean`                                               | `false`     | Whether text that matches no option is kept                                              |
+| `allowsEmptyCollection` | `boolean`                                               | `false`     | Whether the list may stay open when no option matches                                    |
+| `isOpen`                | `boolean`                                               | -           | Sets the open state of the list (controlled)                                             |
+| `defaultOpen`           | `boolean`                                               | -           | Sets the default open state of the list (uncontrolled)                                   |
+| `onOpenChange`          | `(isOpen: boolean) => void`                             | -           | Handler called when the open state changes                                               |
+| `disabledKeys`          | `Iterable<Key>`                                         | -           | Keys of disabled items                                                                   |
+| `isDisabled`            | `boolean`                                               | -           | Whether the combo box is disabled                                                        |
+| `isReadOnly`            | `boolean`                                               | -           | Whether the input can be edited                                                          |
+| `isRequired`            | `boolean`                                               | -           | Whether user input is required                                                           |
+| `isInvalid`             | `boolean`                                               | -           | Whether the value is invalid                                                             |
+| `name`                  | `string`                                                | -           | The name of the input, used when submitting an HTML form                                 |
+| `formValue`             | `"text" \| "key"`                                       | `"key"`     | Whether the text or the key is submitted; `allowsCustomValue` always submits the text    |
+| `fullWidth`             | `boolean`                                               | `false`     | Whether the combo box takes the full width of its container                              |
+| `variant`               | `"primary" \| "secondary"`                              | `"primary"` | Visual variant of the field; `secondary` is the lower emphasis variant for surfaces      |
+| `className`             | `string \| (values: ComboBoxRenderProps) => string`     | -           | Additional classes, or a function of the render props                                    |
+| `children`              | `ReactNode \| (values: ComboBoxRenderProps) => ReactNode` | -         | Combo box content, or a function of the render props                                     |
+| `...rest`               |                                                         |             | Every React Aria `ComboBox` attribute is accepted, including `aria-label`                |
+
+### ComboBox.InputGroup
+
+| Prop        | Type                                                  | Default | Description                                    |
+| ----------- | ----------------------------------------------------- | ------- | ---------------------------------------------- |
+| `className` | `string \| (values: GroupRenderProps) => string`      | -       | Additional classes, or a function of the render props |
+| `children`  | `ReactNode \| (values: GroupRenderProps) => ReactNode` | -      | The `Input` and the `ComboBox.Trigger`         |
+| `...rest`   |                                                       |         | Every React Aria `Group` attribute is accepted |
+
+### ComboBox.Trigger
+
+Without children it renders a chevron; its `aria-label` defaults to the localized "Show suggestions".
+
+| Prop        | Type                                                    | Default | Description                                      |
+| ----------- | ------------------------------------------------------- | ------- | ------------------------------------------------ |
+| `className` | `string \| (values: ButtonRenderProps) => string`       | -       | Additional classes, or a function of the render props |
+| `children`  | `ReactNode \| (values: ButtonRenderProps) => ReactNode` | -       | Custom indicator, replacing the default chevron  |
+| `...rest`   |                                                         |         | Every React Aria `Button` attribute is accepted  |
+
+### ComboBox.Value
+
+Shows the selected items in multiple selection, where the input holds only the search text.
+
+| Prop          | Type                                                                        | Default | Description                                      |
+| ------------- | --------------------------------------------------------------------------- | ------- | ------------------------------------------------ |
+| `placeholder` | `string`                                                                    | -       | Text shown while nothing is selected             |
+| `className`   | `string \| (values: ComboBoxValueRenderProps<T>) => string`                 | -       | Additional classes, or a function of the render props |
+| `children`    | `ReactNode \| (values: ComboBoxValueRenderProps<T>) => ReactNode`           | -       | Value content, or a function of the render props |
+| `...rest`     |                                                                             |         | Every `<div>` attribute is accepted              |
+
+### ComboBox.Popover
+
+| Prop        | Type                                                                                                                                                                                                               | Default    | Description                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------ |
+| `placement` | `"bottom" \| "bottom left" \| "bottom right" \| "bottom start" \| "bottom end" \| "top" \| "top left" \| "top right" \| "top start" \| "top end" \| "left" \| "left top" \| "left bottom" \| "start" \| "start top" \| "start bottom" \| "right" \| "right top" \| "right bottom" \| "end" \| "end top" \| "end bottom"` | `"bottom"` | Placement of the popover relative to the field   |
+| `className` | `string`                                                                                                                                                                                                           | -          | Additional classes                               |
+| `children`  | `ReactNode`                                                                                                                                                                                                        | -          | Content children                                 |
+| `...rest`   |                                                                                                                                                                                                                    |            | Every React Aria `Popover` attribute is accepted |
+
+### Render Props
+
+`ComboBox` children and `className` functions receive `ComboBoxRenderProps`; `ComboBox.Value` functions receive these values:
+
+| Prop            | Type                    | Description                               |
+| --------------- | ----------------------- | ----------------------------------------- |
+| `isPlaceholder` | `boolean`               | Whether the value is a placeholder        |
+| `selectedItems` | `(T \| null)[]`         | The currently selected items              |
+| `selectedText`  | `string`                | The text of the selected items            |
+| `state`         | `ComboBoxState<T, M>`   | The state of the combo box                |
