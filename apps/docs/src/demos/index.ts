@@ -1398,6 +1398,70 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./radio-group/orientation").then((m) => m.Orientation),
     file: "radio-group/orientation.tsx",
   },
+  // range-calendar
+  "range-calendar-anchor-unavailable-dates": {
+    loader: () =>
+      import("./range-calendar/anchor-unavailable-dates").then((m) => m.AnchorUnavailableDates),
+    file: "range-calendar/anchor-unavailable-dates.tsx",
+  },
+  "range-calendar-basic": {
+    loader: () => import("./range-calendar/basic").then((m) => m.Basic),
+    file: "range-calendar/basic.tsx",
+  },
+  "range-calendar-controlled": {
+    loader: () => import("./range-calendar/controlled").then((m) => m.Controlled),
+    file: "range-calendar/controlled.tsx",
+  },
+  "range-calendar-day-view": {
+    loader: () => import("./range-calendar/day-view").then((m) => m.DayView),
+    file: "range-calendar/day-view.tsx",
+  },
+  "range-calendar-default-value": {
+    loader: () => import("./range-calendar/default-value").then((m) => m.DefaultValue),
+    file: "range-calendar/default-value.tsx",
+  },
+  "range-calendar-disabled": {
+    loader: () => import("./range-calendar/disabled").then((m) => m.Disabled),
+    file: "range-calendar/disabled.tsx",
+  },
+  "range-calendar-international-calendar": {
+    loader: () =>
+      import("./range-calendar/international-calendar").then((m) => m.InternationalCalendar),
+    file: "range-calendar/international-calendar.tsx",
+  },
+  "range-calendar-min-max-dates": {
+    loader: () => import("./range-calendar/min-max-dates").then((m) => m.MinMaxDates),
+    file: "range-calendar/min-max-dates.tsx",
+  },
+  "range-calendar-multiple-months": {
+    loader: () => import("./range-calendar/multiple-months").then((m) => m.MultipleMonths),
+    file: "range-calendar/multiple-months.tsx",
+  },
+  "range-calendar-non-contiguous-ranges": {
+    loader: () =>
+      import("./range-calendar/non-contiguous-ranges").then((m) => m.NonContiguousRanges),
+    file: "range-calendar/non-contiguous-ranges.tsx",
+  },
+  "range-calendar-read-only": {
+    loader: () => import("./range-calendar/read-only").then((m) => m.ReadOnly),
+    file: "range-calendar/read-only.tsx",
+  },
+  "range-calendar-unavailable-dates": {
+    loader: () => import("./range-calendar/unavailable-dates").then((m) => m.UnavailableDates),
+    file: "range-calendar/unavailable-dates.tsx",
+  },
+  "range-calendar-week-view": {
+    loader: () => import("./range-calendar/week-view").then((m) => m.WeekView),
+    file: "range-calendar/week-view.tsx",
+  },
+  "range-calendar-with-indicators": {
+    loader: () => import("./range-calendar/with-indicators").then((m) => m.WithIndicators),
+    file: "range-calendar/with-indicators.tsx",
+  },
+  "range-calendar-with-year-picker": {
+    loader: () => import("./range-calendar/with-year-picker").then((m) => m.WithYearPicker),
+    file: "range-calendar/with-year-picker.tsx",
+  },
   // scroll-shadow
   "scroll-shadow-basic": {
     loader: () => import("./scroll-shadow/basic").then((m) => m.Basic),

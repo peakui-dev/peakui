@@ -57,6 +57,7 @@
     "(feedback)/progress-bar",
     "(feedback)/progress-circle",
     "(forms)/radio-group",
+    "(pickers)/range-calendar",
     "(utilities)/scroll-shadow",
     "(forms)/search-field",
     "(buttons)/segmented-control",

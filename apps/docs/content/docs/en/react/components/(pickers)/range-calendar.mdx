@@ -1,0 +1,400 @@
+---
+title: Range Calendar
+description: Month grid for choosing a date range
+links:
+  rac: RangeCalendar
+  source: range-calendar/range-calendar.tsx
+  styles: range-calendar.css
+---
+
+## Usage
+
+```tsx
+import {RangeCalendar} from "@peakui/react";
+```
+
+<ComponentPreview name="range-calendar-basic" />
+
+### Anatomy
+
+```tsx
+import {RangeCalendar} from "@peakui/react";
+
+export default () => (
+  <RangeCalendar>
+    <RangeCalendar.Header>
+      <RangeCalendar.Heading />
+      <RangeCalendar.NavButton slot="previous" />
+      <RangeCalendar.NavButton slot="next" />
+    </RangeCalendar.Header>
+    <RangeCalendar.Grid>
+      <RangeCalendar.GridHeader>
+        {(day) => <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>}
+      </RangeCalendar.GridHeader>
+      <RangeCalendar.GridBody>
+        {(date) => (
+          <RangeCalendar.Cell date={date}>
+            <RangeCalendar.CellIndicator />
+          </RangeCalendar.Cell>
+        )}
+      </RangeCalendar.GridBody>
+    </RangeCalendar.Grid>
+    <RangeCalendar.YearPickerGrid>
+      <RangeCalendar.YearPickerGridBody>
+        {({year}) => <RangeCalendar.YearPickerCell year={year} />}
+      </RangeCalendar.YearPickerGridBody>
+    </RangeCalendar.YearPickerGrid>
+  </RangeCalendar>
+);
+```
+
+## Examples
+
+### Default Value
+
+<ComponentPreview name="range-calendar-default-value" />
+
+### Controlled
+
+<ComponentPreview name="range-calendar-controlled" />
+
+### With Year Picker
+
+`RangeCalendar.YearPickerTrigger` replaces `RangeCalendar.Heading` and opens the year grid.
+
+<ComponentPreview name="range-calendar-with-year-picker" />
+
+### Min and Max Dates
+
+<ComponentPreview name="range-calendar-min-max-dates" />
+
+### Unavailable Dates
+
+<ComponentPreview name="range-calendar-unavailable-dates" />
+
+### Anchor Unavailable Dates
+
+`isDateUnavailable` receives the first chosen date as its second argument.
+
+<ComponentPreview name="range-calendar-anchor-unavailable-dates" />
+
+### Non-Contiguous Ranges
+
+<ComponentPreview name="range-calendar-non-contiguous-ranges" />
+
+### Disabled
+
+<ComponentPreview name="range-calendar-disabled" />
+
+### Read Only
+
+<ComponentPreview name="range-calendar-read-only" />
+
+### With Indicators
+
+<ComponentPreview name="range-calendar-with-indicators" />
+
+### Multiple Months
+
+<ComponentPreview name="range-calendar-multiple-months" />
+
+### Day View
+
+<ComponentPreview name="range-calendar-day-view" />
+
+### Week View
+
+<ComponentPreview name="range-calendar-week-view" />
+
+### International Calendar
+
+The locale sets the calendar system and the first weekday.
+
+<ComponentPreview name="range-calendar-international-calendar" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<RangeCalendar className="w-80 max-w-80" aria-label="Booking dates">
+  {/* ... */}
+</RangeCalendar>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .range-calendar {
+    --range-calendar-width: calc(var(--spacing) * 80);
+  }
+
+  .range-calendar__cell {
+    --range-calendar-cell-bg-range: var(--color-success-soft);
+    --range-calendar-cell-bg-cap: var(--color-success);
+    --range-calendar-cell-fg-cap: var(--color-success-foreground);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The RangeCalendar component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/range-calendar.css)):
+
+#### Base Classes [!toc]
+
+- `.range-calendar` - Root container, 252px wide
+- `.range-calendar__header` - Heading and navigation row
+- `.range-calendar__heading` - Month and year text
+- `.range-calendar__nav-button` - Previous and next buttons
+- `.range-calendar__nav-button-icon` - Default chevron in a nav button
+- `.range-calendar__grid` - Month grid
+- `.range-calendar__grid-header` - Weekday row
+- `.range-calendar__header-cell` - Weekday name
+- `.range-calendar__grid-body` - Date rows
+- `.range-calendar__grid-row` - Hook for custom row styling
+- `.range-calendar__cell` - Date cell; carries the range track
+- `.range-calendar__cell-button` - Round day inside a cell; carries the range caps
+- `.range-calendar__cell-indicator` - Dot at the bottom of a cell
+
+#### Modifier Classes [!toc]
+
+- `.range-calendar--week-view` - Set when `visibleDuration` is in weeks
+- `.range-calendar--day-view` - Set when `visibleDuration` is in days
+
+#### Year Picker Classes [!toc]
+
+- `.calendar-year-picker__trigger` - Button that replaces the heading
+- `.calendar-year-picker__trigger-heading` - Month and year text
+- `.calendar-year-picker__trigger-indicator` - Chevron, turned while open
+- `.calendar-year-picker__year-grid` - Three-column grid laid over the date grid
+- `.calendar-year-picker__year-cell` - Year button
+
+### Slots
+
+- `[data-slot="range-calendar"]`
+- `[data-slot="range-calendar-header"]`
+- `[data-slot="range-calendar-heading"]`
+- `[data-slot="range-calendar-nav-button"]`
+- `[data-slot="range-calendar-nav-button-icon"]`
+- `[data-slot="range-calendar-grid"]`
+- `[data-slot="range-calendar-grid-header"]`
+- `[data-slot="range-calendar-header-cell"]`
+- `[data-slot="range-calendar-grid-body"]`
+- `[data-slot="range-calendar-cell"]`
+- `[data-slot="range-calendar-cell-button"]`
+- `[data-slot="range-calendar-cell-indicator"]`
+- `[data-slot="calendar-year-picker-trigger"]`
+- `[data-slot="calendar-year-picker-trigger-heading"]`
+- `[data-slot="calendar-year-picker-trigger-indicator"]`
+- `[data-slot="calendar-year-picker-grid"]`
+- `[data-slot="calendar-year-picker-year-cell"]`
+
+### CSS Variables
+
+| Variable                                | Purpose                                      |
+| --------------------------------------- | -------------------------------------------- |
+| `--range-calendar-width`                | Width and maximum width of the calendar      |
+| `--range-calendar-cell-bg-hover`        | Hovered day background                       |
+| `--range-calendar-cell-bg-today`        | Today's day background                       |
+| `--range-calendar-cell-bg-today-hover`  | Hovered today's day background              |
+| `--range-calendar-cell-bg-range`        | Background of the range track                |
+| `--range-calendar-cell-bg-cap`          | Background of the first and last day         |
+| `--range-calendar-cell-fg-cap`          | Text color of the first and last day         |
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[data-disabled="true"]`
+- **Selected**: `[data-selected="true"]` on every cell in the range
+- **Range start**: `[data-selection-start="true"]` on a cell
+- **Range end**: `[data-selection-end="true"]` on a cell
+- **Today**: `[data-today="true"]` on a cell
+- **Outside month**: `[data-outside-month="true"]` on a cell
+- **Unavailable**: `[data-unavailable="true"]` on a cell
+- **Open**: `[data-open="true"]` on the year picker trigger and grid
+
+## API Reference
+
+### RangeCalendar
+
+| Prop                        | Type                                                          | Default       | Description                                                      |
+| --------------------------- | ------------------------------------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `value`                     | `RangeValue<DateValue> \| null`                               | -             | The selected range (controlled)                                  |
+| `defaultValue`              | `RangeValue<DateValue> \| null`                               | -             | The initial selected range (uncontrolled)                        |
+| `onChange`                  | `(value: RangeValue<MappedDateValue<DateValue>>) => void`     | -             | Called when a range is completed                                 |
+| `minValue`                  | `DateValue`                                                   | 1 Jan 1900    | The earliest selectable date, in the locale's calendar           |
+| `maxValue`                  | `DateValue`                                                   | 31 Dec 2099   | The latest selectable date, in the locale's calendar             |
+| `isDateUnavailable`         | `(date: DateValue, anchorDate: CalendarDate \| null) => boolean` | -          | Marks a date as unavailable; `anchorDate` is the first chosen date |
+| `allowsNonContiguousRanges` | `boolean`                                                     | `false`       | With `isDateUnavailable`, lets a range contain unavailable dates |
+| `isDisabled`                | `boolean`                                                     | `false`       | Disables the whole calendar                                      |
+| `isReadOnly`                | `boolean`                                                     | `false`       | Allows focus and navigation but not selection                    |
+| `isInvalid`                 | `boolean`                                                     | -             | Marks the selection as invalid                                   |
+| `visibleDuration`           | `DateDuration`                                                | `{months: 1}` | The span shown at once: `months`, `weeks` or `days`              |
+| `firstDayOfWeek`            | `"sun" \| "mon" \| "tue" \| "wed" \| "thu" \| "fri" \| "sat"` | locale        | The first day of the week                                        |
+| `focusedValue`              | `DateValue`                                                   | -             | The focused date (controlled)                                    |
+| `defaultFocusedValue`       | `DateValue`                                                   | -             | The initially focused date                                       |
+| `onFocusChange`             | `(date: CalendarDate) => void`                                | -             | Called when the focused date changes                             |
+| `isYearPickerOpen`          | `boolean`                                                     | -             | Whether the year picker is open (controlled)                     |
+| `defaultYearPickerOpen`     | `boolean`                                                     | `false`       | Whether the year picker starts open                              |
+| `onYearPickerOpenChange`    | `(isYearPickerOpen: boolean) => void`                         | -             | Called when the year picker opens or closes                      |
+| `className`                 | `string \| ((values: RangeCalendarRenderProps) => string)`    | -             | Additional classes, or a function of the render props            |
+| `children`                  | `ReactNode \| ((values: RangeCalendarRenderProps) => ReactNode)` | -          | The parts, or a function of the render props                     |
+| `...rest`                   |                                                               |               | Every React Aria `RangeCalendar` prop, including `aria-label`    |
+
+### RangeCalendar.Header
+
+| Prop        | Type                                     | Default | Description                             |
+| ----------- | ---------------------------------------- | ------- | --------------------------------------- |
+| `render`    | `DOMRenderFunction<"header", undefined>` | -       | Replaces the default `<header>` element |
+| `className` | `string`                                 | -       | Additional classes                      |
+| `...rest`   |                                          |         | Every `<header>` attribute              |
+
+### RangeCalendar.Heading
+
+| Prop        | Type     | Default | Description                                         |
+| ----------- | -------- | ------- | --------------------------------------------------- |
+| `className` | `string` | -       | Additional classes                                  |
+| `...rest`   |          |         | Every React Aria `Heading` prop, including `offset` |
+
+### RangeCalendar.NavButton
+
+| Prop        | Type                                                | Default | Description                                           |
+| ----------- | --------------------------------------------------- | ------- | ----------------------------------------------------- |
+| `slot`      | `"previous" \| "next"`                              | -       | The direction; picks the default chevron              |
+| `children`  | `ReactNode`                                         | chevron | Replaces the default icon                             |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | -       | Additional classes, or a function of the render props |
+| `...rest`   |                                                     |         | Every React Aria `Button` prop                        |
+
+### RangeCalendar.Grid
+
+| Prop           | Type                            | Default   | Description                                              |
+| -------------- | ------------------------------- | --------- | -------------------------------------------------------- |
+| `weekdayStyle` | `"narrow" \| "short" \| "long"` | `"short"` | The format of the weekday names                          |
+| `offset`       | `DateDuration`                  | -         | Shifts the grid, for showing several months side by side |
+| `className`    | `string`                        | -         | Additional classes                                       |
+| `...rest`      |                                 |           | Every React Aria `CalendarGrid` prop                     |
+
+### RangeCalendar.GridHeader
+
+| Prop        | Type                            | Default | Description                                |
+| ----------- | ------------------------------- | ------- | ------------------------------------------ |
+| `children`  | `(day: string) => ReactElement` | -       | Renders one weekday name                   |
+| `className` | `string`                        | -       | Additional classes                         |
+| `...rest`   |                                 |         | Every React Aria `CalendarGridHeader` prop |
+
+### RangeCalendar.GridBody
+
+| Prop        | Type                                   | Default | Description                                                        |
+| ----------- | -------------------------------------- | ------- | ------------------------------------------------------------------ |
+| `children`  | `(date: CalendarDate) => ReactElement` | -       | Renders one date. From seven visible days up, rows follow the week |
+| `className` | `string`                               | -       | Additional classes                                                 |
+| `...rest`   |                                        |         | Every React Aria `CalendarGridBody` prop                           |
+
+### RangeCalendar.HeaderCell
+
+| Prop        | Type     | Default | Description                                |
+| ----------- | -------- | ------- | ------------------------------------------ |
+| `className` | `string` | -       | Additional classes                         |
+| `...rest`   |          |         | Every React Aria `CalendarHeaderCell` prop |
+
+### RangeCalendar.Cell
+
+| Prop        | Type                                                            | Default         | Description                                           |
+| ----------- | --------------------------------------------------------------- | --------------- | ----------------------------------------------------- |
+| `date`      | `CalendarDate`                                                  | -               | The date the cell stands for                          |
+| `children`  | `ReactNode \| ((values: CalendarCellRenderProps) => ReactNode)` | `formattedDate` | Cell content, or a function of the render props       |
+| `className` | `string \| ((values: CalendarCellRenderProps) => string)`       | -               | Additional classes, or a function of the render props |
+| `...rest`   |                                                                 |                 | Every React Aria `CalendarCell` prop                  |
+
+### RangeCalendar.CellIndicator
+
+| Prop        | Type                                   | Default | Description                           |
+| ----------- | -------------------------------------- | ------- | ------------------------------------- |
+| `render`    | `DOMRenderFunction<"span", undefined>` | -       | Replaces the default `<span>` element |
+| `className` | `string`                               | -       | Additional classes                    |
+| `...rest`   |                                        |         | Every `<span>` attribute              |
+
+### RangeCalendar.YearPickerTrigger
+
+| Prop        | Type                                                                         | Default | Description                                                                          |
+| ----------- | ---------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `children`  | `ReactNode \| ((values: CalendarYearPickerTriggerRenderProps) => ReactNode)` | -       | Trigger content, or a function of the render props                                   |
+| `className` | `string \| ((values: ButtonRenderProps) => string)`                          | -       | Additional classes, or a function of the render props                                |
+| `...rest`   |                                                                              |         | Every React Aria `Button` prop; `aria-label` defaults to "Month Year, year selector" |
+
+### RangeCalendar.YearPickerTriggerHeading
+
+| Prop        | Type                                                                         | Default        | Description                                    |
+| ----------- | ---------------------------------------------------------------------------- | -------------- | ---------------------------------------------- |
+| `format`    | `Intl.DateTimeFormatOptions`                                                 | -              | The format of the month and year               |
+| `offset`    | `DateDuration`                                                               | -              | Shows a month other than the first visible one |
+| `children`  | `ReactNode \| ((values: CalendarYearPickerTriggerRenderProps) => ReactNode)` | month and year | Replaces the text                              |
+| `render`    | `DOMRenderFunction<"span", undefined>`                                       | -              | Replaces the default `<span>` element          |
+| `className` | `string`                                                                     | -              | Additional classes                             |
+| `...rest`   |                                                                              |                | Every `<span>` attribute                       |
+
+### RangeCalendar.YearPickerTriggerIndicator
+
+| Prop        | Type                                                                         | Default | Description                           |
+| ----------- | ---------------------------------------------------------------------------- | ------- | ------------------------------------- |
+| `children`  | `ReactNode \| ((values: CalendarYearPickerTriggerRenderProps) => ReactNode)` | chevron | Replaces the chevron                  |
+| `render`    | `DOMRenderFunction<"span", undefined>`                                       | -       | Replaces the default `<span>` element |
+| `className` | `string`                                                                     | -       | Additional classes                    |
+| `...rest`   |                                                                              |         | Every `<span>` attribute              |
+
+### RangeCalendar.YearPickerGrid
+
+| Prop           | Type                                  | Default                  | Description                          |
+| -------------- | ------------------------------------- | ------------------------ | ------------------------------------ |
+| `visibleYears` | `number`                              | years between the bounds | How many years the grid lists        |
+| `format`       | `Intl.DateTimeFormatOptions`          | -                        | The format of the year labels        |
+| `render`       | `DOMRenderFunction<"div", undefined>` | -                        | Replaces the default `<div>` element |
+| `className`    | `string`                              | -                        | Additional classes                   |
+| `...rest`      |                                       |                          | Every `<div>` attribute              |
+
+### RangeCalendar.YearPickerGridBody
+
+| Prop       | Type                                                       | Default            | Description      |
+| ---------- | ---------------------------------------------------------- | ------------------ | ---------------- |
+| `children` | `(values: CalendarYearPickerCellRenderProps) => ReactNode` | a `YearPickerCell` | Renders one year |
+
+### RangeCalendar.YearPickerCell
+
+| Prop        | Type                                                                      | Default         | Description                                           |
+| ----------- | ------------------------------------------------------------------------- | --------------- | ----------------------------------------------------- |
+| `year`      | `number`                                                                  | -               | The year the button stands for                        |
+| `children`  | `ReactNode \| ((values: CalendarYearPickerCellRenderProps) => ReactNode)` | `formattedYear` | Cell content, or a function of the render props       |
+| `className` | `string \| ((values: ButtonRenderProps) => string)`                       | -               | Additional classes, or a function of the render props |
+| `...rest`   |                                                                           |                 | Every React Aria `Button` prop                        |
+
+### Render Props
+
+`RangeCalendar` and `RangeCalendar.Cell` pass the React Aria render props to `children` and `className` functions:
+
+| Part                 | Values                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RangeCalendar`      | `state`, `isDisabled`, `isInvalid`                                                                                                                           |
+| `RangeCalendar.Cell` | `date`, `formattedDate`, `isSelected`, `isSelectionStart`, `isSelectionEnd`, `isFocused`, `isHovered`, `isPressed`, `isUnavailable`, `isOutsideMonth`, `isDisabled` |
+
+The year picker parts share the render props of `Calendar`:
+
+| Prop            | Type         | Description                                                             |
+| --------------- | ------------ | ----------------------------------------------------------------------- |
+| `isOpen`        | `boolean`    | Whether the year picker is open (trigger parts)                         |
+| `monthYear`     | `string`     | The formatted month and year (trigger parts)                            |
+| `toggle`        | `() => void` | Opens or closes the year picker (trigger parts)                         |
+| `year`          | `number`     | The year (grid body and cell)                                           |
+| `formattedYear` | `string`     | The year formatted for the locale and calendar (grid body and cell)     |
+| `isSelected`    | `boolean`    | Whether the calendar is showing this year (grid body and cell)          |
+| `isCurrentYear` | `boolean`    | Whether this is the present calendar year (grid body and cell)          |
+| `selectYear`    | `() => void` | Shows this year and closes the picker (grid body and cell)              |
