@@ -21,6 +21,7 @@ export const COMPONENT_GROUPS = [
       "(pickers)/autocomplete",
       "(pickers)/calendar",
       "(pickers)/combo-box",
+      "(pickers)/date-picker",
       "(pickers)/range-calendar",
       "(pickers)/select",
     ],

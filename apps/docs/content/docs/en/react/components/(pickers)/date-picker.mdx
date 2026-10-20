@@ -1,0 +1,199 @@
+---
+title: DatePicker
+description: Selects a date from a field or a popover calendar
+links:
+  rac: DatePicker
+  source: date-picker/date-picker.tsx
+  styles: date-picker.css
+---
+
+## Usage
+
+```tsx
+import {Calendar, DateField, DatePicker, Label} from "@peakui/react";
+```
+
+<ComponentPreview name="date-picker-basic" />
+
+### Anatomy
+
+```tsx
+import {Calendar, DateField, DatePicker, Description, FieldError, Label} from "@peakui/react";
+
+export default () => (
+  <DatePicker>
+    <Label />
+    <DateField.Group>
+      <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+      <DateField.Suffix>
+        <DatePicker.Trigger>
+          <DatePicker.TriggerIndicator />
+        </DatePicker.Trigger>
+      </DateField.Suffix>
+    </DateField.Group>
+    <Description />
+    <FieldError />
+    <DatePicker.Popover>
+      <Calendar />
+    </DatePicker.Popover>
+  </DatePicker>
+);
+```
+
+## Examples
+
+### With Description
+
+<ComponentPreview name="date-picker-with-description" />
+
+### With Year Picker
+
+<ComponentPreview name="date-picker-with-year-picker" />
+
+### Controlled
+
+<ComponentPreview name="date-picker-controlled" />
+
+### With Validation
+
+`minValue` also limits the dates the calendar offers.
+
+<ComponentPreview name="date-picker-with-validation" />
+
+### Granularity
+
+<ComponentPreview name="date-picker-granularity" />
+
+### Custom Indicator
+
+<ComponentPreview name="date-picker-custom-indicator" />
+
+### Disabled
+
+<ComponentPreview name="date-picker-disabled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<DatePicker className="w-72">
+  <DatePicker.Popover className="p-4">{/* Calendar */}</DatePicker.Popover>
+</DatePicker>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .date-picker {
+    @apply flex flex-col gap-2;
+  }
+
+  .date-picker__trigger {
+    @apply rounded-lg text-accent;
+  }
+
+  .date-picker__popover {
+    @apply rounded-lg border border-border p-4;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The DatePicker component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/date-picker.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.date-picker` - Column of label, field and messages
+- `.date-picker__trigger` - The button that opens the popover
+- `.date-picker__trigger-indicator` - The icon inside the trigger
+- `.date-picker__popover` - The popover container
+
+### Slots
+
+- `[data-slot="date-picker"]`
+- `[data-slot="date-picker-trigger"]`
+- `[data-slot="date-picker-trigger-indicator"]`
+- `[data-slot="date-picker-popover"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible]` on trigger
+- **Disabled**: `:disabled`, `[data-disabled]` or `[aria-disabled="true"]` on trigger
+- **Invalid**: `[data-invalid]` or `[aria-invalid="true"]` on picker
+- **Entering**: `[data-entering]` on popover
+- **Exiting**: `[data-exiting]` on popover
+
+## API Reference
+
+### DatePicker
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `DateValue \| null` | - | Current value (controlled) |
+| `defaultValue` | `DateValue \| null` | - | Default value (uncontrolled) |
+| `onChange` | `(value: MappedDateValue<T> \| null) => void` | - | Handler called when the value changes |
+| `minValue` | `DateValue \| null` | - | Minimum selectable date, also applied to the calendar |
+| `maxValue` | `DateValue \| null` | - | Maximum selectable date, also applied to the calendar |
+| `isDateUnavailable` | `(date: DateValue) => boolean` | - | Whether a date is unavailable in the field |
+| `granularity` | `"day" \| "hour" \| "minute" \| "second"` | - | Smallest unit the field shows |
+| `isOpen` | `boolean` | - | Open state of the popover (controlled) |
+| `defaultOpen` | `boolean` | - | Default open state of the popover (uncontrolled) |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Handler called when the popover opens or closes |
+| `isDisabled` | `boolean` | - | Whether the picker is disabled |
+| `isReadOnly` | `boolean` | - | Whether the value can be selected but not changed |
+| `isRequired` | `boolean` | - | Whether user input is required |
+| `isInvalid` | `boolean` | - | Whether the value is invalid |
+| `name` | `string` | - | Name of the hidden input, used when submitting an HTML form |
+| `className` | `string \| (values: DatePickerRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode \| (values: DatePickerRenderProps & {defaultChildren: ReactNode \| undefined}) => ReactNode` | - | Picker content, or a function of the render props |
+| `...rest` | | | Every React Aria `DatePicker` attribute is accepted, including `aria-label` |
+
+### DatePicker.Trigger
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string \| (values: ButtonRenderProps) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode \| (values: ButtonRenderProps & {defaultChildren: ReactNode \| undefined}) => ReactNode` | - | Trigger content, or a function of the render props |
+| `...rest` | | | Every React Aria `Button` attribute is accepted |
+
+### DatePicker.TriggerIndicator
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `className` | `string` | - | Additional classes |
+| `children` | `ReactNode` | calendar icon | Custom indicator content |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | | | Every `<span>` attribute is accepted |
+
+### DatePicker.Popover
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placement` | `"bottom" \| "bottom left" \| "bottom right" \| "bottom start" \| "bottom end" \| "top" \| "top left" \| "top right" \| "top start" \| "top end" \| "left" \| "left top" \| "left bottom" \| "start" \| "start top" \| "start bottom" \| "right" \| "right top" \| "right bottom" \| "end" \| "end top" \| "end bottom"` | `"bottom"` | Placement of the popover relative to the field |
+| `className` | `string \| (values: PopoverRenderProps & {defaultClassName: string \| undefined}) => string` | - | Additional classes, or a function of the render props |
+| `children` | `ReactNode` | - | Popover content, usually a `Calendar` |
+| `...rest` | | | Every React Aria `Popover` attribute is accepted |
+
+### Render Props
+
+`DatePicker` accepts function `children` and `className`, and receives these values:
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `state` | `DatePickerState` | The state of the picker |
+| `isFocusWithin` | `boolean` | Whether focus is inside the picker |
+| `isFocusVisible` | `boolean` | Whether keyboard focus is visible inside the picker |
+| `isDisabled` | `boolean` | Whether the picker is disabled |
+| `isInvalid` | `boolean` | Whether the value is invalid |
+| `isOpen` | `boolean` | Whether the popover is open |
+| `isReadOnly` | `boolean` | Whether the picker is read-only |
+| `isRequired` | `boolean` | Whether the picker is required |
