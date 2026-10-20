@@ -45,6 +45,7 @@
     "(feedback)/meter",
     "(overlays)/modal",
     "(forms)/number-field",
+    "(navigation)/pagination",
     "(overlays)/popover",
     "(feedback)/progress-bar",
     "(feedback)/progress-circle",

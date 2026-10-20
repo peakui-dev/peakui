@@ -1,0 +1,183 @@
+/*
+ * Pagination. Class names come from src/components/pagination/pagination.styles.ts; all the
+ * Tailwind lives here. Every interactive state is written both as a pseudo-class and as a data-*
+ * attribute, so the stylesheet works without React. The default (md) size lives in the base
+ * classes; --md is empty on purpose.
+ */
+
+/* Base: summary and page list on one row, stacked on narrow screens. */
+.pagination {
+  @apply flex w-full flex-col items-center justify-between gap-4 sm:flex-row;
+}
+
+/* Summary: the "1 to 5 of 10" text */
+.pagination__summary {
+  @apply flex items-center gap-2 self-start text-sm text-muted sm:self-center;
+}
+
+/* Content: the list of items */
+.pagination__content {
+  @apply flex items-center gap-1 self-start sm:self-center;
+}
+
+/* Item: the list item around a link or an ellipsis */
+.pagination__item {
+  @apply inline-flex;
+}
+
+/* Link: a page button, styled as a ghost button */
+.pagination__link {
+  /* Theming seam */
+  --pagination-link-bg: transparent;
+  --pagination-link-bg-hover: var(--color-default-hover);
+  --pagination-link-bg-pressed: var(--color-default-hover);
+  --pagination-link-fg: var(--color-default-foreground);
+  --pagination-link-border: transparent;
+  --pagination-link-radius: var(--radius-3xl);
+
+  @apply relative isolate inline-flex size-10 origin-center items-center justify-center text-sm font-medium whitespace-nowrap outline-none select-none no-highlight md:size-9;
+
+  cursor: var(--cursor-interactive);
+  /* Held transparent so the forced-colors boundary causes no layout shift. */
+  border: 1px solid var(--pagination-link-border);
+  border-radius: var(--pagination-link-radius);
+  background-color: var(--pagination-link-bg);
+  color: var(--pagination-link-fg);
+  box-shadow: var(--focus-ring, 0 0 0 0 transparent, 0 0 0 0 transparent);
+
+  /* CRITICAL: motion-reduce must come after transition for the override to win. */
+  transition:
+    transform 250ms var(--ease-smooth),
+    background-color 100ms var(--ease-out),
+    box-shadow 100ms var(--ease-out);
+  @apply transform-gpu motion-reduce:transition-none;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--pagination-link-bg-hover);
+    }
+  }
+
+  &[data-hovered] {
+    background-color: var(--pagination-link-bg-hover);
+  }
+
+  &:active,
+  &[data-pressed] {
+    background-color: var(--pagination-link-bg-pressed);
+    transform: scale(0.97);
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible] {
+    @apply status-focused;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled] {
+    @apply status-disabled;
+  }
+
+  /* The current page */
+  &[data-active="true"],
+  &[aria-current="page"] {
+    --pagination-link-bg: var(--color-default);
+    --pagination-link-bg-hover: var(--color-default-hover);
+    --pagination-link-bg-pressed: var(--color-default-hover);
+  }
+
+  & svg {
+    @apply pointer-events-none size-4 shrink-0;
+  }
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+
+    &[data-active="true"],
+    &[aria-current="page"] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+}
+
+/* Previous and Next: wider than a page button, icon beside the label */
+.pagination__link--nav {
+  @apply w-auto gap-1.5 px-2.5;
+
+  & [data-slot="pagination-previous-icon"],
+  & [data-slot="pagination-next-icon"] {
+    @apply inline-flex rtl:rotate-180;
+  }
+}
+
+/* Ellipsis: the gap between page ranges */
+.pagination__ellipsis {
+  @apply inline-flex size-10 items-center justify-center text-sm text-muted select-none md:size-9;
+}
+
+/* ---------- Sizes ---------- */
+
+.pagination--sm {
+  .pagination__link {
+    @apply size-9 text-xs md:size-8;
+
+    &:active,
+    &[data-pressed] {
+      transform: scale(0.98);
+    }
+  }
+
+  .pagination__link--nav {
+    @apply w-auto px-2;
+  }
+
+  .pagination__ellipsis {
+    @apply size-9 text-xs md:size-8;
+  }
+
+  .pagination__summary {
+    @apply text-xs;
+  }
+}
+
+.pagination--md {
+  /* No styles: the default size lives in the base classes. */
+}
+
+.pagination--lg {
+  .pagination__link {
+    @apply size-11 text-base md:size-10;
+
+    &:active,
+    &[data-pressed] {
+      transform: scale(0.96);
+    }
+  }
+
+  .pagination__link--nav {
+    @apply w-auto px-3;
+  }
+
+  .pagination__ellipsis {
+    @apply size-11 text-base md:size-10;
+  }
+
+  .pagination__summary {
+    @apply text-base;
+  }
+}
+
+/*
+ * Differences from the reference pagination.css, each deliberate:
+ *
+ * 1. Sizes are one step larger (size-10 / md:size-9 at md): the 2.2 target-size floor is met with
+ *    margin for coarse pointers, and sm stays at 32px on fine pointers.
+ * 2. A constant transparent border and the radius through --pagination-link-radius, so forced
+ *    colors has a boundary to draw and variants cause no layout shift (button.css, same reason).
+ * 3. forced-colors block: the active page is carried by the background alone, which forced colors
+ *    flatten, so Highlight / HighlightText carry it. The reference has none.
+ * 4. Both [data-hovered] and :hover forms, and aria-current="page" styles the active link even
+ *    without the data-active attribute.
+ */
