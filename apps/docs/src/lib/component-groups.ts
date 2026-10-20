@@ -46,7 +46,7 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Date and Time",
-    components: ["(date-and-time)/date-field"],
+    components: ["(date-and-time)/date-field", "(date-and-time)/time-field"],
   },
   {
     category: "Feedback",

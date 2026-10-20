@@ -1881,6 +1881,55 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./textarea/variants").then((m) => m.Variants),
     file: "textarea/variants.tsx",
   },
+  // time-field
+  "time-field-basic": {
+    loader: () => import("./time-field/basic").then((m) => m.Basic),
+    file: "time-field/basic.tsx",
+  },
+  "time-field-controlled": {
+    loader: () => import("./time-field/controlled").then((m) => m.Controlled),
+    file: "time-field/controlled.tsx",
+  },
+  "time-field-disabled": {
+    loader: () => import("./time-field/disabled").then((m) => m.Disabled),
+    file: "time-field/disabled.tsx",
+  },
+  "time-field-full-width": {
+    loader: () => import("./time-field/full-width").then((m) => m.FullWidth),
+    file: "time-field/full-width.tsx",
+  },
+  "time-field-granularity": {
+    loader: () => import("./time-field/granularity").then((m) => m.Granularity),
+    file: "time-field/granularity.tsx",
+  },
+  "time-field-hour-cycle": {
+    loader: () => import("./time-field/hour-cycle").then((m) => m.HourCycle),
+    file: "time-field/hour-cycle.tsx",
+  },
+  "time-field-invalid": {
+    loader: () => import("./time-field/invalid").then((m) => m.Invalid),
+    file: "time-field/invalid.tsx",
+  },
+  "time-field-required": {
+    loader: () => import("./time-field/required").then((m) => m.Required),
+    file: "time-field/required.tsx",
+  },
+  "time-field-variants": {
+    loader: () => import("./time-field/variants").then((m) => m.Variants),
+    file: "time-field/variants.tsx",
+  },
+  "time-field-with-description": {
+    loader: () => import("./time-field/with-description").then((m) => m.WithDescription),
+    file: "time-field/with-description.tsx",
+  },
+  "time-field-with-prefix-and-suffix": {
+    loader: () => import("./time-field/with-prefix-and-suffix").then((m) => m.WithPrefixAndSuffix),
+    file: "time-field/with-prefix-and-suffix.tsx",
+  },
+  "time-field-with-validation": {
+    loader: () => import("./time-field/with-validation").then((m) => m.WithValidation),
+    file: "time-field/with-validation.tsx",
+  },
   // toast
   "toast-basic": {
     loader: () => import("./toast/basic").then((m) => m.Basic),

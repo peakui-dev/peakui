@@ -1,0 +1,24 @@
+/*
+ * TimeField. Class names come from src/components/time-field/time-field.styles.ts. The field
+ * is a column of label, group and messages; the visual control is DateInputGroup.
+ */
+
+.time-field {
+  @apply flex flex-col gap-1;
+
+  /* An invalid field shows its error message in place of the description. */
+  &[data-invalid="true"],
+  &[aria-invalid="true"] {
+    [data-slot="description"] {
+      @apply hidden;
+    }
+  }
+
+  [data-slot="label"] {
+    @apply w-fit;
+  }
+}
+
+.time-field--full-width {
+  @apply w-full;
+}

@@ -71,6 +71,7 @@
     "(collections)/tag-group",
     "(forms)/text-field",
     "(forms)/textarea",
+    "(date-and-time)/time-field",
     "(overlays)/toast",
     "(buttons)/toggle-button",
     "(buttons)/toggle-button-group",
