@@ -6,8 +6,9 @@ export function CustomStyles() {
       <Avatar>
         <Avatar.Fallback>JD</Avatar.Fallback>
       </Avatar>
-      <Badge className="[--badge-bg:var(--color-accent)] [--badge-fg:var(--color-accent-foreground)]">
-        New
+      {/* tabular-nums keeps the width steady as the count changes. */}
+      <Badge className="min-w-6 font-semibold tabular-nums" color="accent" variant="soft">
+        12
       </Badge>
     </Badge.Anchor>
   );

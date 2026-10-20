@@ -132,6 +132,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./badge/variants").then((m) => m.Variants),
     file: "badge/variants.tsx",
   },
+  "badge-with-content": {
+    loader: () => import("./badge/with-content").then((m) => m.WithContent),
+    file: "badge/with-content.tsx",
+  },
   // breadcrumbs
   "breadcrumbs-basic": {
     loader: () => import("./breadcrumbs/basic").then((m) => m.Basic),

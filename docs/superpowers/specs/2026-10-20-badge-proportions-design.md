@@ -131,5 +131,7 @@ own stories, demos and page, and no other component stylesheet references a `.ba
   animation. None exist in the reference either; each is a feature, not a proportion.
 - A smaller dot for a childless badge. The reference sizes a dot at the badge's full size and this
   keeps that, but 20px is arguably heavy for a status dot. Worth its own look.
-- Avatar imagery in the demos. The examples run on initials fallbacks because the project hosts no
-  avatar assets; sourcing them is a separate decision.
+- Avatar imagery beyond the first preview. `avatar-group/basic.tsx` already draws a portrait as an
+  inline SVG data URI, so the Usage preview uses that helper rather than grey initials; the rest of
+  the examples stay on fallbacks, because the badge is their subject and a portrait would only be
+  noise. Whether every avatar in the docs should carry one is a separate decision.
