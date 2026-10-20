@@ -42,9 +42,14 @@ The base class keeps carrying the `md` values and `.badge--md` stays empty, per 
 
 | size | `min-h` / `min-w` | font | `.badge__label` padding |
 | --- | --- | --- | --- |
-| `sm` | 16px (`min-h-4 min-w-4`) | `text-[10px]` | 4px (`px-1`) |
-| `md` | **20px** (`min-h-5 min-w-5`), was 28 | `text-xs` (12px), unchanged | **6px** (`px-1.5`), was 2 |
-| `lg` | **24px** (`min-h-6 min-w-6`), was 32 | `text-sm` (14px), unchanged | **8px** (`px-2`) |
+| `sm` | 16px (`min-h-4 min-w-4`) | `text-[10px]` | 2px (`px-0.5`), unchanged |
+| `md` | **20px** (`min-h-5 min-w-5`), was 28 | `text-xs` (12px), unchanged | **4px** (`px-1`), was 2 |
+| `lg` | **24px** (`min-h-6 min-w-6`), was 32 | `text-sm` (14px), unchanged | **6px** (`px-1.5`) |
+
+The padding is the smallest that lets text escape the floor while a single character still does
+not. Measured in Chromium, one digit renders as an exact circle at all three sizes; a wider scale
+(4/6/8) pushed a digit 1.25px past its height at `md`, which contradicts the single-character rule
+below.
 
 `md` keeps `text-xs` rather than taking an 11px arbitrary value: `css-authoring.md` allows an
 arbitrary value only where the scale has no entry, and 12px is on the scale. `sm` keeps its

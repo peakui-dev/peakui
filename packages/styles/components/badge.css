@@ -13,7 +13,10 @@
   @apply inline-flex shrink-0 items-center justify-center gap-0.5 font-medium;
 
   /* Default size (matches --md) */
-  @apply min-h-7 min-w-7 rounded-3xl text-xs leading-[1.34];
+  @apply min-h-5 min-w-5 text-xs leading-[1.34];
+
+  /* One radius for every size: each is a pill, and saying so once beats three clamped numbers. */
+  @apply rounded-full;
 
   /* Theming seams: fill, text and the ring that separates the badge from what it covers. */
   --badge-bg: var(--color-default);
@@ -31,8 +34,13 @@
   }
 }
 
+/*
+ * The label's inline padding is what turns text into a rounded rectangle: without it the content
+ * never outgrows the min-width floor and a short word renders as a circle. Markup children carry
+ * no label slot, so a dot and an icon keep the floor's square.
+ */
 .badge__label {
-  @apply px-0.5;
+  @apply px-1;
 }
 
 .badge-anchor {
@@ -44,7 +52,11 @@
    ========================================================================== */
 
 .badge--lg {
-  @apply min-h-8 min-w-8 rounded-2xl text-sm leading-[1.43];
+  @apply min-h-6 min-w-6 text-sm leading-[1.43];
+
+  .badge__label {
+    @apply px-1.5;
+  }
 }
 
 .badge--md {
@@ -52,7 +64,11 @@
 }
 
 .badge--sm {
-  @apply min-h-4 min-w-4 rounded-xl text-[10px] leading-[1.34];
+  @apply min-h-4 min-w-4 text-[10px] leading-[1.34];
+
+  .badge__label {
+    @apply px-0.5;
+  }
 }
 
 /* ==========================================================================
@@ -195,4 +211,15 @@
  *    translate. The placement names say which corner, so mirroring them under `dir="rtl"` would
  *    make `top-right` mean top left. A consumer who wants a badge at the inline end writes
  *    `placement` from the writing direction they have.
+ *
+ * 4. The size scale and the label's padding, and one radius instead of three. The reference floors
+ *    `min-width` at the badge's own height (28px at `md`) and gives the label 2px a side, so short
+ *    text never outgrows the floor: "New" measures 31.9 x 28 — a ratio of 1.14, a circle someone
+ *    sat on. Its own documentation never shows this, because every example there passes `sm`,
+ *    where 10px text clears a 16px floor. Heights drop to 20px and 24px at `md` and `lg`, the
+ *    label takes 2/4/6px, and all three sizes land near a ratio of 2 for a three-character label
+ *    while a single character still renders as a circle. The radius was `rounded-3xl`/`-2xl`/`-xl`
+ *    per size, three numbers the browser clamped to one result — half the height — so it is now
+ *    `rounded-full`, said once on the base class.
+ *    docs/superpowers/specs/2026-10-20-badge-proportions-design.md
  */

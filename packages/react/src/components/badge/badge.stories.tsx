@@ -142,9 +142,12 @@ export const Content: Story = {
       </Badge.Anchor>
       <Badge.Anchor>
         <Person initials="JD" />
-        {/* An icon carries no accessible name, so the badge states its own. */}
-        <Badge aria-label="New notifications" color="accent" {...args}>
-          <BellIcon className="size-3" />
+        {/*
+         * The name sits on the glyph, not on the badge: the badge renders a roleless span, and
+         * aria-label on one is prohibited — axe flags it, and assistive tech ignores it.
+         */}
+        <Badge color="accent" {...args}>
+          <BellIcon aria-label="New notifications" className="size-3" role="img" />
         </Badge>
       </Badge.Anchor>
     </Showcase>
