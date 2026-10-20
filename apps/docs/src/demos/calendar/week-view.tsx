@@ -1,3 +1,5 @@
+"use client";
+
 import {Calendar} from "@peakui/react";
 
 export function WeekView() {

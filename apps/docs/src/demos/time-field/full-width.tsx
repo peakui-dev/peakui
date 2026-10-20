@@ -1,3 +1,5 @@
+"use client";
+
 import {Label, TimeField} from "@peakui/react";
 
 export function FullWidth() {

@@ -1,3 +1,5 @@
+"use client";
+
 import {DateField, DateRangePicker, Label, RangeCalendar} from "@peakui/react";
 
 export function Basic() {

@@ -1,3 +1,5 @@
+"use client";
+
 import {DateField, Label} from "@peakui/react";
 
 export function Required() {

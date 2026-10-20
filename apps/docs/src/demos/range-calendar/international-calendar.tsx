@@ -1,3 +1,5 @@
+"use client";
+
 import {getLocalTimeZone, today} from "@internationalized/date";
 import {RangeCalendar} from "@peakui/react";
 import {I18nProvider} from "react-aria-components/I18nProvider";

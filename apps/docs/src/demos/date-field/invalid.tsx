@@ -1,3 +1,5 @@
+"use client";
+
 import {DateField, FieldError, Label} from "@peakui/react";
 
 export function Invalid() {

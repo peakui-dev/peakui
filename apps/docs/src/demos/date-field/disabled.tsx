@@ -1,3 +1,5 @@
+"use client";
+
 import {parseDate} from "@internationalized/date";
 import {DateField, Description, Label} from "@peakui/react";
 

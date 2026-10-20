@@ -1,3 +1,5 @@
+"use client";
+
 import {DateField, DateRangePicker, Description, Label, RangeCalendar} from "@peakui/react";
 
 export function WithDescription() {

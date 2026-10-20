@@ -1,3 +1,5 @@
+"use client";
+
 import {Time} from "@internationalized/date";
 import {Description, Label, TimeField} from "@peakui/react";
 

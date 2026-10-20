@@ -1,3 +1,5 @@
+"use client";
+
 import {ChevronDown} from "@gravity-ui/icons";
 import {Calendar, DateField, DatePicker, Label} from "@peakui/react";
 

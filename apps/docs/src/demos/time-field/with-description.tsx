@@ -1,3 +1,5 @@
+"use client";
+
 import {Description, Label, TimeField} from "@peakui/react";
 
 export function WithDescription() {

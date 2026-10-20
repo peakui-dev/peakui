@@ -1,3 +1,5 @@
+"use client";
+
 import {RangeCalendar} from "@peakui/react";
 
 export function WithYearPicker() {

@@ -1,3 +1,5 @@
+"use client";
+
 import {getLocalTimeZone, today} from "@internationalized/date";
 import {DateField, DateRangePicker, Label, RangeCalendar} from "@peakui/react";
 

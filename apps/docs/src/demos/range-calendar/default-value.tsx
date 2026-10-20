@@ -1,3 +1,5 @@
+"use client";
+
 import {parseDate} from "@internationalized/date";
 import {RangeCalendar} from "@peakui/react";
 

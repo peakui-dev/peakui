@@ -1,3 +1,5 @@
+"use client";
+
 import {ArrowLeft, ArrowRight} from "@gravity-ui/icons";
 import {Calendar} from "@peakui/react";
 
