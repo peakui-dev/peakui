@@ -670,6 +670,35 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./disclosure-group/custom-styles").then((m) => m.CustomStyles),
     file: "disclosure-group/custom-styles.tsx",
   },
+  // drawer
+  "drawer-backdrop-variants": {
+    loader: () => import("./drawer/backdrop-variants").then((m) => m.BackdropVariants),
+    file: "drawer/backdrop-variants.tsx",
+  },
+  "drawer-basic": {
+    loader: () => import("./drawer/basic").then((m) => m.Basic),
+    file: "drawer/basic.tsx",
+  },
+  "drawer-controlled": {
+    loader: () => import("./drawer/controlled").then((m) => m.Controlled),
+    file: "drawer/controlled.tsx",
+  },
+  "drawer-custom-styles": {
+    loader: () => import("./drawer/custom-styles").then((m) => m.CustomStyles),
+    file: "drawer/custom-styles.tsx",
+  },
+  "drawer-dismiss-behavior": {
+    loader: () => import("./drawer/dismiss-behavior").then((m) => m.DismissBehavior),
+    file: "drawer/dismiss-behavior.tsx",
+  },
+  "drawer-placements": {
+    loader: () => import("./drawer/placements").then((m) => m.Placements),
+    file: "drawer/placements.tsx",
+  },
+  "drawer-scrolling-body": {
+    loader: () => import("./drawer/scrolling-body").then((m) => m.ScrollingBody),
+    file: "drawer/scrolling-body.tsx",
+  },
   // dropdown
   "dropdown-basic": {
     loader: () => import("./dropdown/basic").then((m) => m.Basic),

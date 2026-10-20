@@ -1,0 +1,274 @@
+---
+title: Drawer
+description: Edge-docked panel overlay with drag to dismiss
+links:
+  rac: Modal
+  source: drawer/drawer.tsx
+  styles: drawer.css
+---
+
+## Usage
+
+```tsx
+import {Drawer} from "@peakui/react";
+```
+
+<ComponentPreview name="drawer-basic" />
+
+### Anatomy
+
+```tsx
+import {Button, Drawer} from "@peakui/react";
+
+export default () => (
+  <Drawer>
+    <Button>Open drawer</Button>
+    <Drawer.Backdrop>
+      <Drawer.Content>
+        <Drawer.Dialog>
+          <Drawer.Handle /> {/* Optional: drag affordance */}
+          <Drawer.CloseTrigger /> {/* Optional: close button */}
+          <Drawer.Header>
+            <Drawer.Heading />
+          </Drawer.Header>
+          <Drawer.Body />
+          <Drawer.Footer />
+        </Drawer.Dialog>
+      </Drawer.Content>
+    </Drawer.Backdrop>
+  </Drawer>
+);
+```
+
+## Examples
+
+### Placements
+
+<ComponentPreview name="drawer-placements" />
+
+### Scrolling Body
+
+<ComponentPreview name="drawer-scrolling-body" />
+
+### Controlled State
+
+<ComponentPreview name="drawer-controlled" />
+
+### Backdrop Variants
+
+<ComponentPreview name="drawer-backdrop-variants" />
+
+### Dismiss Behavior
+
+<ComponentPreview name="drawer-dismiss-behavior" />
+
+## Customization
+
+### Tailwind CSS
+
+<ComponentPreview name="drawer-custom-styles" />
+
+### Global CSS
+
+```css
+@layer components {
+  .drawer__backdrop {
+    @apply bg-linear-to-br from-black/50 to-black/70;
+  }
+
+  .drawer__dialog {
+    @apply rounded-2xl border border-white/10 shadow-2xl;
+  }
+
+  .drawer__header {
+    @apply text-center;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Drawer component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/drawer.css)):
+
+#### Base & Element Classes [!toc]
+
+- `.drawer__trigger` - Trigger element that opens the drawer
+- `.drawer__backdrop` - Overlay behind the drawer
+- `.drawer__content` - Positioning wrapper docked to an edge
+- `.drawer__dialog` - The drawer panel
+- `.drawer__header` - Header section for the title
+- `.drawer__heading` - Heading element styles
+- `.drawer__body` - Scrollable content area
+- `.drawer__footer` - Footer section for actions
+- `.drawer__handle` - Drag handle indicator
+- `.drawer__close-trigger` - Close button position styles
+
+#### Backdrop Variant Classes [!toc]
+
+- `.drawer__backdrop--opaque` - Dimmed backdrop (default)
+- `.drawer__backdrop--blur` - Blurred backdrop
+- `.drawer__backdrop--transparent` - Transparent backdrop
+
+#### Placement Classes [!toc]
+
+- `.drawer__content--bottom` - Docks to the bottom edge (default)
+- `.drawer__content--top` - Docks to the top edge
+- `.drawer__content--left` - Docks to the left edge
+- `.drawer__content--right` - Docks to the right edge
+- `.drawer__dialog--bottom`
+- `.drawer__dialog--top`
+- `.drawer__dialog--left` - Full-height side panel
+- `.drawer__dialog--right` - Full-height side panel
+
+### Slots
+
+- `[data-slot="drawer-trigger"]` - The `Drawer.Trigger` element
+- `[data-slot="drawer-backdrop"]` - The `Drawer.Backdrop` overlay
+- `[data-slot="drawer-content"]` - The `Drawer.Content` positioning wrapper
+- `[data-slot="drawer-dialog"]` - The `Drawer.Dialog` panel
+- `[data-slot="drawer-header"]` - The `Drawer.Header` element
+- `[data-slot="drawer-heading"]` - The `Drawer.Heading` element
+- `[data-slot="drawer-body"]` - The `Drawer.Body` element
+- `[data-slot="drawer-footer"]` - The `Drawer.Footer` element
+- `[data-slot="drawer-handle"]` - The `Drawer.Handle` element
+- `[data-slot="drawer-handle-bar"]` - The bar inside `Drawer.Handle`
+- `[data-slot="drawer-close-trigger"]` - The `Drawer.CloseTrigger` element; it renames CloseButton's slot through the typed `data-slot` prop
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--drawer-enter-duration` | Slide-in duration (`250ms`) |
+| `--drawer-exit-duration` | Slide-out duration (`200ms`) |
+| `--drawer-enter-ease` | Slide-in easing |
+| `--drawer-exit-ease` | Slide-out easing |
+
+### Interactive States
+
+The overlay parts carry React Aria animation states:
+
+- **Entering**: `[data-entering="true"]`
+- **Exiting**: `[data-exiting="true"]`
+- **Placement**: `[data-placement="bottom | top | left | right"]` on content and dialog
+- **Draggable**: `[data-dismissable="true"]` on the dialog
+
+The trigger supports both pseudo-classes and data attributes:
+
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]`
+- **Disabled**: `:disabled` or `[aria-disabled="true"]`
+- **Pressed**: `:active` or `[data-pressed="true"]`
+
+## API Reference
+
+### Drawer
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | The trigger element followed by the overlay |
+| `state` | `UseOverlayStateReturn` | - | Overlay state from `useOverlayState()` |
+| `...rest` | `DialogTriggerProps` | - | [React Aria DialogTrigger attributes](https://react-spectrum.adobe.com/react-aria/DialogTrigger.html) |
+
+### Drawer.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Trigger content |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ButtonProps` | - | [React Aria Button attributes](https://react-spectrum.adobe.com/react-aria/Button.html) |
+
+### Drawer.Backdrop
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"opaque" \| "blur" \| "transparent"` | `"opaque"` | Backdrop overlay style |
+| `isDismissable` | `boolean` | `true` | Close on backdrop click and on drag; `false` disables both |
+| `isKeyboardDismissDisabled` | `boolean` | `false` | Disable the Escape key |
+| `isOpen` | `boolean` | - | Controlled open state |
+| `defaultOpen` | `boolean` | `false` | Initially open, without controlling |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Open state change handler |
+| `UNSTABLE_portalContainer` | `HTMLElement` | - | Custom portal container |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ModalOverlayProps` | - | [React Aria ModalOverlay attributes](https://react-spectrum.adobe.com/react-aria/Modal.html) |
+
+### Drawer.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placement` | `"bottom" \| "top" \| "left" \| "right"` | `"bottom"` | Edge the panel docks to |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ModalProps` | - | [React Aria Modal attributes](https://react-spectrum.adobe.com/react-aria/Modal.html) |
+
+### Drawer.Dialog
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode \| (({close}) => React.ReactNode)` | - | Content, or a function receiving `close` |
+| `role` | `"dialog" \| "alertdialog"` | `"dialog"` | ARIA role |
+| `aria-label` | `string` | - | Accessible name when no `Drawer.Heading` is present |
+| `aria-labelledby` | `string` | - | ID of the labelling element; set from `Drawer.Heading` |
+| `aria-describedby` | `string` | - | ID of the describing element |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `DialogProps` | - | [React Aria Dialog attributes](https://react-spectrum.adobe.com/react-aria/Dialog.html) |
+
+### Drawer.Header
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Header content |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Drawer.Heading
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Heading text; labels the dialog via `aria-labelledby` |
+| `className` | `string` | - | Additional classes |
+| `...rest` | `HeadingProps` | - | [React Aria Heading attributes](https://react-spectrum.adobe.com/react-aria/Heading.html) |
+
+### Drawer.Body
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Body content; scrolls on its own and never starts a drag. Add `tabIndex={0}` when it overflows so the keyboard can reach it |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Drawer.Footer
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Footer content, usually buttons |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'` |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Drawer.Handle
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered `<div>`; `E` defaults to `'div'`. Hidden from assistive technology |
+| `...rest` | `HTMLAttributes` | - | The attributes of the rendered element |
+
+### Drawer.CloseTrigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `React.ReactNode` | - | Custom close button content; defaults to the cross glyph |
+| `className` | `string \| ((renderProps) => string)` | - | Additional classes, or a function of the state |
+| `...rest` | `ButtonProps` | - | [React Aria Button attributes](https://react-spectrum.adobe.com/react-aria/Button.html); `slot` defaults to `"close"` |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `Drawer.Backdrop` `className` | `(renderProps: ModalOverlayRenderProps) => string` | Computes classes from `isEntering`, `isExiting` and `state` |
+| `Drawer.Content` `className` | `(renderProps: ModalRenderProps) => string` | Computes classes from `isEntering`, `isExiting` and `state` |
+| `Drawer.Dialog` `children` | `(opts: {close: () => void}) => React.ReactNode` | Renders content with a callback that closes the drawer |

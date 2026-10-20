@@ -100,6 +100,7 @@ export const COMPONENT_GROUPS = [
     category: "Overlays",
     components: [
       "(overlays)/alert-dialog",
+      "(overlays)/drawer",
       "(overlays)/modal",
       "(overlays)/popover",
       "(overlays)/toast",

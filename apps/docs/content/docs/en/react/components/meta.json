@@ -33,6 +33,7 @@
     "(forms)/description",
     "(navigation)/disclosure",
     "(navigation)/disclosure-group",
+    "(overlays)/drawer",
     "(collections)/dropdown",
     "(feedback)/empty-state",
     "(forms)/error-message",
