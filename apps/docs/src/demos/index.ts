@@ -1035,6 +1035,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./number-field/with-step").then((m) => m.WithStep),
     file: "number-field/with-step.tsx",
   },
+  // pagination
+  "pagination-basic": {
+    loader: () => import("./pagination/basic").then((m) => m.Basic),
+    file: "pagination/basic.tsx",
+  },
+  "pagination-controlled": {
+    loader: () => import("./pagination/controlled").then((m) => m.Controlled),
+    file: "pagination/controlled.tsx",
+  },
+  "pagination-sizes": {
+    loader: () => import("./pagination/sizes").then((m) => m.Sizes),
+    file: "pagination/sizes.tsx",
+  },
+  "pagination-with-ellipsis": {
+    loader: () => import("./pagination/with-ellipsis").then((m) => m.WithEllipsis),
+    file: "pagination/with-ellipsis.tsx",
+  },
+  "pagination-with-summary": {
+    loader: () => import("./pagination/with-summary").then((m) => m.WithSummary),
+    file: "pagination/with-summary.tsx",
+  },
   // popover
   "popover-basic": {
     loader: () => import("./popover/basic").then((m) => m.Basic),

@@ -1,0 +1,257 @@
+---
+title: Pagination
+description: Page navigation with numbered links
+links:
+  source: pagination/pagination.tsx
+  styles: pagination.css
+---
+
+## Usage
+
+```tsx
+import {Pagination} from "@peakui/react";
+```
+
+<ComponentPreview name="pagination-basic" />
+
+### Anatomy
+
+```tsx
+import {Pagination} from "@peakui/react";
+
+export default () => (
+  <Pagination>
+    <Pagination.Summary>1 to 5 of 42</Pagination.Summary>
+    <Pagination.Content>
+      <Pagination.Item>
+        <Pagination.Previous aria-label="Previous page">
+          <Pagination.PreviousIcon />
+        </Pagination.Previous>
+      </Pagination.Item>
+      <Pagination.Item>
+        <Pagination.Link isActive>1</Pagination.Link>
+      </Pagination.Item>
+      <Pagination.Item>
+        <Pagination.Ellipsis />
+      </Pagination.Item>
+      <Pagination.Item>
+        <Pagination.Next aria-label="Next page">
+          <Pagination.NextIcon />
+        </Pagination.Next>
+      </Pagination.Item>
+    </Pagination.Content>
+  </Pagination>
+);
+```
+
+## Examples
+
+### Sizes
+
+<ComponentPreview name="pagination-sizes" />
+
+### With Summary
+
+<ComponentPreview name="pagination-with-summary" />
+
+### With Ellipsis
+
+<ComponentPreview name="pagination-with-ellipsis" />
+
+### Controlled
+
+`isActive` marks the current page; `onPress` on each link changes it.
+
+<ComponentPreview name="pagination-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Pagination className="justify-center">
+  <Pagination.Content>
+    <Pagination.Item>
+      <Pagination.Link className="rounded-md" isActive>
+        1
+      </Pagination.Link>
+    </Pagination.Item>
+  </Pagination.Content>
+</Pagination>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .pagination__link {
+    --pagination-link-radius: var(--radius-md);
+  }
+
+  .pagination__link[data-active="true"] {
+    --pagination-link-bg: var(--color-accent);
+    --pagination-link-fg: var(--color-accent-foreground);
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Pagination component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/pagination.css)):
+
+#### Base & Size Classes [!toc]
+
+- `.pagination` - Base container: summary and page list on one row
+- `.pagination--sm` - Small size
+- `.pagination--md` - Medium size (default)
+- `.pagination--lg` - Large size
+
+#### Element Classes [!toc]
+
+- `.pagination__summary` - The summary text
+- `.pagination__content` - The page list
+- `.pagination__item` - Each list item
+- `.pagination__link` - A page button
+- `.pagination__link--nav` - Previous and Next: wider, icon beside the label
+- `.pagination__ellipsis` - The gap between page ranges
+
+### Slots
+
+- `[data-slot="pagination"]` - The root `<nav>`
+- `[data-slot="pagination-summary"]` - The summary
+- `[data-slot="pagination-content"]` - The `<ul>`
+- `[data-slot="pagination-item"]` - Each `<li>`
+- `[data-slot="pagination-link"]` - A page button
+- `[data-slot="pagination-previous"]` - The Previous button
+- `[data-slot="pagination-previous-icon"]` - The Previous icon
+- `[data-slot="pagination-next"]` - The Next button
+- `[data-slot="pagination-next-icon"]` - The Next icon
+- `[data-slot="pagination-ellipsis"]` - The ellipsis
+
+### CSS Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `--pagination-link-bg` | Link background color |
+| `--pagination-link-bg-hover` | Link background color when hovered |
+| `--pagination-link-bg-pressed` | Link background color when pressed |
+| `--pagination-link-fg` | Link text and icon color |
+| `--pagination-link-border` | Link border color |
+| `--pagination-link-radius` | Link corner radius |
+
+### Interactive States
+
+The links support both CSS pseudo-classes and data attributes:
+
+- **Hover**: `:hover` or `[data-hovered]`
+- **Focus**: `:focus-visible` or `[data-focus-visible]`
+- **Pressed**: `:active` or `[data-pressed]`
+- **Active page**: `[data-active="true"]` or `[aria-current="page"]`
+- **Disabled**: `:disabled`, `[aria-disabled="true"]` or `[data-disabled]`
+
+## API Reference
+
+### Pagination
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Size of the links, ellipsis and summary |
+| `children` | `ReactNode` | - | The summary and the page list |
+| `className` | `string` | - | Additional classes on the `<nav>` |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'nav'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | `aria-label` defaults to `"Pagination"`; every other `<nav>` attribute is accepted |
+
+### Pagination.Summary
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The summary text |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'div'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | `dir` defaults to `"auto"`; every other `<div>` attribute is accepted |
+
+### Pagination.Content
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The items |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'ul'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Every other `<ul>` attribute |
+
+### Pagination.Item
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | A link, Previous, Next or ellipsis |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'li'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Every other `<li>` attribute |
+
+### Pagination.Link
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isActive` | `boolean` | - | Marks the current page: sets `aria-current="page"` and `data-active` |
+| `isDisabled` | `boolean` | - | Whether the link is disabled |
+| `onPress` | `(e: PressEvent) => void` | - | Handler called when the link is pressed |
+| `children` | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | - | The page label, or a function of the button's state |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | - | Additional classes, or a function of the button's state |
+| `...rest` | `ButtonProps` | - | Every other [React Aria Button](https://react-aria.adobe.com/Button) prop |
+
+### Pagination.Previous
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isDisabled` | `boolean` | - | Whether the button is disabled |
+| `onPress` | `(e: PressEvent) => void` | - | Handler called when the button is pressed |
+| `children` | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | - | Icon and label; pass `aria-label` when there is no text |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | - | Additional classes, or a function of the button's state |
+| `...rest` | `ButtonProps` | - | Every other [React Aria Button](https://react-aria.adobe.com/Button) prop |
+
+### Pagination.Next
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isDisabled` | `boolean` | - | Whether the button is disabled |
+| `onPress` | `(e: PressEvent) => void` | - | Handler called when the button is pressed |
+| `children` | `ReactNode \| ((values: ButtonRenderProps) => ReactNode)` | - | Label and icon; pass `aria-label` when there is no text |
+| `className` | `string \| ((values: ButtonRenderProps) => string)` | - | Additional classes, or a function of the button's state |
+| `...rest` | `ButtonProps` | - | Every other [React Aria Button](https://react-aria.adobe.com/Button) prop |
+
+### Pagination.PreviousIcon
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | left chevron | Replaces the default icon |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Rendered with `aria-hidden="true"`; every other `<span>` attribute |
+
+### Pagination.NextIcon
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | right chevron | Replaces the default icon |
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Rendered with `aria-hidden="true"`; every other `<span>` attribute |
+
+### Pagination.Ellipsis
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional classes |
+| `render` | `DOMRenderFunction<E, undefined>` | - | Replaces the rendered element; `E` defaults to `'span'` |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Rendered with `aria-hidden="true"`; every other `<span>` attribute |
+
+### Render Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `(values: ButtonRenderProps) => ReactNode` | On Link, Previous and Next; receives `isHovered`, `isPressed`, `isFocused`, `isFocusVisible`, `isDisabled` |
+| `className` | `(values: ButtonRenderProps) => string` | Same values as `children` |

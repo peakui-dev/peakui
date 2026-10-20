@@ -48,6 +48,7 @@ export * from "./menu-section/index.ts";
 export * from "./meter/index.ts";
 export * from "./modal/index.ts";
 export * from "./number-field/index.ts";
+export * from "./pagination/index.ts";
 export * from "./popover/index.ts";
 export * from "./progress-bar/index.ts";
 export * from "./progress-circle/index.ts";
