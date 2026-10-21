@@ -3,5 +3,5 @@
   "description": "PeakUI Release Notes",
   "icon": "rocket",
   "root": true,
-  "pages": ["index"]
+  "pages": ["index", "v0-0-1"]
 }
