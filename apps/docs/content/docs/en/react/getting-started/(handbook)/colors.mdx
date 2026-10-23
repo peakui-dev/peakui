@@ -7,89 +7,91 @@ Colors are semantic: a component asks for a role, never for a value. Every role 
 content has a `-foreground` partner readable on it, and the two move together when a theme
 changes one.
 
-Each plate below is filled with its own token, so this page shows the theme you are running —
-switch to dark mode and it follows.
+Each role below is shown in both shipped themes at once, drawn from the tokens themselves — the
+name on a band is written in the foreground it pairs with, on the background it pairs with, so
+what you read is the pair doing its job.
 
 ## Accent
 
-The primary action, used sparingly: overuse costs it its meaning.
+The primary action, used sparingly: overuse costs it its meaning. A `-soft` role is the same hue
+at low opacity, for a tint that lets the surface through.
 
-<ColorSectionSideBySide
-  base={{name: "accent", utility: "bg-accent"}}
-  foreground={{name: "accent-foreground", utility: "text-accent-foreground"}}
-  hover={{name: "accent-hover"}}
-  soft={{
-    base: {name: "accent-soft", utility: "bg-accent-soft"},
-    foreground: {name: "accent-soft-foreground"},
-    hover: {name: "accent-soft-hover"},
-  }}
+<ColorSpecimen
+  label="Accent"
+  utilities={["bg-accent", "text-accent-foreground", "bg-accent-soft"]}
+  bands={[
+    {foreground: "accent-foreground", name: "accent"},
+    {foreground: "accent-foreground", name: "accent-hover"},
+    {foreground: "accent-soft-foreground", name: "accent-soft"},
+    {foreground: "accent-soft-foreground", name: "accent-soft-hover"},
+  ]}
 />
-
-A `-soft` role is the same hue at low opacity, for a tint that lets the surface through.
 
 ## Default
 
 The neutral control: every button, chip and toggle that carries no status.
 
-<ColorSectionSideBySide
-  base={{name: "default", utility: "bg-default"}}
-  foreground={{name: "default-foreground", utility: "text-default-foreground"}}
-  hover={{name: "default-hover"}}
-  soft={{
-    base: {name: "default-soft"},
-    foreground: {name: "default-soft-foreground"},
-    hover: {name: "default-soft-hover"},
-  }}
+<ColorSpecimen
+  label="Default"
+  utilities={["bg-default", "text-default-foreground"]}
+  bands={[
+    {foreground: "default-foreground", name: "default"},
+    {foreground: "default-foreground", name: "default-hover"},
+    {foreground: "default-soft-foreground", name: "default-soft"},
+    {foreground: "default-soft-foreground", name: "default-soft-hover"},
+  ]}
 />
 
 ## Success
 
-<ColorSectionSideBySide
-  base={{name: "success", utility: "bg-success"}}
-  foreground={{name: "success-foreground", utility: "text-success-foreground"}}
-  hover={{name: "success-hover"}}
-  soft={{
-    base: {name: "success-soft"},
-    foreground: {name: "success-soft-foreground"},
-    hover: {name: "success-soft-hover"},
-  }}
+<ColorSpecimen
+  label="Success"
+  utilities={["bg-success", "text-success-foreground"]}
+  bands={[
+    {foreground: "success-foreground", name: "success"},
+    {foreground: "success-foreground", name: "success-hover"},
+    {foreground: "success-soft-foreground", name: "success-soft"},
+    {foreground: "success-soft-foreground", name: "success-soft-hover"},
+  ]}
 />
 
 ## Warning
 
-<ColorSectionSideBySide
-  base={{name: "warning", utility: "bg-warning"}}
-  foreground={{name: "warning-foreground", utility: "text-warning-foreground"}}
-  hover={{name: "warning-hover"}}
-  soft={{
-    base: {name: "warning-soft"},
-    foreground: {name: "warning-soft-foreground"},
-    hover: {name: "warning-soft-hover"},
-  }}
+<ColorSpecimen
+  label="Warning"
+  utilities={["bg-warning", "text-warning-foreground"]}
+  bands={[
+    {foreground: "warning-foreground", name: "warning"},
+    {foreground: "warning-foreground", name: "warning-hover"},
+    {foreground: "warning-soft-foreground", name: "warning-soft"},
+    {foreground: "warning-soft-foreground", name: "warning-soft-hover"},
+  ]}
 />
 
 ## Danger
 
-<ColorSectionSideBySide
-  base={{name: "danger", utility: "bg-danger"}}
-  foreground={{name: "danger-foreground", utility: "text-danger-foreground"}}
-  hover={{name: "danger-hover"}}
-  soft={{
-    base: {name: "danger-soft"},
-    foreground: {name: "danger-soft-foreground"},
-    hover: {name: "danger-soft-hover"},
-  }}
+<ColorSpecimen
+  label="Danger"
+  utilities={["bg-danger", "text-danger-foreground"]}
+  bands={[
+    {foreground: "danger-foreground", name: "danger"},
+    {foreground: "danger-foreground", name: "danger-hover"},
+    {foreground: "danger-soft-foreground", name: "danger-soft"},
+    {foreground: "danger-soft-foreground", name: "danger-soft-hover"},
+  ]}
 />
 
 ## Text
 
 `--muted` is secondary text, not disabled text: a disabled control carries `--disabled-opacity`.
 
-<ColorSectionStacked
-  tokens={[
-    {foreground: "background", name: "foreground", utility: "text-foreground"},
-    {foreground: "background", name: "muted", utility: "text-muted"},
-    {foreground: "background", name: "link", utility: "text-link"},
+<ColorSpecimen
+  label="Text"
+  utilities={["text-foreground", "text-muted", "text-link"]}
+  bands={[
+    {kind: "ink", name: "foreground"},
+    {kind: "ink", name: "muted"},
+    {kind: "ink", name: "link"},
   ]}
 />
 
@@ -97,9 +99,11 @@ The neutral control: every button, chip and toggle that carries no status.
 
 The page itself, with two deeper levels for nested regions and one inversion.
 
-<ColorSectionStacked
-  tokens={[
-    {foreground: "foreground", name: "background", utility: "bg-background"},
+<ColorSpecimen
+  label="Backgrounds"
+  utilities={["bg-background", "bg-background-secondary"]}
+  bands={[
+    {foreground: "foreground", name: "background"},
     {foreground: "foreground", name: "background-secondary"},
     {foreground: "foreground", name: "background-tertiary"},
     {foreground: "background", name: "background-inverse"},
@@ -110,15 +114,14 @@ The page itself, with two deeper levels for nested regions and one inversion.
 
 A surface is a container that does not float: a card, a panel, a table header.
 
-<ColorSectionStacked
-  tokens={[
-    {foreground: "surface-foreground", name: "surface", utility: "bg-surface"},
-    {name: "surface-foreground", utility: "text-surface-foreground"},
+<ColorSpecimen
+  label="Surfaces"
+  utilities={["bg-surface", "text-surface-foreground"]}
+  bands={[
+    {foreground: "surface-foreground", name: "surface"},
     {foreground: "surface-foreground", name: "surface-hover"},
     {foreground: "surface-secondary-foreground", name: "surface-secondary"},
-    {name: "surface-secondary-foreground"},
     {foreground: "surface-tertiary-foreground", name: "surface-tertiary"},
-    {name: "surface-tertiary-foreground"},
   ]}
 />
 
@@ -126,51 +129,50 @@ A surface is a container that does not float: a card, a panel, a table header.
 
 Controls that sit on a surface rather than on the page, so they stay distinct from it.
 
-<ColorSectionStacked
-  tokens={[
-    {foreground: "on-surface-foreground", name: "on-surface", utility: "bg-on-surface"},
-    {name: "on-surface-foreground"},
+<ColorSpecimen
+  label="On surface"
+  utilities={["bg-on-surface", "text-on-surface-foreground"]}
+  bands={[
+    {foreground: "on-surface-foreground", name: "on-surface"},
     {foreground: "on-surface-foreground", name: "on-surface-hover"},
     {foreground: "on-surface-secondary-foreground", name: "on-surface-secondary"},
-    {name: "on-surface-secondary-foreground"},
     {foreground: "on-surface-secondary-foreground", name: "on-surface-secondary-hover"},
     {foreground: "on-surface-tertiary-foreground", name: "on-surface-tertiary"},
-    {name: "on-surface-tertiary-foreground"},
     {foreground: "on-surface-tertiary-foreground", name: "on-surface-tertiary-hover"},
   ]}
 />
 
 ## Overlays
 
-A floating container — popover, menu, tooltip — and the scrim behind a modal one.
+A floating container — popover, menu, tooltip — and the scrim behind a modal one. `--backdrop` is
+translucent, so it carries whatever is under it.
 
-<ColorSectionStacked
-  tokens={[
-    {foreground: "overlay-foreground", name: "overlay", utility: "bg-overlay"},
-    {name: "overlay-foreground"},
-    {name: "backdrop"},
+<ColorSpecimen
+  label="Overlays"
+  utilities={["bg-overlay", "text-overlay-foreground"]}
+  bands={[
+    {foreground: "overlay-foreground", name: "overlay"},
+    {foreground: "overlay-foreground", name: "backdrop"},
   ]}
 />
 
 ## Form Fields
 
 Fields carry their own roles, because a field reads as an input whatever surface holds it.
+`--field-border` is transparent in both themes — the field is told apart by its background, and
+the border appears on hover and focus.
 
-<ColorSectionFormField
-  background={{name: "field-background", utility: "bg-field"}}
-  border={{name: "field-border"}}
-  borderFocus={{name: "field-border-focus"}}
-  borderHover={{name: "field-border-hover"}}
-  foreground={{name: "field-foreground", utility: "text-field-foreground"}}
-  placeholder={{name: "field-placeholder", utility: "text-field-placeholder"}}
-/>
-
-`--field-focus` and `--field-hover` carry the background in those two states.
-
-<ColorSectionStacked
-  tokens={[
+<ColorSpecimen
+  label="Form fields"
+  utilities={["bg-field", "text-field-foreground", "text-field-placeholder"]}
+  bands={[
+    {foreground: "field-foreground", name: "field-background"},
     {foreground: "field-foreground", name: "field-hover"},
     {foreground: "field-foreground", name: "field-focus"},
+    {kind: "ink", name: "field-placeholder"},
+    {kind: "line", name: "field-border"},
+    {kind: "line", name: "field-border-hover"},
+    {kind: "line", name: "field-border-focus"},
   ]}
 />
 
@@ -178,26 +180,29 @@ Fields carry their own roles, because a field reads as an input whatever surface
 
 A border outlines a thing; a separator divides two. Each has two quieter levels.
 
-<ColorSectionStacked
-  tokens={[
-    {name: "border", utility: "border-border"},
-    {name: "border-secondary"},
-    {name: "border-tertiary"},
-    {name: "separator", utility: "border-separator"},
-    {name: "separator-secondary"},
-    {name: "separator-tertiary"},
+<ColorSpecimen
+  label="Borders and separators"
+  utilities={["border-border", "border-separator"]}
+  bands={[
+    {kind: "line", name: "border"},
+    {kind: "line", name: "border-secondary"},
+    {kind: "line", name: "border-tertiary"},
+    {kind: "line", name: "separator"},
+    {kind: "line", name: "separator-secondary"},
+    {kind: "line", name: "separator-tertiary"},
   ]}
 />
 
 ## Focus and Chrome
 
-<ColorSectionStacked
-  tokens={[
-    {name: "focus", utility: "ring-focus"},
+<ColorSpecimen
+  label="Focus and chrome"
+  utilities={["ring-focus"]}
+  bands={[
+    {kind: "line", name: "focus"},
     {foreground: "segment-foreground", name: "segment"},
-    {name: "segment-foreground"},
-    {name: "scrollbar-thumb"},
-    {name: "scrollbar-track"},
+    {foreground: "foreground", name: "scrollbar-track"},
+    {foreground: "foreground", name: "scrollbar-thumb"},
   ]}
 />
 
