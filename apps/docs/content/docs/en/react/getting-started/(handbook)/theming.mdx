@@ -36,25 +36,11 @@ Declare your values after the two imports:
 
 The library's values live in a cascade layer, so a plain rule in your stylesheet always wins over them.
 
+To try values against a whole page before writing any of this, use the [Theme Builder](/themes): it reports the contrast of each pair it changes and exports the CSS it shows.
+
 ## Colors
 
-Colors are semantic. Each role has a background value and a matching `-foreground` value that is readable on top of it.
-
-| Token | Utility examples | Purpose |
-|-------|------------------|---------|
-| `--background`, `--foreground` | `bg-background`, `text-foreground` | The page and its text |
-| `--surface`, `--surface-foreground` | `bg-surface` | Non-floating containers such as cards |
-| `--overlay`, `--overlay-foreground` | `bg-overlay` | Floating containers such as popovers and menus |
-| `--muted` | `text-muted` | Secondary text |
-| `--default`, `--default-foreground`, `--default-hover` | `bg-default` | Neutral controls |
-| `--accent`, `--accent-foreground`, `--accent-hover` | `bg-accent` | The primary action color |
-| `--success`, `--warning`, `--danger` (each with `-foreground` and `-hover`) | `bg-danger`, `text-success` | Status colors |
-| `--accent-soft`, `--danger-soft` and the other `-soft` roles | `bg-accent-soft` | Low-emphasis tints of a role |
-| `--border`, `--separator` | `border-border`, `border-separator` | Outlines and dividers |
-| `--focus` | `ring-focus` | The focus ring |
-| `--field-background`, `--field-foreground`, `--field-placeholder`, `--field-border` | `bg-field`, `text-field-placeholder` | Form fields |
-
-Surface and background also have `-secondary` and `-tertiary` levels for nested containers.
+Colors are semantic: each role carries a background value and a `-foreground` value readable on it. Every role, drawn as a plate from its own token, is on the [Colors](./colors) page.
 
 ## Radius
 
