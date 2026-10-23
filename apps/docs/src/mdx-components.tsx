@@ -9,6 +9,11 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import {Children, Suspense, isValidElement} from "react";
 
 import {CollapsibleCode} from "./components/collapsible-code";
+import {
+  ColorSectionFormField,
+  ColorSectionSideBySide,
+  ColorSectionStacked,
+} from "./components/color-section";
 import {ComponentPreview, ComponentPreviewFallback} from "./components/component-preview";
 import {ComponentsCategory} from "./components/components-category";
 import {Iconify} from "./components/iconify";
@@ -106,6 +111,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Cards,
     CodeBlock,
     CollapsibleCode,
+    ColorSectionFormField,
+    ColorSectionSideBySide,
+    ColorSectionStacked,
     ComponentCount,
     ComponentPreview: ComponentPreviewWithSuspense,
     ComponentsCategory,
