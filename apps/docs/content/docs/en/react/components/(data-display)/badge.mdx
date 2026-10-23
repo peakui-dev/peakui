@@ -38,9 +38,10 @@ dot. `Chip` is an inline label that takes its own place in the flow.
 
 ### Accessibility
 
-A badge has no role and is not announced when it changes. Its meaning is not carried by the
-badge alone: put it in the accessible name of the element it sits over, as in `aria-label="Inbox,
-5 unread"`, or give the badge an `aria-label` when it is the only carrier.
+A badge has no role and is not announced when it changes, so its meaning belongs in the accessible
+name of the element it sits over, as in `aria-label="Inbox, 5 unread"`. The badge renders a plain
+`<span>`, so `aria-label` on the badge itself is prohibited and assistive technology ignores it; an
+icon inside a badge carries its own name through `role="img"`.
 
 ## Examples
 
@@ -67,6 +68,12 @@ The names are physical: `top-right` is the top right corner in every writing dir
 A badge without children is a dot.
 
 <ComponentPreview name="badge-dot" />
+
+### With Content
+
+Text wider than the badge's height renders as a rounded rectangle; a single character stays a circle.
+
+<ComponentPreview name="badge-with-content" />
 
 ### On a Button
 
