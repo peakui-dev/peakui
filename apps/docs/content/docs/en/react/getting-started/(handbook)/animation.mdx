@@ -5,20 +5,21 @@ description: The easing and animation tokens, and how a component animates a sta
 
 Motion comes from three places: easing and animation tokens in the theme, the data attributes a
 component sets as its state changes, and the reduced-motion variant that stands all of it down.
-The library ships no animation dependency.
+It is CSS throughout — the entry and exit utilities come from `tw-animate-css`, which
+`@peakui/styles` imports for you, and there is no JavaScript motion library.
 
 ## Easing
 
 Each curve is a custom property and a Tailwind utility of the same name.
 
-| Token | Value | Used for |
+| Token | Value | Used by |
 |-------|-------|---------|
-| `--ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Overlays and most transitions |
-| `--ease-smooth` | `ease` | Short state changes: hover, press, focus |
-| `--ease-out-quart` | `cubic-bezier(0.165, 0.84, 0.44, 1)` | Longer travel, such as a drawer |
-| `--ease-out-fluid` | `cubic-bezier(0.32, 0.72, 0, 1)` | Movement that follows a gesture |
-| `--ease-out-quad` | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` | Small position changes |
-| `--ease-linear` | `linear` | Progress and spin, where speed must not vary |
+| `--ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | 46 stylesheets — the default for a transition |
+| `--ease-smooth` | `ease` | 35 stylesheets — hover, press and focus changes |
+| `--ease-out-quart` | `cubic-bezier(0.165, 0.84, 0.44, 1)` | Modal, Drawer, AlertDialog, Dropdown, MenuItem, ListBoxItem, CloseButton |
+| `--ease-out-fluid` | `cubic-bezier(0.32, 0.72, 0, 1)` | SegmentedControl, Switch, Tabs, Toast — a part that slides into place |
+| `--ease-out-quad` | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` | Accordion and Disclosure, opening and closing |
+| `--ease-linear` | `linear` | Checkbox, for the icon's scale and opacity |
 | `--ease-in-out-cubic` | `cubic-bezier(0.645, 0.045, 0.355, 1)` | Your own CSS: the library uses it nowhere |
 | `--ease-in-cubic` | `cubic-bezier(0.55, 0.055, 0.675, 0.19)` | Your own CSS: the library uses it nowhere |
 
@@ -34,7 +35,8 @@ Each curve is a custom property and a Tailwind utility of the same name.
 
 ## Looping Animations
 
-Three compositions, each a `@keyframes` and its timing, declared once in the theme.
+Three compositions, each a `@keyframes` and its timing. The `skeleton` and `caret-blink` keyframes
+are declared in the theme beside them; `spin` is Tailwind's own.
 
 | Token | Value | Utility | Used by |
 |-------|-------|---------|---------|
@@ -63,6 +65,10 @@ component stylesheets animate entry and exit this way, overlays among them.
 `data-placement` carries the side an overlay opened on, which is what lets one rule slide a
 popover in from the direction it came from. Each component page lists the attributes it sets.
 
+The library's own overlays write these phases with the `tw-animate-css` utilities rather than by
+hand — `animate-in`, `animate-out`, `fade-in-0`, `zoom-in-90`, `slide-in-from-bottom-1` — and they
+are available to you on the same attributes.
+
 ## Reduced Motion
 
 Every animated stylesheet in the library stands down when the reader asks for less motion, through
@@ -85,6 +91,7 @@ rather than along time, so there is no motion of its own to stop.
 
 ## Using a Motion Library
 
-There is no motion dependency, and a component does not need one to be replaced: every component
-renders through a `render` prop, so an element from a motion library can take its place. The
-mechanics are in [Composition](./composition).
+There is no JavaScript motion library here, and a component that renders a plain DOM element does
+not need one to be replaced: it takes a `render` prop, so an element from a motion library can
+take its place. Which components accept it, and the React Aria restriction that decides it, are in
+[Composition](./composition).

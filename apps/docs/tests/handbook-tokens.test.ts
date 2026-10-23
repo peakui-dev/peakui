@@ -4,7 +4,7 @@
  * from a token that no longer exists renders transparent and says nothing. These tests fail
  * instead.
  */
-import {readFileSync, readdirSync} from "node:fs";
+import {existsSync, readFileSync, readdirSync} from "node:fs";
 
 import {expect, it} from "vitest";
 
@@ -45,6 +45,42 @@ it("gives every handbook page a title and a description", () => {
     expect(source, page).toMatch(/^title: \S/m);
     expect(source, page).toMatch(/^description: \S/m);
   }
+});
+
+/*
+ * The easing table says which components use each curve. A reader retimes a token on the strength
+ * of that column, so every component named must really use it, and a token the page calls unused
+ * must really be used nowhere.
+ */
+it("attributes each easing curve to components that use it", () => {
+  const page = readFileSync(`${HANDBOOK}/animation.mdx`, "utf8");
+  const styles = "../../packages/styles/components";
+  const wrong: string[] = [];
+
+  for (const line of page.split("\n")) {
+    const row = /^\| `(--ease-[a-z-]+)` \| `[^`]+` \| (.+?) \|$/.exec(line);
+
+    if (!row) continue;
+
+    const [, token, claim] = row;
+    const used = (file: string) => readFileSync(`${styles}/${file}`, "utf8").includes(`var(${token})`);
+
+    if (claim?.includes("uses it nowhere")) {
+      const consumers = readdirSync(styles).filter((file) => file.endsWith(".css") && used(file));
+
+      if (consumers.length > 0) wrong.push(`${token}: called unused, used by ${consumers.join(", ")}`);
+      continue;
+    }
+
+    for (const name of claim?.match(/\b[A-Z][A-Za-z]+\b/g) ?? []) {
+      const file = `${name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}.css`;
+
+      if (!existsSync(`${styles}/${file}`)) wrong.push(`${token}: no stylesheet ${file}`);
+      else if (!used(file)) wrong.push(`${token}: ${file} does not use it`);
+    }
+  }
+
+  expect(wrong).toEqual([]);
 });
 
 it("names only motion tokens the shared theme declares", () => {
