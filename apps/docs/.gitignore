@@ -1,3 +1,4 @@
 /dist/
 .vinext/
 .cloudflare/
+.source-vitest/

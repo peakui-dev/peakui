@@ -7,7 +7,7 @@ const config = defineConfig([
     // Generated output of the two builds. next.mjs already ignores .next and .source; the
     // vinext build adds .cloudflare (30 MB of worker output), .vinext and dist — without
     // these entries eslint scans the build output and a lint run takes minutes.
-    ignores: [".cloudflare/**", ".vinext/**", "dist/**"],
+    ignores: [".cloudflare/**", ".vinext/**", "dist/**", ".source-vitest/**"],
   },
   {
     // Pin the tsconfig so the `@/*` aliases resolve the same way whether eslint runs from
