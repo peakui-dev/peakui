@@ -25,7 +25,9 @@ function captures(source: string, pattern: RegExp): string[] {
 it("names only colour tokens the default theme declares", () => {
   const declared = declaredTokens(VARIABLES);
   const page = readFileSync(`${HANDBOOK}/colors.mdx`, "utf8");
-  const named = captures(page, /(?:name|foreground): "([a-z0-9-]+)"/g).map((name) => `--${name}`);
+  const named = captures(page, /(?:name|foreground|over): "([a-z0-9-]+)"/g).map(
+    (name) => `--${name}`,
+  );
 
   expect(named.length).toBeGreaterThan(30);
   expect(named.filter((token) => !declared.has(token))).toEqual([]);
@@ -63,12 +65,14 @@ it("attributes each easing curve to components that use it", () => {
     if (!row) continue;
 
     const [, token, claim] = row;
-    const used = (file: string) => readFileSync(`${styles}/${file}`, "utf8").includes(`var(${token})`);
+    const used = (file: string) =>
+      readFileSync(`${styles}/${file}`, "utf8").includes(`var(${token})`);
 
     if (claim?.includes("uses it nowhere")) {
       const consumers = readdirSync(styles).filter((file) => file.endsWith(".css") && used(file));
 
-      if (consumers.length > 0) wrong.push(`${token}: called unused, used by ${consumers.join(", ")}`);
+      if (consumers.length > 0)
+        wrong.push(`${token}: called unused, used by ${consumers.join(", ")}`);
       continue;
     }
 

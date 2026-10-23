@@ -7,23 +7,38 @@ Colors are semantic: a component asks for a role, never for a value. Every role 
 content has a `-foreground` partner readable on it, and the two move together when a theme
 changes one.
 
-Each role below is shown in both shipped themes at once, drawn from the tokens themselves — the
-name on a band is written in the foreground it pairs with, on the background it pairs with, so
-what you read is the pair doing its job.
+Each role below is shown in both shipped themes at once, drawn from the tokens themselves. A
+variant is drawn **inside** the layer it appears on, because that is where it appears: a hover
+replaces the surface under it, a foreground is content on that surface, and a tint is stacked on
+whatever it tints. The name on a layer is written in the foreground it pairs with, so the label is
+the legibility test.
 
 ## Accent
 
 The primary action, used sparingly: overuse costs it its meaning. A `-soft` role is the same hue
-at low opacity, for a tint that lets the surface through.
+at low opacity, so what shows through it belongs to the layer underneath.
 
 <ColorSpecimen
   label="Accent"
   utilities={["bg-accent", "text-accent-foreground", "bg-accent-soft"]}
-  bands={[
-    {foreground: "accent-foreground", name: "accent"},
-    {foreground: "accent-foreground", name: "accent-hover"},
-    {foreground: "accent-soft-foreground", name: "accent-soft"},
-    {foreground: "accent-soft-foreground", name: "accent-soft-hover"},
+  layers={[
+    {
+      name: "accent",
+      foreground: "accent-foreground",
+      layers: [
+        {name: "accent-hover", foreground: "accent-foreground"},
+        {kind: "ink", name: "accent-foreground"},
+      ],
+    },
+    {
+      name: "accent-soft",
+      foreground: "accent-soft-foreground",
+      over: "surface",
+      layers: [
+        {name: "accent-soft-hover", foreground: "accent-soft-foreground"},
+        {kind: "ink", name: "accent-soft-foreground"},
+      ],
+    },
   ]}
 />
 
@@ -34,11 +49,24 @@ The neutral control: every button, chip and toggle that carries no status.
 <ColorSpecimen
   label="Default"
   utilities={["bg-default", "text-default-foreground"]}
-  bands={[
-    {foreground: "default-foreground", name: "default"},
-    {foreground: "default-foreground", name: "default-hover"},
-    {foreground: "default-soft-foreground", name: "default-soft"},
-    {foreground: "default-soft-foreground", name: "default-soft-hover"},
+  layers={[
+    {
+      name: "default",
+      foreground: "default-foreground",
+      layers: [
+        {name: "default-hover", foreground: "default-foreground"},
+        {kind: "ink", name: "default-foreground"},
+      ],
+    },
+    {
+      name: "default-soft",
+      foreground: "default-soft-foreground",
+      over: "surface",
+      layers: [
+        {name: "default-soft-hover", foreground: "default-soft-foreground"},
+        {kind: "ink", name: "default-soft-foreground"},
+      ],
+    },
   ]}
 />
 
@@ -47,11 +75,24 @@ The neutral control: every button, chip and toggle that carries no status.
 <ColorSpecimen
   label="Success"
   utilities={["bg-success", "text-success-foreground"]}
-  bands={[
-    {foreground: "success-foreground", name: "success"},
-    {foreground: "success-foreground", name: "success-hover"},
-    {foreground: "success-soft-foreground", name: "success-soft"},
-    {foreground: "success-soft-foreground", name: "success-soft-hover"},
+  layers={[
+    {
+      name: "success",
+      foreground: "success-foreground",
+      layers: [
+        {name: "success-hover", foreground: "success-foreground"},
+        {kind: "ink", name: "success-foreground"},
+      ],
+    },
+    {
+      name: "success-soft",
+      foreground: "success-soft-foreground",
+      over: "surface",
+      layers: [
+        {name: "success-soft-hover", foreground: "success-soft-foreground"},
+        {kind: "ink", name: "success-soft-foreground"},
+      ],
+    },
   ]}
 />
 
@@ -60,11 +101,24 @@ The neutral control: every button, chip and toggle that carries no status.
 <ColorSpecimen
   label="Warning"
   utilities={["bg-warning", "text-warning-foreground"]}
-  bands={[
-    {foreground: "warning-foreground", name: "warning"},
-    {foreground: "warning-foreground", name: "warning-hover"},
-    {foreground: "warning-soft-foreground", name: "warning-soft"},
-    {foreground: "warning-soft-foreground", name: "warning-soft-hover"},
+  layers={[
+    {
+      name: "warning",
+      foreground: "warning-foreground",
+      layers: [
+        {name: "warning-hover", foreground: "warning-foreground"},
+        {kind: "ink", name: "warning-foreground"},
+      ],
+    },
+    {
+      name: "warning-soft",
+      foreground: "warning-soft-foreground",
+      over: "surface",
+      layers: [
+        {name: "warning-soft-hover", foreground: "warning-soft-foreground"},
+        {kind: "ink", name: "warning-soft-foreground"},
+      ],
+    },
   ]}
 />
 
@@ -73,22 +127,36 @@ The neutral control: every button, chip and toggle that carries no status.
 <ColorSpecimen
   label="Danger"
   utilities={["bg-danger", "text-danger-foreground"]}
-  bands={[
-    {foreground: "danger-foreground", name: "danger"},
-    {foreground: "danger-foreground", name: "danger-hover"},
-    {foreground: "danger-soft-foreground", name: "danger-soft"},
-    {foreground: "danger-soft-foreground", name: "danger-soft-hover"},
+  layers={[
+    {
+      name: "danger",
+      foreground: "danger-foreground",
+      layers: [
+        {name: "danger-hover", foreground: "danger-foreground"},
+        {kind: "ink", name: "danger-foreground"},
+      ],
+    },
+    {
+      name: "danger-soft",
+      foreground: "danger-soft-foreground",
+      over: "surface",
+      layers: [
+        {name: "danger-soft-hover", foreground: "danger-soft-foreground"},
+        {kind: "ink", name: "danger-soft-foreground"},
+      ],
+    },
   ]}
 />
 
 ## Text
 
-`--muted` is secondary text, not disabled text: a disabled control carries `--disabled-opacity`.
+Text roles are drawn on the page itself. `--muted` is secondary text, not disabled text: a
+disabled control carries `--disabled-opacity`.
 
 <ColorSpecimen
   label="Text"
   utilities={["text-foreground", "text-muted", "text-link"]}
-  bands={[
+  layers={[
     {kind: "ink", name: "foreground"},
     {kind: "ink", name: "muted"},
     {kind: "ink", name: "link"},
@@ -97,31 +165,48 @@ The neutral control: every button, chip and toggle that carries no status.
 
 ## Backgrounds
 
-The page itself, with two deeper levels for nested regions and one inversion.
+The deeper levels exist for regions inside regions, which is how they are drawn here.
 
 <ColorSpecimen
   label="Backgrounds"
   utilities={["bg-background", "bg-background-secondary"]}
-  bands={[
-    {foreground: "foreground", name: "background"},
-    {foreground: "foreground", name: "background-secondary"},
-    {foreground: "foreground", name: "background-tertiary"},
-    {foreground: "background", name: "background-inverse"},
+  layers={[
+    {
+      name: "background",
+      foreground: "foreground",
+      layers: [
+        {
+          name: "background-secondary",
+          foreground: "foreground",
+          layers: [{name: "background-tertiary", foreground: "foreground"}],
+        },
+      ],
+    },
+    {name: "background-inverse", foreground: "background"},
   ]}
 />
 
 ## Surfaces
 
-A surface is a container that does not float: a card, a panel, a table header.
+A surface is a container that does not float: a card, a panel, a table header. Its levels nest
+the same way the backgrounds do.
 
 <ColorSpecimen
   label="Surfaces"
   utilities={["bg-surface", "text-surface-foreground"]}
-  bands={[
-    {foreground: "surface-foreground", name: "surface"},
-    {foreground: "surface-foreground", name: "surface-hover"},
-    {foreground: "surface-secondary-foreground", name: "surface-secondary"},
-    {foreground: "surface-tertiary-foreground", name: "surface-tertiary"},
+  layers={[
+    {
+      name: "surface",
+      foreground: "surface-foreground",
+      layers: [
+        {name: "surface-hover", foreground: "surface-foreground"},
+        {
+          name: "surface-secondary",
+          foreground: "surface-secondary-foreground",
+          layers: [{name: "surface-tertiary", foreground: "surface-tertiary-foreground"}],
+        },
+      ],
+    },
   ]}
 />
 
@@ -132,47 +217,71 @@ Controls that sit on a surface rather than on the page, so they stay distinct fr
 <ColorSpecimen
   label="On surface"
   utilities={["bg-on-surface", "text-on-surface-foreground"]}
-  bands={[
-    {foreground: "on-surface-foreground", name: "on-surface"},
-    {foreground: "on-surface-foreground", name: "on-surface-hover"},
-    {foreground: "on-surface-secondary-foreground", name: "on-surface-secondary"},
-    {foreground: "on-surface-secondary-foreground", name: "on-surface-secondary-hover"},
-    {foreground: "on-surface-tertiary-foreground", name: "on-surface-tertiary"},
-    {foreground: "on-surface-tertiary-foreground", name: "on-surface-tertiary-hover"},
+  layers={[
+    {
+      name: "on-surface",
+      foreground: "on-surface-foreground",
+      layers: [
+        {name: "on-surface-hover", foreground: "on-surface-foreground"},
+        {
+          name: "on-surface-secondary",
+          foreground: "on-surface-secondary-foreground",
+          layers: [
+            {name: "on-surface-secondary-hover", foreground: "on-surface-secondary-foreground"},
+          ],
+        },
+        {
+          name: "on-surface-tertiary",
+          foreground: "on-surface-tertiary-foreground",
+          layers: [
+            {name: "on-surface-tertiary-hover", foreground: "on-surface-tertiary-foreground"},
+          ],
+        },
+      ],
+    },
   ]}
 />
 
 ## Overlays
 
 A floating container — popover, menu, tooltip — and the scrim behind a modal one. `--backdrop` is
-translucent, so it carries whatever is under it.
+translucent, so what you see through it is the page underneath.
 
 <ColorSpecimen
   label="Overlays"
   utilities={["bg-overlay", "text-overlay-foreground"]}
-  bands={[
-    {foreground: "overlay-foreground", name: "overlay"},
-    {foreground: "overlay-foreground", name: "backdrop"},
+  layers={[
+    {
+      name: "overlay",
+      foreground: "overlay-foreground",
+      layers: [{kind: "ink", name: "overlay-foreground"}],
+    },
+    {name: "backdrop", foreground: "background", over: "background"},
   ]}
 />
 
 ## Form Fields
 
-Fields carry their own roles, because a field reads as an input whatever surface holds it.
-`--field-border` is transparent in both themes — the field is told apart by its background, and
-the border appears on hover and focus.
+A field carries its own roles, because it reads as an input whatever surface holds it. The border
+belongs to the field, so it is drawn inside it — and `--field-border` is transparent in both
+themes: the field is told apart by its background, and the outline appears on hover and focus.
 
 <ColorSpecimen
   label="Form fields"
   utilities={["bg-field", "text-field-foreground", "text-field-placeholder"]}
-  bands={[
-    {foreground: "field-foreground", name: "field-background"},
-    {foreground: "field-foreground", name: "field-hover"},
-    {foreground: "field-foreground", name: "field-focus"},
-    {kind: "ink", name: "field-placeholder"},
-    {kind: "line", name: "field-border"},
-    {kind: "line", name: "field-border-hover"},
-    {kind: "line", name: "field-border-focus"},
+  layers={[
+    {
+      name: "field-background",
+      foreground: "field-foreground",
+      layers: [
+        {kind: "ink", name: "field-placeholder"},
+        {kind: "line", name: "field-border"},
+        {kind: "line", name: "field-border-hover"},
+        {kind: "line", name: "field-border-focus"},
+      ],
+    },
+    {name: "field-hover", foreground: "field-foreground"},
+    {name: "field-focus", foreground: "field-foreground"},
   ]}
 />
 
@@ -183,7 +292,7 @@ A border outlines a thing; a separator divides two. Each has two quieter levels.
 <ColorSpecimen
   label="Borders and separators"
   utilities={["border-border", "border-separator"]}
-  bands={[
+  layers={[
     {kind: "line", name: "border"},
     {kind: "line", name: "border-secondary"},
     {kind: "line", name: "border-tertiary"},
@@ -195,14 +304,23 @@ A border outlines a thing; a separator divides two. Each has two quieter levels.
 
 ## Focus and Chrome
 
+The thumb rides the track, so it is drawn on it.
+
 <ColorSpecimen
   label="Focus and chrome"
   utilities={["ring-focus"]}
-  bands={[
+  layers={[
     {kind: "line", name: "focus"},
-    {foreground: "segment-foreground", name: "segment"},
-    {foreground: "foreground", name: "scrollbar-track"},
-    {foreground: "foreground", name: "scrollbar-thumb"},
+    {
+      name: "segment",
+      foreground: "segment-foreground",
+      layers: [{kind: "ink", name: "segment-foreground"}],
+    },
+    {
+      name: "scrollbar-track",
+      foreground: "foreground",
+      layers: [{name: "scrollbar-thumb", foreground: "foreground"}],
+    },
   ]}
 />
 
