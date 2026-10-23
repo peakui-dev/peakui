@@ -1,0 +1,90 @@
+---
+title: Animation
+description: The easing and animation tokens, and how a component animates a state
+---
+
+Motion comes from three places: easing and animation tokens in the theme, the data attributes a
+component sets as its state changes, and the reduced-motion variant that stands all of it down.
+The library ships no animation dependency.
+
+## Easing
+
+Each curve is a custom property and a Tailwind utility of the same name.
+
+| Token | Value | Used for |
+|-------|-------|---------|
+| `--ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Overlays and most transitions |
+| `--ease-smooth` | `ease` | Short state changes: hover, press, focus |
+| `--ease-out-quart` | `cubic-bezier(0.165, 0.84, 0.44, 1)` | Longer travel, such as a drawer |
+| `--ease-out-fluid` | `cubic-bezier(0.32, 0.72, 0, 1)` | Movement that follows a gesture |
+| `--ease-out-quad` | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` | Small position changes |
+| `--ease-linear` | `linear` | Progress and spin, where speed must not vary |
+| `--ease-in-out-cubic` | `cubic-bezier(0.645, 0.045, 0.355, 1)` | Your own CSS: the library uses it nowhere |
+| `--ease-in-cubic` | `cubic-bezier(0.55, 0.055, 0.675, 0.19)` | Your own CSS: the library uses it nowhere |
+
+```css
+.my-panel {
+  transition: transform 150ms var(--ease-out);
+}
+```
+
+```tsx
+<div className="transition-transform duration-150 ease-out" />
+```
+
+## Looping Animations
+
+Three compositions, each a `@keyframes` and its timing, declared once in the theme.
+
+| Token | Value | Utility | Used by |
+|-------|-------|---------|---------|
+| `--animate-spin-fast` | `spin 0.75s linear infinite` | `animate-spin-fast` | Spinner |
+| `--animate-skeleton` | `skeleton 2s linear infinite` | `animate-skeleton` | Skeleton |
+| `--animate-caret-blink` | `caret-blink 1.2s ease-out infinite` | `animate-caret-blink` | InputOTP |
+
+## Animating a State
+
+A component writes its state onto the DOM as `data-*` attributes, and CSS selects on them. Thirteen
+component stylesheets animate entry and exit this way, overlays among them.
+
+```css
+/* The attribute carries a value: match `="true"`, not the bare attribute. */
+.my-popover[data-entering="true"] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.my-popover[data-exiting="true"] {
+  opacity: 0;
+}
+```
+
+`data-placement` carries the side an overlay opened on, which is what lets one rule slide a
+popover in from the direction it came from. Each component page lists the attributes it sets.
+
+## Reduced Motion
+
+Every animated stylesheet in the library stands down when the reader asks for less motion, through
+the `motion-reduce` variant. Write the same into any animation of your own.
+
+```tsx
+<div className="animate-skeleton motion-reduce:animate-none" />
+```
+
+```css
+.my-panel {
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+```
+
+One component does not need it: `ScrollShadow` interpolates its fades along the scroll position
+rather than along time, so there is no motion of its own to stop.
+
+## Using a Motion Library
+
+There is no motion dependency, and a component does not need one to be replaced: every component
+renders through a `render` prop, so an element from a motion library can take its place. The
+mechanics are in [Composition](./composition).
