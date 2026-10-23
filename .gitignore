@@ -11,6 +11,7 @@ next-env.d.ts
 .turbo/
 .codegraph/
 *.tsbuildinfo
+.npmrc
 .env
 .env.*
 !.env.example
