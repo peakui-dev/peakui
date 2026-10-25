@@ -153,7 +153,7 @@
     --field-foreground: oklch(0.98 0.0006 262);
     --field-hover: oklch(0.227 0.0059 262);
     --field-placeholder: oklch(0.705 0.006 262);
-    --field-shadow: 0 0 0 0 transparent inset;
+    --field-shadow: 0 0 1px 0 oklch(1 0 0 / 0.3) inset;
     --focus: oklch(0.555 0.215 262);
     --foreground: oklch(0.9911 0.006 262);
     --link: oklch(0.9911 0.006 262);

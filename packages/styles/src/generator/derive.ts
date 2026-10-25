@@ -416,7 +416,13 @@ const deriveScheme = (
     // Shadows do not read on a dark surface; an inset hairline does.
     tokens["surface-shadow"] = "0 0 0 0 transparent inset";
     tokens["overlay-shadow"] = "0 0 1px 0 oklch(1 0 0 / 0.3) inset";
-    tokens["field-shadow"] = "0 0 0 0 transparent inset";
+    /*
+     * The field needs the hairline more than the overlay does: its background is the surface
+     * colour itself, so with a transparent shadow a field inside a card is invisible until it
+     * is hovered — every dark screen of the 2026-10-23 design-taste eval was flagged for
+     * exactly that.
+     */
+    tokens["field-shadow"] = "0 0 1px 0 oklch(1 0 0 / 0.3) inset";
   }
 
   return {tokens, fixes};
