@@ -13,7 +13,9 @@ The stylesheet you import has three layers that matter for theming:
 2. **Tailwind tokens** – an `@theme inline` block that maps each value to a Tailwind token: `--color-accent: var(--accent)`. This is what makes `bg-accent`, `text-muted` or `shadow-surface` available as utilities.
 3. **Component styles** – BEM classes that use those utilities and expose their own variables, such as `--button-bg`.
 
-Because the mapping is `inline`, changing `--accent` at runtime changes every utility and component that uses it.
+Because the mapping is `inline`, a utility carries the raw token itself — `bg-accent` emits `background-color: var(--accent)` — so it follows the token wherever the token is set. Component styles go one step further, through the mapped custom property (`--button-bg: var(--color-accent)`), and that mapping is resolved once, on the root element where it is declared. An `--accent` set deeper in the tree never reaches it: utilities inside the subtree recolour, component palettes do not.
+
+**Override tokens on the root** — `:root`, `<html>`, or your app's host element. A subtree override recolours only the utilities inside it and is not a supported way to theme a region.
 
 ## Override Tokens
 
@@ -24,13 +26,18 @@ Declare your values after the two imports:
 @import "@peakui/styles";
 
 :root {
+  /*
+   * The accent is a family, not one value: hover, the soft tints and the focus
+   * ring are calibrated to the default hue and keep it if left behind.
+   */
   --accent: oklch(0.6 0.2 250);
   --accent-foreground: oklch(0.98 0.02 250);
+  --accent-hover: oklch(0.638 0.182 250);
+  --accent-soft: oklch(0.6 0.2 250 / 0.15);
+  --accent-soft-foreground: oklch(0.483 0.142 251);
+  --accent-soft-hover: oklch(0.6 0.2 250 / 0.2);
+  --focus: oklch(0.6 0.2 250);
   --radius: 0.75rem;
-}
-
-.default-dark {
-  --accent: oklch(0.7 0.18 250);
 }
 ```
 

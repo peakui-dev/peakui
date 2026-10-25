@@ -1,9 +1,9 @@
 ---
 title: Dark Mode
-description: Switch PeakUI to its dark theme with a class or a data attribute on any element.
+description: Switch PeakUI to its dark theme with a class or a data attribute on the document root.
 ---
 
-PeakUI ships a light and a dark theme. The light theme applies by default. The dark theme applies inside any element that has the class `default-dark` or the attribute `data-theme="default-dark"`:
+PeakUI ships a light and a dark theme. The light theme applies by default. The dark theme applies when the root element has the class `default-dark` or the attribute `data-theme="default-dark"`:
 
 ```html
 <html class="default-dark">
@@ -11,7 +11,7 @@ PeakUI ships a light and a dark theme. The light theme applies by default. The d
 <html data-theme="default-dark">
 ```
 
-`default-light` and `data-theme="default-light"` do the opposite, which lets you force a light region inside a dark page.
+`default-light` and `data-theme="default-light"` do the opposite. Set either on the root: inside a subtree the raw tokens and the utilities follow, but component palettes still resolve from the root, so a light region inside a dark page is not a supported combination.
 
 <Callout type="info">
   The selector is `default-dark`, not `dark`. PeakUI does not follow `prefers-color-scheme` on its own; you decide when the dark theme applies.
