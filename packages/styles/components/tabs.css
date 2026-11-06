@@ -304,21 +304,34 @@
 
 /*
  * The selected tab is carried by the indicator's fill and shadow, and forced colors drops both.
- * The indicator takes the system Highlight; the selected label takes HighlightText so it stays
- * readable on it. System colors carry !important: the secondary variant's selector is more
+ * The indicator is rebuilt from system colors: an outline in Highlight (a Highlight line for the
+ * secondary variant). System colors carry !important: the secondary variant's selector is more
  * specific and sets non-system colors, which forced colors would turn into Canvas.
  */
 @media (forced-colors: active) {
+  /*
+   * Primary: a Canvas pill outlined in Highlight, with a CanvasText label. A Highlight fill with a
+   * HighlightText label is correct on Windows, but Chromium paints a Canvas backplate behind that
+   * label, which leaves it invisible; an outline keeps the label legible with or without it.
+   */
   .tabs__indicator {
+    background-color: Canvas !important;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  /* Secondary: the indicator is a thin line, so it takes the Highlight fill itself. */
+  .tabs--secondary .tabs__indicator {
     background-color: Highlight !important;
+    outline: none;
+  }
+
+  /* Enabled and unselected: ButtonText, so it reads differently from the GrayText disabled tab. */
+  .tabs__tab:not([data-disabled="true"]):not([data-selected="true"]) {
+    color: ButtonText !important;
   }
 
   .tabs__tab[data-selected="true"] {
-    color: HighlightText !important;
-  }
-
-  /* Secondary: the indicator is a thin line under (or beside) the tab, so the label stays on Canvas. */
-  .tabs--secondary .tabs__tab[data-selected="true"] {
     color: CanvasText !important;
   }
 

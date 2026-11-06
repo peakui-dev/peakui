@@ -27,54 +27,34 @@ async function openStory(page: Page, id: string): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
 }
 
-test.describe("Forced colors (browser)", () => {
-  test("флажок: отмечен и не отмечен различимы", async ({page}) => {
-    await openStory(page, "components-checkbox--indeterminate-forced");
-    await expect(page).toHaveScreenshot("checkbox-forced.png");
-  });
+/* One test per story, so a failure in one state does not hide the others. */
+const SNAPSHOTS = [
+  ["checkbox: checked, unchecked and indeterminate are distinguishable", "checkbox-forced", "components-checkbox--indeterminate-forced"],
+  ["checkbox: disabled and checked", "checkbox-disabled-checked", "components-checkbox--disabled-checked"],
+  ["checkbox: invalid and checked", "checkbox-invalid-checked", "components-checkbox--invalid-checked"],
+  ["radio: disabled and checked", "radio-disabled-checked", "components-radiogroup--disabled-checked"],
+  ["radio: invalid and checked", "radio-invalid-checked", "components-radiogroup--invalid-checked"],
+  ["switch: disabled and on", "switch-disabled-checked", "components-switch--disabled-checked"],
+  ["switch: invalid and on", "switch-invalid-checked", "components-switch--invalid-checked"],
+  ["tabs: selected tab, including a disabled one", "tabs-disabled-selected", "components-tabs--disabled-selected-tab"],
+  ["tabs: default selected tab", "tabs-default", "components-tabs--default"],
+  ["slider: mid-range", "slider-mid-range", "components-slider--mid-range"],
+] as const;
 
-  test("флажок: неопределённое, выключенное и неверное состояния", async ({page}) => {
-    for (const [name, id] of [
-      ["checkbox-disabled-checked", "components-checkbox--disabled-checked"],
-      ["checkbox-invalid-checked", "components-checkbox--invalid-checked"],
-      ["radio-disabled-checked", "components-radiogroup--disabled-checked"],
-      ["radio-invalid-checked", "components-radiogroup--invalid-checked"],
-      ["switch-disabled-checked", "components-switch--disabled-checked"],
-      ["switch-invalid-checked", "components-switch--invalid-checked"],
-    ] as const) {
+test.describe("Forced colors (browser)", () => {
+  for (const [title, name, id] of SNAPSHOTS) {
+    test(`snapshot, ${title}`, async ({page}) => {
       await openStory(page, id);
       await expect(page).toHaveScreenshot(`${name}.png`);
-    }
-  });
+    });
 
-  test("вкладки: выбранная вкладка, в том числе выключенная", async ({page}) => {
-    await openStory(page, "components-tabs--disabled-selected-tab");
-    await expect(page).toHaveScreenshot("tabs-disabled-selected.png");
-  });
-
-  test("слайдер: середина диапазона", async ({page}) => {
-    await openStory(page, "components-slider--mid-range");
-    await expect(page).toHaveScreenshot("slider-mid-range.png");
-  });
-
-  test("сквозной проход по историям без нарушений axe", async ({page}) => {
-    for (const id of [
-      "components-checkbox--indeterminate-forced",
-      "components-checkbox--disabled-checked",
-      "components-checkbox--invalid-checked",
-      "components-radiogroup--disabled-checked",
-      "components-radiogroup--invalid-checked",
-      "components-switch--disabled-checked",
-      "components-switch--invalid-checked",
-      "components-tabs--disabled-selected-tab",
-      "components-slider--mid-range",
-    ]) {
+    test(`axe, ${title}`, async ({page}) => {
       await openStory(page, id);
       await injectAxe(page);
       await checkA11y(page, undefined, {
         axeOptions: {runOnly: ["wcag2a", "wcag2aa"]},
         detailedReport: true,
       });
-    }
-  });
+    });
+  }
 });
