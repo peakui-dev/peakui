@@ -19,6 +19,7 @@ import {
 import {
   getSheetScroller,
   getSheetSnapTargets,
+  isSheetPanelOnScreen,
   measureSheet,
   scrollSheetTo,
   snapScrollPosition,
@@ -61,10 +62,12 @@ class StubIntersectionObserver {
 
 /*
  * The scroll the stub is currently playing, and the controls the lifecycle tests use on it. Like a
- * browser, a new scroll supersedes the one in flight: only the last one settles. `panelVisible`
- * is what the dialog's rect reports, so the lifecycle's geometry check sees the settled position.
+ * browser, a new scroll supersedes the one in flight: only the last one settles. `visibleScrollers`
+ * holds the scrollers whose panel is on screen; a dialog's rect reports from it, so the lifecycle's
+ * geometry check sees the settled position of its own sheet. It is per scroller because a stacked
+ * child's exit must not move its parent's panel.
  */
-let panelVisible = false;
+const visibleScrollers = new Set<Element>();
 let holdScrolls = false;
 let swallowScrolls = false;
 let dropScrollEnd = false;
@@ -75,7 +78,7 @@ const scrollCalls: ScrollToOptions[] = [];
 function resetSheetGeometry() {
   clearTimeout(pendingTimer);
   pendingSettle = null;
-  panelVisible = false;
+  visibleScrollers.clear();
   holdScrolls = false;
   swallowScrolls = false;
   dropScrollEnd = false;
@@ -110,7 +113,8 @@ function installSheetGeometry(exitedAtZero = true) {
 
       const settle = () => {
         pendingSettle = null;
-        panelVisible = !exited;
+        if (exited) visibleScrollers.delete(this);
+        else visibleScrollers.add(this);
         Object.defineProperty(this, request.top === undefined ? "scrollLeft" : "scrollTop", {
           configurable: true,
           value: target,
@@ -142,7 +146,8 @@ function installSheetGeometry(exitedAtZero = true) {
     this: HTMLElement,
   ) {
     const isDialog = this.dataset["slot"] === "sheet-dialog";
-    const onScreen = isDialog && panelVisible;
+    const scroller = this.closest("[data-sheet-scroll]");
+    const onScreen = isDialog && !!scroller && visibleScrollers.has(scroller);
 
     return {
       // Any other element ends at the viewport's height: that is where a bottom sheet's end
@@ -2716,6 +2721,17 @@ describe("Sheet", () => {
       await settle();
     };
 
+    afterEach(() => {
+      for (const name of [
+        "scrollHeight",
+        "setPointerCapture",
+        "hasPointerCapture",
+        "releasePointerCapture",
+      ]) {
+        Reflect.deleteProperty(HTMLElement.prototype, name);
+      }
+    });
+
     beforeEach(() => {
       scrollerCalls.clear();
 
@@ -2725,16 +2741,30 @@ describe("Sheet", () => {
       Object.defineProperty(HTMLElement.prototype, "scrollTo", {
         configurable: true,
         value: function scrollTo(this: HTMLElement, options?: ScrollToOptions) {
-          // The primitive's modal focus override scrolls the focused element into view. With no
-          // layout it computes zero, where a browser finds the element already in view and does
-          // nothing: it is not a sheet scroll, so it is dropped rather than recorded.
-          if (new Error().stack?.includes("usePreventScroll")) return;
-
           scrollerCalls.set(this, [...(scrollerCalls.get(this) ?? []), options ?? {}]);
 
           return Reflect.apply(stubbed, this, [options]);
         },
         writable: true,
+      });
+
+      // The primitive's modal focus override scrolls a focused element into view when its rect
+      // lies below the scroller's. The stub's default rect (ending at the viewport height, against a
+      // zero client height) always does, so the sheet would be scrolled by every focus change; a
+      // browser finds a button in view. Buttons report an on-screen rect here, so only the sheet's
+      // own scrolls are recorded.
+      const baseRect = vi
+        .mocked(HTMLElement.prototype.getBoundingClientRect)
+        .getMockImplementation();
+
+      vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        if (this.tagName === "BUTTON") {
+          return {bottom: 0, height: 0, left: 0, right: 0, top: 0, width: 0, x: 0, y: 0} as DOMRect;
+        }
+
+        return baseRect!.call(this);
       });
     });
 
@@ -2852,6 +2882,28 @@ describe("Sheet", () => {
       expect(parentCalls).toHaveLength(callsBeforeClose);
       expect(parentCalls.at(-1)?.top).toBe(resting);
       expect(parentScroller.scrollTop).toBe(resting);
+    });
+
+    it("keeps the parent's panel on screen through the child's exit", async () => {
+      render(<NestedExample />);
+      await user.click(screen.getByRole("button", {name: "Open parent"}));
+      await screen.findByRole("dialog", {name: "Parent sheet"});
+      await settle();
+
+      const parentScroller = document.querySelector<HTMLElement>("[data-sheet-scroll]")!;
+
+      expect(isSheetPanelOnScreen(parentScroller)).toBe(true);
+
+      await user.click(screen.getByRole("button", {name: "Open child"}));
+      await screen.findByRole("dialog", {name: "Child sheet"});
+      await settle();
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await settle();
+
+      // The stub models a browser: only the child's panel left. The lifecycle's own geometry check
+      // for the parent still sees it, so a late scrollend of the parent reports nothing new.
+      expect(isSheetPanelOnScreen(parentScroller)).toBe(true);
     });
 
     it("leaves no inert or aria-hidden on the parent after the child closes", async () => {
@@ -3030,31 +3082,64 @@ describe("Sheet", () => {
 
         Object.defineProperty(event, "timeStamp", {value: t + 1});
         Object.defineProperty(event, "isPrimary", {value: true});
-        Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
-          configurable: true,
-          value: () => {},
-        });
-        Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
-          configurable: true,
-          value: () => true,
-        });
-        Object.defineProperty(HTMLElement.prototype, "releasePointerCapture", {
-          configurable: true,
-          value: () => {},
-        });
         fireEvent(handle, event);
       };
+
+      // Removed again by this block's afterEach, so a failed assertion leaks nothing.
+      for (const [name, value] of [
+        ["setPointerCapture", () => {}],
+        ["hasPointerCapture", () => true],
+        ["releasePointerCapture", () => {}],
+      ] as const) {
+        Object.defineProperty(HTMLElement.prototype, name, {configurable: true, value});
+      }
 
       send("pointerdown", 100, 0);
       send("pointermove", 140, 100);
 
       expect(writes.get(childScroller!)?.length).toBeGreaterThan(0);
       expect(writes.get(parentScroller!)).toBeUndefined();
+    });
 
-      for (const name of ["scrollHeight", "setPointerCapture", "hasPointerCapture"]) {
-        Reflect.deleteProperty(HTMLElement.prototype, name);
-      }
-      Reflect.deleteProperty(HTMLElement.prototype, "releasePointerCapture");
+    it("known limitation: a child mounted open together with its parent is not topmost; open the child from the parent", async () => {
+      const parentOpenChange = vi.fn();
+      const childOpenChange = vi.fn();
+
+      render(
+        <Sheet defaultOpen onOpenChange={parentOpenChange}>
+          <Sheet.Backdrop>
+            <Sheet.Content>
+              <Sheet.Dialog aria-label="Parent sheet">
+                <Sheet.NestedRoot defaultOpen onOpenChange={childOpenChange}>
+                  <Sheet.Backdrop>
+                    <Sheet.Content>
+                      <Sheet.Dialog aria-label="Child sheet">child</Sheet.Dialog>
+                    </Sheet.Content>
+                  </Sheet.Backdrop>
+                </Sheet.NestedRoot>
+              </Sheet.Dialog>
+            </Sheet.Content>
+          </Sheet.Backdrop>
+        </Sheet>,
+      );
+      await screen.findByRole("dialog", {name: "Child sheet", hidden: true});
+      await settle();
+
+      // The primitive registers the sheets in effect order, child first: the child is the bottom of
+      // the stack and the parent sits over it (the reverse of a child opened from the parent).
+      const stackIndex = (label: string) =>
+        screen
+          .getByRole("dialog", {name: label, hidden: true})
+          .closest('[data-slot="sheet-overlay"]')
+          ?.getAttribute("data-stack-index");
+
+      expect(stackIndex("Child sheet")).toBe("0");
+      expect(stackIndex("Parent sheet")).toBe("1");
+
+      // So Escape reaches the parent first, not the child that is visually on top.
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(parentOpenChange).toHaveBeenCalledWith(false));
+      expect(childOpenChange).not.toHaveBeenCalled();
     });
   });
 });
