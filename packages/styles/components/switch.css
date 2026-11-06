@@ -211,6 +211,12 @@
   .switch[data-selected="true"] .switch__thumb {
     background-color: HighlightText;
   }
+
+  /* Disabled and on: the track is GrayText (utility), so the thumb is Canvas */
+  .switch[data-disabled="true"][aria-checked="true"] .switch__thumb,
+  .switch[data-disabled="true"][data-selected="true"] .switch__thumb {
+    background-color: Canvas;
+  }
 }
 
 /* Size-specific thumb dimensions */

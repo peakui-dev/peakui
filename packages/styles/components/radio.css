@@ -168,12 +168,19 @@
   scale: 0.4286; /* 6px */
 }
 
-/* Forced colors: the dot takes the control's text color (HighlightText selected, GrayText disabled) */
+/* Forced colors: system-color keywords only (currentcolor may be forced to Canvas) */
 @media (forced-colors: active) {
   .radio[data-selected] .radio__indicator:empty::before,
   .radio:has([data-slot="radio-content"][aria-checked="true"]) .radio__indicator:empty::before,
   .radio:has(input:checked) .radio__indicator:empty::before {
-    background-color: currentcolor;
+    background-color: HighlightText;
+  }
+
+  .radio[data-disabled="true"][data-selected] .radio__indicator:empty::before,
+  .radio[data-disabled="true"]:has([data-slot="radio-content"][aria-checked="true"])
+    .radio__indicator:empty::before,
+  .radio[data-disabled="true"]:has(input:checked) .radio__indicator:empty::before {
+    background-color: Canvas;
   }
 }
 

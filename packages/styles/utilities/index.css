@@ -66,17 +66,26 @@
     border-width: 1px;
     border-color: ButtonBorder;
 
+    /* !important: the component state rules (invalid + selected, checked track) are more specific
+       and set non-system colors, which forced colors turns into Canvas; a system color must win. */
     &:is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]),
     :is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]) & {
-      color: HighlightText;
-      background-color: Highlight;
-      border-color: Highlight;
+      color: HighlightText !important;
+      background-color: Highlight !important;
+      border-color: Highlight !important;
     }
 
     &:is([data-disabled="true"]),
     :is([data-disabled="true"]) & {
-      color: GrayText;
-      border-color: GrayText;
+      color: GrayText !important;
+      border-color: GrayText !important;
+    }
+
+    /* Disabled and selected: gray fill with a Canvas mark, so the mark never sits GrayText on Highlight. */
+    &:is([data-disabled="true"]):is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]),
+    :is([data-disabled="true"]):is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]) & {
+      color: Canvas !important;
+      background-color: GrayText !important;
     }
   }
 }
