@@ -20,7 +20,7 @@ import {Menu} from "@peakui/react";
 ```tsx
 import {Label, Menu, Separator} from "@peakui/react";
 
-// Menu.Item, Menu.Section and the indicators are aliases of the Dropdown parts.
+// Menu.Item, Menu.Section and the indicators are the menu parts shared with Dropdown.
 // Dividers use Separator; there is no Menu.Separator.
 export default () => (
   <Menu aria-label="Actions">
@@ -82,10 +82,40 @@ The Menu component uses these CSS classes ([view source styles](https://github.c
 #### Base Classes [!toc]
 
 - `.menu` - Inline menu container
+- `.menu-item` - Menu item
+- `.menu-section` - Menu section
+
+#### Element Classes [!toc]
+
+- `.menu-item__indicator` - Selection indicator of an item
+- `.menu-item__indicator--submenu` - Submenu indicator of an item
+
+#### Variant Classes [!toc]
+
+- `.menu-item--default`
+- `.menu-item--danger`
 
 ### Slots
 
 - `[data-slot="menu"]`
+- `[data-slot="menu-item"]`
+- `[data-slot="menu-section"]`
+- `[data-slot="menu-item-indicator"]`
+- `[data-slot="menu-item-indicator--checkmark"]`
+- `[data-slot="menu-item-indicator--dot"]`
+- `[data-slot="submenu-indicator"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Selection mode**: `[data-selection-mode]` on the menu
+- **Hover**: `:hover` or `[data-hovered="true"]` on an item
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on an item
+- **Pressed**: `:active` or `[data-pressed="true"]` on an item
+- **Selected**: `[aria-checked="true"]`, `[aria-selected="true"]` or `[data-selected="true"]` on an item; `[data-visible]` on its indicator
+- **Disabled**: `[data-disabled="true"]` on an item
+- **Submenu**: `[data-has-submenu="true"]` on an item
 
 ## API Reference
 
@@ -105,8 +135,6 @@ The Menu component uses these CSS classes ([view source styles](https://github.c
 
 ### Menu.Item
 
-Alias of `Dropdown.Item`.
-
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `id` | `Key` | - | Unique identifier for the item |
@@ -119,8 +147,6 @@ Alias of `Dropdown.Item`.
 | `...rest` | `MenuItemProps` | - | React Aria [MenuItem](https://react-spectrum.adobe.com/react-aria/Menu.html#menuitem) attributes |
 
 ### Menu.Section
-
-Alias of `Dropdown.Section`.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
