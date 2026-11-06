@@ -69,7 +69,7 @@ export const DisabledChecked: Story = {
   name: "Заблокированный включённый",
   render: () => (
     <Showcase title="Заблокированный включённый">
-      <Switch isDisabled defaultSelected>
+      <Switch defaultSelected isDisabled>
         <Switch.Content>
           <Thumb />
           Включить уведомления
@@ -83,7 +83,7 @@ export const InvalidChecked: Story = {
   name: "Невалидный включённый",
   render: () => (
     <Showcase title="Невалидный включённый">
-      <Switch isInvalid defaultSelected name="notifications-checked">
+      <Switch defaultSelected isInvalid name="notifications-checked">
         <Switch.Content>
           <Thumb />
           Включить уведомления

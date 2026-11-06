@@ -220,7 +220,7 @@ export const DisabledChecked: Story = {
   name: "Заблокированный выбранный",
   render: () => (
     <Showcase title="Заблокированный выбранный">
-      <Checkbox isDisabled defaultSelected aria-label="Функция">
+      <Checkbox defaultSelected isDisabled aria-label="Функция">
         <Checkbox.Content>
           <Control />
           Функция
@@ -234,7 +234,7 @@ export const InvalidChecked: Story = {
   name: "Невалидный выбранный",
   render: () => (
     <Showcase title="Невалидный выбранный">
-      <Checkbox isInvalid defaultSelected aria-label="Согласие" name="agreement-checked">
+      <Checkbox defaultSelected isInvalid aria-label="Согласие" name="agreement-checked">
         <Checkbox.Content>
           <Control />
           Согласен с условиями
