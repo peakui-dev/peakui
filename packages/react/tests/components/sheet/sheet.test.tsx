@@ -960,6 +960,46 @@ describe("Sheet", () => {
         expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]);
       });
 
+      /*
+       * Desktop Safari's path in the primitive waits for a scroll-end after the panel has left, and
+       * WebKit fires none for an instant scroll. Here the observer never reports the exit either,
+       * so the overlay stays mounted the way it does there.
+       */
+      it("signals scrollend to an overlay still mounted after the exit, only while the panel is off screen", async () => {
+        const onAnimationEnd = vi.fn();
+        let scrollEnds = 0;
+
+        dropScrollEnd = true;
+
+        const {rerender} = render(<Controlled isOpen onAnimationEnd={onAnimationEnd} />);
+
+        await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true), {timeout: 2000});
+
+        const scroller = document.querySelector<HTMLElement>("[data-sheet-scroll]")!;
+
+        scroller.addEventListener("scrollend", () => (scrollEnds += 1));
+        holdScrolls = true;
+        rerender(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+        observers.clear();
+        flushScrolls();
+
+        await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]), {
+          timeout: 2000,
+        });
+        await waitFor(() => expect(scrollEnds).toBeGreaterThan(0), {timeout: 2000});
+        expect(part("sheet-overlay")).not.toBeNull();
+
+        // Something brings the panel back on screen while the sheet is closed: no scroll has ended.
+        act(() => {
+          visibleScrollers.add(scroller);
+        });
+        scrollEnds = 0;
+        // jsdom runs frames slower than a browser: this spans several of the 30-frame repeats.
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+
+        expect(scrollEnds).toBe(0);
+      });
+
       it("reports nothing while an interrupted scroll never reaches the panel", async () => {
         const onAnimationEnd = vi.fn();
 

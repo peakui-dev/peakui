@@ -17,8 +17,12 @@ class SilentIntersectionObserver {
   unobserve() {}
 }
 
+/* Whatever the shared setup put on the prototype, put back exactly as it was. */
+let originalScrollTo: PropertyDescriptor | undefined;
+
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", SilentIntersectionObserver);
+  originalScrollTo = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollTo");
   Object.defineProperty(HTMLElement.prototype, "scrollTo", {
     configurable: true,
     value: () => {},
@@ -27,8 +31,8 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  // jsdom defines no scrollTo of its own, so removing the stub restores it.
-  Reflect.deleteProperty(HTMLElement.prototype, "scrollTo");
+  if (originalScrollTo) Object.defineProperty(HTMLElement.prototype, "scrollTo", originalScrollTo);
+  else Reflect.deleteProperty(HTMLElement.prototype, "scrollTo");
 });
 
 describe("Sheet SSR", () => {
@@ -61,6 +65,8 @@ describe("Sheet SSR", () => {
    * warning that mount raises is caught by the smoke.
    */
   it("renders without a hydration mismatch with defaultOpen and snapPoints", async () => {
+    // Set when the dialog is committed to the document, which happens during the hydration.
+    const hydrated: {dialog: HTMLElement | null} = {dialog: null};
     const {html} = await ssrSmoke(
       <Sheet defaultOpen snapPoints={["25%", "50%"]}>
         <Sheet.Trigger>
@@ -68,7 +74,11 @@ describe("Sheet SSR", () => {
         </Sheet.Trigger>
         <Sheet.Backdrop>
           <Sheet.Content>
-            <Sheet.Dialog>
+            <Sheet.Dialog
+              ref={(element) => {
+                if (element) hydrated.dialog = element;
+              }}
+            >
               <Sheet.Handle />
               <Sheet.CloseTrigger />
               <Sheet.Header>
@@ -83,5 +93,8 @@ describe("Sheet SSR", () => {
 
     expect(html).toContain('data-slot="button"');
     expect(html).not.toContain('data-slot="sheet-dialog"');
+    // The open sheet did mount on the client, with the handle as a slider.
+    expect(hydrated.dialog?.getAttribute("role")).toBe("dialog");
+    expect(hydrated.dialog?.querySelector('[role="slider"]') ?? null).not.toBeNull();
   });
 });
