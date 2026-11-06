@@ -39,10 +39,17 @@
   }
 }
 
-/* A parent sheet recedes while a child sheet is on top of it. */
+/*
+ * A parent sheet recedes while a child sheet is on top of it: it moves back, slides a little
+ * further out from its edge so a strip of it stays in sight past the child, and dims. The shift is
+ * per placement (set on the stacked content below); the primitive drives the progress by the
+ * child's own scroll.
+ */
 @keyframes peakui-sheet-scale-back {
   to {
-    transform: translateZ(-120px);
+    transform: translate(var(--sheet-stack-shift-x, 0px), var(--sheet-stack-shift-y, 0px))
+      translateZ(-120px);
+    filter: brightness(0.85);
   }
 }
 
@@ -112,6 +119,32 @@
   @apply will-change-transform;
 }
 
+/*
+ * The stacked parent recedes toward its own open edge, not toward the middle of its box: that box
+ * carries the primitive's overscroll padding (a viewport beyond the closed edge), so a centred
+ * origin would sink the panel behind the child. Each edge names the panel's open edge, and the
+ * shift moves it a little further out, past the child.
+ */
+.sheet__content--bottom[data-has-descendants] {
+  --sheet-stack-shift-y: -1rem;
+  transform-origin: 50% 0;
+}
+
+.sheet__content--top[data-has-descendants] {
+  --sheet-stack-shift-y: 1rem;
+  transform-origin: 50% 100%;
+}
+
+.sheet__content--left[data-has-descendants] {
+  --sheet-stack-shift-x: 1rem;
+  transform-origin: 100% 50%;
+}
+
+.sheet__content--right[data-has-descendants] {
+  --sheet-stack-shift-x: -1rem;
+  transform-origin: 0 50%;
+}
+
 .sheet__content--bottom,
 .sheet__content--top {
   @apply max-h-[calc(100%-2rem)] w-full;
@@ -168,9 +201,10 @@
   @apply h-[calc(100%-1px)] max-h-none;
 }
 
+/* One pixel short of the viewport for the same reason as above, along the other axis. */
 .sheet__content--left[data-snap-points],
 .sheet__content--right[data-snap-points] {
-  @apply w-full max-w-none;
+  @apply w-[calc(100%-1px)] max-w-none;
 }
 
 /* The full detent has to fit the detached margins inside the viewport. */
@@ -334,6 +368,11 @@
  * beat these.
  */
 @media (forced-colors: active) {
+  /* The stacked parent's dim would shift system colours off their values: keep only the scale. */
+  .sheet__content {
+    filter: none !important;
+  }
+
   .sheet__dialog,
   .sheet__handle,
   .sheet__backdrop {
