@@ -118,6 +118,7 @@ export const COMPONENT_GROUPS = [
       "(overlays)/drawer",
       "(overlays)/modal",
       "(overlays)/popover",
+      "(overlays)/sheet",
       "(overlays)/toast",
       "(overlays)/tooltip",
     ],

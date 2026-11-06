@@ -1780,6 +1780,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
     file: "separator/with-surface.tsx",
   },
+  // sheet
+  "sheet-basic": {
+    loader: () => import("./sheet/basic").then((m) => m.Basic),
+    file: "sheet/basic.tsx",
+  },
   // skeleton
   "skeleton-animation-types": {
     loader: () => import("./skeleton/animation-types").then((m) => m.AnimationTypes),
