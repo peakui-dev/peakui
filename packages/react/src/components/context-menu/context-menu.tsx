@@ -8,7 +8,15 @@ import type {JSX, ReactNode, RefObject} from "react";
 
 import {contextMenuVariants} from "@peakui/styles";
 import {mergeRefs} from "@react-aria/utils";
-import React, {createContext, use, useMemo, useRef, useSyncExternalStore} from "react";
+import React, {
+  createContext,
+  use,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   Popover as PopoverPrimitive,
   SubmenuTrigger as SubmenuTriggerPrimitive,
@@ -36,6 +44,9 @@ interface ContextMenuContextValue {
   state: ContextMenuState;
   anchor: ContextMenuAnchor;
   isDisabled: boolean;
+  /** Whether the Trigger's anchor element is mounted; the popover opens only then. */
+  isAnchored: boolean;
+  setAnchored(isAnchored: boolean): void;
   /** The popover element; lets the Trigger ignore events that bubble out of the open popover. */
   popoverRef: RefObject<HTMLElement | null>;
   /** How the menu was last opened; keyboard opens focus the first item. */
@@ -84,10 +95,19 @@ const ContextMenuRoot = ({
   const popoverRef = useRef<HTMLElement | null>(null);
   const openedBy = useRef<"keyboard" | "pointer">("pointer");
 
+  const [isAnchored, setAnchored] = useState(false);
+
+  // Disabling the region closes a menu that is already open.
+  useEffect(() => {
+    if (isDisabled && isOpen) {
+      setOpen(false);
+    }
+  }, [isDisabled, isOpen, setOpen]);
+
   const state = useMemo(() => ({isOpen, setOpen}), [isOpen, setOpen]);
   const contextValue = useMemo(
-    () => ({anchor, isDisabled, openedBy, popoverRef, slots, state}),
-    [anchor, isDisabled, slots, state],
+    () => ({anchor, isAnchored, isDisabled, openedBy, popoverRef, setAnchored, slots, state}),
+    [anchor, isAnchored, isDisabled, slots, state],
   );
 
   return <ContextMenuContext value={contextValue}>{children}</ContextMenuContext>;
@@ -119,8 +139,62 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   ...props
 }: ContextMenuTriggerProps<E> &
   Omit<JSX.IntrinsicElements[E], keyof ContextMenuTriggerProps<E>>) => {
-  const {anchor, slots} = useContextMenuContext("ContextMenu.Trigger");
+  /*
+   * One Trigger per root: every Trigger under a root shares `anchor.ref`, so a second one would
+   * render a second anchor element that the popover cannot tell apart.
+   */
+  const {
+    anchor,
+    isDisabled,
+    openedBy: openedByRef,
+    popoverRef,
+    setAnchored,
+    slots,
+    state,
+  } = useContextMenuContext("ContextMenu.Trigger");
   const isClient = useSyncExternalStore(subscribeNever, getClientSnapshot, getServerSnapshot);
+  const userOnContextMenu = (props as {onContextMenu?: (event: React.MouseEvent) => void})
+    .onContextMenu;
+
+  const onContextMenu = (event: React.MouseEvent) => {
+    userOnContextMenu?.(event);
+
+    if (isDisabled || event.defaultPrevented) {
+      return;
+    }
+
+    const target = event.target as Element;
+
+    // The browser menu stays where the consumer asks for it, e.g. text inputs.
+    if (target.closest?.("[data-context-menu-native]")) {
+      return;
+    }
+
+    // React portals bubble events from the open popover to this Trigger.
+    if (popoverRef.current?.contains(target)) {
+      return;
+    }
+
+    event.preventDefault();
+    openedByRef.current = "pointer";
+    anchor.setPoint(event.clientX, event.clientY);
+    state.setOpen(true);
+  };
+
+  /*
+   * The popover renders only while the anchor element is in the document: that covers a menu that
+   * is open on the first render (the anchor portal mounts after hydration) and a Trigger that
+   * unmounts while the menu is open.
+   */
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
+
+    setAnchored(true);
+
+    return () => setAnchored(false);
+  }, [isClient, setAnchored]);
 
   return (
     <dom.div
@@ -132,6 +206,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
       data-slot="context-menu-trigger"
+      onContextMenu={onContextMenu}
     >
       {children}
       {isClient
@@ -168,7 +243,8 @@ const ContextMenuPopover = ({
   ref,
   ...props
 }: ContextMenuPopoverProps) => {
-  const {anchor, popoverRef, slots, state} = useContextMenuContext("ContextMenu.Popover");
+  const {anchor, isAnchored, popoverRef, slots, state} =
+    useContextMenuContext("ContextMenu.Popover");
   const mergedRef = useMemo(() => mergeRefs(ref, popoverRef), [ref, popoverRef]);
 
   return (
@@ -179,7 +255,7 @@ const ContextMenuPopover = ({
         ref={mergedRef}
         className={composeTwRenderProps(className, slots?.popover())}
         data-slot="context-menu-popover"
-        isOpen={state.isOpen}
+        isOpen={state.isOpen ? isAnchored : false}
         placement={placement}
         triggerRef={anchor.ref}
         onOpenChange={state.setOpen}
@@ -196,8 +272,16 @@ const ContextMenuPopover = ({
 type ContextMenuMenuProps<T extends object> = MenuRootProps<T>;
 
 /* The shared Menu root under this component's slot name; `data-slot` is overridable by design. */
-function ContextMenuMenu<T extends object>(props: ContextMenuMenuProps<T>) {
-  return <MenuRoot {...props} data-slot="context-menu-menu" />;
+function ContextMenuMenu<T extends object>({onClose, ...props}: ContextMenuMenuProps<T>) {
+  const {state} = useContextMenuContext("ContextMenu.Menu");
+
+  /* There is no MenuTrigger to close the popover after a selection, so the menu does it. */
+  const handleClose = () => {
+    onClose?.();
+    state.setOpen(false);
+  };
+
+  return <MenuRoot {...props} data-slot="context-menu-menu" onClose={handleClose} />;
 }
 
 /* -------------------------------------------------------------------------------------------------
