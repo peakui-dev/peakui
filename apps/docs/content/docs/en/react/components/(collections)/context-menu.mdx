@@ -22,6 +22,10 @@ A context menu must never be the only path to an action: pair it with a visible 
 import {ContextMenu, Label} from "@peakui/react";
 
 // Opens from: right-click, touch long-press, Shift+F10 or the ContextMenu key.
+// Long-press: 500 ms (the underlying hook's default), touch only; a 10 px movement cancels it,
+// and releasing the finger does not activate the item under it.
+// Long-press is not discoverable. Automated tests cannot cover iOS Safari:
+// verify it by hand on iOS Safari and Android Chrome.
 // One Trigger per root. It is a plain div: not focusable, no role.
 // Focusable descendants make the region reachable by keyboard.
 // The Popover may be nested in the Trigger or sit beside it.
@@ -42,14 +46,6 @@ export default () => (
   </ContextMenu>
 );
 ```
-
-Keyboard: Shift+F10 or the ContextMenu key opens the menu anchored at the focused element and focuses the first item; Escape closes it and focus returns.
-
-Touch: a 500 ms long-press (the underlying hook's default) opens the menu; a 10 px movement cancels it, and releasing the finger does not activate the item under it.
-
-Long-press is not discoverable, and automated tests cannot cover iOS Safari: verify it by hand on iOS Safari and Android Chrome.
-
-Submenu behaviour inside a context menu is not covered by tests.
 
 ## Examples
 
@@ -174,7 +170,7 @@ The component supports both CSS pseudo-classes and data attributes:
 | `render` | `DOMRenderFunction<E, undefined>` | - | Custom render function; `E` defaults to `"div"` |
 | `className` | `string` | - | Additional CSS classes |
 | `children` | `ReactNode` | - | The region content |
-| `onKeyDown` | `(event: KeyboardEvent) => void` | - | Shift+F10 or the ContextMenu key opens the menu from any focused descendant, including an input; Ctrl, Alt and Meta chords are ignored and plain F10 does nothing |
+| `onKeyDown` | `(event: KeyboardEvent) => void` | - | Shift+F10 or the ContextMenu key opens the menu anchored at the focused descendant, including an input, and focuses the first item; Escape closes it and focus returns. Ctrl, Alt and Meta chords, plain F10, a held key (`repeat`) and IME composition are ignored |
 | `onContextMenu` | `(event: MouseEvent) => void` | - | Runs first. A descendant that calls `stopPropagation` or `preventDefault` on `contextmenu` suppresses the menu |
 | `...rest` | `JSX.IntrinsicElements[E]` | - | Native attributes of the rendered element |
 
@@ -242,5 +238,5 @@ Shared with Dropdown and Menu: the same menu-item part.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `children` | `ReactNode` | - | The item and the submenu popover |
+| `children` | `ReactNode` | - | The item and the submenu popover. Submenu behaviour inside a context menu is not covered by tests |
 | `...rest` | `SubmenuTriggerProps` | - | React Aria [SubmenuTrigger](https://react-spectrum.adobe.com/react-aria/Menu.html#submenutrigger) attributes |
