@@ -27,9 +27,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  // Placeholder: RAC Sheet cannot mount outside an overlay. Task 3/4 replaces this story with a
+  // trigger and a real sheet.
   render: () => (
     <Showcase title="Default">
-      <Sheet>Sheet</Sheet>
+      <p className="text-sm text-muted">The Sheet overlay lands in a later task.</p>
     </Showcase>
   ),
 };

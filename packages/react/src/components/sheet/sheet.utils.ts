@@ -27,7 +27,10 @@ export function normalizeSnapPoints(
 
   for (const point of points as readonly unknown[]) {
     if (typeof point === "number") {
-      if (!Number.isFinite(point) || point < 0) continue;
+      // A numeric 0 is a sheet of zero height, which is closed. Strings such as "0px" or "0%" are
+      // kept as authored: the measured-geometry resolver drops anything that resolves to a size
+      // of 0 or less, and any string it cannot parse.
+      if (!Number.isFinite(point) || point <= 0) continue;
     } else if (typeof point === "string") {
       if (point.trim() === "") continue;
     } else {
@@ -141,21 +144,23 @@ export function sheetDismissTarget({
  * negative toward higher. Otherwise the nearest target wins.
  */
 export function nearestSheetSnap(targets: number[], current: number, velocity: number) {
-  if (targets.length === 0) return null;
+  const finite = targets.filter(Number.isFinite);
+
+  if (finite.length === 0) return null;
 
   if (velocity > HANDLE_DRAG_VELOCITY) {
-    const lower = targets.filter((target) => target < current - 0.5);
+    const lower = finite.filter((target) => target < current - 0.5);
 
     if (lower.length > 0) return Math.max(...lower);
   }
 
   if (velocity < -HANDLE_DRAG_VELOCITY) {
-    const higher = targets.filter((target) => target > current + 0.5);
+    const higher = finite.filter((target) => target > current + 0.5);
 
     if (higher.length > 0) return Math.min(...higher);
   }
 
-  return targets.reduce((best, target) =>
+  return finite.reduce((best, target) =>
     Math.abs(target - current) < Math.abs(best - current) ? target : best,
   );
 }

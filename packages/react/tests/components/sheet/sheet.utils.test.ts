@@ -1,7 +1,5 @@
 import type {SheetSnapPoint} from "@/components/sheet/sheet.utils.ts";
 
-import {describe, expect, it, vi} from "vitest";
-
 import {
   animateSheetValue,
   nearestSheetSnap,
@@ -21,6 +19,12 @@ describe("normalizeSnapPoints", () => {
     expect(normalizeSnapPoints([1])).toBeUndefined();
     expect(normalizeSnapPoints([])).toBeUndefined();
     expect(normalizeSnapPoints(undefined)).toBeUndefined();
+    expect(normalizeSnapPoints([0])).toBeUndefined();
+  });
+
+  it("drops a numeric zero but keeps zero-valued strings as authored", () => {
+    expect(normalizeSnapPoints([0, 300])).toEqual([300]);
+    expect(normalizeSnapPoints(["0px", "0%"])).toEqual(["0px", "0%"]);
   });
 
   it("drops non-finite numbers, negatives, blank strings and duplicates", () => {
@@ -86,12 +90,18 @@ describe("nearestSheetSnap", () => {
     expect(nearestSheetSnap([], 1, 0)).toBeNull();
   });
 
-  it("never returns NaN for non-finite inputs", () => {
+  it("ignores non-finite targets", () => {
+    expect(nearestSheetSnap([NaN, 300, Infinity], 340, 0)).toBe(300);
+    expect(nearestSheetSnap([NaN, Infinity], 340, 0)).toBeNull();
+  });
+
+  it("returns a finite target for non-finite current and velocity", () => {
     for (const current of [NaN, Infinity, -Infinity]) {
       for (const velocity of [NaN, Infinity, -Infinity, 0]) {
-        const result = nearestSheetSnap(targets, current, velocity);
+        // Only an infinite flick toward lower values from +Infinity has a lower target to pick.
+        const expected = current === Infinity && velocity === Infinity ? 600 : 0;
 
-        expect(result === null || !Number.isNaN(result)).toBe(true);
+        expect(nearestSheetSnap(targets, current, velocity)).toBe(expected);
       }
     }
   });
@@ -101,7 +111,7 @@ describe("sheetDismissTarget", () => {
   const base = {
     current: 400,
     elapsed: 1000,
-    extent: 400,
+    extent: 800,
     isDismissable: true,
     rest: 400,
     size: 400,
@@ -114,7 +124,7 @@ describe("sheetDismissTarget", () => {
     expect(sheetDismissTarget({...base, isDismissable: false, travel: 380})).toBe(400);
   });
 
-  it("closes at 30% of the visible size on a bottom sheet", () => {
+  it("closes past the distance threshold on a bottom sheet", () => {
     expect(sheetDismissTarget({...base, travel: 120})).toBe(0);
   });
 
@@ -133,8 +143,32 @@ describe("sheetDismissTarget", () => {
   it("closes toward the far edge for a top sheet", () => {
     expect(
       sheetDismissTarget({...base, current: 0, rest: 0, swipeDirection: "top", travel: -120}),
-    ).toBe(400);
+    ).toBe(800);
   });
+
+  it("closes a right sheet through zero and a left sheet at the far edge", () => {
+    expect(sheetDismissTarget({...base, swipeDirection: "right", travel: 120})).toBe(0);
+    expect(sheetDismissTarget({...base, swipeDirection: "left", travel: -120})).toBe(800);
+    expect(sheetDismissTarget({...base, swipeDirection: "left", travel: 120})).toBe(400);
+  });
+
+  it.each(["horizontal", "vertical"] as const)(
+    "picks the dismiss side from the travel on a %s sheet",
+    (swipeDirection) => {
+      expect(sheetDismissTarget({...base, swipeDirection, travel: 120})).toBe(0);
+      expect(sheetDismissTarget({...base, swipeDirection, travel: -120})).toBe(800);
+    },
+  );
+
+  it.each(["horizontal", "vertical"] as const)(
+    "breaks a zero-travel tie by the scroll position on a %s sheet",
+    (swipeDirection) => {
+      // Scrolled below rest: dismisses toward the start. Above rest: toward the far edge.
+      expect(sheetDismissTarget({...base, current: 300, swipeDirection, travel: 0})).toBe(0);
+      expect(sheetDismissTarget({...base, current: 500, swipeDirection, travel: 0})).toBe(800);
+      expect(sheetDismissTarget({...base, current: 400, swipeDirection, travel: 0})).toBe(400);
+    },
+  );
 });
 
 describe("sheetReleaseEase", () => {
@@ -163,6 +197,24 @@ describe("sheetReleaseEase", () => {
 });
 
 describe("animateSheetValue", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function mockFrames() {
+    const frames: FrameRequestCallback[] = [];
+
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+    vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
+      frames.push(callback);
+
+      return frames.length;
+    });
+    vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {});
+
+    return frames;
+  }
+
   it("jumps to the target synchronously under reduced motion", () => {
     const calls: string[] = [];
     const update = vi.fn((value: number) => calls.push(`update:${value}`));
@@ -174,25 +226,39 @@ describe("animateSheetValue", () => {
     expect(calls).toEqual(["update:10", "complete"]);
   });
 
-  it("returns a cancel function that stops an animation", () => {
-    const frames: FrameRequestCallback[] = [];
-    const raf = vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
-      frames.push(callback);
+  it("runs to the final value across frames, then completes once", () => {
+    const frames = mockFrames();
+    const update = vi.fn();
+    const complete = vi.fn();
 
-      return frames.length;
-    });
-    const caf = vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {});
+    animateSheetValue(0, 100, update, complete, false);
+
+    frames.shift()?.(1250);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update.mock.calls[0]?.[0]).toBeGreaterThan(0);
+    expect(update.mock.calls[0]?.[0]).toBeLessThan(100);
+    expect(complete).not.toHaveBeenCalled();
+
+    frames.shift()?.(1500);
+    expect(update).toHaveBeenLastCalledWith(100);
+    expect(complete).toHaveBeenCalledTimes(1);
+    expect(frames).toHaveLength(0);
+  });
+
+  it("stops after cancel in the middle of a run", () => {
+    const frames = mockFrames();
     const update = vi.fn();
     const complete = vi.fn();
 
     const cancel = animateSheetValue(0, 100, update, complete, false);
 
-    cancel();
-    frames[0]?.(performance.now() + 1000);
+    frames.shift()?.(1100);
+    expect(update).toHaveBeenCalledTimes(1);
 
-    expect(update).not.toHaveBeenCalled();
+    cancel();
+    frames.shift()?.(1200);
+
+    expect(update).toHaveBeenCalledTimes(1);
     expect(complete).not.toHaveBeenCalled();
-    raf.mockRestore();
-    caf.mockRestore();
   });
 });
