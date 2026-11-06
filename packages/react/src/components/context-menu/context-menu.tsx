@@ -494,11 +494,12 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
    * While open, the modal popover leaves the rest of the page inert, so a right-click elsewhere
    * would show the browser's menu on top of ours and leave ours open. Close instead and let the
    * browser menu through (never preventDefault). Bubble phase, so a consumer that already cancelled
-   * the event keeps the menu. The region and the popover are the allow-list: the region re-anchors
-   * in its own handler, the popover is guarded above.
+   * the event keeps the menu. The allow-list is the region, the popover and any submenu popover
+   * (RAC portals those to body and marks them `data-trigger="SubmenuTrigger"`). The browser's own
+   * `contextmenu` after a long press is left alone while the release guard is armed, so the menu
+   * the finger just opened is not closed by the underlay.
    */
-  const {isOpen} = state;
-  const {setOpen} = state;
+  const {isOpen, setOpen} = state;
 
   useEffect(() => {
     if (!isOpen) {
@@ -508,17 +509,21 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     const onOutsideContextMenu = (event: MouseEvent) => {
       const target = event.target;
 
+      if (event.defaultPrevented || releaseGuard.current) {
+        return;
+      }
+
       if (
-        event.defaultPrevented ||
-        (target instanceof Node &&
-          (triggerRef.current?.contains(target) || popoverRef.current?.contains(target)))
+        target instanceof Node &&
+        (triggerRef.current?.contains(target) ||
+          popoverRef.current?.contains(target) ||
+          (target instanceof Element && target.closest('[data-trigger="SubmenuTrigger"]')))
       ) {
         return;
       }
 
       setOpen(false);
     };
-
 
     document.addEventListener("contextmenu", onOutsideContextMenu);
 

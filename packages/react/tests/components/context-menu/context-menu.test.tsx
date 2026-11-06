@@ -3,6 +3,7 @@ import {resolve} from "node:path";
 
 import {act, fireEvent, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 import {useState} from "react";
+import {Popover as SubmenuPopoverPrimitive} from "react-aria-components/Menu";
 
 import {ContextMenu, ContextMenuRoot} from "@/components/context-menu/index.ts";
 import {MenuItemIndicator, MenuItemRoot} from "@/components/menu-item/index.ts";
@@ -183,7 +184,7 @@ describe("ContextMenu pointer open and dismissal", () => {
     expect(getAnchor()?.style.top).toBe("60px");
   });
 
-  it("moves the anchor on a second contextmenu and keeps the menu open", () => {
+  it("moves the anchor on a second contextmenu fired on the region (the browser may not send one: the modal popover makes the page inert)", () => {
     const onOpenChange = vi.fn();
 
     render(<Fixture onOpenChange={onOpenChange} />);
@@ -269,7 +270,7 @@ describe("ContextMenu pointer open and dismissal", () => {
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 
-  it("keeps the menu open for a contextmenu inside the region and moves the anchor", () => {
+  it("keeps the menu open for a contextmenu fired inside the region and moves the anchor (models an event the browser may not send)", () => {
     const onOpenChange = vi.fn();
 
     render(
@@ -301,6 +302,50 @@ describe("ContextMenu pointer open and dismissal", () => {
     expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
+  it("keeps the whole menu open for a contextmenu inside a submenu popover", async () => {
+    const user = setupUser();
+    const onOpenChange = vi.fn();
+
+    render(
+      <ContextMenu onOpenChange={onOpenChange}>
+        <ContextMenu.Trigger>
+          <span data-testid="inner">Region</span>
+        </ContextMenu.Trigger>
+        <ContextMenu.Popover>
+          <ContextMenu.Menu aria-label="Actions">
+            <ContextMenu.SubmenuTrigger>
+              <ContextMenu.Item id="more" textValue="More">
+                More
+              </ContextMenu.Item>
+              {/* RAC's own Popover: ContextMenu.Popover binds to the root's anchor (see the report). */}
+              <SubmenuPopoverPrimitive>
+                <ContextMenu.Menu aria-label="More actions">
+                  <ContextMenu.Item id="telegram" textValue="Telegram">
+                    Telegram
+                  </ContextMenu.Item>
+                </ContextMenu.Menu>
+              </SubmenuPopoverPrimitive>
+            </ContextMenu.SubmenuTrigger>
+          </ContextMenu.Menu>
+        </ContextMenu.Popover>
+      </ContextMenu>,
+    );
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    await user.keyboard("{ArrowDown}{ArrowRight}");
+
+    const subItem = await screen.findByRole("menuitem", {name: "Telegram"});
+
+    expect(subItem.closest('[data-trigger="SubmenuTrigger"]')).not.toBeNull();
+    onOpenChange.mockClear();
+
+    const allowed = fireEvent.contextMenu(subItem, {clientX: 200, clientY: 200});
+
+    expect(allowed).toBe(true);
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("menuitem", {name: "More"})).toBeInTheDocument();
+    expect(subItem).toBeInTheDocument();
+  });
+
   it("does not close for an outside contextmenu whose default was already prevented", () => {
     const onOpenChange = vi.fn();
 
@@ -328,8 +373,7 @@ describe("ContextMenu pointer open and dismissal", () => {
   it("removes the document contextmenu listener after close and on unmount", async () => {
     const add = vi.spyOn(document, "addEventListener");
     const remove = vi.spyOn(document, "removeEventListener");
-    const ours = (spy: typeof add) =>
-      spy.mock.calls.filter(([type]) => type === "contextmenu");
+    const ours = (spy: typeof add) => spy.mock.calls.filter(([type]) => type === "contextmenu");
 
     try {
       const {unmount} = render(<Fixture />);
@@ -990,6 +1034,27 @@ describe("ContextMenu touch long-press", () => {
     expect(allowed).toBe(false);
     expect(getAnchor()?.style.left).toBe("40px");
     expect(getAnchor()?.style.top).toBe("60px");
+  });
+
+  it("does not close the menu on the native contextmenu that follows a long-press, even outside the region", () => {
+    render(
+      <>
+        <Fixture />
+        <div data-testid="outside">Elsewhere</div>
+      </>,
+    );
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    touch(screen.getByTestId("inner"), "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    fireEvent.contextMenu(screen.getByTestId("outside"), {clientX: 90, clientY: 95});
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
   it("opens from a right-click again once the release window has passed", () => {
