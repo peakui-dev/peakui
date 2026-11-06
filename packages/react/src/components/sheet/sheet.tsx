@@ -201,7 +201,12 @@ const SheetTrigger = ({children}: SheetTriggerProps) => {
 
   // The root could not see this trigger, so the child has no press handling and does nothing.
   useEffect(() => {
-    if (isUndetected && process.env.NODE_ENV !== "production") {
+    // StrictMode runs effects twice in development, so the warning may log twice per mount there.
+    if (
+      isUndetected &&
+      typeof process !== "undefined" &&
+      process.env?.["NODE_ENV"] !== "production"
+    ) {
       // eslint-disable-next-line no-console -- dev-only warning, emitted once per undetected trigger
       console.error(
         "Sheet.Trigger must be a direct child of Sheet or sit inside fragments there; a trigger " +
