@@ -433,21 +433,31 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
     const current = readSheetScroll(scroller, axis);
     // A pointer that stopped before letting go has no flick left in it.
     const velocity = event.timeStamp - state.lastTime > FLICK_IDLE_MS ? 0 : state.velocity;
+    // Snap points that measure to no resting position (a layout that has not happened, values that
+    // resolve to nothing) leave nothing to settle on, so the release judges the edge instead.
+    const resolved =
+      !cancelled && hasSnapPoints
+        ? resolveSheetPositions(getSheetSnapTargets(scroller, axis), after)
+        : null;
     let target: number | null;
     let dismisses = false;
 
     if (cancelled) {
       target = state.startScroll;
-    } else if (hasSnapPoints) {
-      const {extent, positions} = resolveSheetPositions(getSheetSnapTargets(scroller, axis), after);
+    } else if (resolved && resolved.positions.length > 0) {
+      const {extent, positions} = resolved;
+      // The scroller is pinned left-to-right (Sheet.mjs: "The scroll geometry is physical"), so the
+      // origin is never negative, even in RTL. A bottom or right sheet closes at scroll 0; a top or
+      // left sheet at the far end. `swipeDirection` here is always the placement: the public props
+      // do not expose the primitive's bidirectional values, so there is one closed edge.
+      const closed = after ? 0 : extent;
       // The closed position is a resting place only for a sheet that may be dismissed: for one
       // that may not, the lowest snap is as far as a drag can take it.
-      const closed = after ? 0 : extent;
       const candidates = positions.map((position) => position.scroll);
 
       if (isDismissable) candidates.push(closed);
 
-      target = positions.length > 0 ? nearestSheetSnap(candidates, current, velocity) : null;
+      target = nearestSheetSnap(candidates, current, velocity);
       dismisses = isDismissable && target === closed;
     } else {
       target = sheetDismissTarget({

@@ -19,8 +19,10 @@ import {
 import {
   getSheetScroller,
   getSheetSnapTargets,
+  measureSheet,
   scrollSheetTo,
   snapScrollPosition,
+  writeSheetScroll,
 } from "@/components/sheet/sheet-scroll.ts";
 import {isUsableSnapPoint, resolveSheetPositions} from "@/components/sheet/use-sheet-handle.ts";
 
@@ -771,6 +773,63 @@ describe("Sheet", () => {
 
       expect(snapScrollPosition(scroller, marker, "y", "start")).toBe(150);
       expect(snapScrollPosition(scroller, marker, "y", "end")).toBe(-150);
+    });
+
+    describe("measureSheet and writeSheetScroll", () => {
+      const scrollerWithDialog = (dialogRect: DOMRect, clientLength = 0) => {
+        const scroller = document.createElement("div");
+        const dialog = document.createElement("div");
+
+        dialog.setAttribute("data-slot", "sheet-dialog");
+        dialog.getBoundingClientRect = () => dialogRect;
+        Object.defineProperty(dialog, "clientHeight", {value: clientLength});
+        Object.defineProperty(dialog, "clientWidth", {value: clientLength});
+        Object.defineProperty(scroller, "scrollHeight", {value: 1400});
+        Object.defineProperty(scroller, "clientHeight", {value: 700});
+        Object.defineProperty(scroller, "scrollWidth", {value: 1000});
+        Object.defineProperty(scroller, "clientWidth", {value: 400});
+        scroller.append(dialog);
+
+        return scroller;
+      };
+
+      it("measures the extent, the dialog's size and the viewport along each axis", () => {
+        const scroller = scrollerWithDialog(rect(0, 320, 0, 280));
+
+        expect(measureSheet(scroller, "y")).toEqual({
+          extent: 700,
+          size: 320,
+          viewport: window.innerHeight,
+        });
+        expect(measureSheet(scroller, "x")).toEqual({
+          extent: 600,
+          size: 280,
+          viewport: window.innerWidth,
+        });
+      });
+
+      it("falls back to the dialog's client size when its rect is empty, and to 0 without a dialog", () => {
+        const scroller = scrollerWithDialog(rect(0, 0), 150);
+
+        expect(measureSheet(scroller, "y").size).toBe(150);
+        expect(measureSheet(scroller, "x").size).toBe(150);
+        expect(measureSheet(document.createElement("div"), "y").size).toBe(0);
+      });
+
+      it("writes the position to scrollTop on y and to scrollLeft on x", () => {
+        const scroller = document.createElement("div");
+        const top = vi.fn();
+        const left = vi.fn();
+
+        Object.defineProperty(scroller, "scrollTop", {configurable: true, set: top});
+        Object.defineProperty(scroller, "scrollLeft", {configurable: true, set: left});
+
+        writeSheetScroll(scroller, "y", 12);
+        writeSheetScroll(scroller, "x", 34);
+
+        expect(top).toHaveBeenCalledExactlyOnceWith(12);
+        expect(left).toHaveBeenCalledExactlyOnceWith(34);
+      });
     });
   });
 
@@ -1981,6 +2040,299 @@ describe("Sheet", () => {
         });
       });
 
+      /*
+       * Top and left sheets open at scroll 0 and close at the far end of the scroll range (600 here),
+       * the mirror of bottom and right sheets: dragging toward the screen edge INCREASES the scroll.
+       */
+      describe.each([
+        ["top", "y"],
+        ["left", "x"],
+      ] as const)("%s placement", (placement, axis) => {
+        const at = (value: number) => (axis === "y" ? {y: value} : {x: value});
+        /** A slow drag of `delta` px along the axis, released where it stopped. */
+        const slowDrag = (delta: number) => {
+          pointer("pointerdown", handle(), {t: 0, ...at(100)});
+          pointer("pointermove", handle(), {t: 1000, ...at(100 + delta)});
+          pointer("pointerup", handle(), {t: 2000, ...at(100 + delta)});
+        };
+        /** 30px in 20ms: a flick. Negative `delta` moves toward the screen edge. */
+        const flick = (delta: number) => {
+          pointer("pointerdown", handle(), {t: 0, ...at(100)});
+          pointer("pointermove", handle(), {t: 20, ...at(100 + delta)});
+          pointer("pointerup", handle(), {t: 21, ...at(100 + delta)});
+        };
+
+        it("dragging toward the edge increases the scroll", async () => {
+          render(<HandleSheet placement={placement} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, ...at(100)});
+          pointer("pointermove", handle(), {t: 500, ...at(50)});
+          expect(writes.at(-1)).toBe(350);
+          pointer("pointermove", handle(), {t: 1000, ...at(130)});
+          expect(writes.at(-1)).toBe(270);
+        });
+
+        it("a slow release settles on the nearest snap and does not close", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet placement={placement} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          slowDrag(-50);
+
+          expect(writes.at(-1)).toBe(300);
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+
+        it("dragging past the lowest snap toward the edge lands on the extent and closes", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet placement={placement} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          slowDrag(-250);
+
+          expect(writes.at(-1)).toBe(600);
+          expect(onOpenChange).toHaveBeenCalledTimes(1);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        it("isDismissable={false}: the same drag settles on the lowest snap and never closes", async () => {
+          const onOpenChange = vi.fn();
+
+          render(
+            <HandleSheet isDismissable={false} placement={placement} onOpenChange={onOpenChange} />,
+          );
+          await screen.findByRole("dialog");
+
+          slowDrag(-250);
+          expect(writes.at(-1)).toBe(300);
+          flick(-30);
+          expect(writes.at(-1)).toBe(300);
+
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+
+        it("a flick toward the edge closes; a flick away reveals the next snap", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet placement={placement} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          // Away from the edge: the scroll falls from 270, toward more of the sheet: 0 is the full
+          // sheet, though 300 is nearer.
+          flick(30);
+          expect(writes.at(-1)).toBe(0);
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+
+        it("a flick toward the edge closes a dismissable sheet", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet placement={placement} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          flick(-30);
+
+          expect(writes.at(-1)).toBe(600);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        describe("without snap points", () => {
+          it("a flick toward the edge closes at the extent", async () => {
+            const onOpenChange = vi.fn();
+
+            render(
+              <HandleSheet placement={placement} snapPoints={null} onOpenChange={onOpenChange} />,
+            );
+            await screen.findByRole("dialog");
+
+            flick(-30);
+
+            expect(writes.at(-1)).toBe(600);
+            expect(onOpenChange).toHaveBeenCalledWith(false);
+          });
+
+          it("a flick away from the edge, or a short slow drag, settles back", async () => {
+            const onOpenChange = vi.fn();
+
+            render(
+              <HandleSheet placement={placement} snapPoints={null} onOpenChange={onOpenChange} />,
+            );
+            await screen.findByRole("dialog");
+
+            flick(30);
+            expect(writes.at(-1)).toBe(300);
+            slowDrag(-10);
+            expect(writes.at(-1)).toBe(300);
+            expect(onOpenChange).not.toHaveBeenCalled();
+          });
+
+          it("isDismissable={false}: a flick toward the edge settles and never closes", async () => {
+            const onOpenChange = vi.fn();
+
+            render(
+              <HandleSheet
+                isDismissable={false}
+                placement={placement}
+                snapPoints={null}
+                onOpenChange={onOpenChange}
+              />,
+            );
+            await screen.findByRole("dialog");
+
+            flick(-30);
+
+            expect(writes.at(-1)).toBe(300);
+            expect(onOpenChange).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      /*
+       * The primitive pins the scroller to `direction: ltr` (Sheet.mjs, "The scroll geometry is
+       * physical"), so scrollLeft stays non-negative and the edges are physical in RTL: the same drag
+       * gives the same targets as in LTR. jsdom cannot apply that CSS; a real `dir=rtl` page is
+       * Task 10's.
+       */
+      describe.each([["ar-EG"], ["he-IL"]])("RTL locale %s", (locale) => {
+        const rtl = (node: React.ReactNode) =>
+          render(
+            <I18nProvider locale={locale}>
+              <div dir="rtl">{node}</div>
+            </I18nProvider>,
+          );
+
+        it("a right sheet drags and dismisses toward the right edge, as in LTR", async () => {
+          const onOpenChange = vi.fn();
+
+          rtl(<HandleSheet placement="right" onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, x: 100});
+          pointer("pointermove", handle(), {t: 500, x: 150});
+          expect(writes.at(-1)).toBe(250);
+          pointer("pointermove", handle(), {t: 1000, x: 350});
+          pointer("pointerup", handle(), {t: 2000, x: 350});
+
+          expect(writes.at(-1)).toBe(0);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        it("a left sheet drags and dismisses toward the left edge, as in LTR", async () => {
+          const onOpenChange = vi.fn();
+
+          rtl(<HandleSheet placement="left" onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, x: 100});
+          pointer("pointermove", handle(), {t: 500, x: 50});
+          expect(writes.at(-1)).toBe(350);
+          pointer("pointermove", handle(), {t: 1000, x: -150});
+          pointer("pointerup", handle(), {t: 2000, x: -150});
+
+          expect(writes.at(-1)).toBe(600);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        it("isDismissable={false}: a right sheet settles on the lowest snap", async () => {
+          const onOpenChange = vi.fn();
+
+          rtl(<HandleSheet isDismissable={false} placement="right" onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, x: 100});
+          pointer("pointermove", handle(), {t: 1000, x: 350});
+          pointer("pointerup", handle(), {t: 2000, x: 350});
+
+          expect(writes.at(-1)).toBe(300);
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+      });
+
+      describe("when no resting position can be measured", () => {
+        it("falls back to the edge dismissal, so a flick still closes a dismissable sheet", async () => {
+          // Every marker measures to the closed position: there is no position to settle on.
+          targets = [0, 0, 0];
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, y: 100});
+          pointer("pointermove", handle(), {t: 20, y: 130});
+          pointer("pointerup", handle(), {t: 21, y: 130});
+
+          expect(writes.at(-1)).toBe(0);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        it("isDismissable={false}: the fallback settles back and never closes", async () => {
+          targets = [0, 0, 0];
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet isDismissable={false} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+
+          pointer("pointerdown", handle(), {t: 0, y: 100});
+          pointer("pointermove", handle(), {t: 20, y: 130});
+          pointer("pointerup", handle(), {t: 21, y: 130});
+
+          expect(writes.at(-1)).toBe(300);
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+      });
+
+      describe("distance threshold without snap points", () => {
+        // The dialog is 400px tall, so a quarter of it is 100px.
+        const sizeDialog = () => {
+          const previous = vi
+            .mocked(HTMLElement.prototype.getBoundingClientRect)
+            .getMockImplementation();
+
+          vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+            this: HTMLElement,
+          ) {
+            if (this.dataset["slot"] === "sheet-dialog") {
+              return {bottom: 400, height: 400, left: 0, right: 400, top: 0, width: 400} as DOMRect;
+            }
+
+            return previous!.call(this);
+          });
+        };
+
+        it("a slow drag of a quarter of the size or more closes the sheet", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet snapPoints={null} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+          sizeDialog();
+
+          pointer("pointerdown", handle(), {t: 0, y: 100});
+          pointer("pointermove", handle(), {t: 4000, y: 200});
+          pointer("pointerup", handle(), {t: 8000, y: 200});
+
+          expect(writes.at(-1)).toBe(0);
+          expect(onOpenChange).toHaveBeenCalledWith(false);
+        });
+
+        it("a slow drag of less than a quarter settles back", async () => {
+          const onOpenChange = vi.fn();
+
+          render(<HandleSheet snapPoints={null} onOpenChange={onOpenChange} />);
+          await screen.findByRole("dialog");
+          sizeDialog();
+
+          pointer("pointerdown", handle(), {t: 0, y: 100});
+          pointer("pointermove", handle(), {t: 4000, y: 199});
+          pointer("pointerup", handle(), {t: 8000, y: 199});
+
+          expect(writes.at(-1)).toBe(300);
+          expect(onOpenChange).not.toHaveBeenCalled();
+        });
+      });
+
       it("a non-primary button or a second pointer id does not start a drag", async () => {
         render(<HandleSheet />);
         await screen.findByRole("dialog");
@@ -2127,25 +2479,44 @@ describe("Sheet", () => {
         expect(onOpenChange).not.toHaveBeenCalled();
       });
 
-      it("the capture released by a finished drag does not count as a cancel of the next one", async () => {
+      it("the lostpointercapture that follows our own release does not undo the release", async () => {
         render(<HandleSheet />);
         await screen.findByRole("dialog");
 
         pointer("pointerdown", handle(), {t: 0, y: 100});
-        pointer("pointermove", handle(), {t: 1000, y: 180});
-        pointer("pointerup", handle(), {t: 2000, y: 180});
+        pointer("pointermove", handle(), {t: 1000, y: -150});
+        pointer("pointerup", handle(), {t: 2000, y: -150});
+        expect(writes.at(-1)).toBe(600);
+
+        // The browser reports the capture we released, with the pointer's own id, before the next
+        // pointer event: the drag is over by then, so it must not restore the start (300).
+        const settled = writes.length;
+
+        lostCapture(1);
+        expect(writes).toHaveLength(settled);
+
+        // And the next gesture with that pointer still drives the sheet.
         pointer("pointerdown", handle(), {t: 3000, y: 100});
-        pointer("pointermove", handle(), {t: 4000, y: 150});
+        pointer("pointermove", handle(), {t: 3500, y: 150});
+        expect(writes.at(-1)).toBe(550);
+        expect(handle()).toHaveAttribute("data-dragging");
+      });
+
+      it("ignores a lostpointercapture for another pointer id while a drag is active", async () => {
+        render(<HandleSheet />);
+        await screen.findByRole("dialog");
+
+        pointer("pointerdown", handle(), {t: 0, y: 100});
+        pointer("pointermove", handle(), {t: 1000, y: 150});
         const before = writes.length;
 
-        // The browser reports the first drag's capture going away, after the second began.
         lostCapture(9);
 
         expect(writes).toHaveLength(before);
         expect(handle()).toHaveAttribute("data-dragging");
       });
 
-      it("pointer events started inside Body do not drive the handle", async () => {
+      it("structural: the handle's pointer handlers are not attached to the Body subtree", async () => {
         render(<HandleSheet withBody />);
         await screen.findByRole("dialog");
         const child = screen.getByTestId("body-child");
