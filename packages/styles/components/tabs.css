@@ -297,3 +297,45 @@
     }
   }
 }
+
+/* ==========================================================================
+   Forced colors
+   ========================================================================== */
+
+/*
+ * The selected tab is carried by the indicator's fill and shadow, and forced colors drops both.
+ * The indicator takes the system Highlight; the selected label takes HighlightText so it stays
+ * readable on it. System colors carry !important: the secondary variant's selector is more
+ * specific and sets non-system colors, which forced colors would turn into Canvas.
+ */
+@media (forced-colors: active) {
+  .tabs__indicator {
+    background-color: Highlight !important;
+  }
+
+  .tabs__tab[data-selected="true"] {
+    color: HighlightText !important;
+  }
+
+  /* Secondary: the indicator is a thin line under (or beside) the tab, so the label stays on Canvas. */
+  .tabs--secondary .tabs__tab[data-selected="true"] {
+    color: CanvasText !important;
+  }
+
+  /* Disabled and selected: gray fill with a Canvas label, never GrayText on Highlight. */
+  .tabs__tab[data-disabled="true"][data-selected="true"] {
+    color: Canvas !important;
+
+    .tabs__indicator {
+      background-color: GrayText !important;
+    }
+  }
+
+  .tabs--secondary .tabs__tab[data-disabled="true"][data-selected="true"] {
+    color: GrayText !important;
+  }
+
+  .tabs__tab[data-disabled="true"]:not([data-selected="true"]) {
+    color: GrayText !important;
+  }
+}

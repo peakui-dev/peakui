@@ -508,6 +508,47 @@ export const WithDisabledTab: Story = {
   ),
 };
 
+/* A selected tab that is also disabled: the forced-colors state that must stay readable. */
+export const DisabledSelectedTab: Story = {
+  args: {
+    children: null,
+    defaultSelectedKey: "locked",
+  },
+  render: (args) => (
+    <Showcase title="Disabled selected tab">
+      <div className="w-[600px]">
+        <Tabs {...args}>
+          <Tabs.ListContainer>
+            <Tabs.List aria-label="Sections with a disabled selected tab">
+              <Tabs.Tab id="open">
+                Open
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab isDisabled id="locked">
+                Locked
+                <Tabs.Indicator />
+              </Tabs.Tab>
+              <Tabs.Tab id="other">
+                Other
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            </Tabs.List>
+          </Tabs.ListContainer>
+          <Tabs.Panel className="pt-4" id="open">
+            <p>Open section.</p>
+          </Tabs.Panel>
+          <Tabs.Panel className="pt-4" id="locked">
+            <p>Locked section.</p>
+          </Tabs.Panel>
+          <Tabs.Panel className="pt-4" id="other">
+            <p>Other section.</p>
+          </Tabs.Panel>
+        </Tabs>
+      </div>
+    </Showcase>
+  ),
+};
+
 export const WithDefaultSelectedTab: Story = {
   args: {
     children: null,
