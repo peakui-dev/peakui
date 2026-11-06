@@ -3,7 +3,6 @@ import {resolve} from "node:path";
 
 import {act, fireEvent, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 import {useState} from "react";
-import {Popover as SubmenuPopoverPrimitive} from "react-aria-components/Menu";
 
 import {ContextMenu, ContextMenuRoot} from "@/components/context-menu/index.ts";
 import {MenuItemIndicator, MenuItemRoot} from "@/components/menu-item/index.ts";
@@ -317,14 +316,13 @@ describe("ContextMenu pointer open and dismissal", () => {
               <ContextMenu.Item id="more" textValue="More">
                 More
               </ContextMenu.Item>
-              {/* RAC's own Popover: ContextMenu.Popover binds to the root's anchor (see the report). */}
-              <SubmenuPopoverPrimitive>
+              <ContextMenu.Popover>
                 <ContextMenu.Menu aria-label="More actions">
                   <ContextMenu.Item id="telegram" textValue="Telegram">
                     Telegram
                   </ContextMenu.Item>
                 </ContextMenu.Menu>
-              </SubmenuPopoverPrimitive>
+              </ContextMenu.Popover>
             </ContextMenu.SubmenuTrigger>
           </ContextMenu.Menu>
         </ContextMenu.Popover>
@@ -344,6 +342,51 @@ describe("ContextMenu pointer open and dismissal", () => {
     expect(onOpenChange).not.toHaveBeenCalled();
     expect(screen.getByRole("menuitem", {name: "More"})).toBeInTheDocument();
     expect(subItem).toBeInTheDocument();
+  });
+
+  it("opens a submenu with ContextMenu.SubmenuTrigger and Popover, and selecting its item fires onAction and closes the menu", async () => {
+    const user = setupUser();
+    const onAction = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <ContextMenu onOpenChange={onOpenChange}>
+        <ContextMenu.Trigger>
+          <span data-testid="inner">Region</span>
+        </ContextMenu.Trigger>
+        <ContextMenu.Popover>
+          <ContextMenu.Menu aria-label="Actions">
+            <ContextMenu.SubmenuTrigger>
+              <ContextMenu.Item id="more" textValue="More">
+                More
+              </ContextMenu.Item>
+              <ContextMenu.Popover>
+                <ContextMenu.Menu aria-label="More actions" onAction={onAction}>
+                  <ContextMenu.Item id="telegram" textValue="Telegram">
+                    Telegram
+                  </ContextMenu.Item>
+                </ContextMenu.Menu>
+              </ContextMenu.Popover>
+            </ContextMenu.SubmenuTrigger>
+          </ContextMenu.Menu>
+        </ContextMenu.Popover>
+      </ContextMenu>,
+    );
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    await user.keyboard("{ArrowDown}{ArrowRight}");
+
+    const subItem = await screen.findByRole("menuitem", {name: "Telegram"});
+
+    /* The submenu is its own popover: not pinned to the pointer anchor of the root menu. */
+    expect(screen.getAllByRole("menu")).toHaveLength(2);
+    expect(subItem).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => expect(onAction).toHaveBeenCalledTimes(1));
+    expect(onAction.mock.calls[0]?.[0]).toBe("telegram");
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 
   it("does not close for an outside contextmenu whose default was already prevented", () => {

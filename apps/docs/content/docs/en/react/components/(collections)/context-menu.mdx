@@ -238,5 +238,5 @@ Shared with Dropdown and Menu: the same menu-item part.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `children` | `ReactNode` | - | The item and the submenu popover. Submenu behaviour inside a context menu is not covered by tests |
+| `children` | `ReactNode` | - | The item and a `ContextMenu.Popover` holding the submenu; opening and selecting a submenu item are tested in jsdom only, with no story or browser test |
 | `...rest` | `SubmenuTriggerProps` | - | React Aria [SubmenuTrigger](https://react-spectrum.adobe.com/react-aria/Menu.html#submenutrigger) attributes |

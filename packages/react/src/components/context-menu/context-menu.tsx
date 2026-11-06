@@ -23,6 +23,7 @@ import {
   Popover as PopoverPrimitive,
   SubmenuTrigger as SubmenuTriggerPrimitive,
 } from "react-aria-components/Menu";
+import {PopoverContext} from "react-aria-components/Popover";
 import {createPortal} from "react-dom";
 import {useControlledState} from "react-stately/useControlledState";
 
@@ -69,6 +70,14 @@ function useContextMenuContext(part: string): ContextMenuContextValue {
 
   return context;
 }
+
+/*
+ * Set by a submenu Popover for its subtree. A Popover under RAC's SubmenuTrigger owns no root
+ * state: RAC supplies the open state and trigger, so neither it nor its Menu may bind to the
+ * root's anchor. SubmenuTrigger cannot set it, because RAC reads `children[0]` and `children[1]`
+ * of the trigger directly. Internal: not exported from the index.
+ */
+const ContextMenuSubmenuContext = createContext(false);
 
 const DEFAULT_SURFACE_CONTEXT = {variant: "default" as SurfaceVariants["variant"]};
 
@@ -601,13 +610,37 @@ interface ContextMenuPopoverProps extends Omit<
 const ContextMenuPopover = ({
   children,
   className,
-  placement = "bottom start",
+  placement: placementProp,
   ref,
   ...props
 }: ContextMenuPopoverProps) => {
+  const placement = placementProp ?? "bottom start";
   const {anchor, isAnchored, isDisabled, popoverRef, slots, state} =
     useContextMenuContext("ContextMenu.Popover");
   const mergedRef = useMemo(() => mergeRefs(ref, popoverRef), [ref, popoverRef]);
+  /* RAC's SubmenuTrigger hands its popover this context; a root popover never sees it. */
+  const popoverContext = use(PopoverContext);
+  const isSubmenu =
+    popoverContext != null &&
+    "trigger" in popoverContext &&
+    popoverContext.trigger === "SubmenuTrigger";
+
+  /* Under a SubmenuTrigger RAC supplies the open state, trigger and placement; only the skin is ours. */
+  if (isSubmenu) {
+    return (
+      <SurfaceContext value={DEFAULT_SURFACE_CONTEXT}>
+        <PopoverPrimitive
+          {...props}
+          ref={ref}
+          className={composeTwRenderProps(className, slots?.popover())}
+          data-slot="context-menu-popover"
+          placement={placementProp}
+        >
+          <ContextMenuSubmenuContext value>{children}</ContextMenuSubmenuContext>
+        </PopoverPrimitive>
+      </SurfaceContext>
+    );
+  }
 
   return (
     <SurfaceContext value={DEFAULT_SURFACE_CONTEXT}>
@@ -617,7 +650,7 @@ const ContextMenuPopover = ({
         ref={mergedRef}
         className={composeTwRenderProps(className, slots?.popover())}
         data-slot="context-menu-popover"
-        isOpen={state.isOpen && isAnchored && !isDisabled}
+        isOpen={!!state.isOpen && !!isAnchored && !isDisabled}
         placement={placement}
         triggerRef={anchor.ref}
         onOpenChange={state.setOpen}
@@ -649,10 +682,12 @@ function ContextMenuMenu<T extends object>({onClose, ...props}: ContextMenuMenuP
    * and leaves focus where it is.
    */
   const autoFocus = openedBy === "keyboard" ? "first" : true;
+  const isSubmenu = use(ContextMenuSubmenuContext);
 
   return (
     <MenuRoot
-      autoFocus={autoFocus}
+      /* A submenu's focus is RAC's: the SubmenuTrigger decides between first item and container. */
+      autoFocus={isSubmenu ? undefined : autoFocus}
       {...props}
       data-slot="context-menu-menu"
       onClose={handleClose}
