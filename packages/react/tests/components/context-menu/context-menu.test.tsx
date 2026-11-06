@@ -362,7 +362,7 @@ function mockRects(rects: Record<string, MockRect>) {
   });
 }
 
-function ControlledFixture() {
+function ControlledFixture({rejectOpen = false}: {rejectOpen?: boolean}) {
   const [isOpen, setOpen] = useState(false);
 
   return (
@@ -370,9 +370,20 @@ function ControlledFixture() {
       <button data-testid="external" type="button" onClick={() => setOpen(true)}>
         External
       </button>
-      <ContextMenu isOpen={isOpen} onOpenChange={setOpen}>
+      <ContextMenu
+        isOpen={isOpen}
+        onOpenChange={(next) => {
+          // A parent that refuses every open request coming from the Trigger.
+          if (!rejectOpen || !next) {
+            setOpen(next);
+          }
+        }}
+      >
         <ContextMenu.Trigger>
           <span data-testid="inner">Region</span>
+          <button data-testid="btn" type="button">
+            Row
+          </button>
         </ContextMenu.Trigger>
         <ContextMenu.Popover>
           <ContextMenu.Menu aria-label="Actions">
@@ -528,6 +539,151 @@ describe("ContextMenu keyboard open and focus", () => {
     expect(shift).toBe(true);
     expect(menuKey).toBe(true);
     expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it.each([
+    ["Ctrl+Shift+F10", {ctrlKey: true}],
+    ["Alt+Shift+F10", {altKey: true}],
+    ["Meta+Shift+F10", {metaKey: true}],
+  ])("leaves %s to the browser", (_name, modifier) => {
+    render(<Fixture />);
+
+    const allowed = fireEvent.keyDown(screen.getByTestId("btn"), {
+      key: "F10",
+      shiftKey: true,
+      ...modifier,
+    });
+
+    expect(allowed).toBe(true);
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("leaves Ctrl+ContextMenu to the browser", () => {
+    render(<Fixture />);
+
+    const allowed = fireEvent.keyDown(screen.getByTestId("btn"), {
+      ctrlKey: true,
+      key: "ContextMenu",
+    });
+
+    expect(allowed).toBe(true);
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("does not re-anchor an open menu on a repeated keydown", async () => {
+    const rect = mockRects({
+      btn: {bottom: 50, height: 20, left: 10, width: 20},
+      field: {bottom: 90, height: 20, left: 70, width: 20},
+    });
+
+    try {
+      render(<Fixture />);
+      fireEvent.keyDown(screen.getByTestId("btn"), {key: "F10", shiftKey: true});
+      await screen.findByRole("menu");
+
+      const allowed = fireEvent.keyDown(screen.getByTestId("field"), {
+        key: "F10",
+        repeat: true,
+        shiftKey: true,
+      });
+
+      expect(allowed).toBe(true);
+      expect(getAnchor()?.style.left).toBe("10px");
+      expect(getAnchor()?.style.top).toBe("50px");
+    } finally {
+      rect.mockRestore();
+    }
+  });
+
+  it("opens on Shift+F10 inside [data-context-menu-native] (the opt-out is pointer-only)", async () => {
+    render(<Fixture />);
+
+    const allowed = fireEvent.keyDown(screen.getByTestId("native"), {key: "F10", shiftKey: true});
+
+    expect(allowed).toBe(false);
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+  });
+
+  it("ignores a keydown whose default was already prevented", () => {
+    render(<Fixture />);
+
+    const event = new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key: "F10",
+      shiftKey: true,
+    });
+
+    event.preventDefault();
+    fireEvent(screen.getByTestId("btn"), event);
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("re-anchors on Shift+F10 while a pointer-opened menu is open and leaves focus where it is", async () => {
+    const rect = mockRects({btn: {bottom: 50, height: 20, left: 10, width: 20}});
+
+    try {
+      render(<Fixture />);
+      fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+
+      const menu = await screen.findByRole("menu");
+
+      expect(document.activeElement).toBe(menu);
+
+      fireEvent.keyDown(screen.getByTestId("btn"), {key: "F10", shiftKey: true});
+
+      expect(getAnchor()?.style.left).toBe("10px");
+      expect(getAnchor()?.style.top).toBe("50px");
+      expect(screen.getByRole("menu")).toBe(menu);
+      // RAC reads autoFocus on mount only, so the open menu keeps its focus target.
+      expect(document.activeElement).toBe(menu);
+    } finally {
+      rect.mockRestore();
+    }
+  });
+
+  it("focuses the menu container, not the first item, when a controlled open follows a keyboard open", async () => {
+    const user = setupUser();
+
+    render(<ControlledFixture />);
+    screen.getByTestId("btn").focus();
+    fireEvent.keyDown(screen.getByTestId("btn"), {key: "ContextMenu"});
+
+    const item = await screen.findByRole("menuitem", {name: "Copy"});
+
+    expect(document.activeElement).toBe(item);
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("menu")).toBeNull();
+
+    await user.click(screen.getByTestId("external"));
+
+    const menu = await screen.findByRole("menu");
+
+    expect(document.activeElement).toBe(menu);
+  });
+
+  it("anchors at the Trigger when a controlled parent rejected an earlier keyboard open", async () => {
+    const user = setupUser();
+    const rect = mockRects({
+      btn: {bottom: 50, height: 20, left: 10, width: 20},
+      "context-menu-trigger": {bottom: 150, height: 100, left: 30, width: 200},
+    });
+
+    try {
+      render(<ControlledFixture rejectOpen />);
+      fireEvent.keyDown(screen.getByTestId("btn"), {key: "F10", shiftKey: true});
+      expect(screen.queryByRole("menu")).toBeNull();
+
+      await user.click(screen.getByTestId("external"));
+
+      expect(await screen.findByRole("menu")).toBeInTheDocument();
+      expect(getAnchor()?.style.left).toBe("30px");
+      expect(getAnchor()?.style.top).toBe("150px");
+    } finally {
+      rect.mockRestore();
+    }
   });
 
   it("does not reuse a stale pointer position when the menu reopens without a pointer", async () => {

@@ -50,9 +50,12 @@ interface ContextMenuContextValue {
   setAnchored(isAnchored: boolean): void;
   /** The popover element; lets the Trigger ignore events that bubble out of the open popover. */
   popoverRef: RefObject<HTMLElement | null>;
-  /** How the menu was last opened; keyboard opens focus the first item. */
-  openedBy: RefObject<"keyboard" | "pointer">;
+  /** How the menu was last opened; keyboard opens focus the first item. Resets to "pointer" on close. */
+  openedBy: ContextMenuOpenedBy;
+  setOpenedBy(openedBy: ContextMenuOpenedBy): void;
 }
+
+type ContextMenuOpenedBy = "keyboard" | "pointer";
 
 const ContextMenuContext = createContext<ContextMenuContextValue | null>(null);
 
@@ -94,7 +97,7 @@ const ContextMenuRoot = ({
   const [isOpen, setOpen] = useControlledState(isOpenProp, defaultOpen, onOpenChange);
   const anchor = useContextMenuAnchor();
   const popoverRef = useRef<HTMLElement | null>(null);
-  const openedBy = useRef<"keyboard" | "pointer">("pointer");
+  const [openedBy, setOpenedBy] = useState<ContextMenuOpenedBy>("pointer");
 
   const [isAnchored, setAnchored] = useState(false);
 
@@ -107,8 +110,18 @@ const ContextMenuRoot = ({
 
   const state = useMemo(() => ({isOpen, setOpen}), [isOpen, setOpen]);
   const contextValue = useMemo(
-    () => ({anchor, isAnchored, isDisabled, openedBy, popoverRef, setAnchored, slots, state}),
-    [anchor, isAnchored, isDisabled, slots, state],
+    () => ({
+      anchor,
+      isAnchored,
+      isDisabled,
+      openedBy,
+      popoverRef,
+      setAnchored,
+      setOpenedBy,
+      slots,
+      state,
+    }),
+    [anchor, isAnchored, isDisabled, openedBy, slots, state],
   );
 
   return <ContextMenuContext value={contextValue}>{children}</ContextMenuContext>;
@@ -144,16 +157,8 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
    * One Trigger per root: every Trigger under a root shares `anchor.ref`, so a second one would
    * render a second anchor element that the popover cannot tell apart.
    */
-  const {
-    anchor,
-    isAnchored,
-    isDisabled,
-    openedBy: openedByRef,
-    popoverRef,
-    setAnchored,
-    slots,
-    state,
-  } = useContextMenuContext("ContextMenu.Trigger");
+  const {anchor, isAnchored, isDisabled, popoverRef, setAnchored, setOpenedBy, slots, state} =
+    useContextMenuContext("ContextMenu.Trigger");
   const triggerRef = useRef<HTMLElement | null>(null);
   const userRef = (props as unknown as {ref?: Ref<HTMLElement>}).ref;
   const mergedTriggerRef = useMemo(() => mergeRefs(userRef, triggerRef), [userRef]);
@@ -191,7 +196,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     }
 
     event.preventDefault();
-    openedByRef.current = "pointer";
+    setOpenedBy("pointer");
     hasOwnAnchor.current = true;
     anchor.setPoint(event.clientX, event.clientY);
     state.setOpen(true);
@@ -209,14 +214,26 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       return;
     }
 
+    /*
+     * Ctrl, Alt and Meta chords belong to the browser, the OS or the consumer, for both keys.
+     * Shift+ContextMenu still matches: it is the same request as the bare key. Held keys and IME
+     * composition never open the menu.
+     */
+    const hasChord = event.ctrlKey || event.altKey || event.metaKey;
     const isMenuKey = event.key === "ContextMenu" || (event.shiftKey && event.key === "F10");
 
-    if (!isMenuKey || isInsidePopover(event.target)) {
+    if (
+      hasChord ||
+      !isMenuKey ||
+      event.repeat ||
+      event.nativeEvent.isComposing ||
+      isInsidePopover(event.target)
+    ) {
       return;
     }
 
     event.preventDefault();
-    openedByRef.current = "keyboard";
+    setOpenedBy("keyboard");
     hasOwnAnchor.current = true;
 
     if (event.target instanceof Element) {
@@ -248,10 +265,16 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
    */
   const {setFromElement} = anchor;
 
+  /*
+   * No dependency list on purpose: a handler's open request that a controlled parent rejects
+   * changes no open state but still re-renders (the anchor point is state), and this effect then
+   * drops the handler's flags so they cannot leak into a later pointer-less open.
+   */
   useLayoutEffect(() => {
     if (!state.isOpen) {
       /* The next open starts clean; the point itself stays put so an exit animation does not jump. */
       hasOwnAnchor.current = false;
+      setOpenedBy("pointer");
 
       return;
     }
@@ -260,7 +283,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       setFromElement(triggerRef.current);
       hasOwnAnchor.current = true;
     }
-  }, [state.isOpen, isAnchored, setFromElement]);
+  });
 
   return (
     <dom.div
@@ -350,10 +373,11 @@ function ContextMenuMenu<T extends object>({onClose, ...props}: ContextMenuMenuP
   };
 
   /*
-   * The ref is written in the event handler that opens the menu, before this part mounts: a
-   * keyboard open lands on the first item, a pointer open on the menu container.
+   * A keyboard open lands on the first item, a pointer open on the menu container. RAC reads
+   * `autoFocus` on mount only, so a Shift+F10 while a pointer-opened menu stays open re-anchors it
+   * and leaves focus where it is.
    */
-  const autoFocus = openedBy.current === "keyboard" ? "first" : true;
+  const autoFocus = openedBy === "keyboard" ? "first" : true;
 
   return (
     <MenuRoot
