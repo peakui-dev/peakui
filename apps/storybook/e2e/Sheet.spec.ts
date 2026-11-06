@@ -720,21 +720,140 @@ test.describe("Sheet: overlay in a real browser", () => {
   });
 
   /*
+   * A focusable element placed right after the handle of the snap-points sheet, in view at 25%.
+   * With `scrollOnFocus`, focusing it scrolls the snap scroller to full height itself, as a consumer
+   * whose focus handler changes the snap point would.
+   */
+  const addFocusableAfterHandle = (page: Page, scrollOnFocus = false) =>
+    handle(page).evaluate((element, scroll) => {
+      const extra = document.createElement("div");
+
+      extra.tabIndex = 0;
+      extra.textContent = "Extra";
+      extra.setAttribute("data-testid", "extra");
+      extra.style.height = "24px";
+      if (scroll) {
+        extra.addEventListener("focus", () => {
+          const scroller = element.closest<HTMLElement>("[data-sheet-scroll]")!;
+
+          scroller.scrollTo({
+            behavior: "smooth",
+            top: scroller.scrollHeight - scroller.clientHeight,
+          });
+        });
+      }
+      element.after(extra);
+    }, scrollOnFocus);
+
+  test("a handle step is not cut short by a Tab onto an element in view", async ({page}) => {
+    await goto(page, "components-sheet--snap-points");
+
+    const dialog = await open(page, "Open with snap points");
+
+    await settled(dialog);
+    await addFocusableAfterHandle(page);
+    await page.keyboard.press("Tab");
+    await expect(handle(page)).toBeFocused();
+    /* The step starts a smooth scroll; the Tab lands while it is still on its way. */
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Tab");
+    await expect(page.getByTestId("extra")).toBeFocused();
+
+    const box = await settled(dialog);
+
+    expect(Math.abs(revealed(page, box) - box.height * 0.5)).toBeLessThanOrEqual(PX);
+    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuenow", "50");
+  });
+
+  test("a scroll that a focus handler starts itself is kept", async ({page}) => {
+    await goto(page, "components-sheet--snap-points");
+
+    const dialog = await open(page, "Open with snap points");
+
+    await settled(dialog);
+    await addFocusableAfterHandle(page, true);
+    await page.keyboard.press("Tab");
+    await expect(handle(page)).toBeFocused();
+    await settled(dialog);
+    await page.keyboard.press("Tab");
+    await expect(page.getByTestId("extra")).toBeFocused();
+
+    /* The handler asked for full height; the primitive's own centring scroll must not win. */
+    const box = await settled(dialog);
+
+    expect(Math.abs(box.y)).toBeLessThanOrEqual(PX);
+    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuenow", "100");
+  });
+
+  /*
+   * Canary for the scroll guard: it exists because the primitive's scroll lock replaces
+   * HTMLElement.prototype.focus while a sheet is open. When this fails, the override is gone: check
+   * whether the guard is still needed (see sheet-scroll-guard.tsx).
+   */
+  test("canary: the primitive overrides focus() while a sheet is open", async ({page}) => {
+    await goto(page, "components-sheet--snap-points");
+
+    /* The page may wrap focus() itself, so the closed page's function is the baseline. */
+    await page.evaluate(() => {
+      (window as unknown as {baseFocus: unknown}).baseFocus = HTMLElement.prototype.focus;
+    });
+
+    const isBaseline = () =>
+      page.evaluate(
+        () => HTMLElement.prototype.focus === (window as unknown as {baseFocus: unknown}).baseFocus,
+      );
+
+    const dialog = await open(page, "Open with snap points");
+
+    expect(await isBaseline()).toBe(false);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect.poll(isBaseline).toBe(true);
+  });
+
+  /*
+   * A checkbox, a radio and a switch focus a native input. It takes Space (and a radio its
+   * arrows), not the page keys, so those still have to be kept off the sheet.
+   */
+  test("page keys on a focused checkbox in the sheet body leave the sheet where it rests", async ({
+    page,
+  }) => {
+    await goto(page, "components-sheet--snap-points");
+
+    const dialog = await open(page, "Open with snap points");
+    const before = await settled(dialog);
+
+    await page.locator('[data-slot="sheet-body"]').evaluate((body) => {
+      const box = document.createElement("input");
+
+      box.type = "checkbox";
+      box.setAttribute("aria-label", "Agree");
+      body.prepend(box);
+    });
+
+    const checkbox = page.getByRole("checkbox", {name: "Agree"});
+
+    await checkbox.evaluate((element: HTMLElement) => element.focus({preventScroll: true}));
+    await expect(checkbox).toBeFocused();
+
+    for (const key of ["PageUp", "Home", "ArrowUp"]) {
+      expect(await afterKey(page, key), key).toEqual({exiting: false, mounted: true});
+    }
+    expect(Math.abs((await settled(dialog)).y - before.y)).toBeLessThanOrEqual(PX);
+
+    /* Space is still its own: it checks the box. */
+    await page.keyboard.press("Space");
+    await expect(checkbox).toBeChecked();
+  });
+
+  /*
    * The browser's own keyboard scrolling must not move the sheet: with focus on something that
    * cannot scroll, the key would scroll the snap scroller, toward the closed end (PageUp, Home,
    * ArrowUp, Shift+Space dismiss a bottom sheet) or toward full size (PageDown, End, ArrowDown,
    * Space). The handle is the keyboard way to resize, and Escape the way to close.
    */
-  const SCROLL_KEYS = [
-    "PageUp",
-    "Home",
-    "ArrowUp",
-    "Shift+Space",
-    "PageDown",
-    "End",
-    "ArrowDown",
-    "Space",
-  ] as const;
+  /* Space is a button's activation, not a scroll: it is checked on the dialog below instead. */
+  const SCROLL_KEYS = ["PageUp", "Home", "ArrowUp", "PageDown", "End", "ArrowDown"] as const;
 
   /** The overlay's state after a key, once a scroll and an exit have had the time they would take. */
   const afterKey = async (page: Page, key: string) => {
@@ -781,6 +900,7 @@ test.describe("Sheet: overlay in a real browser", () => {
     await expect(dialog).toBeFocused();
     expect(await afterKey(page, "PageUp")).toEqual({exiting: false, mounted: true});
     expect(await afterKey(page, "Space")).toEqual({exiting: false, mounted: true});
+    expect(await afterKey(page, "Shift+Space")).toEqual({exiting: false, mounted: true});
     expect(Math.abs((await settled(dialog)).y - before.y)).toBeLessThanOrEqual(PX);
 
     /* The slider takes arrows, Home and End; the page keys are not its own. */
