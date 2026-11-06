@@ -40,6 +40,7 @@ describe("TimeField", () => {
       </TimeField>,
     );
 
+    expect(screen.getByText("Time must be within opening hours")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

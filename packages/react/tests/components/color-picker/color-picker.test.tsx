@@ -64,6 +64,7 @@ describe("ColorPicker", () => {
 
     await user.click(screen.getByRole("button", {name: "Accent colour"}));
     runAllTimers();
+    expect(screen.getByRole("dialog")).toBeVisible();
     await expectNoAxeViolations(document.body);
   });
 

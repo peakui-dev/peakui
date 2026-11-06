@@ -50,6 +50,7 @@ describe("DateField", () => {
       </DateField>,
     );
 
+    expect(screen.getByText("Date must be in the future")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

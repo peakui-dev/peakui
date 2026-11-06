@@ -69,6 +69,7 @@ describe("Dropdown", () => {
     render(<DropdownFixture />);
 
     await openMenu();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
     await expectNoAxeViolations(document.body);
   });
 

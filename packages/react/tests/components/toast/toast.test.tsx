@@ -42,6 +42,8 @@ describe("Toast", () => {
       queue.add({title: "Сохранено"});
     });
 
+    expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(screen.getByText("Сохранено")).toBeInTheDocument();
     await expectNoAxeViolations(document.body);
   });
 

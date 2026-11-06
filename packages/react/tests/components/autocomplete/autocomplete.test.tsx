@@ -98,6 +98,7 @@ describe("Autocomplete", () => {
 
     await user.click(getTrigger());
     runAllTimers();
+    expect(screen.getByRole("listbox")).toBeVisible();
     await expectNoAxeViolations(document.body);
   });
 

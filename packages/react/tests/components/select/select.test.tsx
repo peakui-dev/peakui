@@ -84,6 +84,7 @@ describe("Select", () => {
 
     await user.click(getTrigger());
     runAllTimers();
+    expect(screen.getByRole("listbox")).toBeVisible();
     await expectNoAxeViolations(document.body);
   });
 
@@ -105,6 +106,7 @@ describe("Select", () => {
       </FruitSelect>,
     );
 
+    expect(screen.getByText("Pick a fruit")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

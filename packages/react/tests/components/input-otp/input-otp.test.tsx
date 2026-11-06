@@ -52,6 +52,7 @@ describe("InputOtp", () => {
       </InputOtp>,
     );
 
+    expect(screen.getByText("Неверный код")).toBeInTheDocument();
     await act(async () => {
       await expectNoAxeViolations(container);
     });

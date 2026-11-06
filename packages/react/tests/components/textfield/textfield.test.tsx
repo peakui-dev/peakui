@@ -28,6 +28,7 @@ describe("TextField", () => {
       </TextField>,
     );
 
+    expect(screen.getByText("City is required")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

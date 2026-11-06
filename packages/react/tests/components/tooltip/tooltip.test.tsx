@@ -53,6 +53,7 @@ describe("Tooltip", () => {
     );
 
     await user.hover(screen.getByRole("button", {name: "Hover me"}));
+    expect(screen.getByRole("tooltip")).toBeInTheDocument();
     await expectNoAxeViolations(document.body);
   });
 

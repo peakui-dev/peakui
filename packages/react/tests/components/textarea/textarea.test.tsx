@@ -26,6 +26,7 @@ describe("TextArea", () => {
       </TextField>,
     );
 
+    expect(screen.getByText("Слишком коротко")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

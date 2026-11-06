@@ -87,6 +87,7 @@ describe("DatePicker", () => {
 
     await user.click(getTrigger());
     runAllTimers();
+    expect(screen.getByRole("dialog")).toBeVisible();
     await expectNoAxeViolations(document.body);
   });
 

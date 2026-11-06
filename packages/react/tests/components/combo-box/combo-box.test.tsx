@@ -76,6 +76,7 @@ describe("ComboBox", () => {
 
     await user.click(screen.getByRole("button"));
     runAllTimers();
+    expect(screen.getByRole("listbox")).toBeVisible();
     await expectNoAxeViolations(document.body);
   });
 
@@ -98,6 +99,7 @@ describe("ComboBox", () => {
       </AnimalComboBox>,
     );
 
+    expect(screen.getByText("Pick an animal")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

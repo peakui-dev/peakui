@@ -50,6 +50,7 @@ describe("NumberField", () => {
       </NumberField>,
     );
 
+    expect(screen.getByText("Недопустимое количество")).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 
