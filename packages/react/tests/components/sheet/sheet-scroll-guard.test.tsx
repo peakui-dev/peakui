@@ -253,36 +253,94 @@ describe("SheetScrollGuard", () => {
     return {byName, dialog, scroller, view};
   };
 
-  /** What the primitive's focus() does: focus, then (on a desktop) start a scroll at once. */
-  const focusAndScroll = (element: HTMLElement, scroller: HTMLElement, to = 360) => {
+  /** The scrollTo calls that reached the scroller (jsdom has none of its own: one is defined). */
+  const scrolls: ScrollToOptions[] = [];
+  const SMOOTH = {behavior: "smooth", top: 360} as const;
+
+  /** What the primitive's focus() does on a desktop: focus, then ask for a smooth scroll at once. */
+  const focusAndScroll = (element: HTMLElement, scroller: HTMLElement) => {
     element.focus();
-    scroller.scrollTop = to;
+    scroller.scrollTo(SMOOTH);
   };
 
   const flushMicrotasks = () => act(() => Promise.resolve());
+
+  const setTouchPoints = (count: number) =>
+    Object.defineProperty(navigator, "maxTouchPoints", {configurable: true, value: count});
 
   beforeEach(() => {
     // jsdom has no viewport size of its own worth trusting; pin it.
     vi.stubGlobal("innerHeight", 720);
     vi.stubGlobal("innerWidth", 1280);
     vi.stubGlobal("visualViewport", undefined);
+    scrolls.length = 0;
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      value: (options: ScrollToOptions) => scrolls.push(options),
+      writable: true,
+    });
+    setTouchPoints(0);
   });
 
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    Reflect.deleteProperty(HTMLElement.prototype, "scrollTo");
+    Reflect.deleteProperty(navigator, "maxTouchPoints");
   });
 
   describe("focus scroll", () => {
-    it("cancels the scroll of a focus that moves within the sheet onto an element in view", async () => {
+    it("holds back the smooth scroll of a focus that moves within the sheet onto an element in view", async () => {
       const {dialog, scroller, view} = mount();
 
       dialog.focus();
       focusAndScroll(view.getByTestId("handle"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(180);
+      expect(scrolls).toEqual([]);
+      // Only that call: once the focus() call is over, the scroller is its own again.
+      scroller.scrollTo(SMOOTH);
+      expect(scrolls).toEqual([SMOOTH]);
+      expect(Object.hasOwn(scroller, "scrollTo")).toBe(false);
+    });
+
+    it("never writes the scroller's position, so a scroll in flight carries on", async () => {
+      const {dialog, scroller, view} = mount();
+      const writes = vi.fn();
+
+      Object.defineProperty(scroller, "scrollTop", {
+        configurable: true,
+        get: () => 180,
+        set: writes,
+      });
+      dialog.focus();
+      focusAndScroll(view.getByTestId("handle"), scroller);
+      await flushMicrotasks();
+
+      expect(writes).not.toHaveBeenCalled();
+    });
+
+    it("keeps a scroll that a focus handler of the element starts itself", async () => {
+      const {byName, dialog, scroller} = mount();
+      const own = {behavior: "smooth", top: 720} as const;
+
+      byName("In view").addEventListener("focusin", () => scroller.scrollTo(own));
+      dialog.focus();
+      focusAndScroll(byName("In view"), scroller);
+      await flushMicrotasks();
+
+      expect(scrolls).toEqual([own]);
+    });
+
+    it("lets an instant scroll through", async () => {
+      const {dialog, scroller, view} = mount();
+
+      dialog.focus();
+      view.getByTestId("handle").focus();
+      scroller.scrollTo({top: 200});
+
+      expect(scrolls).toEqual([{top: 200}]);
     });
 
     it("keeps the scroll that brings an element out of view into it", async () => {
@@ -292,7 +350,7 @@ describe("SheetScrollGuard", () => {
       focusAndScroll(byName("Below"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(360);
+      expect(scrolls).toEqual([SMOOTH]);
     });
 
     it("leaves the first focus and a focus coming from outside the sheet to the primitive", async () => {
@@ -302,7 +360,7 @@ describe("SheetScrollGuard", () => {
       focusAndScroll(byName("In view"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(360);
+      expect(scrolls).toEqual([SMOOTH]);
     });
 
     it("keeps the scroll of a text field, which moves it above a software keyboard", async () => {
@@ -312,7 +370,7 @@ describe("SheetScrollGuard", () => {
       focusAndScroll(view.getByRole("textbox"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(360);
+      expect(scrolls).toEqual([SMOOTH]);
     });
 
     it("leaves a scroller held by a handle drag alone", async () => {
@@ -323,46 +381,56 @@ describe("SheetScrollGuard", () => {
       focusAndScroll(view.getByTestId("handle"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(360);
+      expect(scrolls).toEqual([SMOOTH]);
     });
 
-    it("cancels a scroll the primitive defers (a touch screen), until the hold runs out", async () => {
+    it("on a desktop does not hold back a later scroll: the primitive does not defer there", async () => {
+      const {dialog, scroller, view} = mount();
+
+      dialog.focus();
+      view.getByTestId("handle").focus();
+      await flushMicrotasks();
+      scroller.scrollTo(SMOOTH);
+
+      expect(scrolls).toEqual([SMOOTH]);
+    });
+
+    it("on a touch screen holds back the deferred scroll once, until the hold runs out", async () => {
       vi.useFakeTimers();
+      setTouchPoints(5);
 
       const {byName, dialog, scroller, view} = mount();
 
       dialog.focus();
       view.getByTestId("handle").focus();
       await flushMicrotasks();
-      expect(scroller.scrollTop).toBe(180);
-
-      // Frames later, the deferred scroll starts moving the scroller.
-      scroller.scrollTop = 184;
-      scroller.dispatchEvent(new Event("scroll"));
-      expect(scroller.scrollTop).toBe(180);
+      // Frames later, the primitive asks for its scroll: held back, and only that one.
+      scroller.scrollTo(SMOOTH);
+      expect(scrolls).toEqual([]);
+      scroller.scrollTo(SMOOTH);
+      expect(scrolls).toEqual([SMOOTH]);
 
       // Once the hold is over, a scroll is no longer the focus's.
       byName("In view").focus();
-      await flushMicrotasks();
       act(() => vi.advanceTimersByTime(1000));
-      scroller.scrollTop = 200;
-      scroller.dispatchEvent(new Event("scroll"));
-      expect(scroller.scrollTop).toBe(200);
+      scroller.scrollTo(SMOOTH);
+      expect(scrolls).toEqual([SMOOTH, SMOOTH]);
     });
 
-    it("stops cancelling once the person scrolls or presses a key", async () => {
+    it("stops holding back once the person scrolls or presses a key", async () => {
+      setTouchPoints(5);
+
       const {dialog, scroller, view} = mount();
 
       for (const input of ["keydown", "pointerdown", "touchstart", "wheel"]) {
+        scrolls.length = 0;
         dialog.focus();
         view.getByTestId("handle").focus();
         await flushMicrotasks();
 
         document.dispatchEvent(new Event(input));
-        scroller.scrollTop = 360;
-        scroller.dispatchEvent(new Event("scroll"));
-        expect(scroller.scrollTop, input).toBe(360);
-        scroller.scrollTop = 180;
+        scroller.scrollTo(SMOOTH);
+        expect(scrolls, input).toEqual([SMOOTH]);
       }
     });
 
@@ -373,7 +441,7 @@ describe("SheetScrollGuard", () => {
       focusAndScroll(view.getByTestId("handle"), scroller);
       await flushMicrotasks();
 
-      expect(scroller.scrollTop).toBe(360);
+      expect(scrolls).toEqual([SMOOTH]);
     });
   });
 
@@ -425,6 +493,68 @@ describe("SheetScrollGuard", () => {
       expect(press(byName("In body"), "PageDown")).toBe(false);
       // At its start, nothing inside can go up: the key would move the sheet.
       expect(press(byName("In body"), "PageUp")).toBe(true);
+    });
+
+    it("classifies native inputs by the keys they take themselves", () => {
+      const {view} = mount();
+      const body = view.getByTestId("body");
+      const input = (type: string) => {
+        const element = document.createElement("input");
+
+        element.type = type;
+        body.append(element);
+
+        return element;
+      };
+
+      // A checkbox or switch, and button-like inputs, take Space only: page keys would scroll.
+      for (const type of ["checkbox", "button", "submit", "reset", "image", "file", "color"]) {
+        const element = input(type);
+
+        expect(press(element, " "), `${type} Space`).toBe(false);
+        expect(press(element, "PageUp"), `${type} PageUp`).toBe(true);
+        expect(press(element, "Home"), `${type} Home`).toBe(true);
+        expect(press(element, "ArrowDown"), `${type} ArrowDown`).toBe(true);
+      }
+
+      // A radio takes its arrows and Space.
+      const radio = input("radio");
+
+      expect(press(radio, "ArrowUp")).toBe(false);
+      expect(press(radio, "ArrowDown")).toBe(false);
+      expect(press(radio, " ")).toBe(false);
+      expect(press(radio, "PageUp")).toBe(true);
+      expect(press(radio, "End")).toBe(true);
+
+      // A range takes arrows, Page keys, Home and End; Space would scroll.
+      const range = input("range");
+
+      for (const name of ["ArrowUp", "PageUp", "PageDown", "Home", "End"]) {
+        expect(press(range, name), `range ${name}`).toBe(false);
+      }
+      expect(press(range, " ")).toBe(true);
+
+      // Text-like inputs (and an unknown type), a textarea, a select and contenteditable take all.
+      const others: HTMLElement[] = [
+        input("text"),
+        input("search"),
+        input("number"),
+        input("date"),
+        document.createElement("textarea"),
+        document.createElement("select"),
+      ];
+      const editable = document.createElement("div");
+
+      editable.contentEditable = "true";
+      // jsdom does not derive isContentEditable from the attribute.
+      Object.defineProperty(editable, "isContentEditable", {value: true});
+      others.push(editable);
+      for (const element of others) {
+        body.append(element);
+        for (const name of ["PageUp", "Home", "ArrowUp", " "]) {
+          expect(press(element, name), `${element.localName} ${name}`).toBe(false);
+        }
+      }
     });
 
     it("leaves keys outside the sheet alone", () => {
