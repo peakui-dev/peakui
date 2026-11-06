@@ -29,14 +29,34 @@ async function openStory(page: Page, id: string): Promise<void> {
 
 /* One test per story, so a failure in one state does not hide the others. */
 const SNAPSHOTS = [
-  ["checkbox: checked, unchecked and indeterminate are distinguishable", "checkbox-forced", "components-checkbox--indeterminate-forced"],
-  ["checkbox: disabled and checked", "checkbox-disabled-checked", "components-checkbox--disabled-checked"],
-  ["checkbox: invalid and checked", "checkbox-invalid-checked", "components-checkbox--invalid-checked"],
-  ["radio: disabled and checked", "radio-disabled-checked", "components-radiogroup--disabled-checked"],
+  [
+    "checkbox: checked, unchecked and indeterminate are distinguishable",
+    "checkbox-forced",
+    "components-checkbox--indeterminate-forced",
+  ],
+  [
+    "checkbox: disabled and checked",
+    "checkbox-disabled-checked",
+    "components-checkbox--disabled-checked",
+  ],
+  [
+    "checkbox: invalid and checked",
+    "checkbox-invalid-checked",
+    "components-checkbox--invalid-checked",
+  ],
+  [
+    "radio: disabled and checked",
+    "radio-disabled-checked",
+    "components-radiogroup--disabled-checked",
+  ],
   ["radio: invalid and checked", "radio-invalid-checked", "components-radiogroup--invalid-checked"],
   ["switch: disabled and on", "switch-disabled-checked", "components-switch--disabled-checked"],
   ["switch: invalid and on", "switch-invalid-checked", "components-switch--invalid-checked"],
-  ["tabs: selected tab, including a disabled one", "tabs-disabled-selected", "components-tabs--disabled-selected-tab"],
+  [
+    "tabs: selected tab, including a disabled one",
+    "tabs-disabled-selected",
+    "components-tabs--disabled-selected-tab",
+  ],
   ["tabs: default selected tab", "tabs-default", "components-tabs--default"],
   ["slider: mid-range", "slider-mid-range", "components-slider--mid-range"],
 ] as const;
