@@ -1,6 +1,13 @@
 import type {ComboBoxRootProps} from "@/components/combo-box/index.ts";
 
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 
 import {ComboBox, ComboBoxRoot} from "@/components/combo-box/index.ts";
 import {Description} from "@/components/description/index.ts";
@@ -60,6 +67,38 @@ describe("ComboBox", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    render(<AnimalComboBox />);
+
+    await user.click(screen.getByRole("button"));
+    runAllTimers();
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("has no axe violations when invalid with an error message", async () => {
+    const {container} = render(
+      <AnimalComboBox isInvalid>
+        <Label>Animal</Label>
+        <ComboBox.InputGroup>
+          <Input />
+          <ComboBox.Trigger />
+        </ComboBox.InputGroup>
+        <ComboBox.Popover>
+          <ListBox>
+            <ListBox.Item id="cat" textValue="Cat">
+              Cat
+            </ListBox.Item>
+          </ListBox>
+        </ComboBox.Popover>
+        <FieldError>Pick an animal</FieldError>
+      </AnimalComboBox>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   describe("render", () => {

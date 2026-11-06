@@ -1,4 +1,11 @@
-import {cleanup, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  cleanup,
+  expectNoAxeViolations,
+  fireEvent,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 
 import {Button} from "@/components/button";
 import {Drawer, DrawerRoot} from "@/components/drawer/index.ts";
@@ -50,6 +57,14 @@ describe("Drawer", () => {
 
   afterEach(() => {
     cleanup();
+  });
+
+  it("has no axe violations when open", async () => {
+    render(<DrawerExample />);
+
+    await openDrawer(user);
+    /* The dialog is the target: RAC aria-hides the page behind it, trigger included. */
+    await expectNoAxeViolations(screen.getByRole("dialog"));
   });
 
   describe("open and close", () => {

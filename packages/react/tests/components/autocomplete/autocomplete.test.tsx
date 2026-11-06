@@ -1,6 +1,13 @@
 import type {AutocompleteRootProps} from "@/components/autocomplete/index.ts";
 
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 import {useState} from "react";
 
 import {Autocomplete, AutocompleteRoot} from "@/components/autocomplete/index.ts";
@@ -82,6 +89,16 @@ describe("Autocomplete", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    render(<FruitAutocomplete />);
+
+    await user.click(getTrigger());
+    runAllTimers();
+    await expectNoAxeViolations(document.body);
   });
 
   describe("opening and selecting", () => {

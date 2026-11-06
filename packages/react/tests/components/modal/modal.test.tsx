@@ -1,4 +1,4 @@
-import {cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {cleanup, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Button} from "@/components/button";
 import {Modal, ModalRoot} from "@/components/modal/index.ts";
@@ -50,6 +50,14 @@ describe("Modal", () => {
 
   afterEach(() => {
     cleanup();
+  });
+
+  it("не имеет нарушений axe в открытом состоянии", async () => {
+    render(<ModalExample />);
+
+    await openModal(user);
+    /* Целью служит диалог: RAC делает страницу за ним aria-hidden, вместе с триггером. */
+    await expectNoAxeViolations(screen.getByRole("dialog"));
   });
 
   it("выставляет data-slot на собственном триггере", () => {

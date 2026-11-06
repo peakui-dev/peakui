@@ -1,8 +1,16 @@
 import type {SelectRootProps} from "@/components/select/index.ts";
 
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 import {useState} from "react";
 
+import {FieldError} from "@/components/field-error/index.ts";
 import {ListBox} from "@/components/list-box/index.ts";
 import {Select, SelectRoot} from "@/components/select/index.ts";
 
@@ -67,6 +75,37 @@ describe("Select", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    render(<FruitSelect />);
+
+    await user.click(getTrigger());
+    runAllTimers();
+    await expectNoAxeViolations(document.body);
+  });
+
+  it("has no axe violations when invalid with an error message", async () => {
+    const {container} = render(
+      <FruitSelect isInvalid>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <FieldError>Pick a fruit</FieldError>
+        <Select.Popover>
+          <ListBox>
+            <ListBox.Item id="apple" textValue="Apple">
+              Apple
+            </ListBox.Item>
+          </ListBox>
+        </Select.Popover>
+      </FruitSelect>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   it("opens on press and selects an option", async () => {

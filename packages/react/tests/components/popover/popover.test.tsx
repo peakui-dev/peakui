@@ -1,4 +1,4 @@
-import {cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {cleanup, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Button} from "@/components/button";
 import {Popover, PopoverRoot} from "@/components/popover/index.ts";
@@ -28,6 +28,14 @@ describe("Popover", () => {
 
   afterEach(() => {
     cleanup();
+  });
+
+  it("не имеет нарушений axe в открытом состоянии", async () => {
+    render(<PopoverExample />);
+
+    await user.click(screen.getByRole("button", {name: "Открыть"}));
+    /* Целью служит диалог: RAC делает страницу за ним aria-hidden, вместе с триггером. */
+    await expectNoAxeViolations(screen.getByRole("dialog"));
   });
 
   it("выставляет data-slot на собственном триггере", () => {

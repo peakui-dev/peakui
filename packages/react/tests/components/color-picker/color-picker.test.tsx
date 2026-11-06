@@ -1,6 +1,13 @@
 import type {ComponentProps} from "react";
 
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 import {ColorSlider, ColorThumb, SliderTrack, parseColor} from "react-aria-components";
 
 import {ColorPicker, ColorPickerRoot} from "@/components/color-picker/index.ts";
@@ -48,6 +55,16 @@ describe("ColorPicker", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    render(<Picker />);
+
+    await user.click(screen.getByRole("button", {name: "Accent colour"}));
+    runAllTimers();
+    await expectNoAxeViolations(document.body);
   });
 
   it("renders its trigger and opens the popover on press", async () => {

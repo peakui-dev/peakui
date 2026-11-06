@@ -1,4 +1,11 @@
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 
 import {Button} from "@/components/button";
 import {Tooltip, TooltipRoot} from "@/components/tooltip/index.ts";
@@ -35,6 +42,18 @@ describe("Tooltip", () => {
       vi.runOnlyPendingTimers();
     });
     vi.useRealTimers();
+  });
+
+  it("не имеет нарушений axe с показанной подсказкой", async () => {
+    render(
+      <Tooltip delay={0}>
+        <Button>Hover me</Button>
+        <Tooltip.Content>Tooltip content</Tooltip.Content>
+      </Tooltip>,
+    );
+
+    await user.hover(screen.getByRole("button", {name: "Hover me"}));
+    await expectNoAxeViolations(document.body);
   });
 
   it("выставляет data-slot на собственном триггере", () => {
