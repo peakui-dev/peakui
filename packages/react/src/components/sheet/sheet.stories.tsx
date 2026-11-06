@@ -97,7 +97,64 @@ export const SnapPoints: Story = {
                     More content at this level ({index + 1}).
                   </p>
                 ))}
+                {/* A control below the first snap point: focusing it must bring it into view. */}
+                <Button className="mt-3" variant="secondary">
+                  Show all options
+                </Button>
               </Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    </Showcase>
+  ),
+};
+
+/* A horizontal snap sheet: the handle is a horizontal slider and the arrows follow reading order. */
+export const HorizontalSnap: Story = {
+  render: () => (
+    <Showcase title="Horizontal snap">
+      <Sheet placement="right" snapPoints={["50%"]}>
+        <Sheet.Trigger>
+          <Button variant="secondary">Open side sheet</Button>
+        </Sheet.Trigger>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog>
+              <Sheet.Handle />
+              <Sheet.CloseTrigger />
+              <Sheet.Header>
+                <Sheet.Heading>Side sheet</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body>
+                <p>The sheet opens at half the screen width and can be pulled to full width.</p>
+              </Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    </Showcase>
+  ),
+};
+
+export const TopSnap: Story = {
+  render: () => (
+    <Showcase title="Top snap">
+      <Sheet placement="top" snapPoints={["25%"]}>
+        <Sheet.Trigger>
+          <Button variant="secondary">Open top sheet</Button>
+        </Sheet.Trigger>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog>
+              <Sheet.CloseTrigger />
+              <Sheet.Header>
+                <Sheet.Heading>Top sheet</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body>
+                <p>The sheet opens at a quarter of the screen and can be pulled to full height.</p>
+              </Sheet.Body>
+              <Sheet.Handle />
             </Sheet.Dialog>
           </Sheet.Content>
         </Sheet.Backdrop>
