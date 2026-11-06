@@ -16,6 +16,9 @@ import {checkA11y, injectAxe} from "axe-playwright";
  *
  * Known limitation, documented rather than tested: a parent and a nested sheet mounted open
  * together stack in effect order, which puts the parent on top (see the Nested story).
+ *
+ * WebKit is opt-in (see playwright.config.ts): `pnpm --filter @peakui/storybook test:e2e:webkit`,
+ * after a one-time `pnpm --filter @peakui/storybook exec playwright install webkit`.
  */
 
 const THEMES = ["default-light", "default-dark"] as const;
@@ -90,8 +93,10 @@ const handle = (page: Page) => page.locator('[data-slot="sheet-handle"]').first(
 /** A slow mouse drag on the handle that rests before letting go, so no flick is read. */
 const dragHandle = async (page: Page, dy: number, dx = 0) => {
   const box = (await handle(page).boundingBox())!;
-  const x = box.x + box.width / 2;
-  const y = box.y + box.height / 2;
+  const {height, width} = viewport(page);
+  /* The middle of the part on screen: a partial sheet leaves the rest of its handle off it. */
+  const x = (Math.max(box.x, 0) + Math.min(box.x + box.width, width)) / 2;
+  const y = (Math.max(box.y, 0) + Math.min(box.y + box.height, height)) / 2;
 
   await page.mouse.move(x, y);
   await page.mouse.down();
@@ -222,13 +227,45 @@ test.describe("Sheet: overlay in a real browser", () => {
 
     expect(await drawnScale()).toBeCloseTo(1, 3);
 
-    const child = await open(page, "Open nested sheet", "Nested sheet");
+    /* The content's untransformed box, and where the panel's top edge sits inside it. */
+    const layout = (await content.boundingBox())!;
 
-    await settled(child);
+    /*
+     * Where the panel's top edge is drawn: its corner projected through the computed transform
+     * about the computed transform-origin, as the browser draws it.
+     */
+    const drawnTop = () =>
+      content.evaluate(
+        (element, {box, local}) => {
+          const style = getComputedStyle(element);
+          const matrix = new DOMMatrix(style.transform === "none" ? undefined : style.transform);
+          const [ox = 0, oy = 0] = style.transformOrigin.split(" ").map(parseFloat);
+          const point = matrix.transformPoint(new DOMPoint(local.x - ox, local.y - oy, 0, 1));
+
+          return box.y + oy + point.y / point.w;
+        },
+        {box: layout, local: {x: before.x - layout.x, y: before.y - layout.y}},
+      );
+    const dim = () =>
+      content.evaluate((element) => {
+        const match = /brightness\(([\d.]+)\)/.exec(getComputedStyle(element).filter);
+
+        return match ? Number(match[1]) : 1;
+      });
+
+    expect(await dim()).toBe(1);
+
+    const child = await open(page, "Open nested sheet", "Nested sheet");
+    const childBox = await settled(child);
+
     await settled(content);
 
     /* translateZ(-120px) under perspective(1000px): drawn at 1000 / 1120 of its size. */
     expect(await drawnScale()).toBeCloseTo(1000 / 1120, 2);
+    /* The point of the scale-back: a strip of the receded parent stays in sight above the child. */
+    expect(await drawnTop()).toBeLessThan(childBox.y - 8);
+    /* And it is dimmed, so the child reads as the one on top. */
+    expect(await dim()).toBeLessThan(0.95);
 
     await page.keyboard.press("Escape");
     await expect(child).toBeHidden();
@@ -237,6 +274,7 @@ test.describe("Sheet: overlay in a real browser", () => {
     const restored = await settled(parent);
 
     expect(await drawnScale()).toBeCloseTo(1, 3);
+    expect(await dim()).toBe(1);
     expect(Math.abs(restored.width - before.width)).toBeLessThanOrEqual(PX);
     expect(Math.abs(restored.x - before.x)).toBeLessThanOrEqual(PX);
     expect(Math.abs(restored.y - before.y)).toBeLessThanOrEqual(PX);
@@ -343,9 +381,97 @@ test.describe("Sheet: overlay in a real browser", () => {
     ).toBe(true);
   });
 
+  /** A right sheet's revealed width: from its left edge to the viewport's right edge. */
+  const revealedX = (page: Page, box: {x: number}) => viewport(page).width - box.x;
+
+  /*
+   * The handle of a horizontal snap sheet in a given reading direction: `more` is the arrow that
+   * reveals more of it. A drag is physical either way: toward the left reveals a right sheet.
+   */
+  const horizontalHandle = async (page: Page, more: "ArrowLeft" | "ArrowRight") => {
+    const less = more === "ArrowRight" ? "ArrowLeft" : "ArrowRight";
+    const dialog = await open(page, "Open side sheet");
+    const slider = page.getByRole("slider", {name: "Resize sheet"});
+    const start = await settled(dialog);
+
+    /* Half of the sheet shows; the rest is still past the right edge. */
+    expect(Math.abs(revealedX(page, start) - start.width * 0.5)).toBeLessThanOrEqual(PX);
+    await expect(slider).toHaveAttribute("aria-orientation", "horizontal");
+    await expect(slider).toHaveAttribute("aria-valuemin", "50");
+
+    await focusHandle(page);
+    await settled(dialog);
+
+    const step = async (key: string, value: number) => {
+      await page.keyboard.press(key);
+      await expect(slider).toHaveAttribute("aria-valuenow", String(value));
+
+      const box = await settled(dialog);
+
+      expect(Math.abs(revealedX(page, box) - (box.width * value) / 100)).toBeLessThanOrEqual(PX);
+    };
+
+    await step("Home", 50);
+    await step(more, 100);
+    await step(less, 50);
+
+    /* From half, a slow pull a third of the width to the left rests at full width. */
+    await dragHandle(page, 0, -start.width / 3);
+    await expect(slider).toHaveAttribute("aria-valuenow", "100");
+
+    /* Fully revealed, the sheet is one pixel short of the viewport and on its right edge. */
+    const full = await settled(dialog);
+
+    expect(Math.abs(full.x + full.width - viewport(page).width)).toBeLessThanOrEqual(PX);
+    expect(full.x).toBeLessThanOrEqual(PX);
+
+    /* Escape from full width closes, and the overlay is gone, not left mounted off screen. */
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCount(0);
+  };
+
+  test("horizontal snap sheet: arrows, drag and Escape from full width", async ({page}) => {
+    await goto(page, "components-sheet--horizontal-snap");
+    await horizontalHandle(page, "ArrowRight");
+  });
+
+  test("top snap sheet: Escape from full height unmounts it", async ({page}) => {
+    await goto(page, "components-sheet--top-snap");
+
+    const dialog = await open(page, "Open top sheet");
+    const box = await settled(dialog);
+
+    /* A quarter shows, from the viewport's top edge down. */
+    expect(Math.abs(box.y + box.height - box.height * 0.25)).toBeLessThanOrEqual(PX);
+
+    /*
+     * Focus without the focus scroll: Tab onto this handle centres it, which on a top sheet at full
+     * height scrolls to the closed end and dismisses it (the focus-scroll defect pinned below).
+     */
+    await handle(page).evaluate((element: HTMLElement) => element.focus({preventScroll: true}));
+    await page.keyboard.press("End");
+    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuenow", "100");
+    expect(Math.abs((await settled(dialog)).y)).toBeLessThanOrEqual(PX);
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('[data-slot="sheet-overlay"]')).toHaveCount(0);
+  });
+
   test.describe("RTL", () => {
     /* A right-to-left locale gives React Aria its direction; the document follows it. */
     test.use({locale: "he-IL"});
+
+    test("a horizontal handle follows the reading direction: ArrowLeft reveals more", async ({
+      page,
+    }) => {
+      await goto(page, "components-sheet--horizontal-snap");
+      await page.evaluate(() => {
+        document.documentElement.dir = "rtl";
+      });
+      await horizontalHandle(page, "ArrowLeft");
+    });
 
     test('with dir="rtl" a right sheet stays on the right edge', async ({page}) => {
       await goto(page, "components-sheet--placements");
@@ -400,12 +526,21 @@ test.describe("Sheet: overlay in a real browser", () => {
 
     const border = await dialog.evaluate((element) => {
       const style = getComputedStyle(element);
+      /* A probe drawn with the system colour the panel's border must use. */
+      const probe = document.createElement("div");
 
-      return {color: style.borderTopColor, width: style.borderTopWidth};
+      probe.style.border = "1px solid CanvasText";
+      document.body.append(probe);
+
+      const expected = getComputedStyle(probe).borderTopColor;
+
+      probe.remove();
+
+      return {color: style.borderTopColor, expected, width: style.borderTopWidth};
     });
 
     expect(border.color).not.toBe("rgba(0, 0, 0, 0)");
-    expect(border.color).not.toBe("transparent");
+    expect(border.color).toBe(border.expected);
     expect(parseFloat(border.width)).toBeGreaterThan(0);
 
     await focusHandle(page);
@@ -485,22 +620,75 @@ test.describe("Sheet: overlay in a real browser", () => {
    * move it, and focus({preventScroll: true}) does not either; React Aria's focus containment
    * moves focus with a scrolling focus(). Marked as an expected failure so the fix shows up here.
    */
+  /* The precondition of the expected failure below, kept outside it so it can really fail. */
+  test("Tab reaches the handle of an open snap sheet", async ({page}) => {
+    await goto(page, "components-sheet--snap-points");
+    await open(page, "Open with snap points");
+    await page.keyboard.press("Tab");
+    await expect(handle(page)).toBeFocused();
+  });
+
   test("Tab onto the handle leaves the sheet at the snap point it rests on", async ({page}) => {
     test.fail(true, "focus scroll moves the snap scroller: see the comment above");
+    test.setTimeout(30_000);
     await goto(page, "components-sheet--snap-points");
 
     const dialog = await open(page, "Open with snap points");
     const before = await settled(dialog);
 
-    await focusHandle(page);
+    await page.keyboard.press("Tab");
 
     const after = await settled(dialog);
 
     expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(PX);
-    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuenow", "25");
   });
 
-  test("isDismissable=false: Escape, a backdrop click and a swipe never close it", async ({
+  /*
+   * Known defect, not fixed here: the browser's own keyboard scrolling of the snap scroller, with
+   * focus on a control in the body, scrolls the sheet to its closed end and dismisses it. Seen at
+   * the first snap point with PageUp, Home and ArrowUp in both engines. Pinned per engine as
+   * expected failures; the desired behaviour is the title.
+   */
+  const KEY_DISMISSES: Record<string, readonly string[]> = {
+    chromium: ["PageUp", "Home", "ArrowUp"],
+    webkit: ["PageUp", "Home", "ArrowUp"],
+  };
+
+  for (const key of ["PageUp", "Home", "ArrowUp"] as const) {
+    test(`${key} on a focused control in the sheet body does not dismiss`, async ({
+      browserName,
+      page,
+    }) => {
+      test.fail(
+        KEY_DISMISSES[browserName]?.includes(key) ?? false,
+        `${browserName}: ${key} scrolls the snap scroller to its closed end`,
+      );
+      test.setTimeout(60_000);
+      await goto(page, "components-sheet--snap-points");
+
+      const dialog = await open(page, "Open with snap points");
+
+      await settled(dialog);
+      /* Focus without the focus scroll, so the sheet still rests at its first snap point. */
+      await page
+        .getByRole("button", {name: "Show all options"})
+        .evaluate((element: HTMLElement) => element.focus({preventScroll: true}));
+      await expect(page.getByRole("button", {name: "Show all options"})).toBeFocused();
+      await page.keyboard.press(key);
+      /* A negative: give a scroll and an exit the time they would take, then look once. */
+      await page.waitForTimeout(1500);
+
+      const state = await page.evaluate(() => {
+        const overlay = document.querySelector('[data-slot="sheet-overlay"]');
+
+        return {exiting: !!overlay?.hasAttribute("data-exiting"), mounted: !!overlay};
+      });
+
+      expect(state).toEqual({exiting: false, mounted: true});
+    });
+  }
+
+  test("isDismissable=false: Escape, a backdrop click and a wheel scroll never close it", async ({
     page,
   }) => {
     /* Positive control: the same three gestures each close a dismissable sheet. */
@@ -542,19 +730,22 @@ test.describe("Sheet: overlay in a real browser", () => {
     expect(Math.abs(after.y - rest.y)).toBeLessThanOrEqual(PX);
   });
 
-  test("the handle and the close button are at least 24 by 24", async ({page}) => {
-    await goto(page, "components-sheet--default");
-
-    const dialog = await open(page, "Open sheet");
-
-    await settled(dialog);
-
-    for (const target of [handle(page), page.locator('[data-slot="sheet-close-trigger"]')]) {
+  test("the slider handle and the close button are at least 24 by 24", async ({page}) => {
+    const measure = async (target: Locator) => {
       const box = (await target.boundingBox())!;
 
       expect(box.width).toBeGreaterThanOrEqual(24);
       expect(box.height).toBeGreaterThanOrEqual(24);
-    }
+    };
+
+    /* The interactive handle: a slider, on a sheet with snap points. */
+    await goto(page, "components-sheet--snap-points");
+    await settled(await open(page, "Open with snap points"));
+    await measure(page.getByRole("slider", {name: "Resize sheet"}));
+
+    await goto(page, "components-sheet--default");
+    await settled(await open(page, "Open sheet"));
+    await measure(page.getByRole("button", {name: "Close"}));
   });
 
   test("the exit marks the backdrop, the content and the dialog with data-exiting", async ({
@@ -598,18 +789,50 @@ test.describe("Sheet: overlay in a real browser", () => {
   });
 
   test("controlled: reopening mid-exit ends open, with focus inside and nothing left inert", async ({
+    browserName,
     page,
   }) => {
+    /*
+     * Known defect, not fixed here: in WebKit the exit scroll is over in about 0.1 s and a reopen
+     * on its first exiting frame often loses the race. The scroller still reaches the closed end,
+     * the primitive's observer reports the panel gone and closes the reopened sheet (failed in 4 of
+     * 6, 6 of 6 and 2 of 4 repeats, with and without the lifecycle's scroll-end signal).
+     * Intermittent, so it cannot be pinned with test.fail; Chromium passes every run.
+     */
+    test.fixme(browserName === "webkit", "WebKit: a reopen mid-exit can end closed (see above)");
     await goto(page, "components-sheet--controlled");
 
     const dialog = await open(page, "Open controlled sheet");
 
     await settled(dialog);
-    await page.getByRole("button", {name: "Close from state"}).click();
-    /* Reopen while the exit scroll is still under way (the outside is inert, so not by the mouse). */
-    await page
-      .locator("button", {hasText: "Open controlled sheet"})
-      .evaluate((element: HTMLElement) => element.click());
+    /*
+     * Close, then reopen while the exit scroll is still under way, and prove it was: the dialog
+     * carries data-exiting at the moment of the reopen. Both presses go in from the page, because
+     * WebKit's exit is over in about a tenth of a second, less than a round trip from the test, and
+     * because the outside is inert while the sheet is open, so the mouse cannot reach it.
+     */
+    const wasExiting = await page.evaluate(
+      () =>
+        new Promise<boolean>((resolve) => {
+          const press = (name: string) =>
+            [...document.querySelectorAll("button")].find((b) => b.textContent?.trim() === name)!;
+          let frames = 0;
+          /* The reopen goes in on the first frame the dialog is marked as exiting. */
+          const tick = () => {
+            const exiting = !!document.querySelector('[data-slot="sheet-dialog"][data-exiting]');
+
+            if (exiting || frames++ > 60) {
+              press("Open controlled sheet").click();
+              resolve(exiting);
+            } else requestAnimationFrame(tick);
+          };
+
+          press("Close from state").click();
+          requestAnimationFrame(tick);
+        }),
+    );
+
+    expect(wasExiting).toBe(true);
 
     await expect(dialog).toBeVisible();
 
@@ -644,6 +867,24 @@ test.describe("Sheet: overlay in a real browser", () => {
 
     /* 1rem plus the primitive's keyboard and chrome inset, which is zero on a desktop viewport. */
     expect(padding).toEqual(["16px", "16px"]);
+
+    /* Exercised: Tab to a control that the first snap point leaves below the viewport. */
+    const control = page.getByRole("button", {name: "Show all options"});
+    const {height} = viewport(page);
+
+    expect((await control.boundingBox())!.y).toBeGreaterThan(height);
+
+    const isFocused = () => control.evaluate((element) => element === document.activeElement);
+
+    for (let i = 0; i < 4 && !(await isFocused()); i++) await page.keyboard.press("Tab");
+    await expect(control).toBeFocused();
+    await settled(dialog);
+
+    const box = await settled(control);
+
+    /* Not obscured by the sheet's visible edge: in view, with the 16px clearance. */
+    expect(box.y).toBeGreaterThanOrEqual(16);
+    expect(box.y + box.height).toBeLessThanOrEqual(height - 16);
   });
 
   for (const theme of THEMES) {

@@ -9,6 +9,7 @@
     "lint": "eslint . --max-warnings=0",
     "test:e2e": "playwright test",
     "test:e2e:ci": "storybook build --quiet && playwright test",
+    "test:e2e:webkit": "playwright test e2e/Sheet.spec.ts --project=webkit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
