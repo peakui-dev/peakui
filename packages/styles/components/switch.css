@@ -97,6 +97,8 @@
     box-shadow 150ms var(--ease-out);
   @apply motion-reduce:transition-none;
 
+  @apply status-selected-forced;
+
   /* Focus states */
   .switch:focus-visible &,
   .switch:has([data-slot="switch-content"][data-focus-visible="true"]) &,
@@ -192,6 +194,22 @@
 
   .switch:active &,
   .switch[data-pressed="true"] & {
+  }
+}
+
+/* Forced colors: the thumb takes the text color of the track state. */
+@media (forced-colors: active) {
+  .switch__thumb {
+    background-color: ButtonText;
+  }
+
+  .switch[data-disabled="true"] .switch__thumb {
+    background-color: GrayText;
+  }
+
+  .switch[aria-checked="true"] .switch__thumb,
+  .switch[data-selected="true"] .switch__thumb {
+    background-color: HighlightText;
   }
 }
 

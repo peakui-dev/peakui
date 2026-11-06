@@ -65,6 +65,34 @@ export const Disabled: Story = {
   ),
 };
 
+export const DisabledChecked: Story = {
+  name: "Заблокированный включённый",
+  render: () => (
+    <Showcase title="Заблокированный включённый">
+      <Switch isDisabled defaultSelected>
+        <Switch.Content>
+          <Thumb />
+          Включить уведомления
+        </Switch.Content>
+      </Switch>
+    </Showcase>
+  ),
+};
+
+export const InvalidChecked: Story = {
+  name: "Невалидный включённый",
+  render: () => (
+    <Showcase title="Невалидный включённый">
+      <Switch isInvalid defaultSelected name="notifications-checked">
+        <Switch.Content>
+          <Thumb />
+          Включить уведомления
+        </Switch.Content>
+      </Switch>
+    </Showcase>
+  ),
+};
+
 export const DefaultSelected: Story = {
   name: "Выбранный по умолчанию",
   render: () => (

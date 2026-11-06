@@ -187,6 +187,63 @@ export const Indeterminate: Story = {
   ),
 };
 
+/* Targets of the forced-colors snapshot: checked, indeterminate and unchecked side by side. */
+export const IndeterminateForced: Story = {
+  name: "Состояния в принудительных цветах",
+  render: () => (
+    <Showcase title="Состояния в принудительных цветах">
+      <div className="flex flex-col gap-3">
+        <Checkbox aria-label="Не выбрано">
+          <Checkbox.Content>
+            <Control />
+            Не выбрано
+          </Checkbox.Content>
+        </Checkbox>
+        <Checkbox defaultSelected aria-label="Выбрано">
+          <Checkbox.Content>
+            <Control />
+            Выбрано
+          </Checkbox.Content>
+        </Checkbox>
+        <Checkbox isIndeterminate aria-label="Промежуточное">
+          <Checkbox.Content>
+            <Control />
+            Промежуточное
+          </Checkbox.Content>
+        </Checkbox>
+      </div>
+    </Showcase>
+  ),
+};
+
+export const DisabledChecked: Story = {
+  name: "Заблокированный выбранный",
+  render: () => (
+    <Showcase title="Заблокированный выбранный">
+      <Checkbox isDisabled defaultSelected aria-label="Функция">
+        <Checkbox.Content>
+          <Control />
+          Функция
+        </Checkbox.Content>
+      </Checkbox>
+    </Showcase>
+  ),
+};
+
+export const InvalidChecked: Story = {
+  name: "Невалидный выбранный",
+  render: () => (
+    <Showcase title="Невалидный выбранный">
+      <Checkbox isInvalid defaultSelected aria-label="Согласие" name="agreement-checked">
+        <Checkbox.Content>
+          <Control />
+          Согласен с условиями
+        </Checkbox.Content>
+      </Checkbox>
+    </Showcase>
+  ),
+};
+
 export const ControlOnly: Story = {
   name: "Только индикатор",
   render: () => (

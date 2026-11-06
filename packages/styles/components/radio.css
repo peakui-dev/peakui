@@ -68,6 +68,8 @@
 
   cursor: var(--cursor-interactive);
 
+  @apply status-selected-forced;
+
   /* Interactive states */
   /* Focus */
   .radio:has([data-slot="radio-content"][data-focus-visible="true"]) &,
@@ -164,6 +166,15 @@
 .radio:has(input:checked) .radio__indicator:empty::before {
   @apply bg-accent-foreground;
   scale: 0.4286; /* 6px */
+}
+
+/* Forced colors: the dot takes the control's text color (HighlightText selected, GrayText disabled) */
+@media (forced-colors: active) {
+  .radio[data-selected] .radio__indicator:empty::before,
+  .radio:has([data-slot="radio-content"][aria-checked="true"]) .radio__indicator:empty::before,
+  .radio:has(input:checked) .radio__indicator:empty::before {
+    background-color: currentcolor;
+  }
 }
 
 /* Selected + Pressed state */
