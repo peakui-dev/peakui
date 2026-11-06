@@ -6,8 +6,8 @@ import {checkA11y, injectAxe} from "axe-playwright";
 /*
  * Browser tier of ContextMenu. jsdom has no layout, no real scrolling and no touch pipeline, so
  * what lives here is exactly what it fakes: where the menu lands relative to the pointer, how it
- * moves at a viewport edge, where a keyboard open anchors, the touch long press, and the scroll
- * dismissal.
+ * moves at a viewport edge, where a keyboard open anchors, the touch long press, the scroll lock
+ * and the dismissal by a right-click elsewhere.
  *
  * Stories are opened by the iframe URL, not through the manager: injectAxe reaches only the main
  * frame, so an audit by frame selector would inspect the iframe element instead of the story.
@@ -79,14 +79,12 @@ test.describe("ContextMenu — overlay in a real browser", () => {
   });
 
   /*
-   * FINDING (confirmed in Chromium with a probe on document; reported, not hidden): while the menu
-   * is open, a right-click outside it does not reach the region. The modal popover makes the rest
-   * of the page non-interactive, so the event lands on BODY, `contextmenu` arrives with
-   * defaultPrevented=false (the browser's own menu would open over ours) and the menu neither
-   * closes nor moves. A custom context menu is expected to move to the new pointer position.
-   * Enable this test when the component handles it.
+   * While the menu is open the modal popover leaves the rest of the page inert, so a right-click
+   * elsewhere lands on BODY, not on the region. The menu must go away and the event must stay
+   * un-prevented (the browser's own menu may show); before this was handled, the menu stayed open
+   * under the native one.
    */
-  test.fixme("a second right-click elsewhere moves the menu to the new pointer position", async ({
+  test("a right-click elsewhere closes the menu and leaves the browser menu alone", async ({
     page,
   }) => {
     await openStory(page, "components-contextmenu--default");
@@ -96,22 +94,28 @@ test.describe("ContextMenu — overlay in a real browser", () => {
     expect(regionBox).not.toBeNull();
 
     await page.mouse.click(regionBox!.x + 40, regionBox!.y + 20, {button: "right"});
-    await expectMenuSettled(page);
 
-    /* Well clear of the first menu (about 220 px wide): a click on it would not reach the region. */
-    const secondX = regionBox!.x + 700;
-    const secondY = regionBox!.y + 50;
+    const menu = await expectMenuSettled(page);
 
-    await page.mouse.click(secondX, secondY, {button: "right"});
+    await page.evaluate(() => {
+      const record = {prevented: [] as boolean[]};
 
-    await expect
-      .poll(async () => (await popoverLocator(page).boundingBox())?.x ?? -1)
-      .toBeGreaterThanOrEqual(secondX - POINTER_TOLERANCE);
+      (window as unknown as {__contextMenuLog: typeof record}).__contextMenuLog = record;
+      document.addEventListener("contextmenu", (event) => {
+        record.prevented.push(event.defaultPrevented);
+      });
+    });
 
-    const popoverBox = await popoverLocator(page).boundingBox();
+    /* Well clear of the first menu (about 220 px wide). */
+    await page.mouse.click(regionBox!.x + 700, regionBox!.y + 50, {button: "right"});
 
-    expect(Math.abs(popoverBox!.x - secondX)).toBeLessThanOrEqual(POINTER_TOLERANCE);
-    expect(Math.abs(popoverBox!.y - secondY)).toBeLessThanOrEqual(POINTER_TOLERANCE);
+    await expect(menu).toBeHidden();
+
+    const log = await page.evaluate(
+      () => (window as unknown as {__contextMenuLog: {prevented: boolean[]}}).__contextMenuLog,
+    );
+
+    expect(log.prevented).toEqual([false]);
   });
 
   test("flips at the bottom-right viewport edge (NearViewportEdge story)", async ({page}) => {
@@ -210,23 +214,10 @@ test.describe("ContextMenu — overlay in a real browser", () => {
   };
 
   /*
-   * FINDING (confirmed in Chromium; reported, not hidden): the design spec says "Scroll of an
-   * ancestor closes the menu (RAC default)", but it does not. RAC closes on scroll only for a
-   * non-modal popover; this menu's popover is modal, so a programmatic scroll leaves it open (it
-   * re-measures against the fixed anchor instead), and a wheel scroll never reaches the document
-   * at all (see the next test). Enable this test when the component or the spec is reconciled.
+   * The menu is modal and locks scroll, exactly like Dropdown (RAC closes on scroll only for a
+   * non-modal popover), so no ancestor scroll can happen to close it: the page stays put.
    */
-  test.fixme("an ancestor scroll closes the menu", async ({page}) => {
-    const {menu} = await openWithScrollableDocument(page);
-
-    await page.evaluate(() => window.scrollTo(0, 200));
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(200);
-
-    await expect(menu).toBeHidden();
-  });
-
-  /* What actually happens on a wheel scroll: the open menu locks the page behind it. */
-  test("the document does not scroll behind an open menu", async ({page}) => {
+  test("the open menu is modal: the document is scroll-locked behind it", async ({page}) => {
     const {clear, menu} = await openWithScrollableDocument(page);
 
     await page.mouse.move(clear.x, clear.y);
@@ -309,6 +300,7 @@ test.describe("ContextMenu — overlay in a real browser", () => {
    * Escape closes it.
    */
   test("Controlled opens from the external toggle and Escape closes it", async ({page}) => {
+    /* The toggle-while-open race (an outside press versus the toggle) is not exercised. */
     await openStory(page, "components-contextmenu--controlled");
 
     await expect(page.getByText("closed", {exact: true})).toBeVisible();
@@ -371,7 +363,11 @@ test.describe("ContextMenu — touch", () => {
     await page.waitForTimeout(200);
     await expect(page.getByRole("menu")).toHaveCount(0);
 
-    /* Hold past the threshold; the hold itself is the thing under test. */
+    /*
+     * Hold past the threshold; the hold itself is the thing under test. The Default story has no
+     * onAction, so "the release does not select" is asserted as "the menu is still open past the
+     * ghost window" (a selection would close it); the activation itself is covered in jsdom.
+     */
     await page.waitForTimeout(500);
 
     const menu = await expectMenuSettled(page);

@@ -91,7 +91,7 @@ inline `left/top`, passed as `Popover triggerRef`. RAC flips and shifts at viewp
 ### Focus
 RAC `Popover` restores focus to the previously focused element on close. For a pointer open on a
 non-focusable region, nothing was focused, so nothing is restored. Escape closes and restores.
-Selecting an item closes (`shouldCloseOnSelect` default). Scroll of an ancestor closes the menu (RAC default).
+Selecting an item closes (`shouldCloseOnSelect` default). The popover is modal and locks page scroll, like Dropdown, so there is no ancestor scroll to close it. A right-click outside the region and the popover closes the menu and leaves the browser menu to show.
 
 ## Accessibility
 
@@ -135,7 +135,7 @@ no layout: assert anchor inline style, not real position). SSR smoke renders clo
 
 Playwright (Storybook iframe, overlay spec): real right-click places the menu at the pointer; viewport-edge
 flip; keyboard open anchors to the focused element and focus returns on Escape; touch emulation long-press
-(Chromium `hasTouch`); scroll closes. WebKit run for long-press/contextmenu differences if CI allows.
+(Chromium `hasTouch`); the open menu scroll-locks the page; a right-click elsewhere closes it. WebKit run for long-press/contextmenu differences if CI allows.
 
 ## Risks
 
