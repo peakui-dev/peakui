@@ -22,6 +22,8 @@ import {
 const MAX_SETTLE_FRAMES = 240;
 /** Frames the scroller must stand still before a settle check trusts its position. */
 const STATIONARY_FRAMES = 2;
+/** Frames between the scroll-ends an exited sheet repeats until the primitive unmounts it. */
+const SCROLL_END_INTERVAL = 30;
 
 /*
  * What a sheet is doing is told by its scroller, not by a timer: the primitive animates by
@@ -177,15 +179,35 @@ function SheetLifecycle({
     let previous: number | undefined;
     let stationaryFrames = 0;
     let resumedExit = false;
+    let exitedFrames = 0;
     let frame = 0;
     const checkExit = () => {
       finishScroll();
-      if (reported.current === false || latest.current.isOpen) return;
+      if (latest.current.isOpen) return;
 
       const current = readSheetScroll(scroller, axis);
 
       stationaryFrames = current === previous ? stationaryFrames + 1 : 0;
       previous = current;
+
+      if (reported.current === false) {
+        /*
+         * The panel is off screen and still. On desktop Safari the primitive holds the overlay
+         * until the scroller fires a scroll-end, which WebKit does not fire for an instant scroll
+         * (a wheel that reaches the edge, a drag release written frame by frame), so the overlay
+         * would stay mounted for good. The scroll is over: say so, now and then, until it unmounts.
+         */
+        if (
+          stationaryFrames >= STATIONARY_FRAMES &&
+          (stationaryFrames - STATIONARY_FRAMES) % SCROLL_END_INTERVAL === 0
+        ) {
+          scroller.dispatchEvent(new Event("scrollend"));
+        }
+        exitedFrames += 1;
+        if (exitedFrames < MAX_SETTLE_FRAMES) frame = requestAnimationFrame(checkExit);
+
+        return;
+      }
 
       if (stationaryFrames >= STATIONARY_FRAMES && !resumedExit) {
         const towardStart = bidirectional ? current <= getSheetViewportLength(axis) : after;
