@@ -18,6 +18,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
+import {useLongPress} from "react-aria/useLongPress";
 import {
   Popover as PopoverPrimitive,
   SubmenuTrigger as SubmenuTriggerPrimitive,
@@ -137,6 +138,11 @@ interface ContextMenuTriggerProps<
   className?: string;
 }
 
+/** Past this distance (px) a touch is a pan, not a hold. */
+const TOUCH_MOVE_TOLERANCE = 10;
+/** How long after the finger lifts the ghost-activation guard stays armed. */
+const GHOST_WINDOW_MS = 400;
+
 const subscribeNever = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
@@ -170,6 +176,175 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   /* Whether the current open already placed the anchor itself (pointer or keyboard). */
   const hasOwnAnchor = useRef(false);
 
+  /* Counts finished long presses; the layout effect that opens the menu runs once per increment. */
+  const [longPresses, setLongPresses] = useState(0);
+  /* Where the current touch began (client coordinates); null when no touch is being tracked. */
+  const touchStart = useRef<{x: number; y: number} | null>(null);
+  /* Removes the post-long-press guard; null when the guard is not armed. */
+  const releaseGuard = useRef<(() => void) | null>(null);
+
+  const disarmGuard = () => {
+    releaseGuard.current?.();
+    releaseGuard.current = null;
+  };
+
+  /*
+   * After a long press the menu appears under the finger. Releasing it must not activate whatever
+   * item landed there, and the browser's own `contextmenu` that follows on iOS/Android must not
+   * reopen or re-anchor the menu. The guard swallows the release-side events aimed at the popover
+   * (document capture runs before React's listeners) and is dropped shortly after the finger lifts.
+   */
+  const armGuard = () => {
+    disarmGuard();
+
+    const blocked = ["pointerup", "mouseup", "mousedown", "click", "touchend"] as const;
+    const swallow = (event: Event) => {
+      if (event.target instanceof Node && popoverRef.current?.contains(event.target)) {
+        event.stopImmediatePropagation();
+
+        if (event.type === "click") {
+          event.preventDefault();
+        }
+      }
+    };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onRelease = () => {
+      clearTimeout(timer);
+      timer = setTimeout(disarmGuard, GHOST_WINDOW_MS);
+    };
+
+    /* Registered first: the swallowing listener below stops the same event for later listeners. */
+    document.addEventListener("pointerup", onRelease, true);
+    document.addEventListener("pointercancel", onRelease, true);
+
+    for (const type of blocked) {
+      document.addEventListener(type, swallow, true);
+    }
+
+    releaseGuard.current = () => {
+      clearTimeout(timer);
+
+      for (const type of blocked) {
+        document.removeEventListener(type, swallow, true);
+      }
+
+      document.removeEventListener("pointerup", onRelease, true);
+      document.removeEventListener("pointercancel", onRelease, true);
+    };
+  };
+
+  /* Touch only: a held mouse button must never open the menu. */
+  const {longPressProps} = useLongPress({
+    isDisabled,
+    pointerType: "touch",
+    /*
+     * The press event's own x/y are relative to the target, so the open reads the client point
+     * recorded on pointerdown instead. It happens in the layout effect below, which keeps this
+     * callback (handed to a hook) free of ref access.
+     */
+    onLongPress() {
+      setLongPresses((count) => count + 1);
+    },
+  });
+
+  useEffect(() => disarmGuard, []);
+
+  const isGuardedTarget = (target: EventTarget) =>
+    (target instanceof Element && target.closest("[data-context-menu-native]") !== null) ||
+    isInsidePopover(target);
+
+  /*
+   * Only the pointer half of the long press is wired. `usePress` also owns keyboard and mouse
+   * handlers that would preventDefault Enter/Space inside a descendant and stop mousedown
+   * propagation; none of that belongs on a region.
+   */
+  type PointerHandler = (event: React.PointerEvent<HTMLElement>) => void;
+
+  const userOnPointerDown = (props as {onPointerDown?: PointerHandler}).onPointerDown;
+  const userOnPointerMove = (props as {onPointerMove?: PointerHandler}).onPointerMove;
+  const userOnPointerUp = (props as {onPointerUp?: PointerHandler}).onPointerUp;
+  const userOnPointerEnter = (props as {onPointerEnter?: PointerHandler}).onPointerEnter;
+  const userOnPointerLeave = (props as {onPointerLeave?: PointerHandler}).onPointerLeave;
+  const userOnClick = (props as {onClick?: (event: React.MouseEvent<HTMLElement>) => void}).onClick;
+  const userOnDragStart = (props as {onDragStart?: (event: React.DragEvent<HTMLElement>) => void})
+    .onDragStart;
+
+  const onClick = (event: React.MouseEvent<HTMLElement>) => {
+    userOnClick?.(event);
+    /* The press hook stops click propagation; a region must not swallow its descendants' clicks. */
+    longPressProps.onClick?.(
+      new Proxy(event, {
+        get(target, key) {
+          if (key === "stopPropagation") {
+            return () => {};
+          }
+
+          const value: unknown = Reflect.get(target, key);
+
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      }),
+    );
+  };
+
+  const onDragStart = (event: React.DragEvent<HTMLElement>) => {
+    userOnDragStart?.(event);
+    longPressProps.onDragStart?.(event);
+  };
+
+  const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
+    userOnPointerDown?.(event);
+
+    if (event.pointerType !== "touch") {
+      /* A mouse or pen press ends any leftover guard, so a right-click right after still opens. */
+      disarmGuard();
+
+      return;
+    }
+
+    if (isDisabled || isGuardedTarget(event.target)) {
+      return;
+    }
+
+    touchStart.current = {x: event.clientX, y: event.clientY};
+    longPressProps.onPointerDown?.(event);
+  };
+
+  const onPointerEnter = (event: React.PointerEvent<HTMLElement>) => {
+    userOnPointerEnter?.(event);
+    longPressProps.onPointerEnter?.(event);
+  };
+
+  const onPointerLeave = (event: React.PointerEvent<HTMLElement>) => {
+    userOnPointerLeave?.(event);
+    longPressProps.onPointerLeave?.(event);
+  };
+
+  const onPointerMove = (event: React.PointerEvent<HTMLElement>) => {
+    userOnPointerMove?.(event);
+
+    const start = touchStart.current;
+
+    if (
+      event.pointerType !== "touch" ||
+      !start ||
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) <= TOUCH_MOVE_TOLERANCE
+    ) {
+      return;
+    }
+
+    /* The press hook only cancels when the finger leaves the region; a drag is a pan, not a hold. */
+    touchStart.current = null;
+    event.currentTarget.dispatchEvent(
+      new PointerEvent("pointercancel", {bubbles: true, pointerId: event.pointerId}),
+    );
+  };
+
+  const onPointerUp = (event: React.PointerEvent<HTMLElement>) => {
+    userOnPointerUp?.(event);
+    longPressProps.onPointerUp?.(event);
+  };
+
   /*
    * React portals bubble events from the open popover to this Trigger when the Popover is nested
    * inside it (a supported layout).
@@ -192,6 +367,13 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     }
 
     if (isInsidePopover(target)) {
+      return;
+    }
+
+    /* The browser's own contextmenu after a long press: keep it away, and do not re-anchor. */
+    if (releaseGuard.current) {
+      event.preventDefault();
+
       return;
     }
 
@@ -285,6 +467,26 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     }
   });
 
+  /*
+   * Opens the menu for a finished long press. It must stay below the effect above: that one clears
+   * `hasOwnAnchor` while the menu is closed, in the same commit, and would undo this one's flag.
+   */
+  useLayoutEffect(() => {
+    const point = touchStart.current;
+
+    if (longPresses === 0 || !point) {
+      return;
+    }
+
+    touchStart.current = null;
+    armGuard();
+    setOpenedBy("pointer");
+    hasOwnAnchor.current = true;
+    anchor.setPoint(point.x, point.y);
+    state.setOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per long press
+  }, [longPresses]);
+
   return (
     <dom.div
       className={slots?.trigger({className})}
@@ -296,8 +498,15 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       {...(props as any)}
       ref={mergedTriggerRef}
       data-slot="context-menu-trigger"
+      onClick={onClick}
       onContextMenu={onContextMenu}
+      onDragStart={onDragStart}
       onKeyDown={onKeyDown}
+      onPointerDown={onPointerDown}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
     >
       {children}
       {isClient

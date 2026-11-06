@@ -1,4 +1,7 @@
-import {fireEvent, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
+
+import {act, fireEvent, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 import {useState} from "react";
 
 import {ContextMenu, ContextMenuRoot} from "@/components/context-menu/index.ts";
@@ -707,5 +710,259 @@ describe("ContextMenu keyboard open and focus", () => {
     } finally {
       rect.mockRestore();
     }
+  });
+});
+
+function touch(
+  target: Element,
+  type: "pointerDown" | "pointerMove" | "pointerUp",
+  point: {x: number; y: number},
+) {
+  fireEvent[type](target, {
+    button: 0,
+    clientX: point.x,
+    clientY: point.y,
+    height: 2,
+    pointerId: 7,
+    pointerType: "touch",
+    width: 2,
+  });
+}
+
+describe("ContextMenu touch long-press", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("opens, anchored to the touch point, when a touch is held past the threshold", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+
+    act(() => {
+      vi.advanceTimersByTime(499);
+    });
+    expect(screen.queryByRole("menu")).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(2);
+    });
+
+    expect(screen.getByRole("menu", {name: "Actions"})).toBeInTheDocument();
+    expect(getAnchor()?.style.left).toBe("40px");
+    expect(getAnchor()?.style.top).toBe("60px");
+  });
+
+  it("does not open when the touch is released before the threshold", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    touch(screen.getByTestId("inner"), "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("does not open when a mouse button is held past the threshold", () => {
+    render(<Fixture />);
+    fireEvent.pointerDown(screen.getByTestId("inner"), {
+      button: 0,
+      clientX: 40,
+      clientY: 60,
+      height: 2,
+      pointerId: 1,
+      pointerType: "mouse",
+      width: 2,
+    });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("cancels the long-press when the finger moves past the tolerance", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    touch(screen.getByTestId("inner"), "pointerMove", {x: 40, y: 90});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("keeps the long-press alive for a small tremor within the tolerance", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    touch(screen.getByTestId("inner"), "pointerMove", {x: 43, y: 62});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    expect(getAnchor()?.style.left).toBe("40px");
+  });
+
+  it("does not activate the item under the finger when it is released after the open", () => {
+    const onAction = vi.fn();
+
+    render(<Fixture onAction={onAction} />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    const item = screen.getByRole("menuitem", {name: "Copy"});
+
+    touch(item, "pointerUp", {x: 40, y: 60});
+    fireEvent.mouseUp(item);
+    fireEvent.click(item);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(onAction).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("lets a later tap on an item activate it once the release window has passed", () => {
+    const onAction = vi.fn();
+
+    render(<Fixture onAction={onAction} />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    touch(screen.getByRole("menuitem", {name: "Copy"}), "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    const item = screen.getByRole("menuitem", {name: "Copy"});
+
+    touch(item, "pointerDown", {x: 50, y: 70});
+    touch(item, "pointerUp", {x: 50, y: 70});
+    fireEvent.click(item);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(onAction).toHaveBeenCalledTimes(1);
+    expect(onAction.mock.calls[0]?.[0]).toBe("copy");
+  });
+
+  it("ignores the native contextmenu that follows a long-press: no reopen, no re-anchor", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    touch(screen.getByTestId("inner"), "pointerUp", {x: 40, y: 60});
+    // Past the press hook's own 100 ms suppression, inside this component's release window.
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    const allowed = fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 90, clientY: 95});
+
+    expect(allowed).toBe(false);
+    expect(getAnchor()?.style.left).toBe("40px");
+    expect(getAnchor()?.style.top).toBe("60px");
+  });
+
+  it("opens from a right-click again once the release window has passed", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    touch(screen.getByTestId("inner"), "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 90, clientY: 95});
+
+    expect(getAnchor()?.style.left).toBe("90px");
+  });
+
+  it("does not long-press when isDisabled", () => {
+    render(<Fixture isDisabled />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("does not long-press inside [data-context-menu-native]", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("native"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("does not re-anchor on a long-press inside the open popover that bubbles to a nested Trigger", () => {
+    render(<Fixture nested />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    touch(screen.getByTestId("inner"), "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    touch(screen.getByRole("menuitem", {name: "Copy"}), "pointerDown", {x: 200, y: 210});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(getAnchor()?.style.left).toBe("40px");
+  });
+
+  it("does not swallow a descendant's click for the Trigger's ancestors", () => {
+    const onClick = vi.fn();
+
+    render(
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+      <div onClick={onClick}>
+        <Fixture />
+      </div>,
+    );
+    fireEvent.click(screen.getByTestId("btn"));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("carries the block class the touch-callout and user-select suppression is keyed on", () => {
+    render(<Fixture />);
+
+    const trigger = document.querySelector('[data-slot="context-menu-trigger"]');
+    // Vitest runs from packages/react.
+    const css = readFileSync(
+      resolve(process.cwd(), "../styles/components/context-menu.css"),
+      "utf8",
+    );
+    const rule =
+      /\.context-menu__trigger\s*\{[\s\S]*?@media \(pointer: coarse\)\s*\{([^}]*)\}/.exec(css);
+
+    expect(trigger).toHaveClass("context-menu__trigger");
+    expect(rule?.[1]).toContain("-webkit-touch-callout: none");
+    expect(rule?.[1]).toContain("user-select: none");
   });
 });
