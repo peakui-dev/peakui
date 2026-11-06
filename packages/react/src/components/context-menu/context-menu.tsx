@@ -161,6 +161,17 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   const userOnContextMenu = (props as {onContextMenu?: (event: React.MouseEvent) => void})
     .onContextMenu;
 
+  const userOnKeyDown = (props as {onKeyDown?: (event: React.KeyboardEvent) => void}).onKeyDown;
+  /* Whether the current open already placed the anchor itself (pointer or keyboard). */
+  const hasOwnAnchor = useRef(false);
+
+  /*
+   * React portals bubble events from the open popover to this Trigger when the Popover is nested
+   * inside it (a supported layout).
+   */
+  const isInsidePopover = (target: EventTarget) =>
+    target instanceof Node && popoverRef.current?.contains(target) === true;
+
   const onContextMenu = (event: React.MouseEvent) => {
     userOnContextMenu?.(event);
 
@@ -175,17 +186,43 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       return;
     }
 
-    /*
-     * React portals bubble events from the open popover to this Trigger when the Popover is
-     * nested inside it (a supported layout).
-     */
-    if (target instanceof Node && popoverRef.current?.contains(target)) {
+    if (isInsidePopover(target)) {
       return;
     }
 
     event.preventDefault();
     openedByRef.current = "pointer";
+    hasOwnAnchor.current = true;
     anchor.setPoint(event.clientX, event.clientY);
+    state.setOpen(true);
+  };
+
+  /*
+   * Shift+F10 and the ContextMenu key reach the Trigger from any focused descendant. Unlike the
+   * pointer path, `[data-context-menu-native]` does not opt out here: the keyboard has no other
+   * way to reach the menu, and an input inside the region still opens it.
+   */
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    userOnKeyDown?.(event);
+
+    if (isDisabled || event.defaultPrevented) {
+      return;
+    }
+
+    const isMenuKey = event.key === "ContextMenu" || (event.shiftKey && event.key === "F10");
+
+    if (!isMenuKey || isInsidePopover(event.target)) {
+      return;
+    }
+
+    event.preventDefault();
+    openedByRef.current = "keyboard";
+    hasOwnAnchor.current = true;
+
+    if (event.target instanceof Element) {
+      anchor.setFromElement(event.target, triggerRef.current ?? undefined);
+    }
+
     state.setOpen(true);
   };
 
@@ -210,13 +247,20 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
    * it anchors at the bottom-start corner of the Trigger instead of the end of the body flow.
    */
   const {setFromElement} = anchor;
-  const hasPoint = anchor.point !== null;
 
   useLayoutEffect(() => {
-    if (state.isOpen && isAnchored && !hasPoint && triggerRef.current) {
-      setFromElement(triggerRef.current);
+    if (!state.isOpen) {
+      /* The next open starts clean; the point itself stays put so an exit animation does not jump. */
+      hasOwnAnchor.current = false;
+
+      return;
     }
-  }, [state.isOpen, isAnchored, hasPoint, setFromElement]);
+
+    if (isAnchored && !hasOwnAnchor.current && triggerRef.current) {
+      setFromElement(triggerRef.current);
+      hasOwnAnchor.current = true;
+    }
+  }, [state.isOpen, isAnchored, setFromElement]);
 
   return (
     <dom.div
@@ -230,6 +274,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       ref={mergedTriggerRef}
       data-slot="context-menu-trigger"
       onContextMenu={onContextMenu}
+      onKeyDown={onKeyDown}
     >
       {children}
       {isClient
@@ -296,7 +341,7 @@ type ContextMenuMenuProps<T extends object> = MenuRootProps<T>;
 
 /* The shared Menu root under this component's slot name; `data-slot` is overridable by design. */
 function ContextMenuMenu<T extends object>({onClose, ...props}: ContextMenuMenuProps<T>) {
-  const {state} = useContextMenuContext("ContextMenu.Menu");
+  const {openedBy, state} = useContextMenuContext("ContextMenu.Menu");
 
   /* There is no MenuTrigger to close the popover after a selection, so the menu does it. */
   const handleClose = () => {
@@ -304,7 +349,20 @@ function ContextMenuMenu<T extends object>({onClose, ...props}: ContextMenuMenuP
     state.setOpen(false);
   };
 
-  return <MenuRoot {...props} data-slot="context-menu-menu" onClose={handleClose} />;
+  /*
+   * The ref is written in the event handler that opens the menu, before this part mounts: a
+   * keyboard open lands on the first item, a pointer open on the menu container.
+   */
+  const autoFocus = openedBy.current === "keyboard" ? "first" : true;
+
+  return (
+    <MenuRoot
+      autoFocus={autoFocus}
+      {...props}
+      data-slot="context-menu-menu"
+      onClose={handleClose}
+    />
+  );
 }
 
 /* -------------------------------------------------------------------------------------------------

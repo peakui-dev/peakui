@@ -16,8 +16,11 @@ interface ContextMenuAnchor {
   point: ContextMenuAnchorPoint | null;
   /** Anchors at a pointer position (viewport coordinates). */
   setPoint(x: number, y: number): void;
-  /** Anchors at the bottom-start corner of an element, for keyboard opens. */
-  setFromElement(el: Element): void;
+  /**
+   * Anchors at the bottom-start corner of an element, for keyboard opens. A zero-size `el` falls
+   * back to the `fallback` element's rect.
+   */
+  setFromElement(el: Element, fallback?: Element): void;
 }
 
 /*
@@ -32,8 +35,13 @@ function useContextMenuAnchor(): ContextMenuAnchor {
     setPointState({x, y});
   }, []);
 
-  const setFromElement = useCallback((el: Element) => {
-    const rect = el.getBoundingClientRect();
+  const setFromElement = useCallback((el: Element, fallback?: Element) => {
+    let rect = el.getBoundingClientRect();
+
+    // A detached or `display: none` element measures zero; anchoring there would pin the menu at (0, 0).
+    if (fallback && rect.width === 0 && rect.height === 0) {
+      rect = fallback.getBoundingClientRect();
+    }
 
     setPointState({x: rect.left, y: rect.bottom});
   }, []);
