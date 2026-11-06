@@ -1,4 +1,5 @@
 import {ssrSmoke} from "@peakui/testing/helpers";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Pagination} from "@/components/pagination";
 
@@ -42,5 +43,15 @@ describe("Pagination SSR", () => {
     }
     expect(html).toContain('aria-current="page"');
     expect(html).toContain("pagination--sm");
+  });
+
+  it("hydrates without mismatch under ru-RU", async () => {
+    const {html} = await ssrSmoke(
+      <I18nProvider locale="ru-RU">
+        <Pagination />
+      </I18nProvider>,
+    );
+
+    expect(html).toContain('aria-label="Постраничная навигация"');
   });
 });

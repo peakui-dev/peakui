@@ -1,5 +1,6 @@
 import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {CloseButton, CloseButtonRoot} from "@/components/close-button";
 
@@ -274,6 +275,57 @@ describe("CloseButton", () => {
       render(<CloseButton ref={ref} />);
 
       expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+    });
+  });
+
+  describe("локализация", () => {
+    it("называет элемент по-русски при ru-RU", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <CloseButton />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("button", {name: "Закрыть"})).toBeInTheDocument();
+    });
+
+    it("по умолчанию называет по-английски", () => {
+      render(<CloseButton />);
+
+      expect(screen.getByRole("button", {name: "Close"})).toBeInTheDocument();
+    });
+
+    it("метка потребителя побеждает", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <CloseButton aria-label="Моё имя" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("button", {name: "Моё имя"})).toBeInTheDocument();
+    });
+
+    it.each(["ru", "de-DE", "ar-EG"])("откатывается к английскому для %s", (locale) => {
+      render(
+        <I18nProvider locale={locale}>
+          <CloseButton />
+        </I18nProvider>,
+      );
+
+      const name = locale === "ru" ? "Закрыть" : "Close";
+
+      expect(screen.getByRole("button", {name})).toBeInTheDocument();
+    });
+
+    it("aria-labelledby потребителя побеждает", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <span id="x">Своё</span>
+          <CloseButton aria-labelledby="x" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("button", {name: "Своё"})).toBeInTheDocument();
     });
   });
 });

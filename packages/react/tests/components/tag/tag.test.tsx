@@ -1,4 +1,5 @@
 import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Tag} from "@/components/tag/index.ts";
 import {TagGroup} from "@/components/tag-group/index.ts";
@@ -53,5 +54,49 @@ describe("Tag", () => {
 
     await user.click(screen.getByTestId("custom-remove"));
     expect(onRemove).toHaveBeenCalledTimes(1);
+  });
+
+  describe("локализация", () => {
+    const renderLocalized = (locale?: string, removeLabel?: string) => {
+      const group = (
+        <TagGroup aria-label="Категории" selectionMode="single" onRemove={vi.fn()}>
+          <TagGroup.List>
+            <Tag id="news">
+              Новости
+              {removeLabel ? <Tag.RemoveButton aria-label={removeLabel} /> : null}
+            </Tag>
+          </TagGroup.List>
+        </TagGroup>
+      );
+
+      return render(locale ? <I18nProvider locale={locale}>{group}</I18nProvider> : group);
+    };
+
+    it("называет элемент по-русски при ru-RU", () => {
+      renderLocalized("ru-RU");
+
+      expect(screen.getByRole("button", {name: "Удалить тег Новости"})).toBeInTheDocument();
+    });
+
+    it("по умолчанию называет по-английски", () => {
+      renderLocalized();
+
+      expect(screen.getByRole("button", {name: "Remove tag Новости"})).toBeInTheDocument();
+    });
+
+    it("метка потребителя побеждает", () => {
+      renderLocalized("ru-RU", "Моё имя");
+
+      expect(screen.getByRole("button", {name: "Моё имя Новости"})).toBeInTheDocument();
+    });
+
+    it.each(["ru", "de-DE", "ar-EG"])("откатывается к английскому для %s", (locale) => {
+      renderLocalized(locale);
+
+      // RAC appends the tag's own name to the remove button's label through aria-labelledby.
+      const name = locale === "ru" ? "Удалить тег Новости" : "Remove tag Новости";
+
+      expect(screen.getByRole("button", {name})).toBeInTheDocument();
+    });
   });
 });

@@ -1,5 +1,6 @@
 import {render, screen} from "@peakui/testing/helpers";
 import {createRef} from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Spinner} from "@/components/spinner";
 
@@ -110,5 +111,56 @@ describe("Spinner", () => {
 
     expect(spinner).toHaveAttribute("data-rendered", "true");
     expect(spinner.querySelector('[data-slot="spinner-icon"]')).not.toBeNull();
+  });
+
+  describe("localization", () => {
+    it("names the status in Russian under ru-RU", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <Spinner />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("status", {name: "Загрузка"})).toBeInTheDocument();
+    });
+
+    it("names the status in English by default", () => {
+      render(<Spinner />);
+
+      expect(screen.getByRole("status", {name: "Loading"})).toBeInTheDocument();
+    });
+
+    it("lets the consumer label win", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <Spinner aria-label="Моё имя" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("status", {name: "Моё имя"})).toBeInTheDocument();
+    });
+
+    it.each(["ru", "de-DE", "ar-EG"])("falls back to English for %s", (locale) => {
+      render(
+        <I18nProvider locale={locale}>
+          <Spinner />
+        </I18nProvider>,
+      );
+
+      const name = locale === "ru" ? "Загрузка" : "Loading";
+
+      expect(screen.getByRole("status", {name})).toBeInTheDocument();
+    });
+
+    it("lets the consumer aria-labelledby win", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <span id="x">Своё</span>
+          <Spinner aria-labelledby="x" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("status", {name: "Своё"})).toBeInTheDocument();
+    });
   });
 });
