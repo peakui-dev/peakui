@@ -52,6 +52,7 @@ export * from "./list-box-section/index.ts";
 export * from "./list-box/index.ts";
 export * from "./menu-item/index.ts";
 export * from "./menu-section/index.ts";
+export * from "./menu/index.ts";
 export * from "./meter/index.ts";
 export * from "./modal/index.ts";
 export * from "./number-field/index.ts";

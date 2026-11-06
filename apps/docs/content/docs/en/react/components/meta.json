@@ -51,6 +51,7 @@
     "(forms)/label",
     "(navigation)/link",
     "(collections)/list-box",
+    "(collections)/menu",
     "(feedback)/meter",
     "(overlays)/modal",
     "(forms)/number-field",

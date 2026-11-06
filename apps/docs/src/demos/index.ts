@@ -1240,6 +1240,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./list-box/with-sections").then((m) => m.WithSections),
     file: "list-box/with-sections.tsx",
   },
+  // menu
+  "menu-basic": {
+    loader: () => import("./menu/basic").then((m) => m.Basic),
+    file: "menu/basic.tsx",
+  },
   // meter
   "meter-basic": {
     loader: () => import("./meter/basic").then((m) => m.Basic),
