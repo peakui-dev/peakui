@@ -491,6 +491,41 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   });
 
   /*
+   * While open, the modal popover leaves the rest of the page inert, so a right-click elsewhere
+   * would show the browser's menu on top of ours and leave ours open. Close instead and let the
+   * browser menu through (never preventDefault). Bubble phase, so a consumer that already cancelled
+   * the event keeps the menu. The region and the popover are the allow-list: the region re-anchors
+   * in its own handler, the popover is guarded above.
+   */
+  const {isOpen} = state;
+  const {setOpen} = state;
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const onOutsideContextMenu = (event: MouseEvent) => {
+      const target = event.target;
+
+      if (
+        event.defaultPrevented ||
+        (target instanceof Node &&
+          (triggerRef.current?.contains(target) || popoverRef.current?.contains(target)))
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+
+    document.addEventListener("contextmenu", onOutsideContextMenu);
+
+    return () => document.removeEventListener("contextmenu", onOutsideContextMenu);
+  }, [isOpen, popoverRef, setOpen]);
+
+  /*
    * Opens the menu for a finished long press. It must stay below the effect above: that one clears
    * `hasOwnAnchor` while the menu is closed, in the same commit, and would undo this one's flag.
    */

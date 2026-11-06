@@ -247,6 +247,117 @@ describe("ContextMenu pointer open and dismissal", () => {
     expect(screen.getByRole("menu")).toBeInTheDocument();
   });
 
+  it("closes on a contextmenu outside the region and the popover, and leaves it to the browser", async () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <>
+        <Fixture onOpenChange={onOpenChange} />
+        <div data-testid="outside">Elsewhere</div>
+      </>,
+    );
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+
+    const allowed = fireEvent.contextMenu(screen.getByTestId("outside"), {
+      clientX: 300,
+      clientY: 300,
+    });
+
+    expect(allowed).toBe(true);
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  it("keeps the menu open for a contextmenu inside the region and moves the anchor", () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <>
+        <Fixture onOpenChange={onOpenChange} />
+        <div data-testid="outside">Elsewhere</div>
+      </>,
+    );
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    fireEvent.contextMenu(screen.getByTestId("btn"), {clientX: 100, clientY: 120});
+
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(getAnchor()?.style.left).toBe("100px");
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("does not close for a contextmenu inside the popover when it is outside the region", () => {
+    const onOpenChange = vi.fn();
+
+    render(<Fixture onOpenChange={onOpenChange} />);
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    onOpenChange.mockClear();
+    fireEvent.contextMenu(screen.getByRole("menuitem", {name: "Copy"}), {
+      clientX: 300,
+      clientY: 300,
+    });
+
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("does not close for an outside contextmenu whose default was already prevented", () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <>
+        <Fixture onOpenChange={onOpenChange} />
+        <div
+          data-testid="outside"
+          onContextMenu={(event) => {
+            event.preventDefault();
+          }}
+        >
+          Elsewhere
+        </div>
+      </>,
+    );
+    fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
+    onOpenChange.mockClear();
+    fireEvent.contextMenu(screen.getByTestId("outside"));
+
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("removes the document contextmenu listener after close and on unmount", async () => {
+    const add = vi.spyOn(document, "addEventListener");
+    const remove = vi.spyOn(document, "removeEventListener");
+    const ours = (spy: typeof add) =>
+      spy.mock.calls.filter(([type]) => type === "contextmenu");
+
+    try {
+      const {unmount} = render(<Fixture />);
+
+      expect(ours(add)).toHaveLength(0);
+
+      fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 1, clientY: 2});
+      expect(ours(add)).toHaveLength(1);
+
+      const handler = ours(add)[0]![1];
+
+      fireEvent.keyDown(screen.getByRole("menu"), {key: "Escape"});
+      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+      expect(ours(remove).map(([, listener]) => listener)).toContain(handler);
+
+      fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 1, clientY: 2});
+      expect(ours(add)).toHaveLength(2);
+
+      const second = ours(add)[1]![1];
+
+      unmount();
+      expect(ours(remove).map(([, listener]) => listener)).toContain(second);
+    } finally {
+      add.mockRestore();
+      remove.mockRestore();
+    }
+  });
+
   it("reports open changes and honours controlled isOpen", () => {
     const onOpenChange = vi.fn();
 
