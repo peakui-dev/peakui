@@ -22,23 +22,15 @@ const PLACEMENTS = ["bottom", "top", "left", "right"] as const;
 
 type Placement = (typeof PLACEMENTS)[number];
 
-const LABELS: Record<Placement, string> = {
-  bottom: "Bottom",
-  left: "Left",
-  right: "Right",
-  top: "Top",
-};
+const capitalize = (value: Placement) => `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 
-/*
- * No `component` in meta: with it every story needs args carrying children, and these stories are
- * explicit render functions.
- */
 const meta = {
+  component: Sheet,
   parameters: {
     layout: "padded",
   },
   title: "Components/Sheet",
-} satisfies Meta;
+} satisfies Meta<typeof Sheet>;
 
 export default meta;
 
@@ -128,7 +120,7 @@ export const Placements: Story = {
                 {placement === "bottom" ? <Sheet.Handle /> : null}
                 <Sheet.CloseTrigger />
                 <Sheet.Header>
-                  <Sheet.Heading>{`${LABELS[placement]} sheet`}</Sheet.Heading>
+                  <Sheet.Heading>{`${capitalize(placement)} sheet`}</Sheet.Heading>
                 </Sheet.Header>
                 <Sheet.Body>
                   <p>{`This sheet slides in from the ${placement} edge of the screen.`}</p>
@@ -235,6 +227,33 @@ export const Nested: Story = {
   ),
 };
 
+const RELEASE_NOTES = [
+  "faster startup and a smaller bundle.",
+  "keyboard shortcuts for the main menu.",
+  "fixed a flicker when switching themes.",
+  "added an offline indicator to the header.",
+  "improved focus handling in dialogs.",
+  "new empty states for lists and tables.",
+  "search results now keep their scroll position.",
+  "reduced memory use on long sessions.",
+  "clearer error messages for failed uploads.",
+  "date pickers respect the first day of the week.",
+  "added drag handles to sortable lists.",
+  "fixed clipped labels in compact layouts.",
+  "notifications can be snoozed for an hour.",
+  "better contrast for disabled controls.",
+  "export now includes hidden columns on request.",
+  "faster filtering on large tables.",
+  "profile photos are cropped on the client.",
+  "fixed double submit on slow connections.",
+  "added a high contrast mode.",
+  "settings remember the last opened tab.",
+  "improved screen reader labels for icon buttons.",
+  "tooltips no longer cover their trigger.",
+  "fixed a rare crash when resizing panels.",
+  "refreshed illustrations across onboarding.",
+];
+
 export const ScrollingBody: Story = {
   render: () => (
     <Showcase title="Scrolling body">
@@ -251,11 +270,10 @@ export const ScrollingBody: Story = {
                 <Sheet.Heading>Release notes</Sheet.Heading>
               </Sheet.Header>
               {/* A scrollable region must be keyboard reachable: tabIndex lets Tab land on it. */}
-              <Sheet.Body tabIndex={0}>
-                {Array.from({length: 24}, (_, index) => (
-                  <p key={index} className="mb-3">
-                    Entry {index + 1}: the body scrolls on its own while the header and footer stay
-                    in place.
+              <Sheet.Body aria-label="Release notes content" tabIndex={0}>
+                {RELEASE_NOTES.map((note, index) => (
+                  <p key={note} className="mb-3">
+                    Version 1.{index + 1}: {note}
                   </p>
                 ))}
               </Sheet.Body>
@@ -283,9 +301,6 @@ const ControlledExample = () => {
       <Button variant="secondary" onPress={() => setIsOpen(true)}>
         Open controlled sheet
       </Button>
-      <Button variant="secondary" onPress={() => setIsOpen(false)}>
-        Close controlled sheet
-      </Button>
       <Sheet isOpen={isOpen} onOpenChange={setIsOpen}>
         <Sheet.Backdrop>
           <Sheet.Content>
@@ -297,7 +312,13 @@ const ControlledExample = () => {
               </Sheet.Header>
               <Sheet.Body>
                 <p>The open state lives outside the sheet.</p>
+                <p className="mt-3 text-xs text-muted">
+                  isOpen: <span className="font-mono text-foreground">{String(isOpen)}</span>
+                </p>
               </Sheet.Body>
+              <Sheet.Footer>
+                <Button onPress={() => setIsOpen(false)}>Close from state</Button>
+              </Sheet.Footer>
             </Sheet.Dialog>
           </Sheet.Content>
         </Sheet.Backdrop>
