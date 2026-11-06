@@ -20,6 +20,16 @@ export default defineConfig({
       name: "chromium",
       use: {...devices["Desktop Chrome"]},
     },
+    /*
+     * WebKit covers the Sheet only, whose scroll-snap overlay is where Safari differs most. Two
+     * older specs fail there for reasons of their own (Drawer: the handle drag past the threshold
+     * does not close; Modal: a backdrop click does not dismiss); widen the match once they pass.
+     */
+    {
+      name: "webkit",
+      testMatch: /Sheet\.spec\.ts/,
+      use: {...devices["Desktop Safari"]},
+    },
   ],
   reporter: process.env.CI ? "html" : "list",
   retries: process.env.CI ? 2 : 0,
