@@ -1,6 +1,6 @@
 ---
 title: Menu
-description: Menu component
+description: Inline menu that is always visible
 links:
   rac: Menu
   source: menu/menu.tsx
@@ -14,3 +14,131 @@ import {Menu} from "@peakui/react";
 ```
 
 <ComponentPreview name="menu-basic" />
+
+### Anatomy
+
+```tsx
+import {Label, Menu, Separator} from "@peakui/react";
+
+// Menu.Item, Menu.Section and the indicators are aliases of the Dropdown parts.
+// Dividers use Separator; there is no Menu.Separator.
+export default () => (
+  <Menu aria-label="Actions">
+    <Menu.Item>
+      <Label />
+      <Menu.ItemIndicator />
+    </Menu.Item>
+    <Separator />
+    <Menu.Section aria-label="Section">
+      <Menu.Item>
+        <Label />
+        <Menu.SubmenuIndicator />
+      </Menu.Item>
+    </Menu.Section>
+  </Menu>
+);
+```
+
+## Examples
+
+### With Sections
+
+<ComponentPreview name="menu-with-sections" />
+
+### With Selection
+
+<ComponentPreview name="menu-with-selection" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<Menu aria-label="Actions" className="w-60 rounded-xl border border-border p-2">
+  <Menu.Item id="new" textValue="New file">
+    <Label>New file</Label>
+  </Menu.Item>
+</Menu>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .menu {
+    @apply gap-1 rounded-xl border border-border p-2;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The Menu component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/menu.css)):
+
+#### Base Classes [!toc]
+
+- `.menu` - Inline menu container
+
+### Slots
+
+- `[data-slot="menu"]`
+
+## API Reference
+
+### Menu
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `selectionMode` | `"single" \| "multiple" \| "none"` | `"none"` | Whether single or multiple selection is enabled |
+| `selectedKeys` | `Iterable<Key>` | - | The currently selected keys (controlled) |
+| `defaultSelectedKeys` | `Iterable<Key>` | - | The initial selected keys (uncontrolled) |
+| `onSelectionChange` | `(keys: Selection) => void` | - | Handler called when the selection changes |
+| `disabledKeys` | `Iterable<Key>` | - | Keys of disabled items |
+| `onAction` | `(key: Key) => void` | - | Handler called when an item is activated |
+| `className` | `string \| ((values) => string)` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Menu content |
+| `...rest` | `MenuProps<T>` | - | React Aria [Menu](https://react-spectrum.adobe.com/react-aria/Menu.html#menu) attributes |
+
+### Menu.Item
+
+Alias of `Dropdown.Item`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | Unique identifier for the item |
+| `textValue` | `string` | - | Text content of the item for typeahead |
+| `variant` | `"default" \| "danger"` | `"default"` | Visual variant of the item |
+| `isDisabled` | `boolean` | - | Whether the item is disabled |
+| `href` | `string` | - | Renders the item as a link to this URL |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Item content or render function |
+| `...rest` | `MenuItemProps` | - | React Aria [MenuItem](https://react-spectrum.adobe.com/react-aria/Menu.html#menuitem) attributes |
+
+### Menu.Section
+
+Alias of `Dropdown.Section`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Section content |
+| `...rest` | `MenuSectionProps` | - | React Aria [MenuSection](https://react-spectrum.adobe.com/react-aria/Menu.html#menusection) attributes |
+
+### Menu.ItemIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `type` | `"checkmark" \| "dot"` | `"checkmark"` | Type of indicator to display |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Custom indicator content or render function |
+
+### Menu.SubmenuIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Custom indicator content |

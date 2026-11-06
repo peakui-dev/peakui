@@ -13,7 +13,12 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Collections",
-    components: ["(collections)/dropdown", "(collections)/list-box", "(collections)/tag-group"],
+    components: [
+      "(collections)/dropdown",
+      "(collections)/list-box",
+      "(collections)/menu",
+      "(collections)/tag-group",
+    ],
   },
   {
     category: "Pickers",
