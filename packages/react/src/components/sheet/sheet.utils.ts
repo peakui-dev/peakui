@@ -10,7 +10,7 @@ export const SHEET_CLOSE_THRESHOLD = 0.25;
 /** Duration of the settle animation after release, in milliseconds. */
 export const SHEET_RELEASE_MS = 500;
 
-function isFullSize(point: SheetSnapPoint) {
+export function isFullSize(point: SheetSnapPoint) {
   return point === 1 || (typeof point === "string" && ["1", "100%"].includes(point.trim()));
 }
 

@@ -8,7 +8,7 @@ import type {DialogRenderProps} from "react-aria-components/Dialog";
 import type {SheetRenderProps} from "react-aria-components/Sheet";
 
 import {sheetVariants} from "@peakui/styles";
-import {mergeProps, mergeRefs} from "@react-aria/utils";
+import {chain, mergeProps, mergeRefs} from "@react-aria/utils";
 import {
   Children,
   Fragment,
@@ -459,22 +459,37 @@ const SheetFooter = ({children, className, ...rest}: SheetFooterProps) => {
  * -----------------------------------------------------------------------------------------------*/
 interface SheetHandleProps extends ComponentPropsWithRef<"div"> {}
 
-const SheetHandle = ({children, className, ref, ...rest}: SheetHandleProps) => {
+const SheetHandle = ({
+  children,
+  className,
+  onKeyDown: consumerKeyDown,
+  ref,
+  ...rest
+}: SheetHandleProps) => {
   const {placement} = useSheetContext();
   const swipeDirection = use(SheetSwipeDirectionContext);
   const {ref: handleRef, sliderProps} = useSheetHandle(swipeDirection ?? placement);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
   const mergedRef = useMemo(() => mergeRefs(handleRef, ref), [handleRef, ref]);
 
+  // The consumer's key handler runs first, so it can claim a key (preventDefault) before the
+  // slider steps on it.
+  const onKeyDown = chain(
+    consumerKeyDown,
+    "onKeyDown" in sliderProps ? sliderProps.onKeyDown : undefined,
+  );
+
   return (
+    // The role, tabindex and label come from the spread when the handle is a slider.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
-      // The slider's props come first so a consumer's own (a label, a value text, a key handler)
-      // wins or chains.
+      // The slider's props come first so a consumer's own (a label, a value text) win.
       {...mergeProps(sliderProps, rest)}
       ref={mergedRef}
       className={composeSlotClassName(slots.handle, className)}
       data-sheet-handle=""
       data-slot="sheet-handle"
+      onKeyDown={onKeyDown}
     >
       {children ?? <span className={slots.handleBar()} data-slot="sheet-handle-bar" />}
     </div>

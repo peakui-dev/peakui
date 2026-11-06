@@ -1,4 +1,4 @@
-import {act, cleanup, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
+import {act, cleanup, fireEvent, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 import {createRef, useState} from "react";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
@@ -22,11 +22,7 @@ import {
   scrollSheetTo,
   snapScrollPosition,
 } from "@/components/sheet/sheet-scroll.ts";
-import {
-  describeSheetHeight,
-  isUsableSnapPoint,
-  resolveSheetPositions,
-} from "@/components/sheet/use-sheet-handle.ts";
+import {isUsableSnapPoint, resolveSheetPositions} from "@/components/sheet/use-sheet-handle.ts";
 
 type Placement = "top" | "bottom" | "left" | "right";
 
@@ -1511,16 +1507,49 @@ describe("Sheet", () => {
     });
 
     it("stops listening to the scroller when it unmounts", async () => {
+      const added: Array<[string, unknown]> = [];
+      const removed: Array<[string, unknown]> = [];
+      const originalAdd = EventTarget.prototype.addEventListener;
+      const originalRemove = EventTarget.prototype.removeEventListener;
+      const isScroller = (target: unknown) =>
+        target instanceof HTMLElement && target.hasAttribute("data-sheet-scroll");
+
+      vi.spyOn(EventTarget.prototype, "addEventListener").mockImplementation(function (
+        this: EventTarget,
+        ...args: Parameters<typeof originalAdd>
+      ) {
+        // The primitive's own one-shot waits clean themselves up; only persistent listeners count.
+        const once = typeof args[2] === "object" && args[2] !== null && args[2].once === true;
+
+        if (isScroller(this) && !once && (args[0] === "scroll" || args[0] === "scrollend")) {
+          added.push([args[0], args[1]]);
+        }
+
+        return originalAdd.apply(this, args);
+      });
+      vi.spyOn(EventTarget.prototype, "removeEventListener").mockImplementation(function (
+        this: EventTarget,
+        ...args: Parameters<typeof originalRemove>
+      ) {
+        if (isScroller(this) && (args[0] === "scroll" || args[0] === "scrollend")) {
+          removed.push([args[0], args[1]]);
+        }
+
+        return originalRemove.apply(this, args);
+      });
+
       const {unmount} = render(<HandleSheet />);
 
       await screen.findByRole("dialog");
-
-      const removeEventListener = vi.spyOn(scroller(), "removeEventListener");
-
       unmount();
 
-      expect(removeEventListener).toHaveBeenCalledWith("scroll", expect.any(Function));
-      expect(removeEventListener).toHaveBeenCalledWith("scrollend", expect.any(Function));
+      // Every listener added to the scroller (the handle's included) is removed again, each once.
+      expect(added.length).toBeGreaterThanOrEqual(2);
+      for (const [type, listener] of added) {
+        expect(removed.filter(([t, l]) => t === type && l === listener)).toHaveLength(
+          added.filter(([t, l]) => t === type && l === listener).length,
+        );
+      }
     });
 
     it("a consumer aria-valuetext overrides the default", async () => {
@@ -1597,12 +1626,124 @@ describe("Sheet", () => {
         expect(isUsableSnapPoint(Number.NaN)).toBe(false);
       });
 
-      it("describes heights", () => {
-        expect(describeSheetHeight(25)).toBe("Quarter height");
-        expect(describeSheetHeight(50)).toBe("Half height");
-        expect(describeSheetHeight(75)).toBe("Three-quarter height");
-        expect(describeSheetHeight(100)).toBe("Full height");
-        expect(describeSheetHeight(62)).toBe("62% height");
+      it("treats full-size points as no partial position", () => {
+        expect(isUsableSnapPoint(1)).toBe(false);
+        expect(isUsableSnapPoint("1")).toBe(false);
+        expect(isUsableSnapPoint("100%")).toBe(false);
+      });
+    });
+
+    describe("localization", () => {
+      /** Moves the scripted scroll to a percentage of the 600 extent and reports it. */
+      const showPercent = (percent: number) => scrollTo("y", (percent / 100) * 600, "scrollend");
+      const renderAt = async (
+        locale?: string,
+        handleProps?: Parameters<typeof HandleSheet>[0]["handleProps"],
+      ) => {
+        // The sheet renders three markers (closed, partial, full): extent 600, lowest rest at 25%.
+        targets = [0, 150, 600];
+        const sheet = <HandleSheet handleProps={handleProps} />;
+
+        render(locale ? <I18nProvider locale={locale}>{sheet}</I18nProvider> : sheet);
+        await screen.findByRole("dialog");
+      };
+
+      it("speaks the default English height texts", async () => {
+        await renderAt("en-US");
+
+        for (const [percent, text] of [
+          [25, "Quarter height"],
+          [50, "Half height"],
+          [75, "Three-quarter height"],
+          [100, "Full height"],
+          [62, "62% height"],
+        ] as const) {
+          showPercent(percent);
+          expect(slider()).toHaveAttribute("aria-valuetext", text);
+        }
+
+        expect(slider()).toHaveAttribute("aria-label", "Resize sheet");
+      });
+
+      it("speaks Russian under ru-RU", async () => {
+        await renderAt("ru-RU");
+
+        expect(slider()).toHaveAttribute("aria-label", "Изменить размер панели");
+        showPercent(25);
+        expect(slider()).toHaveAttribute("aria-valuetext", "Четверть высоты");
+        showPercent(62);
+        expect(slider()).toHaveAttribute("aria-valuetext", "62% высоты");
+      });
+
+      it("falls back to English for an unsupported locale", async () => {
+        await renderAt("de-DE");
+
+        expect(slider()).toHaveAttribute("aria-label", "Resize sheet");
+        showPercent(50);
+        expect(slider()).toHaveAttribute("aria-valuetext", "Half height");
+      });
+
+      it("lets a consumer label and value text win under ru-RU", async () => {
+        await renderAt("ru-RU", {"aria-label": "Высота", "aria-valuetext": "Peek"});
+
+        expect(slider()).toHaveAttribute("aria-label", "Высота");
+        expect(slider()).toHaveAttribute("aria-valuetext", "Peek");
+      });
+    });
+
+    describe("key guards", () => {
+      it("ignores modifier chords and leaves them to the browser", async () => {
+        render(<HandleSheet />);
+        await screen.findByRole("dialog");
+        act(() => slider().focus());
+        scrollCalls.length = 0;
+
+        const altLeft = fireEvent.keyDown(slider(), {altKey: true, key: "ArrowLeft"});
+        const ctrlHome = fireEvent.keyDown(slider(), {ctrlKey: true, key: "Home"});
+        const metaEnd = fireEvent.keyDown(slider(), {key: "End", metaKey: true});
+
+        // fireEvent returns false when the event was default-prevented.
+        expect([altLeft, ctrlHome, metaEnd]).toEqual([true, true, true]);
+        expect(scrollCalls).toEqual([]);
+      });
+
+      it("does not step when a consumer onKeyDown prevented the key", async () => {
+        render(
+          <HandleSheet
+            handleProps={{
+              onKeyDown: (event) => event.preventDefault(),
+            }}
+          />,
+        );
+        await screen.findByRole("dialog");
+        act(() => slider().focus());
+        scrollCalls.length = 0;
+
+        await user.keyboard("{ArrowUp}");
+
+        expect(scrollCalls).toEqual([]);
+      });
+
+      it("does not prevent keys it has no use for", async () => {
+        render(<HandleSheet />);
+        await screen.findByRole("dialog");
+        act(() => slider().focus());
+
+        // (Tab is not asserted: the dialog's own focus containment owns it.)
+        expect(fireEvent.keyDown(slider(), {key: "a"})).toBe(true);
+        expect(fireEvent.keyDown(slider(), {key: "PageUp"})).toBe(true);
+        expect(fireEvent.keyDown(slider(), {key: "ArrowUp", shiftKey: true})).toBe(false);
+      });
+
+      it("renders a sheet whose only snap points are full size as a decorative handle", async () => {
+        render(<HandleSheet snapPoints={["100%", "1"]} />);
+        await screen.findByRole("dialog");
+
+        expect(screen.queryByRole("slider")).toBeNull();
+        expect(document.querySelector("[data-sheet-handle]")).toHaveAttribute(
+          "aria-hidden",
+          "true",
+        );
       });
     });
   });

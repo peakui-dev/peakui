@@ -1,13 +1,16 @@
 "use client";
 
 import type {SheetSnapPoint} from "./sheet.utils.ts";
+import type {StringKey} from "../../i18n/strings.ts";
 import type {HTMLAttributes, KeyboardEvent, RefObject} from "react";
 import type {SheetRenderProps} from "react-aria-components/Sheet";
 
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useLocale} from "react-aria-components/I18nProvider";
 
 import {useMediaQuery} from "../../hooks/use-media-query.ts";
+import {strings} from "../../i18n/strings.ts";
 
 import {useSheetContext} from "./context.ts";
 import {
@@ -16,6 +19,7 @@ import {
   readSheetScroll,
   scrollSheetTo,
 } from "./sheet-scroll.ts";
+import {isFullSize} from "./sheet.utils.ts";
 
 /** A resting position of the sheet: where the scroller rests, and how much of the sheet shows. */
 interface SheetRestingPosition {
@@ -42,9 +46,13 @@ const CSS_FUNCTION = /^[a-z-]+\(.+\)$/i;
  * Whether an authored snap point can describe a resting position at all. A number must be finite
  * and positive. A string must be a number with an optional unit and a positive value, or a CSS
  * function (`calc()`, `var()`, `min()`...), whose size only the browser knows: measurement drops
- * the ones that turn out to be zero or less.
+ * the ones that turn out to be zero or less. A full-size point is not a partial position: it is
+ * the end every sheet already has, so it alone never makes the handle a slider. This is decided
+ * from the authored points only, so server and client agree and the role never flips after
+ * hydration.
  */
 function isUsableSnapPoint(point: SheetSnapPoint): boolean {
+  if (isFullSize(point)) return false;
   if (typeof point === "number") return Number.isFinite(point) && point > 0;
   if (typeof point !== "string") return false;
 
@@ -89,19 +97,25 @@ function revealedPercent(scroll: number, extent: number, after: boolean): number
   return ((after ? scroll : extent - scroll) / extent) * 100;
 }
 
-/** The spoken form of a revealed height; English, and overridable with an `aria-valuetext` prop. */
-function describeSheetHeight(percent: number): string {
+/** The slice of the string formatter the height text needs. */
+type FormatSheetString = (key: StringKey, args?: Record<string, number | string>) => string;
+
+/**
+ * The spoken form of a revealed height, in the active locale; an `aria-valuetext` prop overrides
+ * it.
+ */
+function describeSheetHeight(percent: number, format: FormatSheetString): string {
   switch (percent) {
     case 25:
-      return "Quarter height";
+      return format("heightQuarter");
     case 50:
-      return "Half height";
+      return format("heightHalf");
     case 75:
-      return "Three-quarter height";
+      return format("heightThreeQuarter");
     case 100:
-      return "Full height";
+      return format("heightFull");
     default:
-      return `${percent}% height`;
+      return format("heightPercent", {percent});
   }
 }
 
@@ -128,6 +142,7 @@ interface UseSheetHandleResult {
 function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): UseSheetHandleResult {
   const {snapPoints} = useSheetContext();
   const {direction} = useLocale();
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const ref = useRef<HTMLDivElement>(null);
   const measured = useRef<SheetPositions>({extent: 0, positions: []});
@@ -184,7 +199,10 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
     const onScroll = () => sync(false);
     const onScrollEnd = () => sync(true);
 
-    // The first reading of an external system (the scroller's layout) once it is in the document.
+    // The scroller's layout exists only once the sheet is in the document, and reading it is
+    // syncing with an external system, which is what this effect also subscribes to. A layout
+    // effect would trip the same rule and add a blocking pass to every open for no gain: the
+    // value is state the server cannot know, so the first paint is value-less either way.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     sync(true);
     scroller.addEventListener("scroll", onScroll, {passive: true});
@@ -197,6 +215,11 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
   }, [isSlider, sync]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // A consumer that already handled the key keeps it, and Alt/Ctrl/Meta chords (history
+    // navigation, OS and browser shortcuts) are not ours. Shift is not a chord for a slider, so it
+    // is ignored: Shift+Arrow steps like Arrow.
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+
     // On a horizontal sheet, reading order decides which arrow points toward more of the sheet.
     const flipped = axis === "x" && direction === "rtl";
     let move: "down" | "end" | "home" | "up";
@@ -228,6 +251,8 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
 
     if (!scroller) return;
 
+    // Prevented before the "nothing to do" returns on purpose: at either end the arrow is swallowed
+    // rather than scrolling the page behind the sheet (slider convention).
     event.preventDefault();
     sync(true);
 
@@ -256,12 +281,14 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
     isSlider,
     ref,
     sliderProps: {
-      "aria-label": "Resize sheet",
+      "aria-label": formatter.format("resizeSheet"),
       "aria-orientation": axis === "x" ? "horizontal" : "vertical",
       "aria-valuemax": value ? 100 : undefined,
       "aria-valuemin": value?.min,
       "aria-valuenow": value?.now,
-      "aria-valuetext": value ? describeSheetHeight(value.now) : undefined,
+      "aria-valuetext": value
+        ? describeSheetHeight(value.now, (key, args) => formatter.format(key, args))
+        : undefined,
       onKeyDown,
       role: "slider",
       tabIndex: 0,
