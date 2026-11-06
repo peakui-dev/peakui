@@ -12,7 +12,14 @@
    */
   @media (pointer: coarse) {
     -webkit-touch-callout: none;
+    -webkit-user-select: none;
     user-select: none;
+
+    /* Text inputs and other native-menu regions keep selectable text. */
+    :where([data-context-menu-native]) {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
   }
 }
 

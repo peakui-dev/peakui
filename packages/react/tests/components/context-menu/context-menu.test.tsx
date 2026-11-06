@@ -953,16 +953,120 @@ describe("ContextMenu touch long-press", () => {
     render(<Fixture />);
 
     const trigger = document.querySelector('[data-slot="context-menu-trigger"]');
-    // Vitest runs from packages/react.
     const css = readFileSync(
-      resolve(process.cwd(), "../styles/components/context-menu.css"),
+      resolve(import.meta.dirname, "../../../../styles/components/context-menu.css"),
       "utf8",
     );
-    const rule =
-      /\.context-menu__trigger\s*\{[\s\S]*?@media \(pointer: coarse\)\s*\{([^}]*)\}/.exec(css);
+    // The trigger rule: from its selector to the closing brace that balances the opening one.
+    const start = css.indexOf(".context-menu__trigger {");
+    let depth = 0;
+    let end = start;
 
+    for (let i = css.indexOf("{", start); i < css.length; i++) {
+      depth += css[i] === "{" ? 1 : css[i] === "}" ? -1 : 0;
+
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+
+    const rule = css.slice(start, end + 1);
+    const coarse = /@media \(pointer: coarse\)\s*\{([^}]*)\}/.exec(rule)?.[1] ?? "";
+
+    expect(start).toBeGreaterThanOrEqual(0);
     expect(trigger).toHaveClass("context-menu__trigger");
-    expect(rule?.[1]).toContain("-webkit-touch-callout: none");
-    expect(rule?.[1]).toContain("user-select: none");
+    expect(coarse).toContain("-webkit-touch-callout: none");
+    expect(coarse).toContain("-webkit-user-select: none");
+    expect(coarse).toContain("user-select: none");
+    // Native-menu descendants keep selectable text on coarse pointers.
+    expect(rule).toMatch(
+      /:where\(\[data-context-menu-native\]\)[^{]*\{[^}]*-webkit-user-select: auto[^}]*user-select: auto/,
+    );
+  });
+
+  it("cancels the long-press when the browser cancels the touch (scrolling)", () => {
+    render(<Fixture />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    fireEvent.pointerCancel(screen.getByTestId("inner"), {pointerId: 7, pointerType: "touch"});
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.queryByRole("menu")).toBeNull();
+  });
+
+  it("does not prevent the default of a descendant link or checkbox click in an enabled region", () => {
+    render(
+      <ContextMenu>
+        <ContextMenu.Trigger>
+          <a data-testid="link" href="#x">
+            Link
+          </a>
+          <input aria-label="Check" data-testid="check" type="checkbox" />
+        </ContextMenu.Trigger>
+      </ContextMenu>,
+    );
+
+    expect(fireEvent.click(screen.getByTestId("link"))).toBe(true);
+    expect(fireEvent.click(screen.getByTestId("check"))).toBe(true);
+  });
+
+  it("does not prevent the default of a descendant link or checkbox click when isDisabled", () => {
+    render(
+      <ContextMenu isDisabled>
+        <ContextMenu.Trigger>
+          <a data-testid="link" href="#x">
+            Link
+          </a>
+          <input aria-label="Check" data-testid="check" type="checkbox" />
+        </ContextMenu.Trigger>
+      </ContextMenu>,
+    );
+
+    expect(fireEvent.click(screen.getByTestId("link"))).toBe(true);
+    expect(fireEvent.click(screen.getByTestId("check"))).toBe(true);
+  });
+
+  it("does not prevent the default of a dragstart from a draggable child", () => {
+    render(
+      <ContextMenu>
+        <ContextMenu.Trigger>
+          <div draggable data-testid="drag">
+            Drag me
+          </div>
+        </ContextMenu.Trigger>
+      </ContextMenu>,
+    );
+
+    expect(fireEvent.dragStart(screen.getByTestId("drag"))).toBe(true);
+  });
+
+  it("lets a second tap on the popover through while the release window is still open", () => {
+    const onAction = vi.fn();
+
+    render(<Fixture onAction={onAction} />);
+    touch(screen.getByTestId("inner"), "pointerDown", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    const item = screen.getByRole("menuitem", {name: "Copy"});
+
+    touch(item, "pointerUp", {x: 40, y: 60});
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    touch(item, "pointerDown", {x: 50, y: 70});
+    touch(item, "pointerUp", {x: 50, y: 70});
+    fireEvent.click(item);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(onAction).toHaveBeenCalledTimes(1);
   });
 });

@@ -213,7 +213,15 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       timer = setTimeout(disarmGuard, GHOST_WINDOW_MS);
     };
 
+    /* A fresh touch on the popover is a deliberate second tap, not the ghost of the first. */
+    const onPopoverDown = (event: Event) => {
+      if (event.target instanceof Node && popoverRef.current?.contains(event.target)) {
+        disarmGuard();
+      }
+    };
+
     /* Registered first: the swallowing listener below stops the same event for later listeners. */
+    document.addEventListener("pointerdown", onPopoverDown, true);
     document.addEventListener("pointerup", onRelease, true);
     document.addEventListener("pointercancel", onRelease, true);
 
@@ -228,6 +236,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
         document.removeEventListener(type, swallow, true);
       }
 
+      document.removeEventListener("pointerdown", onPopoverDown, true);
       document.removeEventListener("pointerup", onRelease, true);
       document.removeEventListener("pointercancel", onRelease, true);
     };
@@ -266,11 +275,15 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   const userOnPointerEnter = (props as {onPointerEnter?: PointerHandler}).onPointerEnter;
   const userOnPointerLeave = (props as {onPointerLeave?: PointerHandler}).onPointerLeave;
   const userOnClick = (props as {onClick?: (event: React.MouseEvent<HTMLElement>) => void}).onClick;
-  const userOnDragStart = (props as {onDragStart?: (event: React.DragEvent<HTMLElement>) => void})
-    .onDragStart;
 
   const onClick = (event: React.MouseEvent<HTMLElement>) => {
     userOnClick?.(event);
+
+    /* A disabled press hook preventDefaults every click; a disabled region must leave them alone. */
+    if (isDisabled) {
+      return;
+    }
+
     /* The press hook stops click propagation; a region must not swallow its descendants' clicks. */
     longPressProps.onClick?.(
       new Proxy(event, {
@@ -285,11 +298,6 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
         },
       }),
     );
-  };
-
-  const onDragStart = (event: React.DragEvent<HTMLElement>) => {
-    userOnDragStart?.(event);
-    longPressProps.onDragStart?.(event);
   };
 
   const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
@@ -312,11 +320,21 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
 
   const onPointerEnter = (event: React.PointerEvent<HTMLElement>) => {
     userOnPointerEnter?.(event);
+
+    if (isDisabled) {
+      return;
+    }
+
     longPressProps.onPointerEnter?.(event);
   };
 
   const onPointerLeave = (event: React.PointerEvent<HTMLElement>) => {
     userOnPointerLeave?.(event);
+
+    if (isDisabled) {
+      return;
+    }
+
     longPressProps.onPointerLeave?.(event);
   };
 
@@ -342,6 +360,11 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
 
   const onPointerUp = (event: React.PointerEvent<HTMLElement>) => {
     userOnPointerUp?.(event);
+
+    if (isDisabled) {
+      return;
+    }
+
     longPressProps.onPointerUp?.(event);
   };
 
@@ -500,7 +523,6 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       data-slot="context-menu-trigger"
       onClick={onClick}
       onContextMenu={onContextMenu}
-      onDragStart={onDragStart}
       onKeyDown={onKeyDown}
       onPointerDown={onPointerDown}
       onPointerEnter={onPointerEnter}
