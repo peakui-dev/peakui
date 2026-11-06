@@ -17,7 +17,7 @@ Produce a single total order over the components still to build, in three priori
 
 **Build only what the reference already has.** Every entry below maps to a directory in
 `heroui/packages/react/src/components/`. Nothing is invented. Where a component exists upstream as a
-package but carries no documentation page, the entry says so.
+package but carries no documentation page, the entry says so. Exception, by owner decision of 2026-11-06: `ContextMenu` is built without a reference counterpart. Any further exception needs the same explicit decision.
 
 ## Why this order
 
