@@ -75,6 +75,64 @@ function isSheetPanelOnScreen(scroller: HTMLElement): boolean {
 }
 
 /**
+ * Whether the element lies entirely inside the visual viewport (so the area a software keyboard
+ * covers counts as outside): focusing it needs no scroll to bring it into view. An element with no
+ * box is not in view.
+ */
+function isElementInView(element: Element): boolean {
+  const rect = element.getBoundingClientRect();
+  const view = window.visualViewport;
+  const top = view?.offsetTop ?? 0;
+  const left = view?.offsetLeft ?? 0;
+  const bottom = top + (view?.height ?? window.innerHeight);
+  const right = left + (view?.width ?? window.innerWidth);
+
+  return (
+    rect.width + rect.height > 0 &&
+    rect.top >= top - 0.5 &&
+    rect.left >= left - 0.5 &&
+    rect.bottom <= bottom + 0.5 &&
+    rect.right <= right + 0.5
+  );
+}
+
+/**
+ * Whether a scroll container between `target` (inclusive) and the sheet's scroller (exclusive) can
+ * still scroll along `axis` in `direction` (-1 toward smaller coordinates, 1 toward larger). When
+ * one can, a scroll key moves that container; when none can, the browser would pass the scroll on
+ * to the sheet's scroller and move the sheet.
+ */
+function canScrollWithin(
+  target: Element,
+  scroller: Element,
+  axis: SheetAxis,
+  direction: -1 | 1,
+): boolean {
+  for (let node: Element | null = target; node && node !== scroller; node = node.parentElement) {
+    const style = getComputedStyle(node);
+
+    if (!/(auto|scroll|overlay)/.test(axis === "y" ? style.overflowY : style.overflowX)) continue;
+
+    const max =
+      axis === "y" ? node.scrollHeight - node.clientHeight : node.scrollWidth - node.clientWidth;
+
+    if (!(max > 0.5)) continue;
+
+    // In a right-to-left container scrollLeft runs from 0 at the right edge down to -max.
+    const offset =
+      axis === "y"
+        ? node.scrollTop
+        : style.direction === "rtl"
+          ? node.scrollLeft + max
+          : node.scrollLeft;
+
+    if (direction < 0 ? offset > 0.5 : offset < max - 0.5) return true;
+  }
+
+  return false;
+}
+
+/**
  * The scroll position at which `marker` meets the scroller's edge. `align` is a `scroll-snap-align`
  * value; only its first keyword counts, and anything but `end` is read as `start`. The marker's
  * `scroll-margin` is honoured, as the browser's own snapping does.
@@ -155,10 +213,12 @@ function scrollSheetTo(
 }
 
 export {
+  canScrollWithin,
   findSheetScroller,
   getSheetScroller,
   getSheetSnapTargets,
   getSheetViewportLength,
+  isElementInView,
   isSheetPanelOnScreen,
   measureSheet,
   readSheetScroll,

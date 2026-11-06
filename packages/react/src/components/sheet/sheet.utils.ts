@@ -165,6 +165,47 @@ export function nearestSheetSnap(targets: number[], current: number, velocity: n
   );
 }
 
+/** The parts of a key event that decide whether the browser scrolls for it. */
+interface SheetScrollKey {
+  altKey: boolean;
+  ctrlKey: boolean;
+  key: string;
+  metaKey: boolean;
+  shiftKey: boolean;
+}
+
+/**
+ * The physical direction the browser scrolls for a key along the sheet's axis when nothing handles
+ * it: -1 toward smaller coordinates (up, left), 1 toward larger (down, right), null when the key
+ * does not scroll that axis. Alt, Ctrl and Meta chords are the browser's and the system's
+ * (history, shortcuts), so they are never claimed.
+ */
+export function sheetScrollKeyDirection(event: SheetScrollKey, axis: "x" | "y"): -1 | 1 | null {
+  if (event.altKey || event.ctrlKey || event.metaKey) return null;
+
+  if (axis === "x") {
+    if (event.key === "ArrowLeft") return -1;
+    if (event.key === "ArrowRight") return 1;
+
+    return null;
+  }
+
+  switch (event.key) {
+    case "ArrowUp":
+    case "PageUp":
+    case "Home":
+      return -1;
+    case "ArrowDown":
+    case "PageDown":
+    case "End":
+      return 1;
+    case " ":
+      return event.shiftKey ? -1 : 1;
+    default:
+      return null;
+  }
+}
+
 /** Animates a scalar from one value to another; returns a cancel function. */
 export function animateSheetValue(
   from: number,

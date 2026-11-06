@@ -42,6 +42,7 @@ import {
   useSheetContext,
 } from "./context.ts";
 import {SheetLifecycle} from "./sheet-lifecycle.tsx";
+import {SheetScrollGuard} from "./sheet-scroll-guard.tsx";
 import {normalizeSnapPoints} from "./sheet.utils.ts";
 import {useSheetHandle} from "./use-sheet-handle.ts";
 
@@ -305,6 +306,7 @@ const SheetBackdrop = ({
         <SheetSwipeDirectionContext value={renderProps.swipeDirection}>
           <SheetExitingContext value={renderProps.isExiting}>
             <SheetLifecycle {...renderProps} overlayRef={overlayRef} />
+            <SheetScrollGuard overlayRef={overlayRef} swipeDirection={renderProps.swipeDirection} />
             <SheetBackdropPrimitive
               className={slots.backdrop()}
               data-slot="sheet-backdrop"

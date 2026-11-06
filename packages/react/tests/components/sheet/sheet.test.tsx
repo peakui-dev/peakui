@@ -2675,8 +2675,20 @@ describe("Sheet", () => {
 
         // (Tab is not asserted: the dialog's own focus containment owns it.)
         expect(fireEvent.keyDown(slider(), {key: "a"})).toBe(true);
-        expect(fireEvent.keyDown(slider(), {key: "PageUp"})).toBe(true);
+        expect(fireEvent.keyDown(slider(), {key: "Enter"})).toBe(true);
         expect(fireEvent.keyDown(slider(), {key: "ArrowUp", shiftKey: true})).toBe(false);
+      });
+
+      it("does not step on PageUp, which the sheet's scroll guard holds instead", async () => {
+        render(<HandleSheet />);
+        await screen.findByRole("dialog");
+        act(() => slider().focus());
+
+        const before = slider().getAttribute("aria-valuenow");
+
+        // Prevented, so the browser does not scroll the sheet toward its closed end; not stepped.
+        expect(fireEvent.keyDown(slider(), {key: "PageUp"})).toBe(false);
+        expect(slider().getAttribute("aria-valuenow")).toBe(before);
       });
 
       it("renders a sheet whose only snap points are full size as a decorative handle", async () => {
