@@ -2,7 +2,7 @@ import type {DateValue} from "@internationalized/date";
 import type {ComponentProps, ReactNode} from "react";
 
 import {CalendarDate} from "@internationalized/date";
-import {act, render, screen, setupUser} from "@peakui/testing/helpers";
+import {act, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Calendar, CalendarRoot} from "@/components/calendar/index.ts";
@@ -75,6 +75,12 @@ describe("Calendar", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("has no axe violations", async () => {
+    const {container} = renderCalendar();
+
+    await expectNoAxeViolations(container);
   });
 
   it("renders a grid with an accessible name", () => {

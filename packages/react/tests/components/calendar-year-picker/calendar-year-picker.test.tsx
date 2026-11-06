@@ -1,7 +1,7 @@
 import type {ComponentProps} from "react";
 
 import {CalendarDate} from "@internationalized/date";
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Calendar} from "@/components/calendar/index.ts";
@@ -58,6 +58,12 @@ describe("CalendarYearPicker", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("has no axe violations", async () => {
+    const {container} = renderPicker();
+
+    await expectNoAxeViolations(container);
   });
 
   it("exposes the namespace parts and the flat names as the same components", () => {
