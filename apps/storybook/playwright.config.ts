@@ -4,11 +4,19 @@ const PORT = Number(process.env.STORYBOOK_PORT ?? 6007);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 /*
- * The webkit project is opt-in (see `projects`). Asking for it by name (`--project=webkit`, which
- * `pnpm test:e2e:webkit` does) opts in as well, with no shell syntax for the variable; it is
- * written back to the environment so the worker processes, which inherit it, build the same list.
+ * The webkit project is opt-in (see `projects`). Asking for it by name (`--project=webkit`,
+ * `--project webkit` or `-p webkit`; `pnpm test:e2e:webkit` uses the first) opts in as well, with
+ * no shell syntax for the variable; it is written back to the environment so the worker processes,
+ * which inherit it, build the same list.
  */
-if (process.argv.some((arg) => arg === "--project=webkit")) process.env.E2E_WEBKIT = "1";
+const ARGS = process.argv;
+const asksForWebkit = ARGS.some(
+  (arg, index) =>
+    arg === "--project=webkit" ||
+    ((arg === "--project" || arg === "-p") && ARGS[index + 1] === "webkit"),
+);
+
+if (asksForWebkit) process.env.E2E_WEBKIT = "1";
 
 /*
  * Конфиг живёт в приложении, а не в корне: Storybook — его зависимость, и порт знает оно.
