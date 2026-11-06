@@ -118,6 +118,7 @@ describe("ContextMenu", () => {
 });
 
 function Fixture({
+  nested = false,
   onAction,
   onOpenChange,
   showTrigger = true,
@@ -126,10 +127,22 @@ function Fixture({
   isOpen?: boolean;
   defaultOpen?: boolean;
   isDisabled?: boolean;
+  /** Renders the Popover as a child of the Trigger, so portal events bubble into it. */
+  nested?: boolean;
   showTrigger?: boolean;
   onAction?: (key: React.Key) => void;
   onOpenChange?: (isOpen: boolean) => void;
 }) {
+  const popover = (
+    <ContextMenu.Popover>
+      <ContextMenu.Menu aria-label="Actions" onAction={onAction}>
+        <ContextMenu.Item id="copy" textValue="Copy">
+          Copy
+        </ContextMenu.Item>
+      </ContextMenu.Menu>
+    </ContextMenu.Popover>
+  );
+
   return (
     <ContextMenu {...rootProps} onOpenChange={onOpenChange}>
       {showTrigger ? (
@@ -138,15 +151,10 @@ function Fixture({
           <span data-context-menu-native data-testid="native">
             Native
           </span>
+          {nested ? popover : null}
         </ContextMenu.Trigger>
       ) : null}
-      <ContextMenu.Popover>
-        <ContextMenu.Menu aria-label="Actions" onAction={onAction}>
-          <ContextMenu.Item id="copy" textValue="Copy">
-            Copy
-          </ContextMenu.Item>
-        </ContextMenu.Menu>
-      </ContextMenu.Popover>
+      {nested ? null : popover}
     </ContextMenu>
   );
 }
@@ -217,7 +225,7 @@ describe("ContextMenu pointer open and dismissal", () => {
   it("does not re-anchor or call onOpenChange for a contextmenu inside the open popover", () => {
     const onOpenChange = vi.fn();
 
-    render(<Fixture onOpenChange={onOpenChange} />);
+    render(<Fixture nested onOpenChange={onOpenChange} />);
     fireEvent.contextMenu(screen.getByTestId("inner"), {clientX: 40, clientY: 60});
     onOpenChange.mockClear();
     fireEvent.contextMenu(screen.getByRole("menuitem", {name: "Copy"}), {
@@ -241,14 +249,34 @@ describe("ContextMenu pointer open and dismissal", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
-  it("mounts open with defaultOpen and anchors the popover to the anchor element", async () => {
-    render(<Fixture defaultOpen />);
+  it("anchors a defaultOpen menu at the bottom-start corner of the Trigger", async () => {
+    const rect = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const isTrigger = this.dataset.slot === "context-menu-trigger";
 
-    expect(await screen.findByRole("menu")).toBeInTheDocument();
-    expect(getAnchor()).not.toBeNull();
-    expect(getAnchor()?.style.left).toBe("");
-    expect(getAnchor()?.style.top).toBe("");
-    expect(screen.getByRole("menu").closest('[data-slot="context-menu-popover"]')).not.toBeNull();
+        return {
+          bottom: isTrigger ? 150 : 0,
+          height: 0,
+          left: isTrigger ? 30 : 0,
+          right: 0,
+          toJSON: () => ({}),
+          top: 0,
+          width: 0,
+          x: 0,
+          y: 0,
+        };
+      });
+
+    try {
+      render(<Fixture defaultOpen />);
+
+      expect(await screen.findByRole("menu")).toBeInTheDocument();
+      expect(getAnchor()?.style.left).toBe("30px");
+      expect(getAnchor()?.style.top).toBe("150px");
+    } finally {
+      rect.mockRestore();
+    }
   });
 
   it("closes on Escape", async () => {

@@ -4,7 +4,7 @@ import type {ContextMenuAnchor} from "./use-context-menu-anchor.ts";
 import type {DOMRenderProps} from "../../utils/dom.tsx";
 import type {MenuRootProps} from "../menu/index.ts";
 import type {SurfaceVariants} from "../surface/index.ts";
-import type {JSX, ReactNode, RefObject} from "react";
+import type {JSX, ReactNode, Ref, RefObject} from "react";
 
 import {contextMenuVariants} from "@peakui/styles";
 import {mergeRefs} from "@react-aria/utils";
@@ -12,6 +12,7 @@ import React, {
   createContext,
   use,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -145,6 +146,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
    */
   const {
     anchor,
+    isAnchored,
     isDisabled,
     openedBy: openedByRef,
     popoverRef,
@@ -152,6 +154,9 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     slots,
     state,
   } = useContextMenuContext("ContextMenu.Trigger");
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const userRef = (props as unknown as {ref?: Ref<HTMLElement>}).ref;
+  const mergedTriggerRef = useMemo(() => mergeRefs(userRef, triggerRef), [userRef]);
   const isClient = useSyncExternalStore(subscribeNever, getClientSnapshot, getServerSnapshot);
   const userOnContextMenu = (props as {onContextMenu?: (event: React.MouseEvent) => void})
     .onContextMenu;
@@ -163,15 +168,18 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
       return;
     }
 
-    const target = event.target as Element;
+    const target = event.target;
 
     // The browser menu stays where the consumer asks for it, e.g. text inputs.
-    if (target.closest?.("[data-context-menu-native]")) {
+    if (target instanceof Element && target.closest("[data-context-menu-native]")) {
       return;
     }
 
-    // React portals bubble events from the open popover to this Trigger.
-    if (popoverRef.current?.contains(target)) {
+    /*
+     * React portals bubble events from the open popover to this Trigger when the Popover is
+     * nested inside it (a supported layout).
+     */
+    if (target instanceof Node && popoverRef.current?.contains(target)) {
       return;
     }
 
@@ -184,7 +192,8 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
   /*
    * The popover renders only while the anchor element is in the document: that covers a menu that
    * is open on the first render (the anchor portal mounts after hydration) and a Trigger that
-   * unmounts while the menu is open.
+   * unmounts while the menu is open. A controlled `isOpen` stays true after the Trigger unmounts:
+   * the parent owns that state.
    */
   useEffect(() => {
     if (!isClient) {
@@ -196,6 +205,19 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
     return () => setAnchored(false);
   }, [isClient, setAnchored]);
 
+  /*
+   * A menu that opens without a pointer (`defaultOpen`, a controlled `isOpen`) has no point yet;
+   * it anchors at the bottom-start corner of the Trigger instead of the end of the body flow.
+   */
+  const {setFromElement} = anchor;
+  const hasPoint = anchor.point !== null;
+
+  useLayoutEffect(() => {
+    if (state.isOpen && isAnchored && !hasPoint && triggerRef.current) {
+      setFromElement(triggerRef.current);
+    }
+  }, [state.isOpen, isAnchored, hasPoint, setFromElement]);
+
   return (
     <dom.div
       className={slots?.trigger({className})}
@@ -205,6 +227,7 @@ const ContextMenuTrigger = <E extends keyof JSX.IntrinsicElements = "div">({
        */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {...(props as any)}
+      ref={mergedTriggerRef}
       data-slot="context-menu-trigger"
       onContextMenu={onContextMenu}
     >
@@ -243,7 +266,7 @@ const ContextMenuPopover = ({
   ref,
   ...props
 }: ContextMenuPopoverProps) => {
-  const {anchor, isAnchored, popoverRef, slots, state} =
+  const {anchor, isAnchored, isDisabled, popoverRef, slots, state} =
     useContextMenuContext("ContextMenu.Popover");
   const mergedRef = useMemo(() => mergeRefs(ref, popoverRef), [ref, popoverRef]);
 
@@ -255,7 +278,7 @@ const ContextMenuPopover = ({
         ref={mergedRef}
         className={composeTwRenderProps(className, slots?.popover())}
         data-slot="context-menu-popover"
-        isOpen={state.isOpen ? isAnchored : false}
+        isOpen={state.isOpen && isAnchored && !isDisabled}
         placement={placement}
         triggerRef={anchor.ref}
         onOpenChange={state.setOpen}
