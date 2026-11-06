@@ -3,7 +3,15 @@ import type {ComponentProps, ReactNode} from "react";
 import type {RangeValue} from "react-aria-components/RangeCalendar";
 
 import {CalendarDate} from "@internationalized/date";
-import {act, cleanup, render, screen, setupUser, within} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+  within,
+} from "@peakui/testing/helpers";
 import {createRef, useState} from "react";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
@@ -91,6 +99,16 @@ describe("DateRangePicker", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    renderPicker();
+
+    await user.click(getTrigger());
+    runAllTimers();
+    await expectNoAxeViolations(document.body);
   });
 
   describe("structure", () => {

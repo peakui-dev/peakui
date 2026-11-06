@@ -11,7 +11,9 @@ import {mergeRefs} from "@react-aria/utils";
 import {createContext, use, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Button as ButtonPrimitive} from "react-aria-components/Button";
 import {DatePicker as DatePickerPrimitive} from "react-aria-components/DatePicker";
+import {DialogContext} from "react-aria-components/Dialog";
 import {Popover as PopoverPrimitive} from "react-aria-components/Popover";
+import {useSlottedContext} from "react-aria-components/slots";
 
 import {dataAttr} from "../../utils/assertion.ts";
 import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
@@ -175,9 +177,11 @@ const DatePickerPopover = ({
   children,
   className,
   placement = "bottom",
+  render,
   ...props
 }: DatePickerPopoverProps) => {
   const {slots} = use(DatePickerContext);
+  const dialogProps = useSlottedContext(DialogContext);
   const surface = useMemo(() => ({variant: "default" as SurfaceVariants["variant"]}), []);
 
   return (
@@ -187,6 +191,21 @@ const DatePickerPopover = ({
         className={composeTwRenderProps(className, slots?.popover())}
         data-slot="date-picker-popover"
         placement={placement}
+        render={(domProps, values) => {
+          /* RAC's automatic dialog stays unnamed: label it by the picker's own label, with no wrapper. */
+          const popoverProps =
+            domProps.role === "dialog"
+              ? {
+                  ...domProps,
+                  id: domProps.id ?? dialogProps?.id,
+                  "aria-labelledby":
+                    domProps["aria-labelledby"] ??
+                    (domProps["aria-label"] ? undefined : dialogProps?.["aria-labelledby"]),
+                }
+              : domProps;
+
+          return render ? render(popoverProps, values) : <div {...popoverProps} />;
+        }}
       >
         {children}
       </PopoverPrimitive>
