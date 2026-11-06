@@ -754,6 +754,10 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./context-menu/controlled").then((m) => m.Controlled),
     file: "context-menu/controlled.tsx",
   },
+  "context-menu-disabled": {
+    loader: () => import("./context-menu/disabled").then((m) => m.Disabled),
+    file: "context-menu/disabled.tsx",
+  },
   "context-menu-with-native-escape": {
     loader: () => import("./context-menu/with-native-escape").then((m) => m.WithNativeEscape),
     file: "context-menu/with-native-escape.tsx",

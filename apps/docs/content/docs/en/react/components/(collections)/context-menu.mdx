@@ -21,11 +21,7 @@ A context menu must never be the only path to an action: pair it with a visible 
 ```tsx
 import {ContextMenu, Label} from "@peakui/react";
 
-// Opens from: right-click, touch long-press (500 ms, touch only), Shift+F10 or the ContextMenu key.
-// A 10 px movement cancels the long-press; releasing the finger does not activate the item under it.
-// Long-press is not discoverable. Hand-verify it on iOS Safari and Android Chrome:
-// automated tests cannot cover iOS Safari.
-// Keyboard open focuses the first item; Escape closes the menu and focus returns.
+// Opens from: right-click, touch long-press, Shift+F10 or the ContextMenu key.
 // One Trigger per root. It is a plain div: not focusable, no role.
 // Focusable descendants make the region reachable by keyboard.
 // The Popover may be nested in the Trigger or sit beside it.
@@ -47,6 +43,14 @@ export default () => (
 );
 ```
 
+Keyboard: Shift+F10 or the ContextMenu key opens the menu anchored at the focused element and focuses the first item; Escape closes it and focus returns.
+
+Touch: a 500 ms long-press (the underlying hook's default) opens the menu; a 10 px movement cancels it, and releasing the finger does not activate the item under it.
+
+Long-press is not discoverable, and automated tests cannot cover iOS Safari: verify it by hand on iOS Safari and Android Chrome.
+
+Submenu behaviour inside a context menu is not covered by tests.
+
 ## Examples
 
 ### With Sections
@@ -58,6 +62,12 @@ export default () => (
 `data-context-menu-native` on a descendant keeps the browser menu for pointer events; keyboard open still works there.
 
 <ComponentPreview name="context-menu-with-native-escape" />
+
+### Disabled
+
+`isDisabled` leaves the browser menu alone.
+
+<ComponentPreview name="context-menu-disabled" />
 
 ### Controlled
 
@@ -104,7 +114,17 @@ The ContextMenu component uses these CSS classes ([view source styles](https://g
 - `.context-menu__anchor` - Zero-size fixed element the popover positions against, portaled to `body`
 - `.context-menu__popover` - The popover surface
 
-The menu and its items use `.menu`, `.menu-item` and `.menu-section`; see [Menu](/docs/react/components/menu).
+#### Shared Menu Classes [!toc]
+
+- `.menu` - The menu container
+- `.menu-item` - Menu item
+- `.menu-section` - Menu section
+- `.menu-item__indicator` - Selection indicator of an item
+- `.menu-item__indicator--submenu` - Submenu indicator of an item
+- `.menu-item--default`
+- `.menu-item--danger`
+
+Inside `.context-menu__popover`, `[data-slot="context-menu-menu"]` gets `p-1.5` and `[data-slot="menu-item"]` gets `px-2.5`.
 
 ### Slots
 
@@ -115,12 +135,20 @@ The menu and its items use `.menu`, `.menu-item` and `.menu-section`; see [Menu]
 - `[data-slot="menu-item"]`
 - `[data-slot="menu-section"]`
 - `[data-slot="menu-item-indicator"]`
+- `[data-slot="menu-item-indicator--checkmark"]`
+- `[data-slot="menu-item-indicator--dot"]`
 - `[data-slot="submenu-indicator"]`
 
 ### Interactive States
 
 The component supports both CSS pseudo-classes and data attributes:
 
+- **Item hover**: `:hover` or `[data-hovered="true"]` on an item
+- **Item focus**: `:focus-visible` or `[data-focus-visible="true"]` on an item
+- **Item pressed**: `:active` or `[data-pressed="true"]` on an item
+- **Item selected**: `[aria-checked="true"]`, `[aria-selected="true"]` or `[data-selected="true"]` on an item
+- **Item disabled**: `[data-disabled="true"]` on an item
+- **Item submenu**: `[data-has-submenu="true"]` on an item
 - **Entering**: `[data-entering="true"]` on the popover
 - **Exiting**: `[data-exiting="true"]` on the popover
 - **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the popover
@@ -146,7 +174,9 @@ The component supports both CSS pseudo-classes and data attributes:
 | `render` | `DOMRenderFunction<E, undefined>` | - | Custom render function; `E` defaults to `"div"` |
 | `className` | `string` | - | Additional CSS classes |
 | `children` | `ReactNode` | - | The region content |
-| `...rest` | `JSX.IntrinsicElements[E]` | - | Native attributes of the rendered element. Shift+F10 and the ContextMenu key (Ctrl, Alt and Meta chords ignored; plain F10 does nothing) open the menu anchored at the focused element, including inside an input. A descendant that calls `stopPropagation` on `contextmenu` swallows the event |
+| `onKeyDown` | `(event: KeyboardEvent) => void` | - | Shift+F10 or the ContextMenu key opens the menu from any focused descendant, including an input; Ctrl, Alt and Meta chords are ignored and plain F10 does nothing |
+| `onContextMenu` | `(event: MouseEvent) => void` | - | Runs first. A descendant that calls `stopPropagation` or `preventDefault` on `contextmenu` suppresses the menu |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Native attributes of the rendered element |
 
 ### ContextMenu.Popover
 
