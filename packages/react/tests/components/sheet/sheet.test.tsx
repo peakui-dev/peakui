@@ -1,5 +1,6 @@
 import {act, cleanup, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
-import {useState} from "react";
+import {createRef, useState} from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Button} from "@/components/button";
 import {
@@ -21,6 +22,11 @@ import {
   scrollSheetTo,
   snapScrollPosition,
 } from "@/components/sheet/sheet-scroll.ts";
+import {
+  describeSheetHeight,
+  isUsableSnapPoint,
+  resolveSheetPositions,
+} from "@/components/sheet/use-sheet-handle.ts";
 
 type Placement = "top" | "bottom" | "left" | "right";
 
@@ -1173,8 +1179,434 @@ describe("Sheet", () => {
     });
   });
 
-  // Pinned in later tasks.
-  it.todo("operates the handle as a slider (Task 6)");
+  /*
+   * jsdom has no layout. These tests give the sheet's snap markers a scripted geometry and the
+   * scroller a scripted scroll position, so they prove the slider's semantics, stepping arithmetic
+   * and wiring; the browser tier (Task 10) proves the same against real layout and real scrolling.
+   */
+  describe("handle", () => {
+    const scroll = {x: 300, y: 300};
+    let targets = [0, 300, 600];
+    const snapElements = () =>
+      [...document.querySelectorAll<HTMLElement>("[data-sheet-scroll] *")].filter(
+        (element) => element.style.scrollSnapAlign,
+      );
+    const slider = () => screen.getByRole("slider");
+    const scroller = () => document.querySelector<HTMLElement>("[data-sheet-scroll]")!;
+    /** Reports a scroll to the slider, as the browser's scroll event does. */
+    const scrollTo = (axis: "x" | "y", value: number, type = "scroll") => {
+      scroll[axis] = value;
+      act(() => {
+        scroller().dispatchEvent(new Event(type));
+      });
+    };
+
+    beforeEach(() => {
+      scroll.x = 300;
+      scroll.y = 300;
+      targets = [0, 300, 600];
+      // RAC's own scrolls are recorded but go nowhere: the scripted scroll is the only position.
+      swallowScrolls = true;
+      Object.defineProperty(HTMLElement.prototype, "scrollTop", {
+        configurable: true,
+        get: () => scroll.y,
+        set: () => {},
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        get: () => scroll.x,
+        set: () => {},
+      });
+
+      const previous = vi
+        .mocked(HTMLElement.prototype.getBoundingClientRect)
+        .getMockImplementation();
+
+      // A marker's rect is where it would sit for the current scroll: target minus the scroll.
+      vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        const index = snapElements().indexOf(this);
+        const target = targets[index];
+
+        if (index >= 0 && target !== undefined) {
+          // The adapter honours the marker's scroll-margin, as the browser's snapping does, so
+          // the marker sits where that margin puts it relative to the target.
+          const style = getComputedStyle(this);
+          const margin = (value: string) => parseFloat(value) || 0;
+          const atEnd = this.style.scrollSnapAlign === "end";
+          const top = target - scroll.y + (atEnd ? 0 : margin(style.scrollMarginTop));
+          const bottom = target - scroll.y - (atEnd ? margin(style.scrollMarginBottom) : 0);
+          const left = target - scroll.x + (atEnd ? 0 : margin(style.scrollMarginLeft));
+          const right = target - scroll.x - (atEnd ? margin(style.scrollMarginRight) : 0);
+
+          return {bottom, height: 0, left, right, top, width: 0, x: left, y: top} as DOMRect;
+        }
+
+        return previous!.call(this);
+      });
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(HTMLElement.prototype, "scrollTop");
+      Reflect.deleteProperty(HTMLElement.prototype, "scrollLeft");
+    });
+
+    const HandleSheet = ({
+      handleProps,
+      onOpenChange,
+      placement,
+      snapPoints = [0.5],
+    }: {
+      handleProps?: React.ComponentProps<typeof Sheet.Handle>;
+      onOpenChange?: (open: boolean) => void;
+      placement?: Placement;
+      snapPoints?: Array<number | string>;
+    }) => (
+      <Sheet defaultOpen placement={placement} snapPoints={snapPoints} onOpenChange={onOpenChange}>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog>
+              <Sheet.Handle {...handleProps} />
+              <Sheet.Heading>Title</Sheet.Heading>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    );
+
+    it("is a slider with orientation, min, max, now and text when snap points exist", async () => {
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+
+      expect(getSheetSnapTargets(scroller(), "y")).toEqual([0, 300, 600]);
+      expect(slider()).toHaveAttribute("aria-orientation", "vertical");
+      expect(slider()).toHaveAttribute("aria-valuemin", "50");
+      expect(slider()).toHaveAttribute("aria-valuemax", "100");
+      expect(slider()).toHaveAttribute("aria-valuenow", "50");
+      expect(slider()).toHaveAttribute("aria-valuetext", "Half height");
+      expect(slider()).toHaveAttribute("tabindex", "0");
+      expect(slider()).toHaveAccessibleName();
+    });
+
+    it("horizontal placement reports aria-orientation horizontal", async () => {
+      render(<HandleSheet placement="right" />);
+      await screen.findByRole("dialog");
+
+      expect(slider()).toHaveAttribute("aria-orientation", "horizontal");
+      expect(slider()).toHaveAttribute("aria-valuenow", "50");
+    });
+
+    it("ArrowUp steps to the next snap and ArrowDown back; Home and End jump to the extremes", async () => {
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowUp}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", top: 600}]);
+
+      scrollTo("y", 600);
+      expect(slider()).toHaveAttribute("aria-valuenow", "100");
+      expect(slider()).toHaveAttribute("aria-valuetext", "Full height");
+
+      scrollCalls.length = 0;
+      await user.keyboard("{ArrowDown}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", top: 300}]);
+
+      scrollTo("y", 300);
+      expect(slider()).toHaveAttribute("aria-valuenow", "50");
+
+      scrollCalls.length = 0;
+      await user.keyboard("{End}");
+      scrollTo("y", 600);
+      await user.keyboard("{Home}");
+
+      expect(scrollCalls).toEqual([
+        {behavior: "smooth", top: 600},
+        {behavior: "smooth", top: 300},
+      ]);
+    });
+
+    it("steps to the nearest position when the scroll is between two", async () => {
+      targets = [0, 150, 300, 600];
+      render(<HandleSheet snapPoints={[0.25, 0.5]} />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollTo("y", 400);
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowDown}");
+      await user.keyboard("{ArrowUp}");
+
+      expect(scrollCalls).toEqual([
+        {behavior: "smooth", top: 300},
+        {behavior: "smooth", top: 600},
+      ]);
+    });
+
+    it("reads a top sheet's reveal from the far edge", async () => {
+      // A top sheet is open at scroll 0 and closed at the far edge: 150 shows 75% of 600.
+      scroll.y = 150;
+      render(<HandleSheet placement="top" />);
+      await screen.findByRole("dialog");
+
+      expect(slider()).toHaveAttribute("aria-valuenow", "75");
+      expect(slider()).toHaveAttribute("aria-valuetext", "Three-quarter height");
+    });
+
+    it("RTL horizontal: ArrowLeft increases and ArrowRight decreases", async () => {
+      render(
+        <I18nProvider locale="ar-EG">
+          <HandleSheet placement="right" />
+        </I18nProvider>,
+      );
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowLeft}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", left: 600}]);
+
+      scrollTo("x", 600);
+      scrollCalls.length = 0;
+      await user.keyboard("{ArrowRight}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", left: 300}]);
+    });
+
+    it("LTR horizontal: ArrowRight increases and ArrowLeft decreases", async () => {
+      render(<HandleSheet placement="right" />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowRight}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", left: 600}]);
+
+      scrollTo("x", 600);
+      scrollCalls.length = 0;
+      await user.keyboard("{ArrowLeft}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", left: 300}]);
+    });
+
+    it("RTL does not swap the arrows of a vertical sheet", async () => {
+      render(
+        <I18nProvider locale="ar-EG">
+          <HandleSheet />
+        </I18nProvider>,
+      );
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowUp}");
+      expect(scrollCalls).toEqual([{behavior: "smooth", top: 600}]);
+    });
+
+    it("Escape on the focused handle closes the sheet", async () => {
+      const onOpenChange = vi.fn();
+
+      render(<HandleSheet onOpenChange={onOpenChange} />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+
+      await user.keyboard("{Escape}");
+
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it("with no snapPoints the handle is aria-hidden and not a slider", async () => {
+      render(<HandleSheet snapPoints={[]} />);
+      await screen.findByRole("dialog");
+
+      expect(screen.queryByRole("slider")).toBeNull();
+      expect(document.querySelector("[data-sheet-handle]")).toHaveAttribute("aria-hidden", "true");
+      expect(document.querySelector("[data-sheet-handle]")).not.toHaveAttribute("tabindex");
+    });
+
+    it("ignores snap points that cannot describe a position", async () => {
+      render(<HandleSheet snapPoints={["abc", "0px", "0%", "-5px"]} />);
+      await screen.findByRole("dialog");
+
+      expect(screen.queryByRole("slider")).toBeNull();
+    });
+
+    it("ArrowDown at the lowest snap and ArrowUp at full do nothing", async () => {
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowDown}");
+      expect(scrollCalls).toEqual([]);
+
+      scrollTo("y", 600);
+      await user.keyboard("{ArrowUp}");
+      expect(scrollCalls).toEqual([]);
+    });
+
+    it("a step past the lowest point does not dismiss the sheet", async () => {
+      const onOpenChange = vi.fn();
+
+      render(<HandleSheet onOpenChange={onOpenChange} />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      await user.keyboard("{ArrowDown}{ArrowDown}{Home}");
+
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it("zero-size layout never renders NaN in aria-valuenow", async () => {
+      targets = [0, 0, 0];
+      scroll.y = 0;
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+      scrollTo("y", 0, "scrollend");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowUp}{ArrowDown}{Home}{End}");
+
+      expect(slider()).not.toHaveAttribute("aria-valuenow");
+      expect(document.body.innerHTML).not.toContain("NaN");
+      expect(scrollCalls).toEqual([]);
+    });
+
+    it("a single resting position leaves the arrows inert and the value steady", async () => {
+      targets = [0, 600, 600];
+      scroll.y = 600;
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowUp}{ArrowDown}{Home}{End}");
+
+      expect(slider()).toHaveAttribute("aria-valuenow", "100");
+      expect(scrollCalls).toEqual([]);
+    });
+
+    it("re-measures on scrollend and reports an in-between scroll as its own percentage", async () => {
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+
+      scrollTo("y", 450, "scrollend");
+
+      expect(slider()).toHaveAttribute("aria-valuenow", "75");
+      expect(slider()).toHaveAttribute("aria-valuetext", "Three-quarter height");
+
+      scrollTo("y", 330);
+
+      expect(slider()).toHaveAttribute("aria-valuenow", "55");
+      expect(slider()).toHaveAttribute("aria-valuetext", "55% height");
+    });
+
+    it("clamps a scroll below the lowest snap to the minimum", async () => {
+      render(<HandleSheet />);
+      await screen.findByRole("dialog");
+
+      scrollTo("y", 30);
+
+      expect(slider()).toHaveAttribute("aria-valuenow", "50");
+    });
+
+    it("stops listening to the scroller when it unmounts", async () => {
+      const {unmount} = render(<HandleSheet />);
+
+      await screen.findByRole("dialog");
+
+      const removeEventListener = vi.spyOn(scroller(), "removeEventListener");
+
+      unmount();
+
+      expect(removeEventListener).toHaveBeenCalledWith("scroll", expect.any(Function));
+      expect(removeEventListener).toHaveBeenCalledWith("scrollend", expect.any(Function));
+    });
+
+    it("a consumer aria-valuetext overrides the default", async () => {
+      render(<HandleSheet handleProps={{"aria-valuetext": "Peek"}} />);
+      await screen.findByRole("dialog");
+
+      expect(slider()).toHaveAttribute("aria-valuetext", "Peek");
+    });
+
+    it("chains a consumer onKeyDown with the stepping", async () => {
+      const onKeyDown = vi.fn();
+
+      render(<HandleSheet handleProps={{onKeyDown}} />);
+      await screen.findByRole("dialog");
+      act(() => slider().focus());
+      scrollCalls.length = 0;
+
+      await user.keyboard("{ArrowUp}");
+
+      expect(onKeyDown).toHaveBeenCalledTimes(1);
+      expect(scrollCalls).toHaveLength(1);
+    });
+
+    it("the handle accepts className and ref", async () => {
+      const ref = createRef<HTMLDivElement>();
+
+      render(<HandleSheet handleProps={{className: "custom-handle", ref}} />);
+      await screen.findByRole("dialog");
+
+      expect(slider()).toHaveClass("custom-handle");
+      expect(ref.current).toBe(slider());
+      expect(slider()).toHaveAttribute("data-slot", "sheet-handle");
+      expect(slider().querySelector('[data-slot="sheet-handle-bar"]')).not.toBeNull();
+    });
+
+    describe("resolveSheetPositions", () => {
+      it("sorts, de-duplicates and drops zero, negative and non-finite sizes", () => {
+        const {extent, positions} = resolveSheetPositions(
+          [600, 0, Number.NaN, 300, 300.2, Number.POSITIVE_INFINITY, -40],
+          true,
+        );
+
+        expect(extent).toBe(600);
+        expect(positions).toEqual([
+          {percent: 50, scroll: 300},
+          {percent: 100, scroll: 600},
+        ]);
+      });
+
+      it("measures a top or left sheet from the far edge", () => {
+        const {positions} = resolveSheetPositions([0, 150, 600], false);
+
+        expect(positions).toEqual([
+          {percent: 75, scroll: 150},
+          {percent: 100, scroll: 0},
+        ]);
+      });
+
+      it("yields nothing for a zero-size layout", () => {
+        expect(resolveSheetPositions([0, 0, 0], true).positions).toEqual([]);
+        expect(resolveSheetPositions([], true).positions).toEqual([]);
+        expect(resolveSheetPositions([Number.NaN], true).positions).toEqual([]);
+      });
+
+      it("accepts only snap points that can describe a position", () => {
+        expect(isUsableSnapPoint(0.5)).toBe(true);
+        expect(isUsableSnapPoint("320px")).toBe(true);
+        expect(isUsableSnapPoint("40%")).toBe(true);
+        expect(isUsableSnapPoint("calc(100% - 2rem)")).toBe(true);
+        expect(isUsableSnapPoint("0px")).toBe(false);
+        expect(isUsableSnapPoint("0%")).toBe(false);
+        expect(isUsableSnapPoint("-10px")).toBe(false);
+        expect(isUsableSnapPoint("tall")).toBe(false);
+        expect(isUsableSnapPoint(Number.NaN)).toBe(false);
+      });
+
+      it("describes heights", () => {
+        expect(describeSheetHeight(25)).toBe("Quarter height");
+        expect(describeSheetHeight(50)).toBe("Half height");
+        expect(describeSheetHeight(75)).toBe("Three-quarter height");
+        expect(describeSheetHeight(100)).toBe("Full height");
+        expect(describeSheetHeight(62)).toBe("62% height");
+      });
+    });
+  });
+
   it.todo("drags the handle and settles on snap points (Task 7)");
   it.todo("stacks nested sheets and closes the topmost first (Task 8)");
 });

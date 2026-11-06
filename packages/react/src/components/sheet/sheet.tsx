@@ -43,6 +43,7 @@ import {
 } from "./context.ts";
 import {SheetLifecycle} from "./sheet-lifecycle.tsx";
 import {normalizeSnapPoints} from "./sheet.utils.ts";
+import {useSheetHandle} from "./use-sheet-handle.ts";
 
 /*
  * The names the primitive's inline styles run. The keyframes are in @peakui/styles
@@ -454,19 +455,25 @@ const SheetFooter = ({children, className, ...rest}: SheetFooterProps) => {
 
 /* -------------------------------------------------------------------------------------------------
  * Sheet Handle
- * Placeholder: Task 6 makes it a keyboard-operable slider and Task 7 adds the drag.
+ * Decorative without snap points; a keyboard-operable slider with them. Task 7 adds the drag.
  * -----------------------------------------------------------------------------------------------*/
 interface SheetHandleProps extends ComponentPropsWithRef<"div"> {}
 
-const SheetHandle = ({children, className, ...rest}: SheetHandleProps) => {
+const SheetHandle = ({children, className, ref, ...rest}: SheetHandleProps) => {
   const {placement} = useSheetContext();
+  const swipeDirection = use(SheetSwipeDirectionContext);
+  const {ref: handleRef, sliderProps} = useSheetHandle(swipeDirection ?? placement);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
+  const mergedRef = useMemo(() => mergeRefs(handleRef, ref), [handleRef, ref]);
 
   return (
     <div
-      aria-hidden="true"
-      {...rest}
+      // The slider's props come first so a consumer's own (a label, a value text, a key handler)
+      // wins or chains.
+      {...mergeProps(sliderProps, rest)}
+      ref={mergedRef}
       className={composeSlotClassName(slots.handle, className)}
+      data-sheet-handle=""
       data-slot="sheet-handle"
     >
       {children ?? <span className={slots.handleBar()} data-slot="sheet-handle-bar" />}
