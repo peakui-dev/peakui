@@ -156,10 +156,16 @@
 /*
  * A snap sheet needs a definite size so flex children (a virtualized picker, say) can fill it.
  * Its first snap point reveals only the leading part of that size.
+ *
+ * One pixel short of the viewport, never all of it: a sheet exactly as tall as the stage exits to
+ * a position where it only touches the viewport edge, which an IntersectionObserver still counts
+ * as intersecting, so the primitive never sees it leave and the overlay stays mounted after
+ * closing. A pixel is enough to clear the edge, and it keeps the handle's percentages (measured
+ * against the scroll travel, which is the viewport) equal to the sheet's own.
  */
 .sheet__content--bottom[data-snap-points],
 .sheet__content--top[data-snap-points] {
-  @apply h-full max-h-none;
+  @apply h-[calc(100%-1px)] max-h-none;
 }
 
 .sheet__content--left[data-snap-points],
