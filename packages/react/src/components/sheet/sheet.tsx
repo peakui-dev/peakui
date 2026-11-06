@@ -21,7 +21,7 @@ interface SheetRootProps extends ComponentPropsWithRef<typeof SheetPrimitive>, S
 const SheetRoot = ({children, className, ...rest}: SheetRootProps) => {
   return (
     <SheetPrimitive
-      className={composeTwRenderProps(className, sheetVariants())}
+      className={composeTwRenderProps(className, sheetVariants().overlay())}
       {...rest}
       data-slot="sheet"
     >
