@@ -18,21 +18,28 @@ import {
   snapScrollPosition,
 } from "./sheet-scroll.ts";
 
+/** Frames after which the settle check gives up (about four seconds at 60fps). */
+const MAX_SETTLE_FRAMES = 240;
+/** Frames the scroller must stand still before a settle check trusts its position. */
+const STATIONARY_FRAMES = 2;
+
 /*
  * What a sheet is doing is told by its scroller, not by a timer: the primitive animates by
- * scrolling, so an enter or exit is over when the scroll ends and the panel is where the open
+ * scrolling, so an enter or exit is over when the scroll has ended and the panel is where the open
  * state says it should be. This component renders nothing. It reports each settled state once to
  * `onAnimationEnd`, and carries a closed overlay's scroller to its closed position when the
  * primitive's own exit scroll did not run.
+ *
+ * A `scrollend` event is the fast signal, but it can come before a listener exists, it is not
+ * fired for a scroll that goes nowhere, and some browsers lack it. A bounded per-frame check backs
+ * it up: both ask the same question (is the panel where the state says it should be?) through
+ * `finishScroll`, so a scroll that stopped short reports nothing either way.
  */
 function SheetLifecycle({
-  onExitComplete,
   overlayRef,
   swipeDirection,
 }: SheetRenderProps & {
   overlayRef: RefObject<HTMLDivElement | null>;
-  /** Called after the closed state has been reported. */
-  onExitComplete?: () => void;
 }) {
   const {isOpen, onAnimationEnd} = useSheetContext();
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -44,30 +51,26 @@ function SheetLifecycle({
   // Whether the sheet's open position is at the far end of the scroll range.
   const after = swipeDirection === "bottom" || swipeDirection === "right" || bidirectional;
 
-  /** The last state reported, so each settled state is announced once. */
+  /** The last state delivered to `onAnimationEnd`: a state is delivered once, not once per visit. */
   const reported = useRef<boolean | undefined>(undefined);
-  /** True from a reopen of a retained overlay until its scroller is back at rest. */
+  /** True from a reopen during an exit until the scroller is back at rest. */
   const restoring = useRef(false);
   /** Where the scroller last rested while open. */
   const restingScroll = useRef<number | null>(null);
   /** What the long-lived callbacks read, so a stale closure never reports an old state. */
-  const latest = useRef({isOpen, onAnimationEnd, onExitComplete, reducedMotion});
+  const latest = useRef({isOpen, onAnimationEnd, reducedMotion});
 
   useSafeLayoutEffect(() => {
-    if (isOpen !== latest.current.isOpen) {
-      // A change of state supersedes whatever was reported for the previous one.
-      if (isOpen) restoring.current = true;
-      reported.current = undefined;
-    }
-    latest.current = {isOpen, onAnimationEnd, onExitComplete, reducedMotion};
-  }, [isOpen, onAnimationEnd, onExitComplete, reducedMotion]);
+    // The overlay is still mounted from an exit that the primitive's enter will not replay.
+    if (isOpen && !latest.current.isOpen) restoring.current = true;
+    latest.current = {isOpen, onAnimationEnd, reducedMotion};
+  }, [isOpen, onAnimationEnd, reducedMotion]);
 
   const notify = useCallback((open: boolean) => {
+    if (open) restoring.current = false;
     if (reported.current === open) return;
     reported.current = open;
-    if (open) restoring.current = false;
     latest.current.onAnimationEnd?.(open);
-    if (!open) latest.current.onExitComplete?.();
   }, []);
 
   /** Reports the state the scroller has settled in, if it matches the state asked for. */
@@ -89,50 +92,74 @@ function SheetLifecycle({
   }, [axis, notify, overlayRef]);
 
   /*
-   * Reopening while the overlay is still mounted from its exit: the primitive's enter runs once, on
-   * mount, so a reopen has to carry the scroller back to rest here.
+   * Reopening during an exit: the primitive's enter runs once, on mount, and its exit scroll may
+   * already be under way, so the scroller is always sent back to rest here. A new scroll replaces
+   * the one in flight; skipping it because the scroller still looks close to rest would let the
+   * exit carry on and close a sheet the owner has just reopened.
    */
   useEffect(() => {
     if (!isOpen || !restoring.current) return;
 
     const scroller = overlayRef.current ? findSheetScroller(overlayRef.current) : null;
 
-    if (scroller) {
-      if (restingScroll.current === null) {
-        // Interrupted before its first rest: read the primitive's own opening marker, the first
-        // snap point or the fully-entered position.
-        const initial = scroller.querySelector<HTMLElement>("[data-sheet-initial]");
-        const marker =
-          initial ??
-          (bidirectional
-            ? scroller.children[1]
-            : after
-              ? scroller.lastElementChild
-              : scroller.firstElementChild);
+    if (!scroller) return;
 
-        if (!(marker instanceof HTMLElement)) return;
+    if (restingScroll.current === null) {
+      // Interrupted before its first rest: read the primitive's own opening marker, the first
+      // snap point or the fully-entered position.
+      const initial = scroller.querySelector<HTMLElement>("[data-sheet-initial]");
+      const marker =
+        initial ??
+        (bidirectional
+          ? scroller.children[1]
+          : after
+            ? scroller.lastElementChild
+            : scroller.firstElementChild);
 
-        const align = initial
-          ? after
-            ? "start"
-            : "end"
-          : after && !bidirectional
-            ? "end"
-            : "start";
+      if (!(marker instanceof HTMLElement)) return;
 
-        restingScroll.current = snapScrollPosition(scroller, marker, axis, align);
-      }
+      const align = initial ? (after ? "start" : "end") : after && !bidirectional ? "end" : "start";
 
-      if (Math.abs(readSheetScroll(scroller, axis) - restingScroll.current) > 1) {
-        scrollSheetTo(scroller, axis, restingScroll.current, latest.current.reducedMotion);
-
-        // The scroll's end reports the reopen.
-        return;
-      }
+      restingScroll.current = snapScrollPosition(scroller, marker, axis, align);
     }
 
-    finishScroll();
-  }, [after, axis, bidirectional, finishScroll, isOpen, overlayRef]);
+    // The settle check below reports it: a scroll to where the scroller already is ends no scroll.
+    scrollSheetTo(scroller, axis, restingScroll.current, latest.current.reducedMotion);
+  }, [after, axis, bidirectional, isOpen, overlayRef]);
+
+  /*
+   * While open and not yet reported, watch the scroller each frame and report once it stands still
+   * with the panel on screen. Bounded, and cancelled on cleanup.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scroller = overlayRef.current ? findSheetScroller(overlayRef.current) : null;
+
+    if (!scroller) return;
+
+    let previous: number | undefined;
+    let stationaryFrames = 0;
+    let frames = 0;
+    let frame = 0;
+    const check = () => {
+      if (!latest.current.isOpen || (reported.current === true && !restoring.current)) return;
+
+      const current = readSheetScroll(scroller, axis);
+
+      stationaryFrames = current === previous ? stationaryFrames + 1 : 0;
+      previous = current;
+      if (stationaryFrames >= STATIONARY_FRAMES) finishScroll();
+      if (reported.current === true && !restoring.current) return;
+
+      frames += 1;
+      if (frames < MAX_SETTLE_FRAMES) frame = requestAnimationFrame(check);
+    };
+
+    frame = requestAnimationFrame(check);
+
+    return () => cancelAnimationFrame(frame);
+  }, [axis, finishScroll, isOpen, overlayRef]);
 
   /*
    * While closed, watch the scroller each frame. Closing before any movement ends no scroll, so
@@ -160,7 +187,7 @@ function SheetLifecycle({
       stationaryFrames = current === previous ? stationaryFrames + 1 : 0;
       previous = current;
 
-      if (stationaryFrames >= 2 && !resumedExit) {
+      if (stationaryFrames >= STATIONARY_FRAMES && !resumedExit) {
         const towardStart = bidirectional ? current <= getSheetViewportLength(axis) : after;
         const marker = towardStart ? scroller.firstElementChild : scroller.lastElementChild;
 
@@ -182,18 +209,31 @@ function SheetLifecycle({
     return () => cancelAnimationFrame(frame);
   }, [after, axis, bidirectional, finishScroll, isOpen, overlayRef]);
 
-  /* A scroll that ends, by the primitive's hand or by ours, settles the state. */
-  useEffect(() => {
-    const scroller = overlayRef.current ? findSheetScroller(overlayRef.current) : null;
+  /*
+   * A scroll that ends, by the primitive's hand or by ours, settles the state. `scrollend` does not
+   * bubble, but a capturing listener on the document hears it, and it can be attached in a layout
+   * effect: the overlay's ref is not set yet when this component's layout effects run (it is an
+   * ancestor's), so the scroller is looked up when the event arrives instead.
+   */
+  useSafeLayoutEffect(() => {
+    const onScrollEnd = (event: Event) => {
+      const scroller = overlayRef.current ? findSheetScroller(overlayRef.current) : null;
 
-    scroller?.addEventListener("scrollend", finishScroll);
-
-    return () => {
-      scroller?.removeEventListener("scrollend", finishScroll);
-      // Unmounting while closed ends the exit, whether or not a scroll-end was seen.
-      if (!latest.current.isOpen) notify(false);
+      if (scroller && event.target === scroller) finishScroll();
     };
-  }, [finishScroll, notify, overlayRef]);
+
+    document.addEventListener("scrollend", onScrollEnd, true);
+
+    return () => document.removeEventListener("scrollend", onScrollEnd, true);
+  }, [finishScroll, overlayRef]);
+
+  /* Unmounting while closed ends the exit, whether or not a scroll-end was seen. */
+  useEffect(
+    () => () => {
+      if (!latest.current.isOpen) notify(false);
+    },
+    [notify],
+  );
 
   return null;
 }

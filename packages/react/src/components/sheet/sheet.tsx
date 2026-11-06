@@ -316,43 +316,24 @@ const SheetBackdrop = ({
  * -----------------------------------------------------------------------------------------------*/
 interface SheetContentProps extends ComponentPropsWithRef<typeof SheetPrimitive> {}
 
-/* The arguments the primitive hands its className and children functions: the render props plus
- * the defaults it composes, which a wrapper must pass through untouched. */
-type RenderFunction = (...args: never[]) => unknown;
-type ContentClassNameProps = Parameters<
-  Extract<NonNullable<SheetContentProps["className"]>, RenderFunction>
->[0];
-type ContentChildrenProps = Parameters<
-  Extract<NonNullable<SheetContentProps["children"]>, RenderFunction>
->[0];
-
 const SheetContent = ({children, className, ...rest}: SheetContentProps) => {
   const {isDetached, placement, snapPoints} = useSheetContext();
-  const isExiting = use(SheetExitingContext);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
 
-  /* The overlay's exit is the one truth: every render prop below is given it, and the element
-   * carries it as data-exiting, whatever the primitive reports for itself. */
-  const resolvedClassName =
-    typeof className === "function"
-      ? (renderProps: ContentClassNameProps) => className({...renderProps, isExiting})
-      : className;
-
+  /* The primitive's modal element sets data-exiting and hands isExiting to its className and
+   * children functions itself, so nothing is added here. */
   return (
     <SheetPrimitive
       {...rest}
-      className={composeTwRenderProps(resolvedClassName, slots.content())}
+      className={composeTwRenderProps(className, slots.content())}
       data-detached={isDetached ? "" : undefined}
-      data-exiting={isExiting || undefined}
       data-placement={placement}
       data-slot="sheet-content"
       data-snap-points={snapPoints?.length ? "" : undefined}
       overscrollPadding={!isDetached}
       stackAnimation={STACK_ANIMATION}
     >
-      {typeof children === "function"
-        ? (renderProps: ContentChildrenProps) => children({...renderProps, isExiting})
-        : children}
+      {children}
     </SheetPrimitive>
   );
 };

@@ -63,6 +63,7 @@ class StubIntersectionObserver {
 let panelVisible = false;
 let holdScrolls = false;
 let swallowScrolls = false;
+let dropScrollEnd = false;
 let pendingSettle: (() => void) | null = null;
 let pendingTimer: ReturnType<typeof setTimeout> | undefined;
 const scrollCalls: ScrollToOptions[] = [];
@@ -73,6 +74,7 @@ function resetSheetGeometry() {
   panelVisible = false;
   holdScrolls = false;
   swallowScrolls = false;
+  dropScrollEnd = false;
   scrollCalls.length = 0;
 }
 
@@ -97,7 +99,10 @@ function installSheetGeometry(exitedAtZero = true) {
       scrollCalls.push(request);
       if (swallowScrolls) return;
 
+      // A new scroll cancels the one in flight, as a browser's does; one that is not superseded
+      // still completes, whether it is held for the test to flush or runs on a timer.
       clearTimeout(pendingTimer);
+      pendingSettle = null;
 
       const settle = () => {
         pendingSettle = null;
@@ -113,7 +118,8 @@ function installSheetGeometry(exitedAtZero = true) {
             {} as IntersectionObserver,
           );
         }
-        this.dispatchEvent(new Event("scrollend"));
+        // Some browsers have no scrollend, and a scroll to where it already is ends none.
+        if (!dropScrollEnd) this.dispatchEvent(new Event("scrollend"));
       };
 
       if (holdScrolls) {
@@ -129,10 +135,13 @@ function installSheetGeometry(exitedAtZero = true) {
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
     this: HTMLElement,
   ) {
-    const onScreen = this.dataset["slot"] === "sheet-dialog" && panelVisible;
+    const isDialog = this.dataset["slot"] === "sheet-dialog";
+    const onScreen = isDialog && panelVisible;
 
     return {
-      bottom: onScreen ? 400 : 0,
+      // Any other element ends at the viewport's height: that is where a bottom sheet's end
+      // marker puts the entered scroll position, so a restore computes a real (non-zero) target.
+      bottom: onScreen ? 400 : isDialog ? 0 : 768,
       height: onScreen ? 400 : 0,
       left: 0,
       right: onScreen ? 300 : 0,
@@ -772,11 +781,13 @@ describe("Sheet", () => {
     const Controlled = ({
       isOpen,
       onAnimationEnd,
+      onOpenChange,
     }: {
       isOpen: boolean;
       onAnimationEnd?: (open: boolean) => void;
+      onOpenChange?: (open: boolean) => void;
     }) => (
-      <Sheet isOpen={isOpen} onAnimationEnd={onAnimationEnd}>
+      <Sheet isOpen={isOpen} onAnimationEnd={onAnimationEnd} onOpenChange={onOpenChange}>
         <Sheet.Trigger>
           <Button>Open</Button>
         </Sheet.Trigger>
@@ -834,6 +845,85 @@ describe("Sheet", () => {
       await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]));
     });
 
+    describe("settle check", () => {
+      it("reports onAnimationEnd(true) exactly once when scrollend never fires", async () => {
+        const onAnimationEnd = vi.fn();
+
+        dropScrollEnd = true;
+        render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+        await openSheet(user);
+
+        await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true), {timeout: 2000});
+        await settle();
+
+        expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+      });
+
+      it("reports onAnimationEnd(true) for a sheet open at mount without scrollend", async () => {
+        const onAnimationEnd = vi.fn();
+
+        dropScrollEnd = true;
+        render(<SheetExample defaultOpen onAnimationEnd={onAnimationEnd} />);
+
+        await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true), {timeout: 2000});
+        await settle();
+
+        expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+      });
+
+      it("reports the exit once when scrollend never fires", async () => {
+        const onAnimationEnd = vi.fn();
+
+        dropScrollEnd = true;
+
+        // Closed by the owner: without scrollend the enter never resolves, so focus has not moved
+        // into the dialog and Escape would not reach it.
+        const {rerender} = render(<Controlled isOpen onAnimationEnd={onAnimationEnd} />);
+
+        await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true), {timeout: 2000});
+
+        rerender(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+
+        await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]), {
+          timeout: 2000,
+        });
+        await settle();
+
+        expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]);
+      });
+
+      it("reports nothing while an interrupted scroll never reaches the panel", async () => {
+        const onAnimationEnd = vi.fn();
+
+        holdScrolls = true;
+        render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+        await openSheet(user);
+
+        // Many frames pass with the scroller standing still and the panel still off screen.
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        expect(onAnimationEnd).not.toHaveBeenCalled();
+      });
+
+      it("stops checking when the sheet unmounts mid-enter", async () => {
+        const cancel = vi.spyOn(window, "cancelAnimationFrame");
+        const onAnimationEnd = vi.fn();
+
+        holdScrolls = true;
+
+        const {unmount} = render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+
+        await openSheet(user);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        cancel.mockClear();
+
+        unmount();
+
+        expect(cancel).toHaveBeenCalled();
+        expect(onAnimationEnd).not.toHaveBeenCalled();
+      });
+    });
+
     it("calls onAnimationEnd(false) once after exit", async () => {
       const onAnimationEnd = vi.fn();
 
@@ -883,10 +973,11 @@ describe("Sheet", () => {
       expect(dialog.closest("[inert]")).toBeNull();
       expect(dialog.closest("[aria-hidden='true']")).toBeNull();
       expect(screen.queryByRole("button", {name: "Open"})).toBeNull();
-      expect(onAnimationEnd.mock.calls.at(-1)).toEqual([true]);
-      expect(onAnimationEnd).not.toHaveBeenCalledWith(false);
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
     });
 
+    // The flips happen before any scroll starts, so this covers the state machine and the
+    // release of the page, not the scroll path (see the held-scroll tests below for that).
     it("toggling isOpen true, false quickly ends closed, releases the page and reports false once", async () => {
       const onAnimationEnd = vi.fn();
       const {rerender} = render(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
@@ -901,30 +992,47 @@ describe("Sheet", () => {
       expect(screen.getByRole("button", {name: "Open"})).toBeInTheDocument();
       expect(document.querySelector("[inert]")).toBeNull();
       expect(document.querySelector("[aria-hidden='true']")).toBeNull();
-      expect(onAnimationEnd.mock.calls.filter(([open]) => open === false)).toHaveLength(1);
-      expect(onAnimationEnd.mock.calls.at(-1)).toEqual([false]);
+      expect(onAnimationEnd.mock.calls).toEqual([[false]]);
     });
 
-    it("rapid close then reopen keeps focus return on the Trigger", async () => {
-      const {rerender} = render(<Controlled isOpen={false} />);
+    it("rapid close then reopen cancels the exit in flight and keeps focus return on the Trigger", async () => {
+      const onAnimationEnd = vi.fn();
+      const onOpenChange = vi.fn();
+      const props = {onAnimationEnd, onOpenChange};
+      const {rerender} = render(<Controlled isOpen={false} {...props} />);
 
       await user.click(screen.getByRole("button", {name: "Open"}));
-      rerender(<Controlled isOpen />);
+      rerender(<Controlled isOpen {...props} />);
       await screen.findByRole("dialog");
-      await settle();
+      await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true]]));
+      onOpenChange.mockClear();
 
+      // The exit scroll starts and is still in flight when the owner reopens the sheet.
       holdScrolls = true;
-      rerender(<Controlled isOpen={false} />);
-      rerender(<Controlled isOpen />);
+      rerender(<Controlled isOpen={false} {...props} />);
+      const exitScroll = scrollCalls.length;
+
+      rerender(<Controlled isOpen {...props} />);
+
+      // The reopen sent the scroller back to rest, replacing the exit scroll.
+      expect(scrollCalls.length).toBeGreaterThan(exitScroll);
+      expect(scrollCalls.at(-1)).toMatchObject({behavior: "smooth", top: 768});
+
+      // Letting whatever is still in flight finish must not close the sheet the owner reopened.
       holdScrolls = false;
+      flushScrolls();
       await settle();
 
-      expect(await screen.findByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(onOpenChange).not.toHaveBeenCalledWith(false);
+      // Open was reported once: an exit that never completed is not a second settled state.
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
 
-      rerender(<Controlled isOpen={false} />);
+      rerender(<Controlled isOpen={false} {...props} />);
 
       await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
       await waitFor(() => expect(screen.getByRole("button", {name: "Open"})).toHaveFocus());
+      expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]);
     });
 
     it("sets data-exiting on Backdrop, Content and Dialog during exit and not while open", async () => {
@@ -947,12 +1055,17 @@ describe("Sheet", () => {
       await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     });
 
+    /*
+     * Backdrop and Dialog are wired by this library; Content is the primitive's own modal element,
+     * which sets data-exiting and passes isExiting to its className and children functions. The
+     * Content assertions pin that wiring through our component, they do not test code of ours.
+     */
     it("hands isExiting to the render-prop children of Backdrop, Content and Dialog", async () => {
       render(
         <Sheet defaultOpen>
           <Sheet.Backdrop>
             {({isExiting}) => (
-              <Sheet.Content>
+              <Sheet.Content className={(content) => (content.isExiting ? "is-out" : "is-in")}>
                 {(content) => (
                   <Sheet.Dialog>
                     {(dialog) => (
@@ -971,11 +1084,14 @@ describe("Sheet", () => {
       await settle();
 
       expect(screen.getByTestId("flags")).toHaveTextContent("false/false/false");
+      expect(part("sheet-content")).toHaveClass("is-in");
 
       holdScrolls = true;
       await user.keyboard("{Escape}");
 
       await waitFor(() => expect(screen.getByTestId("flags")).toHaveTextContent("true/true/true"));
+      expect(part("sheet-content")).toHaveClass("is-out");
+      expect(part("sheet-content")).toHaveAttribute("data-exiting");
 
       flushScrolls();
       await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
@@ -1034,13 +1150,25 @@ describe("Sheet", () => {
         await user.keyboard("{Escape}");
         await waitFor(() => expect(request).toHaveBeenCalled());
 
-        const scroller = document.querySelector("[data-sheet-scroll]") as HTMLElement;
-        const remove = vi.spyOn(scroller, "removeEventListener");
+        const remove = vi.spyOn(document, "removeEventListener");
 
         unmount();
 
-        expect(remove).toHaveBeenCalledWith("scrollend", expect.any(Function));
+        expect(remove).toHaveBeenCalledWith("scrollend", expect.any(Function), true);
         expect(cancel).toHaveBeenCalled();
+      });
+
+      it("reports the closed state on unmount even if the scroller was never settled", async () => {
+        const onAnimationEnd = vi.fn();
+        const {unmount} = render(<SheetExample defaultOpen onAnimationEnd={onAnimationEnd} />);
+
+        await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true]]));
+
+        swallowScrolls = true;
+        await user.keyboard("{Escape}");
+        unmount();
+
+        expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]);
       });
     });
   });
