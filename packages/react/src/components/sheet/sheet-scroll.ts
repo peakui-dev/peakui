@@ -21,6 +21,36 @@ function readSheetScroll(scroller: HTMLElement, axis: SheetAxis): number {
   return axis === "x" ? scroller.scrollLeft : scroller.scrollTop;
 }
 
+/** Moves the scroller along its axis at once, with no smooth scrolling (a drag follows the pointer). */
+function writeSheetScroll(scroller: HTMLElement, axis: SheetAxis, position: number): void {
+  if (axis === "x") scroller.scrollLeft = position;
+  else scroller.scrollTop = position;
+}
+
+/**
+ * The geometry a released drag is judged by: the scroll distance of the full range (`extent`), the
+ * dialog's rendered length along the axis (`size`), and the viewport's (`viewport`).
+ */
+function measureSheet(
+  scroller: HTMLElement,
+  axis: SheetAxis,
+): {extent: number; size: number; viewport: number} {
+  const dialog = scroller.querySelector<HTMLElement>('[data-slot="sheet-dialog"]');
+  const rect = dialog?.getBoundingClientRect();
+
+  return axis === "y"
+    ? {
+        extent: scroller.scrollHeight - scroller.clientHeight,
+        size: rect?.height || dialog?.clientHeight || 0,
+        viewport: window.innerHeight,
+      }
+    : {
+        extent: scroller.scrollWidth - scroller.clientWidth,
+        size: rect?.width || dialog?.clientWidth || 0,
+        viewport: window.innerWidth,
+      };
+}
+
 /** The viewport's length along the scroller's axis. */
 function getSheetViewportLength(axis: SheetAxis): number {
   return axis === "x" ? window.innerWidth : window.innerHeight;
@@ -130,9 +160,11 @@ export {
   getSheetSnapTargets,
   getSheetViewportLength,
   isSheetPanelOnScreen,
+  measureSheet,
   readSheetScroll,
   scrollSheetTo,
   snapScrollPosition,
+  writeSheetScroll,
 };
 
 export type {SheetAxis};

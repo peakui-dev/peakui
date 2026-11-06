@@ -455,7 +455,8 @@ const SheetFooter = ({children, className, ...rest}: SheetFooterProps) => {
 
 /* -------------------------------------------------------------------------------------------------
  * Sheet Handle
- * Decorative without snap points; a keyboard-operable slider with them. Task 7 adds the drag.
+ * Decorative without snap points; a keyboard-operable slider with them. A pointer drag on it moves
+ * the sheet either way.
  * -----------------------------------------------------------------------------------------------*/
 interface SheetHandleProps extends ComponentPropsWithRef<"div"> {}
 
@@ -463,12 +464,17 @@ const SheetHandle = ({
   children,
   className,
   onKeyDown: consumerKeyDown,
+  onLostPointerCapture: consumerLostPointerCapture,
+  onPointerCancel: consumerPointerCancel,
+  onPointerDown: consumerPointerDown,
+  onPointerMove: consumerPointerMove,
+  onPointerUp: consumerPointerUp,
   ref,
   ...rest
 }: SheetHandleProps) => {
   const {placement} = useSheetContext();
   const swipeDirection = use(SheetSwipeDirectionContext);
-  const {ref: handleRef, sliderProps} = useSheetHandle(swipeDirection ?? placement);
+  const {dragHandlers, ref: handleRef, sliderProps} = useSheetHandle(swipeDirection ?? placement);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
   const mergedRef = useMemo(() => mergeRefs(handleRef, ref), [handleRef, ref]);
 
@@ -490,6 +496,12 @@ const SheetHandle = ({
       data-sheet-handle=""
       data-slot="sheet-handle"
       onKeyDown={onKeyDown}
+      // Pointer handlers chain the same way: the consumer's first, so it can claim the gesture.
+      onLostPointerCapture={chain(consumerLostPointerCapture, dragHandlers.onLostPointerCapture)}
+      onPointerCancel={chain(consumerPointerCancel, dragHandlers.onPointerCancel)}
+      onPointerDown={chain(consumerPointerDown, dragHandlers.onPointerDown)}
+      onPointerMove={chain(consumerPointerMove, dragHandlers.onPointerMove)}
+      onPointerUp={chain(consumerPointerUp, dragHandlers.onPointerUp)}
     >
       {children ?? <span className={slots.handleBar()} data-slot="sheet-handle-bar" />}
     </div>

@@ -2,7 +2,7 @@
 
 import type {SheetSnapPoint} from "./sheet.utils.ts";
 import type {StringKey} from "../../i18n/strings.ts";
-import type {HTMLAttributes, KeyboardEvent, RefObject} from "react";
+import type {HTMLAttributes, KeyboardEvent, PointerEvent, RefObject} from "react";
 import type {SheetRenderProps} from "react-aria-components/Sheet";
 
 import {useLocalizedStringFormatter} from "@react-aria/i18n";
@@ -16,10 +16,17 @@ import {useSheetContext} from "./context.ts";
 import {
   getSheetScroller,
   getSheetSnapTargets,
+  measureSheet,
   readSheetScroll,
   scrollSheetTo,
+  writeSheetScroll,
 } from "./sheet-scroll.ts";
-import {isFullSize} from "./sheet.utils.ts";
+import {
+  animateSheetValue,
+  isFullSize,
+  nearestSheetSnap,
+  sheetDismissTarget,
+} from "./sheet.utils.ts";
 
 /** A resting position of the sheet: where the scroller rests, and how much of the sheet shows. */
 interface SheetRestingPosition {
@@ -119,12 +126,81 @@ function describeSheetHeight(percent: number, format: FormatSheetString): string
   }
 }
 
+/** A pointer that has been still this long (ms) before letting go is not flicking. */
+const FLICK_IDLE_MS = 100;
+
+/** Lets go of the pointer, if the handle still holds it. */
+function releaseSheetCapture(handle: HTMLElement, pointerId: number): void {
+  if (handle.hasPointerCapture?.(pointerId)) handle.releasePointerCapture(pointerId);
+}
+
+/** Stops a release that is still animating and lets go of the scroller it holds. */
+function cancelSheetRelease(release: RefObject<SheetRelease | null>): void {
+  const running = release.current;
+
+  if (!running) return;
+
+  running.cancel();
+  running.scroller.removeAttribute("data-handle-dragging");
+  release.current = null;
+}
+
+/** Ends a drag in progress and any release animation, leaving nothing held. */
+function endSheetDrag(
+  drag: RefObject<SheetDrag | null>,
+  release: RefObject<SheetRelease | null>,
+): void {
+  const active = drag.current;
+
+  if (active) {
+    releaseSheetCapture(active.handle, active.pointerId);
+    active.handle.removeAttribute("data-dragging");
+    active.scroller.removeAttribute("data-handle-dragging");
+    drag.current = null;
+  }
+
+  cancelSheetRelease(release);
+}
+
 interface SheetHandleValue {
   min: number;
   now: number;
 }
 
+/** The pointer events the Handle listens to; each takes the event React hands to the element. */
+interface SheetHandleDragHandlers {
+  onLostPointerCapture: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerCancel: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerDown: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerUp: (event: PointerEvent<HTMLDivElement>) => void;
+}
+
+/** One pointer drag in progress. The scroll is the only thing that moves: the pointer drives it. */
+interface SheetDrag {
+  handle: HTMLElement;
+  /** The pointer coordinate of the previous move, along the axis. */
+  last: number;
+  lastTime: number;
+  /** The pointer coordinate where the drag began. */
+  origin: number;
+  pointerId: number;
+  scroller: HTMLElement;
+  /** The scroll position where the drag began: what a cancel restores. */
+  startScroll: number;
+  startTime: number;
+  /** Pointer speed along the axis in px/ms; positive when it moves to larger coordinates. */
+  velocity: number;
+}
+
+/** The release animation in flight: its cancel function, and the scroller it holds. */
+interface SheetRelease {
+  cancel: () => void;
+  scroller: HTMLElement;
+}
+
 interface UseSheetHandleResult {
+  dragHandlers: SheetHandleDragHandlers;
   isSlider: boolean;
   ref: RefObject<HTMLDivElement | null>;
   sliderProps: HTMLAttributes<HTMLDivElement> | {"aria-hidden": true};
@@ -140,12 +216,17 @@ interface UseSheetHandleResult {
  * the scroll on `scroll` and re-measures the resting positions on `scrollend`.
  */
 function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): UseSheetHandleResult {
-  const {snapPoints} = useSheetContext();
+  const {closeSheet, isDismissable, isOpen, snapPoints} = useSheetContext();
   const {direction} = useLocale();
   const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const ref = useRef<HTMLDivElement>(null);
   const measured = useRef<SheetPositions>({extent: 0, positions: []});
+  const drag = useRef<SheetDrag | null>(null);
+  const release = useRef<SheetRelease | null>(null);
+  // What an animation that finishes later must read fresh: whether the sheet is still open, and
+  // whether it may be dismissed at all.
+  const latest = useRef({closeSheet, isDismissable, isOpen});
   const [value, setValue] = useState<SheetHandleValue | null>(null);
 
   const isSlider = (snapPoints ?? []).some(isUsableSnapPoint);
@@ -275,9 +356,158 @@ function useSheetHandle(swipeDirection: SheetRenderProps["swipeDirection"]): Use
     scrollSheetTo(scroller, axis, target.scroll, reducedMotion);
   };
 
-  if (!isSlider) return {isSlider, ref, sliderProps: {"aria-hidden": true}};
+  useEffect(() => {
+    latest.current = {closeSheet, isDismissable, isOpen};
+  }, [closeSheet, isDismissable, isOpen]);
+
+  // Unmounting ends whatever is in flight: a drag in progress and a release still animating.
+  useEffect(() => () => endSheetDrag(drag, release), []);
+
+  const hasSnapPoints = (snapPoints?.length ?? 0) > 0;
+  const pointOf = (event: PointerEvent<HTMLDivElement>) =>
+    axis === "y" ? event.clientY : event.clientX;
+
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    // The primary button of the primary pointer starts a drag, and only when none is under way: a
+    // second finger, a right click or a consumer that claimed the event leaves it alone.
+    if (event.defaultPrevented || event.button !== 0 || !event.isPrimary || drag.current) return;
+
+    const handle = event.currentTarget;
+    const scroller = getSheetScroller(handle);
+
+    if (!scroller) return;
+
+    // A release still gliding is taken over from wherever it has got to.
+    cancelSheetRelease(release);
+    handle.setPointerCapture?.(event.pointerId);
+    handle.setAttribute("data-dragging", "");
+    scroller.setAttribute("data-handle-dragging", "");
+
+    const origin = pointOf(event);
+
+    drag.current = {
+      handle,
+      last: origin,
+      lastTime: event.timeStamp,
+      origin,
+      pointerId: event.pointerId,
+      scroller,
+      startScroll: readSheetScroll(scroller, axis),
+      startTime: event.timeStamp,
+      velocity: 0,
+    };
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const state = drag.current;
+
+    if (!state || event.defaultPrevented || event.pointerId !== state.pointerId) return;
+
+    const point = pointOf(event);
+    const elapsed = event.timeStamp - state.lastTime;
+
+    if (elapsed > 0) state.velocity = (point - state.last) / elapsed;
+
+    state.last = point;
+    state.lastTime = event.timeStamp;
+    // The sheet follows the pointer: the scroll runs against the pointer's travel.
+    writeSheetScroll(state.scroller, axis, state.startScroll - (point - state.origin));
+  };
+
+  /**
+   * Ends the drag and settles the sheet. `cancelled` (pointercancel, lost capture) restores the
+   * starting position instead of choosing a target from the release.
+   */
+  const finish = (event: PointerEvent<HTMLDivElement>, cancelled: boolean) => {
+    const state = drag.current;
+
+    if (!state || event.pointerId !== state.pointerId) return;
+
+    const {scroller} = state;
+
+    drag.current = null;
+    state.handle.removeAttribute("data-dragging");
+    releaseSheetCapture(state.handle, state.pointerId);
+
+    // Read where the drag left the scroller before anything can pull it toward a snap.
+    const current = readSheetScroll(scroller, axis);
+    // A pointer that stopped before letting go has no flick left in it.
+    const velocity = event.timeStamp - state.lastTime > FLICK_IDLE_MS ? 0 : state.velocity;
+    let target: number | null;
+    let dismisses = false;
+
+    if (cancelled) {
+      target = state.startScroll;
+    } else if (hasSnapPoints) {
+      const {extent, positions} = resolveSheetPositions(getSheetSnapTargets(scroller, axis), after);
+      // The closed position is a resting place only for a sheet that may be dismissed: for one
+      // that may not, the lowest snap is as far as a drag can take it.
+      const closed = after ? 0 : extent;
+      const candidates = positions.map((position) => position.scroll);
+
+      if (isDismissable) candidates.push(closed);
+
+      target = positions.length > 0 ? nearestSheetSnap(candidates, current, velocity) : null;
+      dismisses = isDismissable && target === closed;
+    } else {
+      target = sheetDismissTarget({
+        current,
+        elapsed: event.timeStamp - state.startTime,
+        isDismissable,
+        rest: state.startScroll,
+        swipeDirection,
+        travel: state.last - state.origin,
+        ...measureSheet(scroller, axis),
+      });
+      dismisses = isDismissable && target !== state.startScroll;
+    }
+
+    if (target === null) {
+      scroller.removeAttribute("data-handle-dragging");
+
+      return;
+    }
+
+    // The scroller stays held (scroll-snap off) for the whole release.
+    scroller.setAttribute("data-handle-dragging", "");
+
+    let finished = false;
+    const cancel = animateSheetValue(
+      current,
+      target,
+      (value) => writeSheetScroll(scroller, axis, value),
+      () => {
+        finished = true;
+        release.current = null;
+        scroller.removeAttribute("data-handle-dragging");
+
+        // A scroller that only just reached the edge may not have told the primitive, so a dismissal
+        // closes the sheet itself, once, and only if nothing closed it first.
+        const {closeSheet: close, isDismissable: mayClose, isOpen: open} = latest.current;
+
+        if (dismisses && mayClose && open && scroller.isConnected) close();
+      },
+      reducedMotion,
+    );
+
+    // Under reduced motion the animation is over before it is returned.
+    if (!finished) release.current = {cancel, scroller};
+  };
+
+  const dragHandlers: SheetHandleDragHandlers = {
+    onLostPointerCapture: (event) => finish(event, true),
+    onPointerCancel: (event) => finish(event, true),
+    onPointerDown,
+    onPointerMove,
+    // Letting go always ends the drag, even when a consumer prevented the event: otherwise the
+    // sheet would stay held until the next gesture.
+    onPointerUp: (event) => finish(event, false),
+  };
+
+  if (!isSlider) return {dragHandlers, isSlider, ref, sliderProps: {"aria-hidden": true}};
 
   return {
+    dragHandlers,
     isSlider,
     ref,
     sliderProps: {
@@ -303,4 +533,4 @@ export {
   revealedPercent,
   useSheetHandle,
 };
-export type {SheetPositions, SheetRestingPosition};
+export type {SheetHandleDragHandlers, SheetPositions, SheetRestingPosition};
