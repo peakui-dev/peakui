@@ -23,6 +23,14 @@ describe("expectNoAxeViolations", () => {
     await expect(expectNoAxeViolations(container)).rejects.toThrow(/image-alt/);
   });
 
+  it("lets caller rules override the defaults", async () => {
+    const {container} = render(<button type="button" />);
+
+    await expect(
+      expectNoAxeViolations(container, {rules: {"button-name": {enabled: false}}}),
+    ).resolves.toBeUndefined();
+  });
+
   it("checks a node outside the container when document.body is passed", async () => {
     const {container} = render(<button type="button">Save</button>);
     const stray = document.createElement("button");
