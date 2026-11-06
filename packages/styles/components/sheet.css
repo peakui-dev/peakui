@@ -5,10 +5,27 @@
  *
  * The scroll-snap primitive owns the gesture, the snap settling and the exit. This file is only
  * the visual layer: never set `transform` or `position` on the panel, because both fight the
- * scrollport. The one transform below sits on a stacked parent and exists so translateZ has a
- * perspective to work in.
+ * scrollport. The single exception is `transform: perspective()` on a stacked parent's content
+ * wrapper (the modal element, not the dialog), so translateZ has a perspective to work in.
  *
  * Placement edges are physical (left, right): they do not flip in RTL.
+ *
+ * Attributes. React Aria emits: data-position, data-swipe-direction, data-expanded,
+ * data-stack-index and data-has-descendants (overlay, content and backdrop), data-entering and
+ * data-exiting, and data-sheet-scroll on the scroller. Everything else this file keys on is a
+ * HARD CONTRACT that a later task must set:
+ *   - data-detached     : Task 4, on the content element (`isDetached`).
+ *   - data-snap-points  : Task 4, on the content element when snap points are given. The primitive
+ *                         places snap markers by percentage, so the content needs a definite size.
+ *   - data-dragging     : Task 7, on the handle while a pointer drag is active.
+ *   - data-handle-dragging : Task 7, on the scroller ([data-sheet-scroll]) during a handle drag.
+ *
+ * Which animation runs where. The primitive writes the swipe animation (swipeAnimation) as an
+ * INLINE style on the backdrop and the content, and the stack animation (stackAnimation) inline
+ * on a parent's content. Inline wins over every class here, so once Task 4 passes
+ * `peakui-sheet-backdrop` and `peakui-sheet-scale-back` those inline animations run (scroll
+ * driven in browsers with view timelines, 300ms on the Firefox path) and the enter/exit rules on
+ * the backdrop below are only the fallback for a sheet rendered without them.
  */
 
 /* Backdrop fade; Task 4 hands this name to the primitive's swipe animation. */
@@ -29,20 +46,20 @@
   }
 }
 
-/* The timing seam. Reduced motion zeroes all four at the bottom of the file. */
+/*
+ * The timing seam for the backdrop's fallback fade, the only author-timed motion in this file.
+ * Release (pointer-drag settle) and stack scale-back are driven by the primitive and by Task 7's
+ * script, not by CSS durations, so no variable is defined for them.
+ */
 .sheet__overlay {
   @apply z-(--z-index-overlay);
 
   --sheet-enter-duration: 300ms;
   --sheet-exit-duration: 200ms;
-  --sheet-release-duration: 250ms;
-  --sheet-scale-back-duration: 300ms;
   --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Room kept clear at the sheet edge so a focused control is never hidden under it (SC 2.4.11). */
-  --sheet-scroll-padding: 3rem;
-
-  &[data-closed] {
+  /* A sheet on its way out must not swallow clicks meant for the page. */
+  &[data-exiting] {
     @apply pointer-events-none;
   }
 }
@@ -54,12 +71,10 @@
   /* Held transparent in the normal state so the forced-colors border shifts nothing. */
   border: 1px solid transparent;
 
-  &[data-entering="true"],
   &[data-entering] {
     animation: peakui-sheet-backdrop var(--sheet-enter-duration) var(--sheet-ease) both;
   }
 
-  &[data-exiting="true"],
   &[data-exiting] {
     animation: peakui-sheet-backdrop var(--sheet-exit-duration) var(--sheet-ease) reverse both;
   }
@@ -78,22 +93,14 @@
 }
 
 /*
- * The scrollport wrapper. Overscroll padding sits outside the height, so a 100% dialog fills the
- * sheet. scroll-padding keeps a focused control clear of the sheet edge.
+ * The panel's positioned wrapper (the primitive's modal element). It clips; it is not the scroller,
+ * so it carries no scroll-padding. Overscroll padding sits outside the height. The primitive gives
+ * the dialog inline width/height 100% of this element, so the dialog only fills it when this
+ * element has a definite size: the left/right placements and the snap-point rules below do; a
+ * bottom/top sheet without snap points sizes to its content (Task 4's story check should confirm).
  */
 .sheet__content {
   @apply z-1 box-content overflow-clip outline-none;
-  scroll-padding: var(--sheet-scroll-padding);
-
-  &[data-entering="true"],
-  &[data-entering] {
-    animation-duration: var(--sheet-enter-duration);
-  }
-
-  &[data-exiting="true"],
-  &[data-exiting] {
-    animation-duration: var(--sheet-exit-duration);
-  }
 }
 
 /*
@@ -209,10 +216,17 @@
 /*
  * The body scrolls only once the sheet is fully expanded: a swipe at a partial detent expands
  * the sheet instead of scrolling its content.
+ *
+ * scroll-padding (SC 2.4.11) lives here, on the real inner scroller, not on [data-sheet-scroll]:
+ * padding on the snap scroller would shift its snap positions. The primitive publishes
+ * --sheet-scroll-padding-x/-y on the overlay (the viewport area taken by the software keyboard or
+ * browser chrome); they are folded in so a focused control also clears that. The 1rem is the
+ * clearance from the sheet edge.
  */
 .sheet__body {
   @apply min-h-0 flex-auto scrollbar overflow-hidden px-5 py-2;
-  scroll-padding: var(--sheet-scroll-padding);
+  scroll-padding-block: calc(1rem + var(--sheet-scroll-padding-y, 0px));
+  scroll-padding-inline: calc(1rem + var(--sheet-scroll-padding-x, 0px));
 }
 
 .sheet__content[data-expanded] .sheet__body {
@@ -282,19 +296,28 @@
   }
 }
 
-/* Reduced motion goes after every rule that sets a duration. Snap points still apply. */
+/*
+ * Reduced motion goes after every rule that sets motion. Snap points still apply.
+ *
+ * What this delivers: the backdrop's fallback fade is instant, and the primitive's swipe
+ * animation (backdrop and content) and stack animation (a parent's content) are removed. Those
+ * are written as INLINE styles by the primitive (Sheet.mjs: animation-name on the backdrop and
+ * modal, plus animation-duration 300ms on the Firefox path), so only `animation: none !important`
+ * can beat them; a duration of 0s would lose to the inline style, and is ignored on the view
+ * timeline path anyway. What depends on the primitive and Task 7, not on CSS: programmatic
+ * scrolls (the primitive checks the media query itself and uses behavior "auto") and the
+ * pointer-drag release. Task 4's tests and Task 10's reduced-motion e2e must confirm the result.
+ */
 @media (prefers-reduced-motion: reduce) {
   .sheet__overlay {
     --sheet-enter-duration: 0s;
     --sheet-exit-duration: 0s;
-    --sheet-release-duration: 0s;
-    --sheet-scale-back-duration: 0s;
   }
 
   .sheet__backdrop,
   .sheet__content {
-    animation-duration: 0s;
-    transition-duration: 0s;
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -338,6 +361,17 @@
 
   .sheet__close-trigger {
     color: ButtonText;
+  }
+
+  .sheet__handle:disabled,
+  .sheet__handle[aria-disabled="true"],
+  .sheet__handle[data-disabled="true"] {
+    opacity: 1;
+
+    .sheet__handle-bar {
+      background-color: GrayText;
+      border-color: GrayText;
+    }
   }
 
   .sheet__close-trigger:disabled,
