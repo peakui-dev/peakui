@@ -184,6 +184,14 @@ const SheetRootBase = ({
 /* -------------------------------------------------------------------------------------------------
  * Sheet NestedRoot
  * -----------------------------------------------------------------------------------------------*/
+/*
+ * Place it inside the parent's Sheet.Dialog (any depth), so its Trigger is rendered by the parent
+ * and focus returns there when it closes. The primitive stacks sheets by mount order in a module
+ * registry, not by tree position, so the scale-back and dim of the parent need nothing more; the
+ * child's overlay portals out of the parent's DOM. Open it from the parent: two sheets mounted open
+ * together stack in effect order, which puts the parent on top. It owns its state, its Trigger, its
+ * dismissal and its onAnimationEnd; only the context lookup ties it to the parent.
+ */
 const SheetNestedRoot = (props: SheetRootProps) => {
   const parent = use(SheetContext);
 

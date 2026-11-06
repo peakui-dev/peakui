@@ -117,6 +117,8 @@ function installSheetGeometry(exitedAtZero = true) {
           writable: true,
         });
         for (const {callback, element} of observers) {
+          // Only the panel of the scroller that scrolled moves: a stacked sheet's parent stays put.
+          if (!this.contains(element)) continue;
           callback(
             [{intersectionRatio: exited ? 0 : 1, target: element} as IntersectionObserverEntry],
             {} as IntersectionObserver,
@@ -2645,5 +2647,414 @@ describe("Sheet", () => {
     });
   });
 
-  it.todo("stacks nested sheets and closes the topmost first (Task 8)");
+  /*
+   * jsdom cannot show the stacking: the parent's scale-back and dim are CSS animations on a view
+   * timeline and the restore is a real scroll. These tests prove the wiring (both dialogs, one stack
+   * index each, the topmost-only Escape, independent state and lifecycle, focus return, no stuck
+   * inert); the visuals are for the Playwright spec.
+   */
+  describe("nested", () => {
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
+    const overlays = () =>
+      [...document.querySelectorAll<HTMLElement>('[data-slot="sheet-overlay"]')].filter(
+        (element) => element.isConnected,
+      );
+    const dialogs = () => screen.queryAllByRole("dialog", {hidden: true});
+    const scrollerCalls = new Map<Element, ScrollToOptions[]>();
+
+    const NestedExample = ({
+      childProps = {},
+      parentProps = {},
+    }: {
+      childProps?: {
+        isDismissable?: boolean;
+        onAnimationEnd?: (open: boolean) => void;
+        onOpenChange?: (open: boolean) => void;
+      };
+      parentProps?: {
+        isDismissable?: boolean;
+        onAnimationEnd?: (open: boolean) => void;
+        onOpenChange?: (open: boolean) => void;
+      };
+    }) => (
+      <Sheet {...parentProps}>
+        <Sheet.Trigger>
+          <Button>Open parent</Button>
+        </Sheet.Trigger>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog aria-label="Parent sheet">
+              <Sheet.Body>Parent content</Sheet.Body>
+              <Sheet.NestedRoot {...childProps}>
+                <Sheet.Trigger>
+                  <Button>Open child</Button>
+                </Sheet.Trigger>
+                <Sheet.Backdrop>
+                  <Sheet.Content>
+                    <Sheet.Dialog aria-label="Child sheet">
+                      <Sheet.Body>Child content</Sheet.Body>
+                      <Sheet.Close>
+                        <Button>Close child</Button>
+                      </Sheet.Close>
+                    </Sheet.Dialog>
+                  </Sheet.Content>
+                </Sheet.Backdrop>
+              </Sheet.NestedRoot>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    );
+
+    /** Opens the parent, waits for its enter to settle, then opens the child. */
+    const openBoth = async () => {
+      await user.click(screen.getByRole("button", {name: "Open parent"}));
+      await screen.findByRole("dialog", {name: "Parent sheet"});
+      await settle();
+      await user.click(screen.getByRole("button", {name: "Open child"}));
+      await screen.findByRole("dialog", {name: "Child sheet"});
+      await settle();
+    };
+
+    beforeEach(() => {
+      scrollerCalls.clear();
+
+      const stubbed = HTMLElement.prototype.scrollTo;
+
+      // Records which scroller each scroll was sent to, then plays the geometry stub's script.
+      Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+        configurable: true,
+        value: function scrollTo(this: HTMLElement, options?: ScrollToOptions) {
+          // The primitive's modal focus override scrolls the focused element into view. With no
+          // layout it computes zero, where a browser finds the element already in view and does
+          // nothing: it is not a sheet scroll, so it is dropped rather than recorded.
+          if (new Error().stack?.includes("usePreventScroll")) return;
+
+          scrollerCalls.set(this, [...(scrollerCalls.get(this) ?? []), options ?? {}]);
+
+          return Reflect.apply(stubbed, this, [options]);
+        },
+        writable: true,
+      });
+    });
+
+    it("opens a nested sheet over its parent and both dialogs exist", async () => {
+      render(<NestedExample />);
+      await openBoth();
+
+      expect(dialogs().map((dialog) => dialog.getAttribute("aria-label"))).toEqual([
+        "Parent sheet",
+        "Child sheet",
+      ]);
+      // The primitive stacks them by mount order: it is what the scale and dim styles key on.
+      const [parent, child] = overlays();
+
+      expect(parent).toHaveAttribute("data-stack-index", "0");
+      expect(parent).toHaveAttribute("data-has-descendants");
+      expect(child).toHaveAttribute("data-stack-index", "1");
+      expect(child).not.toHaveAttribute("data-has-descendants");
+    });
+
+    it("keeps the nested overlay a sibling of the parent's, not inside it", async () => {
+      render(<NestedExample />);
+      await openBoth();
+
+      const [parent, child] = overlays();
+
+      expect(parent!.contains(child!)).toBe(false);
+    });
+
+    it("closes only the topmost sheet on Escape and the parent stays open", async () => {
+      const parentOpenChange = vi.fn();
+      const childOpenChange = vi.fn();
+
+      render(
+        <NestedExample
+          childProps={{onOpenChange: childOpenChange}}
+          parentProps={{onOpenChange: parentOpenChange}}
+        />,
+      );
+      await openBoth();
+      parentOpenChange.mockClear();
+
+      await user.keyboard("{Escape}");
+
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      expect(screen.getByRole("dialog", {name: "Parent sheet"})).toBeInTheDocument();
+      expect(childOpenChange).toHaveBeenLastCalledWith(false);
+      expect(parentOpenChange).not.toHaveBeenCalled();
+      expect(overlays()[0]).not.toHaveAttribute("data-has-descendants");
+    });
+
+    it("closes the parent on the next Escape once the child is gone", async () => {
+      render(<NestedExample />);
+      await openBoth();
+
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      // Focus comes back to the child's Trigger, inside the parent, where Escape is heard again.
+      await waitFor(() => expect(screen.getByRole("button", {name: "Open child"})).toHaveFocus());
+      await user.keyboard("{Escape}");
+
+      await waitFor(() => expect(dialogs()).toHaveLength(0));
+    });
+
+    it("closing the child leaves the parent's onAnimationEnd and open state unchanged", async () => {
+      const parentAnimationEnd = vi.fn();
+      const childAnimationEnd = vi.fn();
+      const parentOpenChange = vi.fn();
+
+      render(
+        <NestedExample
+          childProps={{onAnimationEnd: childAnimationEnd}}
+          parentProps={{onAnimationEnd: parentAnimationEnd, onOpenChange: parentOpenChange}}
+        />,
+      );
+      await openBoth();
+      await waitFor(() => expect(childAnimationEnd.mock.calls).toEqual([[true]]));
+      expect(parentAnimationEnd.mock.calls).toEqual([[true]]);
+      parentOpenChange.mockClear();
+
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await settle();
+
+      // The child reported its own exit; the parent reported nothing new and is still open.
+      expect(childAnimationEnd.mock.calls).toEqual([[true], [false]]);
+      expect(parentAnimationEnd.mock.calls).toEqual([[true]]);
+      expect(parentOpenChange).not.toHaveBeenCalled();
+      expect(screen.getByRole("dialog", {name: "Parent sheet"})).toBeInTheDocument();
+    });
+
+    it("closing the child restores the parent snap point", async () => {
+      render(<NestedExample />);
+      await user.click(screen.getByRole("button", {name: "Open parent"}));
+      await screen.findByRole("dialog", {name: "Parent sheet"});
+      await settle();
+
+      const parentScroller = document.querySelector<HTMLElement>("[data-sheet-scroll]")!;
+      const resting = parentScroller.scrollTop;
+
+      expect(resting).toBe(768);
+
+      await user.click(screen.getByRole("button", {name: "Open child"}));
+      await screen.findByRole("dialog", {name: "Child sheet"});
+      await settle();
+      const callsBeforeClose = scrollerCalls.get(parentScroller)?.length ?? 0;
+
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await settle();
+
+      const parentCalls = scrollerCalls.get(parentScroller) ?? [];
+
+      // The parent's scroller is left alone by the child's exit, and its last target is its rest.
+      expect(parentCalls).toHaveLength(callsBeforeClose);
+      expect(parentCalls.at(-1)?.top).toBe(resting);
+      expect(parentScroller.scrollTop).toBe(resting);
+    });
+
+    it("leaves no inert or aria-hidden on the parent after the child closes", async () => {
+      render(<NestedExample />);
+      await openBoth();
+
+      const parentDialog = screen.getByRole("dialog", {name: "Parent sheet", hidden: true});
+
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await settle();
+
+      expect(parentDialog.closest("[inert], [aria-hidden='true']")).toBeNull();
+      expect(screen.getByRole("button", {name: "Open child"})).toBeInTheDocument();
+
+      // A second round trip leaves it clean too.
+      await user.click(screen.getByRole("button", {name: "Open child"}));
+      await screen.findByRole("dialog", {name: "Child sheet"});
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await settle();
+
+      expect(parentDialog.closest("[inert], [aria-hidden='true']")).toBeNull();
+    });
+
+    it("returns focus to the child's Trigger inside the parent when the child closes", async () => {
+      render(<NestedExample />);
+      await openBoth();
+
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+
+      await waitFor(() => expect(screen.getByRole("button", {name: "Open child"})).toHaveFocus());
+      // The parent is interactive again: its Trigger-less content takes a click without a throw.
+      await user.click(screen.getByRole("button", {name: "Open child"}));
+      await screen.findByRole("dialog", {name: "Child sheet"});
+    });
+
+    it("judges a Trigger inside a NestedRoot by its own root", async () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      render(<NestedExample />);
+      await openBoth();
+
+      // The child's trigger was detected by the child's root: it opened the child, with no warning.
+      expect(error).not.toHaveBeenCalledWith(expect.stringContaining("Sheet.Trigger must be"));
+    });
+
+    it("warns about an undetected Trigger in a NestedRoot even when the parent has a Trigger", async () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      const Wrapped = () => (
+        <Sheet.Trigger>
+          <Button>Open child</Button>
+        </Sheet.Trigger>
+      );
+
+      render(
+        <Sheet defaultOpen>
+          <Sheet.Trigger>
+            <Button>Open parent</Button>
+          </Sheet.Trigger>
+          <Sheet.Backdrop>
+            <Sheet.Content>
+              <Sheet.Dialog aria-label="Parent sheet">
+                <Sheet.NestedRoot>
+                  <Wrapped />
+                </Sheet.NestedRoot>
+              </Sheet.Dialog>
+            </Sheet.Content>
+          </Sheet.Backdrop>
+        </Sheet>,
+      );
+      await screen.findByRole("dialog", {name: "Parent sheet"});
+
+      expect(error).toHaveBeenCalledWith(expect.stringContaining("Sheet.Trigger must be"));
+    });
+
+    it("keeps isDismissable independent between the child and the parent", async () => {
+      render(<NestedExample childProps={{isDismissable: false}} />);
+      await openBoth();
+
+      // The child refuses Escape; the parent behind it is not asked and stays open too.
+      await user.keyboard("{Escape}");
+      await settle();
+
+      expect(dialogs()).toHaveLength(2);
+
+      await user.click(screen.getByRole("button", {name: "Close child"}));
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+      await waitFor(() => expect(screen.getByRole("button", {name: "Open child"})).toHaveFocus());
+
+      // The parent is dismissable by default: its Escape still closes it.
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(dialogs()).toHaveLength(0));
+    });
+
+    it("keeps a dismissable child closable when the parent is not dismissable", async () => {
+      render(<NestedExample parentProps={{isDismissable: false}} />);
+      await openBoth();
+
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(dialogs()).toHaveLength(1));
+
+      // The parent refuses Escape.
+      await user.keyboard("{Escape}");
+      await settle();
+
+      expect(dialogs()).toHaveLength(1);
+    });
+
+    it("drags the nested handle without moving the parent scroller", async () => {
+      const writes = new Map<Element, number[]>();
+
+      Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+        configurable: true,
+        value: 600,
+      });
+      // The child opens from the parent, so it is the topmost overlay and hears the pointer.
+      render(
+        <Sheet>
+          <Sheet.Trigger>
+            <Button>Open parent</Button>
+          </Sheet.Trigger>
+          <Sheet.Backdrop>
+            <Sheet.Content>
+              <Sheet.Dialog aria-label="Parent sheet">
+                <Sheet.Handle data-testid="parent-handle" />
+                <Sheet.NestedRoot>
+                  <Sheet.Trigger>
+                    <Button>Open child</Button>
+                  </Sheet.Trigger>
+                  <Sheet.Backdrop>
+                    <Sheet.Content>
+                      <Sheet.Dialog aria-label="Child sheet">
+                        <Sheet.Handle data-testid="child-handle" />
+                      </Sheet.Dialog>
+                    </Sheet.Content>
+                  </Sheet.Backdrop>
+                </Sheet.NestedRoot>
+              </Sheet.Dialog>
+            </Sheet.Content>
+          </Sheet.Backdrop>
+        </Sheet>,
+      );
+      await openBoth();
+
+      const scrollers = [...document.querySelectorAll<HTMLElement>("[data-sheet-scroll]")];
+      const childScroller = screen.getByTestId("child-handle").closest("[data-sheet-scroll]");
+      const parentScroller = scrollers.find((scroller) => scroller !== childScroller);
+
+      expect(scrollers).toHaveLength(2);
+      expect(childScroller).not.toBeNull();
+      for (const scroller of scrollers) {
+        let value = 300;
+
+        Object.defineProperty(scroller, "scrollTop", {
+          configurable: true,
+          get: () => value,
+          set: (next: number) => {
+            value = next;
+            writes.set(scroller, [...(writes.get(scroller) ?? []), next]);
+          },
+        });
+      }
+
+      const handle = screen.getByTestId("child-handle");
+      const send = (type: string, y: number, t: number) => {
+        const event = new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          cancelable: true,
+          clientY: y,
+          isPrimary: true,
+          pointerId: 1,
+        });
+
+        Object.defineProperty(event, "timeStamp", {value: t + 1});
+        Object.defineProperty(event, "isPrimary", {value: true});
+        Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
+          configurable: true,
+          value: () => {},
+        });
+        Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
+          configurable: true,
+          value: () => true,
+        });
+        Object.defineProperty(HTMLElement.prototype, "releasePointerCapture", {
+          configurable: true,
+          value: () => {},
+        });
+        fireEvent(handle, event);
+      };
+
+      send("pointerdown", 100, 0);
+      send("pointermove", 140, 100);
+
+      expect(writes.get(childScroller!)?.length).toBeGreaterThan(0);
+      expect(writes.get(parentScroller!)).toBeUndefined();
+
+      for (const name of ["scrollHeight", "setPointerCapture", "hasPointerCapture"]) {
+        Reflect.deleteProperty(HTMLElement.prototype, name);
+      }
+      Reflect.deleteProperty(HTMLElement.prototype, "releasePointerCapture");
+    });
+  });
 });
