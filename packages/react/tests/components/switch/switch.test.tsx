@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Label} from "@/components/label/index.ts";
 import {Switch, SwitchRoot} from "@/components/switch/index.ts";
@@ -33,6 +33,12 @@ const renderSwitch = (props: ComponentProps<typeof Switch> = {}, text = "Уве�
   );
 
 describe("Switch", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderSwitch();
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит switch с доступным именем из Label", () => {
     renderSwitch();
 

@@ -1,7 +1,8 @@
 import type {ComponentProps} from "react";
 
-import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 
+import {FieldError} from "@/components/field-error/index.ts";
 import {NumberField, NumberFieldRoot} from "@/components/number-field/index.ts";
 
 const pointerOpts = {
@@ -35,6 +36,23 @@ const renderField = (props: ComponentProps<typeof NumberField> = {}) =>
   );
 
 describe("NumberField", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderField();
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("не имеет нарушений axe в невалидном состоянии с сообщением", async () => {
+    const {container} = render(
+      <NumberField isInvalid aria-label="Количество" defaultValue={5}>
+        <NumberField.Group>{stepper()}</NumberField.Group>
+        <FieldError>Недопустимое количество</FieldError>
+      </NumberField>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит поле со значением", () => {
     renderField();
 

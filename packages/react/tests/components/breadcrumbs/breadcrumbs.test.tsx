@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Breadcrumbs, BreadcrumbsItem, BreadcrumbsRoot} from "@/components/breadcrumbs/index.ts";
 
@@ -18,6 +18,12 @@ describe("Breadcrumbs", () => {
         <BreadcrumbsItem>Ноутбуки</BreadcrumbsItem>
       </Breadcrumbs>,
     );
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderTrail();
+
+    await expectNoAxeViolations(container);
+  });
 
   describe("структура списка", () => {
     it("рисует упорядоченный список с доступным именем", () => {

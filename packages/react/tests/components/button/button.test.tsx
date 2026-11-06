@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
 import {Button} from "@/components/button";
@@ -20,6 +20,12 @@ const pressUp = (element: HTMLElement) => {
 };
 
 describe("Button", () => {
+  it("has no axe violations", async () => {
+    const {container} = render(<Button>Save</Button>);
+
+    await expectNoAxeViolations(container);
+  });
+
   let user: ReturnType<typeof setupUser>;
 
   beforeAll(() => {

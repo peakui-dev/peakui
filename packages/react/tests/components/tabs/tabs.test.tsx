@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {act, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {useState} from "react";
 
 import {Tab, TabIndicator, TabList, TabPanel, Tabs, TabsRoot} from "@/components/tabs/index.ts";
@@ -59,6 +59,15 @@ describe("Tabs", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(<SimpleTabs />);
+
+    /* The animated indicator settles state while axe awaits: keep it inside act. */
+    await act(async () => {
+      await expectNoAxeViolations(container);
+    });
   });
 
   it("рендерит роли tablist, tab и tabpanel", () => {

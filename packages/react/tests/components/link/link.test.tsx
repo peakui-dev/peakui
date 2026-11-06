@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Link, LinkIcon, LinkRoot} from "@/components/link/index.ts";
 
@@ -7,6 +7,12 @@ describe("Link", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(<Link href="/pricing">Тарифы</Link>);
+
+    await expectNoAxeViolations(container);
   });
 
   describe("рендеринг", () => {

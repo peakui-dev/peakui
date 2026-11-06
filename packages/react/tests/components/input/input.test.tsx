@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
 import {Input, InputRoot} from "@/components/input/index.ts";
@@ -9,6 +9,12 @@ describe("Input", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("has no axe violations", async () => {
+    const {container} = render(<Input aria-label="City" />);
+
+    await expectNoAxeViolations(container);
   });
 
   it("renders a textbox and accepts typing", async () => {

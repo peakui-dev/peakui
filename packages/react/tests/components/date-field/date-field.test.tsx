@@ -7,7 +7,7 @@ import {
   parseDate,
   parseZonedDateTime,
 } from "@internationalized/date";
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {DateField, DateFieldRoot} from "@/components/date-field/index.ts";
@@ -33,6 +33,26 @@ function segmentOf(type: string) {
 }
 
 describe("DateField", () => {
+  it("has no axe violations", async () => {
+    const {container} = renderField({defaultValue: new CalendarDate(2026, 8, 15)});
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("has no axe violations when invalid with an error message", async () => {
+    const {container} = render(
+      <DateField isInvalid name="date">
+        <Label>Date</Label>
+        <DateField.Group>
+          <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
+        </DateField.Group>
+        <FieldError>Date must be in the future</FieldError>
+      </DateField>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
   describe("structure", () => {
     it("renders month, day and year as spinbuttons", () => {
       renderField({defaultValue: new CalendarDate(2026, 8, 15)});

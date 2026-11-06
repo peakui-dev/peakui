@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {fireEvent, render, screen} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen} from "@peakui/testing/helpers";
 
 import {Checkbox} from "@/components/checkbox/index.ts";
 import {CheckboxGroup} from "@/components/checkbox-group/index.ts";
@@ -42,6 +42,12 @@ const renderGroup = (props: ComponentProps<typeof CheckboxGroup> = {}) =>
   );
 
 describe("CheckboxGroup", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderGroup();
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит group с доступным именем из Label", () => {
     renderGroup();
 

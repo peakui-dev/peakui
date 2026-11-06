@@ -1,4 +1,4 @@
-import {render, screen} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen} from "@peakui/testing/helpers";
 
 import {Label} from "@/components/label/index.ts";
 import {Switch} from "@/components/switch/index.ts";
@@ -16,6 +16,12 @@ const item = (label: string) => (
 );
 
 describe("SwitchGroup", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(<SwitchGroup aria-label="Настройки">{item("Почта")}</SwitchGroup>);
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит презентационную группу с data-slot", () => {
     render(<SwitchGroup aria-label="Настройки">{item("Почта")}</SwitchGroup>);
 

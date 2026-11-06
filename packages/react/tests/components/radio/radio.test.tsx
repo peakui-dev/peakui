@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Label} from "@/components/label/index.ts";
 import {Radio, RadioRoot} from "@/components/radio/index.ts";
@@ -36,6 +36,12 @@ const renderOption = (props: ComponentProps<typeof Radio> = {value: "a"}, text =
   );
 
 describe("Radio", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderOption();
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит radio с доступным именем из Label", () => {
     renderOption();
 

@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {fireEvent, render, screen} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen} from "@peakui/testing/helpers";
 
 import {Label} from "@/components/label/index.ts";
 import {Radio} from "@/components/radio/index.ts";
@@ -42,6 +42,12 @@ const renderGroup = (props: ComponentProps<typeof RadioGroup> = {}) =>
   );
 
 describe("RadioGroup", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderGroup();
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит radiogroup с доступным именем из Label", () => {
     renderGroup();
 

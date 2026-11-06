@@ -1,9 +1,19 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {Input, Label} from "react-aria-components";
 
 import {ColorField, ColorFieldRoot} from "@/components/color-field/index.ts";
 
 describe("ColorField", () => {
+  it("has no axe violations", async () => {
+    const {container} = render(
+      <ColorField aria-label="Hex">
+        <Input />
+      </ColorField>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
   it("exposes the BEM block and data-slot", () => {
     render(
       <ColorField aria-label="Hex" data-testid="field">

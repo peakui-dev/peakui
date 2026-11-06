@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
 import {ToggleButtonGroupContext as RACToggleButtonGroupContext} from "react-aria-components/ToggleButtonGroup";
 
@@ -17,6 +17,17 @@ describe("ButtonGroup", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(
+      <ButtonGroup aria-label="Действия">
+        <Button>Первый</Button>
+        <Button>Вторый</Button>
+      </ButtonGroup>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   it("рендерит группу с ролями и именами дочерних кнопок", () => {

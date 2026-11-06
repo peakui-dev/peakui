@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import React, {useState} from "react";
 
 import {Disclosure} from "@/components/disclosure/index.ts";
@@ -37,6 +37,12 @@ describe("DisclosureGroup", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderGroup();
+
+    await expectNoAxeViolations(container);
   });
 
   describe("рендеринг", () => {
