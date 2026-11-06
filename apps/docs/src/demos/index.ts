@@ -750,6 +750,18 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./context-menu/basic").then((m) => m.Basic),
     file: "context-menu/basic.tsx",
   },
+  "context-menu-controlled": {
+    loader: () => import("./context-menu/controlled").then((m) => m.Controlled),
+    file: "context-menu/controlled.tsx",
+  },
+  "context-menu-with-native-escape": {
+    loader: () => import("./context-menu/with-native-escape").then((m) => m.WithNativeEscape),
+    file: "context-menu/with-native-escape.tsx",
+  },
+  "context-menu-with-sections": {
+    loader: () => import("./context-menu/with-sections").then((m) => m.WithSections),
+    file: "context-menu/with-sections.tsx",
+  },
   // date-field
   "date-field-basic": {
     loader: () => import("./date-field/basic").then((m) => m.Basic),

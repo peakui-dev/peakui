@@ -1,6 +1,6 @@
 ---
 title: ContextMenu
-description: ContextMenu component
+description: Menu opened by right-click, long-press or keyboard
 links:
   source: context-menu/context-menu.tsx
   styles: context-menu.css
@@ -12,4 +12,205 @@ links:
 import {ContextMenu} from "@peakui/react";
 ```
 
+A context menu must never be the only path to an action: pair it with a visible control.
+
 <ComponentPreview name="context-menu-basic" />
+
+### Anatomy
+
+```tsx
+import {ContextMenu, Label} from "@peakui/react";
+
+// Opens from: right-click, touch long-press (500 ms, touch only), Shift+F10 or the ContextMenu key.
+// A 10 px movement cancels the long-press; releasing the finger does not activate the item under it.
+// Long-press is not discoverable. Hand-verify it on iOS Safari and Android Chrome:
+// automated tests cannot cover iOS Safari.
+// Keyboard open focuses the first item; Escape closes the menu and focus returns.
+// One Trigger per root. It is a plain div: not focusable, no role.
+// Focusable descendants make the region reachable by keyboard.
+// The Popover may be nested in the Trigger or sit beside it.
+export default () => (
+  <ContextMenu>
+    <ContextMenu.Trigger>
+      <ContextMenu.Popover>
+        <ContextMenu.Menu aria-label="Actions">
+          <ContextMenu.Section aria-label="Section">
+            <ContextMenu.Item id="item" textValue="Item">
+              <Label />
+              <ContextMenu.ItemIndicator />
+            </ContextMenu.Item>
+          </ContextMenu.Section>
+        </ContextMenu.Menu>
+      </ContextMenu.Popover>
+    </ContextMenu.Trigger>
+  </ContextMenu>
+);
+```
+
+## Examples
+
+### With Sections
+
+<ComponentPreview name="context-menu-with-sections" />
+
+### With Native Escape
+
+`data-context-menu-native` on a descendant keeps the browser menu for pointer events; keyboard open still works there.
+
+<ComponentPreview name="context-menu-with-native-escape" />
+
+### Controlled
+
+An open without a pointer anchors at the Trigger's bottom-start corner.
+
+<ComponentPreview name="context-menu-controlled" />
+
+## Customization
+
+### Tailwind CSS
+
+```tsx
+<ContextMenu.Trigger className="rounded-xl border border-dashed p-12">Region</ContextMenu.Trigger>
+<ContextMenu.Popover className="min-w-64 rounded-xl">
+  <ContextMenu.Menu aria-label="Actions">{/* items */}</ContextMenu.Menu>
+</ContextMenu.Popover>
+```
+
+### Global CSS
+
+```css
+@layer components {
+  .context-menu__trigger {
+    @apply rounded-xl border border-dashed;
+  }
+
+  .context-menu__popover {
+    @apply min-w-64 rounded-xl;
+  }
+}
+```
+
+## Styling Reference
+
+PeakUI follows the [BEM](https://getbem.com/) methodology, so variants and states are plain class names you can target.
+
+### CSS Classes
+
+The ContextMenu component uses these CSS classes ([view source styles](https://github.com/peakui-dev/peakui/blob/main/packages/styles/components/context-menu.css)):
+
+#### Element Classes [!toc]
+
+- `.context-menu__trigger` - The region; draws nothing of its own
+- `.context-menu__anchor` - Zero-size fixed element the popover positions against, portaled to `body`
+- `.context-menu__popover` - The popover surface
+
+The menu and its items use `.menu`, `.menu-item` and `.menu-section`; see [Menu](/docs/react/components/menu).
+
+### Slots
+
+- `[data-slot="context-menu-trigger"]`
+- `[data-slot="context-menu-anchor"]`
+- `[data-slot="context-menu-popover"]`
+- `[data-slot="context-menu-menu"]`
+- `[data-slot="menu-item"]`
+- `[data-slot="menu-section"]`
+- `[data-slot="menu-item-indicator"]`
+- `[data-slot="submenu-indicator"]`
+
+### Interactive States
+
+The component supports both CSS pseudo-classes and data attributes:
+
+- **Entering**: `[data-entering="true"]` on the popover
+- **Exiting**: `[data-exiting="true"]` on the popover
+- **Focus**: `:focus-visible` or `[data-focus-visible="true"]` on the popover
+- **Coarse pointer**: `@media (pointer: coarse)` sets `user-select: none` on the trigger; `[data-context-menu-native]` descendants keep `user-select: auto`
+- **Forced colors**: `@media (forced-colors: active)` draws a `ButtonBorder` border on the popover
+
+## API Reference
+
+### ContextMenu
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isOpen` | `boolean` | - | Whether the menu is open (controlled). Stays true if the Trigger unmounts: the parent owns the state. A parent that accepts an open asynchronously loses the keyboard focus target and anchor position |
+| `defaultOpen` | `boolean` | `false` | Whether the menu is open on first render (uncontrolled) |
+| `onOpenChange` | `(isOpen: boolean) => void` | - | Called when the menu opens or closes |
+| `isDisabled` | `boolean` | `false` | Leaves the browser menu alone, closes an open menu, and does not intercept clicks or drags of descendants |
+| `children` | `ReactNode` | - | Trigger and Popover |
+
+### ContextMenu.Trigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `render` | `DOMRenderFunction<E, undefined>` | - | Custom render function; `E` defaults to `"div"` |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | The region content |
+| `...rest` | `JSX.IntrinsicElements[E]` | - | Native attributes of the rendered element. Shift+F10 and the ContextMenu key (Ctrl, Alt and Meta chords ignored; plain F10 does nothing) open the menu anchored at the focused element, including inside an input. A descendant that calls `stopPropagation` on `contextmenu` swallows the event |
+
+### ContextMenu.Popover
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `placement` | `Placement` | `"bottom start"` | Placement against the anchor |
+| `offset` | `number` | `0` | Distance from the anchor in pixels |
+| `className` | `string \| ((values) => string)` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Popover content; required |
+| `...rest` | `PopoverProps` | - | React Aria [Popover](https://react-spectrum.adobe.com/react-aria/Popover.html#popover) attributes, except `isOpen`, `onOpenChange` and `triggerRef` |
+
+### ContextMenu.Menu
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onAction` | `(key: Key) => void` | - | Called when an item is activated; the menu then closes |
+| `onClose` | `() => void` | - | Called when the menu closes itself |
+| `autoFocus` | `boolean \| "first" \| "last"` | - | Set by the open method: a keyboard open focuses the first item, a pointer open the menu |
+| `aria-label` | `string` | - | Accessible name of the menu |
+| `className` | `string \| ((values) => string)` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Menu content |
+| `...rest` | `MenuProps<T>` | - | React Aria [Menu](https://react-spectrum.adobe.com/react-aria/Menu.html#menu) attributes |
+
+### ContextMenu.Item
+
+Shared with Dropdown and Menu: the same menu-item part.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | `Key` | - | Unique identifier for the item |
+| `textValue` | `string` | - | Text content of the item for typeahead |
+| `variant` | `"default" \| "danger"` | `"default"` | Visual variant of the item |
+| `isDisabled` | `boolean` | - | Whether the item is disabled |
+| `href` | `string` | - | Renders the item as a link to this URL |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Item content or render function |
+| `...rest` | `MenuItemProps` | - | React Aria [MenuItem](https://react-spectrum.adobe.com/react-aria/Menu.html#menuitem) attributes |
+
+### ContextMenu.Section
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Section content |
+| `...rest` | `MenuSectionProps` | - | React Aria [MenuSection](https://react-spectrum.adobe.com/react-aria/Menu.html#menusection) attributes |
+
+### ContextMenu.ItemIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `type` | `"checkmark" \| "dot"` | `"checkmark"` | Type of indicator to display |
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode \| RenderFunction` | - | Custom indicator content or render function |
+
+### ContextMenu.SubmenuIndicator
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | `string` | - | Additional CSS classes |
+| `children` | `ReactNode` | - | Custom indicator content |
+
+### ContextMenu.SubmenuTrigger
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | The item and the submenu popover |
+| `...rest` | `SubmenuTriggerProps` | - | React Aria [SubmenuTrigger](https://react-spectrum.adobe.com/react-aria/Menu.html#submenutrigger) attributes |
