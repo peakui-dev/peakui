@@ -1,4 +1,4 @@
-import {cleanup, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
+import {act, cleanup, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 import {useState} from "react";
 
 import {Button} from "@/components/button";
@@ -15,6 +15,12 @@ import {
   SheetRoot,
   SheetTrigger,
 } from "@/components/sheet/index.ts";
+import {
+  getSheetScroller,
+  getSheetSnapTargets,
+  scrollSheetTo,
+  snapScrollPosition,
+} from "@/components/sheet/sheet-scroll.ts";
 
 type Placement = "top" | "bottom" | "left" | "right";
 
@@ -49,17 +55,58 @@ class StubIntersectionObserver {
   }
 }
 
+/*
+ * The scroll the stub is currently playing, and the controls the lifecycle tests use on it. Like a
+ * browser, a new scroll supersedes the one in flight: only the last one settles. `panelVisible`
+ * is what the dialog's rect reports, so the lifecycle's geometry check sees the settled position.
+ */
+let panelVisible = false;
+let holdScrolls = false;
+let swallowScrolls = false;
+let pendingSettle: (() => void) | null = null;
+let pendingTimer: ReturnType<typeof setTimeout> | undefined;
+const scrollCalls: ScrollToOptions[] = [];
+
+function resetSheetGeometry() {
+  clearTimeout(pendingTimer);
+  pendingSettle = null;
+  panelVisible = false;
+  holdScrolls = false;
+  swallowScrolls = false;
+  scrollCalls.length = 0;
+}
+
+/** Settles the held scroll, as the browser would when the animation ends. */
+function flushScrolls() {
+  const settle = pendingSettle;
+
+  pendingSettle = null;
+  if (settle) act(settle);
+}
+
 function installSheetGeometry(exitedAtZero = true) {
   vi.stubGlobal("IntersectionObserver", StubIntersectionObserver);
   // jsdom does not implement scrollTo, so there is nothing to spy on: define it, remove it after.
   Object.defineProperty(HTMLElement.prototype, "scrollTo", {
     configurable: true,
     value: function scrollTo(this: HTMLElement, options?: ScrollToOptions | number) {
-      const target = typeof options === "object" ? (options.top ?? options.left ?? 0) : 0;
+      const request = typeof options === "object" ? options : {};
+      const target = request.top ?? request.left ?? 0;
       const exited = exitedAtZero ? target === 0 : target > 0;
 
-      // RAC registers its listeners right after it scrolls, so everything follows asynchronously.
-      setTimeout(() => {
+      scrollCalls.push(request);
+      if (swallowScrolls) return;
+
+      clearTimeout(pendingTimer);
+
+      const settle = () => {
+        pendingSettle = null;
+        panelVisible = !exited;
+        Object.defineProperty(this, request.top === undefined ? "scrollLeft" : "scrollTop", {
+          configurable: true,
+          value: target,
+          writable: true,
+        });
         for (const {callback, element} of observers) {
           callback(
             [{intersectionRatio: exited ? 0 : 1, target: element} as IntersectionObserverEntry],
@@ -67,9 +114,34 @@ function installSheetGeometry(exitedAtZero = true) {
           );
         }
         this.dispatchEvent(new Event("scrollend"));
-      }, 0);
+      };
+
+      if (holdScrolls) {
+        pendingSettle = settle;
+      } else {
+        // RAC registers its listeners right after it scrolls, so everything follows asynchronously.
+        pendingTimer = setTimeout(settle, 0);
+      }
     },
     writable: true,
+  });
+  // The dialog is on screen once its scroll has settled at the entered position, and off it after.
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    const onScreen = this.dataset["slot"] === "sheet-dialog" && panelVisible;
+
+    return {
+      bottom: onScreen ? 400 : 0,
+      height: onScreen ? 400 : 0,
+      left: 0,
+      right: onScreen ? 300 : 0,
+      top: 0,
+      width: onScreen ? 300 : 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    };
   });
 }
 
@@ -81,6 +153,7 @@ const SheetExample = ({
   defaultOpen,
   isDismissable,
   isOpen,
+  onAnimationEnd,
   onClose,
   onOpenChange,
   placement,
@@ -89,6 +162,7 @@ const SheetExample = ({
   defaultOpen?: boolean;
   isDismissable?: boolean;
   isOpen?: boolean;
+  onAnimationEnd?: (open: boolean) => void;
   onClose?: () => void;
   onOpenChange?: (open: boolean) => void;
   placement?: Placement;
@@ -100,6 +174,7 @@ const SheetExample = ({
     isOpen={isOpen}
     placement={placement}
     snapPoints={snapPoints}
+    onAnimationEnd={onAnimationEnd}
     onClose={onClose}
     onOpenChange={onOpenChange}
   >
@@ -131,6 +206,7 @@ describe("Sheet", () => {
   let user: ReturnType<typeof setupUser>;
 
   beforeEach(() => {
+    resetSheetGeometry();
     installSheetGeometry();
     user = setupUser();
   });
@@ -608,9 +684,368 @@ describe("Sheet", () => {
     });
   });
 
+  describe("scrollSheetTo", () => {
+    const scrollerWith = () => {
+      const scroller = document.createElement("div");
+      const scrollTo = vi.fn();
+
+      scroller.scrollTo = scrollTo;
+
+      return {scrollTo, scroller};
+    };
+
+    it("scrolls the vertical axis with top and the horizontal one with left", () => {
+      const vertical = scrollerWith();
+      const horizontal = scrollerWith();
+
+      scrollSheetTo(vertical.scroller, "y", 120, false);
+      scrollSheetTo(horizontal.scroller, "x", 80, false);
+
+      expect(vertical.scrollTo).toHaveBeenCalledWith({behavior: "smooth", top: 120});
+      expect(horizontal.scrollTo).toHaveBeenCalledWith({behavior: "smooth", left: 80});
+    });
+
+    it("uses behavior auto, not instant, under reduced motion", () => {
+      const {scrollTo, scroller} = scrollerWith();
+
+      scrollSheetTo(scroller, "y", 120, true);
+
+      expect(scrollTo).toHaveBeenCalledWith({behavior: "auto", top: 120});
+    });
+  });
+
+  describe("sheet-scroll geometry", () => {
+    const rect = (top: number, bottom: number, left = 0, right = 0) =>
+      ({bottom, height: bottom - top, left, right, top, width: right - left}) as DOMRect;
+
+    it("finds the nearest scroller and nothing outside one", () => {
+      const scroller = document.createElement("div");
+      const inner = document.createElement("span");
+
+      scroller.setAttribute("data-sheet-scroll", "");
+      scroller.append(inner);
+
+      expect(getSheetScroller(inner)).toBe(scroller);
+      expect(getSheetScroller(document.createElement("div"))).toBeNull();
+    });
+
+    it("lists snap targets ascending and without duplicates", () => {
+      const scroller = document.createElement("div");
+      const markers = [300, 100, 300, 200].map((top) => {
+        const marker = document.createElement("div");
+
+        marker.style.scrollSnapAlign = "start";
+        marker.getBoundingClientRect = () => rect(top, top + 10);
+        scroller.append(marker);
+
+        return marker;
+      });
+      const plain = document.createElement("div");
+
+      scroller.getBoundingClientRect = () => rect(0, 500);
+      scroller.append(plain);
+
+      expect(markers).toHaveLength(4);
+      expect(getSheetSnapTargets(scroller, "y")).toEqual([100, 200, 300]);
+    });
+
+    it("computes the start and end alignment of a marker", () => {
+      const scroller = document.createElement("div");
+      const marker = document.createElement("div");
+
+      scroller.getBoundingClientRect = () => rect(10, 410);
+      marker.getBoundingClientRect = () => rect(110, 210);
+      Object.defineProperty(scroller, "clientHeight", {value: 400});
+      Object.defineProperty(scroller, "scrollTop", {value: 50});
+
+      expect(snapScrollPosition(scroller, marker, "y", "start")).toBe(150);
+      expect(snapScrollPosition(scroller, marker, "y", "end")).toBe(-150);
+    });
+  });
+
+  describe("lifecycle", () => {
+    const EXIT_PARTS = ["sheet-overlay", "sheet-backdrop", "sheet-content", "sheet-dialog"];
+    const part = (slot: string) => document.querySelector(`[data-slot="${slot}"]`);
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
+
+    /** A controlled sheet with a Trigger, so the owner can flip `isOpen` at any moment. */
+    const Controlled = ({
+      isOpen,
+      onAnimationEnd,
+    }: {
+      isOpen: boolean;
+      onAnimationEnd?: (open: boolean) => void;
+    }) => (
+      <Sheet isOpen={isOpen} onAnimationEnd={onAnimationEnd}>
+        <Sheet.Trigger>
+          <Button>Open</Button>
+        </Sheet.Trigger>
+        <Sheet.Backdrop>
+          <Sheet.Content>
+            <Sheet.Dialog>
+              <Sheet.Heading>Title</Sheet.Heading>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    );
+
+    it("calls onAnimationEnd(true) once after the enter settles", async () => {
+      const onAnimationEnd = vi.fn();
+
+      holdScrolls = true;
+      render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+      await openSheet(user);
+
+      // The enter scroll is still running: nothing has settled yet.
+      expect(onAnimationEnd).not.toHaveBeenCalled();
+
+      flushScrolls();
+      await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true));
+      await settle();
+
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+    });
+
+    it("ignores a scroll that ends short of the requested state", async () => {
+      const onAnimationEnd = vi.fn();
+      const endScroll = () =>
+        act(() => {
+          document.querySelector("[data-sheet-scroll]")?.dispatchEvent(new Event("scrollend"));
+        });
+
+      holdScrolls = true;
+      render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+      await openSheet(user);
+
+      // An interrupted enter: the scroll ends while the panel is still off screen.
+      endScroll();
+      expect(onAnimationEnd).not.toHaveBeenCalled();
+
+      flushScrolls();
+      await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true]]));
+
+      // An interrupted exit: the scroll ends while the panel is still on screen.
+      await user.keyboard("{Escape}");
+      endScroll();
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+
+      flushScrolls();
+      await waitFor(() => expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]));
+    });
+
+    it("calls onAnimationEnd(false) once after exit", async () => {
+      const onAnimationEnd = vi.fn();
+
+      render(<SheetExample onAnimationEnd={onAnimationEnd} />);
+      await openSheet(user);
+      await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true));
+
+      holdScrolls = true;
+      await user.keyboard("{Escape}");
+
+      // The exit scroll is still running: the close has not been reported.
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+
+      flushScrolls();
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      await settle();
+
+      expect(onAnimationEnd.mock.calls).toEqual([[true], [false]]);
+    });
+
+    it("calls onAnimationEnd(true) for a sheet that is open at mount", async () => {
+      const onAnimationEnd = vi.fn();
+
+      render(<SheetExample defaultOpen onAnimationEnd={onAnimationEnd} />);
+
+      await waitFor(() => expect(onAnimationEnd).toHaveBeenCalledWith(true));
+      await settle();
+
+      expect(onAnimationEnd.mock.calls).toEqual([[true]]);
+    });
+
+    it("toggling isOpen true, false, true quickly ends open and interactive, with no stale report", async () => {
+      const onAnimationEnd = vi.fn();
+      const {rerender} = render(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+
+      rerender(<Controlled isOpen onAnimationEnd={onAnimationEnd} />);
+      rerender(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+      rerender(<Controlled isOpen onAnimationEnd={onAnimationEnd} />);
+
+      const dialog = await screen.findByRole("dialog", {name: "Title"});
+
+      await settle();
+
+      // Final state is open: the dialog is reachable, the page behind is hidden, and nothing that
+      // closed was ever reported after the last change.
+      expect(dialog).toBeVisible();
+      expect(dialog.closest("[inert]")).toBeNull();
+      expect(dialog.closest("[aria-hidden='true']")).toBeNull();
+      expect(screen.queryByRole("button", {name: "Open"})).toBeNull();
+      expect(onAnimationEnd.mock.calls.at(-1)).toEqual([true]);
+      expect(onAnimationEnd).not.toHaveBeenCalledWith(false);
+    });
+
+    it("toggling isOpen true, false quickly ends closed, releases the page and reports false once", async () => {
+      const onAnimationEnd = vi.fn();
+      const {rerender} = render(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+
+      rerender(<Controlled isOpen onAnimationEnd={onAnimationEnd} />);
+      rerender(<Controlled isOpen={false} onAnimationEnd={onAnimationEnd} />);
+
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      await settle();
+
+      // The page is interactive again: nothing stayed inert or aria-hidden.
+      expect(screen.getByRole("button", {name: "Open"})).toBeInTheDocument();
+      expect(document.querySelector("[inert]")).toBeNull();
+      expect(document.querySelector("[aria-hidden='true']")).toBeNull();
+      expect(onAnimationEnd.mock.calls.filter(([open]) => open === false)).toHaveLength(1);
+      expect(onAnimationEnd.mock.calls.at(-1)).toEqual([false]);
+    });
+
+    it("rapid close then reopen keeps focus return on the Trigger", async () => {
+      const {rerender} = render(<Controlled isOpen={false} />);
+
+      await user.click(screen.getByRole("button", {name: "Open"}));
+      rerender(<Controlled isOpen />);
+      await screen.findByRole("dialog");
+      await settle();
+
+      holdScrolls = true;
+      rerender(<Controlled isOpen={false} />);
+      rerender(<Controlled isOpen />);
+      holdScrolls = false;
+      await settle();
+
+      expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+      rerender(<Controlled isOpen={false} />);
+
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      await waitFor(() => expect(screen.getByRole("button", {name: "Open"})).toHaveFocus());
+    });
+
+    it("sets data-exiting on Backdrop, Content and Dialog during exit and not while open", async () => {
+      render(<SheetExample defaultOpen />);
+      await screen.findByRole("dialog");
+      await settle();
+
+      for (const slot of EXIT_PARTS) {
+        expect(part(slot), slot).not.toHaveAttribute("data-exiting");
+      }
+
+      holdScrolls = true;
+      await user.keyboard("{Escape}");
+
+      for (const slot of EXIT_PARTS) {
+        expect(part(slot), slot).toHaveAttribute("data-exiting");
+      }
+
+      flushScrolls();
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    });
+
+    it("hands isExiting to the render-prop children of Backdrop, Content and Dialog", async () => {
+      render(
+        <Sheet defaultOpen>
+          <Sheet.Backdrop>
+            {({isExiting}) => (
+              <Sheet.Content>
+                {(content) => (
+                  <Sheet.Dialog>
+                    {(dialog) => (
+                      <p data-testid="flags">
+                        {`${isExiting}/${content.isExiting}/${dialog.isExiting}`}
+                      </p>
+                    )}
+                  </Sheet.Dialog>
+                )}
+              </Sheet.Content>
+            )}
+          </Sheet.Backdrop>
+        </Sheet>,
+      );
+      await screen.findByRole("dialog");
+      await settle();
+
+      expect(screen.getByTestId("flags")).toHaveTextContent("false/false/false");
+
+      holdScrolls = true;
+      await user.keyboard("{Escape}");
+
+      await waitFor(() => expect(screen.getByTestId("flags")).toHaveTextContent("true/true/true"));
+
+      flushScrolls();
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    });
+
+    describe("programmatic scrolls", () => {
+      /*
+       * RAC skips the exit scroll when it misjudges visibility at a partial detent, leaving the
+       * closed panel on screen. The lifecycle then scrolls it away itself: that is the scroll whose
+       * behavior the reduced-motion preference decides. The stub swallows RAC's own exit scroll to
+       * reach that path.
+       */
+      const closeWithoutRacExit = async () => {
+        render(<SheetExample defaultOpen />);
+        await screen.findByRole("dialog");
+        await settle();
+
+        swallowScrolls = true;
+        scrollCalls.length = 0;
+        await user.keyboard("{Escape}");
+        // RAC's own exit scroll is the first call; the lifecycle's follows after the panel sits still.
+        await waitFor(() => expect(scrollCalls.length).toBeGreaterThan(1), {timeout: 2000});
+      };
+
+      it("reduced motion: with matchMedia matching, programmatic scroll uses behavior auto", async () => {
+        vi.stubGlobal("matchMedia", (query: string) => ({
+          addEventListener() {},
+          addListener() {},
+          matches: true,
+          media: query,
+          removeEventListener() {},
+          removeListener() {},
+        }));
+        await closeWithoutRacExit();
+
+        expect(scrollCalls.at(-1)).toMatchObject({behavior: "auto"});
+      });
+
+      it("scrolls smoothly when reduced motion is not requested", async () => {
+        await closeWithoutRacExit();
+
+        expect(scrollCalls.at(-1)).toMatchObject({behavior: "smooth"});
+      });
+    });
+
+    describe("cleanup", () => {
+      it("cancels its frame loop and its listener when the sheet unmounts", async () => {
+        const cancel = vi.spyOn(window, "cancelAnimationFrame");
+        const request = vi.spyOn(window, "requestAnimationFrame");
+        const {unmount} = render(<SheetExample defaultOpen />);
+
+        await screen.findByRole("dialog");
+        await settle();
+
+        swallowScrolls = true;
+        await user.keyboard("{Escape}");
+        await waitFor(() => expect(request).toHaveBeenCalled());
+
+        const scroller = document.querySelector("[data-sheet-scroll]") as HTMLElement;
+        const remove = vi.spyOn(scroller, "removeEventListener");
+
+        unmount();
+
+        expect(remove).toHaveBeenCalledWith("scrollend", expect.any(Function));
+        expect(cancel).toHaveBeenCalled();
+      });
+    });
+  });
+
   // Pinned in later tasks.
-  it.todo("data-exiting is present on Backdrop, Content and Dialog during exit");
-  it.todo("runs the lifecycle: onAnimationEnd and retained exit (Task 5)");
   it.todo("operates the handle as a slider (Task 6)");
   it.todo("drags the handle and settles on snap points (Task 7)");
   it.todo("stacks nested sheets and closes the topmost first (Task 8)");

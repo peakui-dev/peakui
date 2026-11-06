@@ -26,6 +26,12 @@ const SheetContext = createContext<SheetContextValue | null>(null);
 /** The swipe direction RAC resolved for the overlay (it may be bidirectional), for the Handle. */
 const SheetSwipeDirectionContext = createContext<SheetRenderProps["swipeDirection"] | null>(null);
 
+/*
+ * Whether the overlay is playing its exit. The primitive's overlay and backdrop layer report it, but
+ * its dialog part reports neither a render prop nor `data-exiting`, so the Backdrop carries it down.
+ */
+const SheetExitingContext = createContext(false);
+
 function useSheetContext(): SheetContextValue {
   const context = use(SheetContext);
 
@@ -36,6 +42,6 @@ function useSheetContext(): SheetContextValue {
   return context;
 }
 
-export {SheetContext, SheetSwipeDirectionContext, useSheetContext};
+export {SheetContext, SheetExitingContext, SheetSwipeDirectionContext, useSheetContext};
 
 export type {SheetContextValue};

@@ -4,10 +4,11 @@ import type {SheetSnapPoint} from "./sheet.utils.ts";
 import type {EdgePlacement} from "../../utils/overlay.ts";
 import type {SheetVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef, ReactElement, ReactNode} from "react";
+import type {DialogRenderProps} from "react-aria-components/Dialog";
 import type {SheetRenderProps} from "react-aria-components/Sheet";
 
 import {sheetVariants} from "@peakui/styles";
-import {mergeProps} from "@react-aria/utils";
+import {mergeProps, mergeRefs} from "@react-aria/utils";
 import {
   Children,
   Fragment,
@@ -17,6 +18,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {Heading as HeadingPrimitive} from "react-aria-components/Dialog";
@@ -33,7 +35,13 @@ import {DIALOG_SURFACE_CONTEXT} from "../../utils/overlay.ts";
 import {CloseButton} from "../close-button/index.ts";
 import {SurfaceContext} from "../surface/index.ts";
 
-import {SheetContext, SheetSwipeDirectionContext, useSheetContext} from "./context.ts";
+import {
+  SheetContext,
+  SheetExitingContext,
+  SheetSwipeDirectionContext,
+  useSheetContext,
+} from "./context.ts";
+import {SheetLifecycle} from "./sheet-lifecycle.tsx";
 import {normalizeSnapPoints} from "./sheet.utils.ts";
 
 /*
@@ -256,10 +264,18 @@ interface SheetBackdropProps extends Omit<
   variant?: SheetVariants["backdrop"];
 }
 
-const SheetBackdrop = ({children, className, variant = "opaque", ...rest}: SheetBackdropProps) => {
+const SheetBackdrop = ({
+  children,
+  className,
+  ref,
+  variant = "opaque",
+  ...rest
+}: SheetBackdropProps) => {
   const {isDismissable, isOpen, isTriggerControlled, placement, setIsOpen, snapPoints} =
     useSheetContext();
   const slots = useMemo(() => sheetVariants({backdrop: variant, placement}), [placement, variant]);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const mergedRef = useMemo(() => mergeRefs(overlayRef, ref), [ref]);
 
   /* The dimming layer fades out by the first snap point's worth of travel, not the whole drag. */
   const fadeRange = snapPoints?.length ? {start: snapPoints.length - 1} : undefined;
@@ -269,6 +285,7 @@ const SheetBackdrop = ({children, className, variant = "opaque", ...rest}: Sheet
       // A Sheet.Trigger above shares its state through context; without one, pass it directly.
       {...(isTriggerControlled ? {} : {isOpen, onOpenChange: setIsOpen})}
       {...rest}
+      ref={mergedRef}
       className={composeTwRenderProps(className, slots.overlay())}
       data-slot="sheet-overlay"
       position={placement}
@@ -277,13 +294,16 @@ const SheetBackdrop = ({children, className, variant = "opaque", ...rest}: Sheet
     >
       {(renderProps) => (
         <SheetSwipeDirectionContext value={renderProps.swipeDirection}>
-          <SheetBackdropPrimitive
-            className={slots.backdrop()}
-            data-slot="sheet-backdrop"
-            swipeAnimation={BACKDROP_ANIMATION}
-            swipeAnimationRange={fadeRange}
-          />
-          {typeof children === "function" ? children(renderProps) : children}
+          <SheetExitingContext value={renderProps.isExiting}>
+            <SheetLifecycle {...renderProps} overlayRef={overlayRef} />
+            <SheetBackdropPrimitive
+              className={slots.backdrop()}
+              data-slot="sheet-backdrop"
+              swipeAnimation={BACKDROP_ANIMATION}
+              swipeAnimationRange={fadeRange}
+            />
+            {typeof children === "function" ? children(renderProps) : children}
+          </SheetExitingContext>
         </SheetSwipeDirectionContext>
       )}
     </SheetOverlayPrimitive>
@@ -296,22 +316,43 @@ const SheetBackdrop = ({children, className, variant = "opaque", ...rest}: Sheet
  * -----------------------------------------------------------------------------------------------*/
 interface SheetContentProps extends ComponentPropsWithRef<typeof SheetPrimitive> {}
 
+/* The arguments the primitive hands its className and children functions: the render props plus
+ * the defaults it composes, which a wrapper must pass through untouched. */
+type RenderFunction = (...args: never[]) => unknown;
+type ContentClassNameProps = Parameters<
+  Extract<NonNullable<SheetContentProps["className"]>, RenderFunction>
+>[0];
+type ContentChildrenProps = Parameters<
+  Extract<NonNullable<SheetContentProps["children"]>, RenderFunction>
+>[0];
+
 const SheetContent = ({children, className, ...rest}: SheetContentProps) => {
   const {isDetached, placement, snapPoints} = useSheetContext();
+  const isExiting = use(SheetExitingContext);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
+
+  /* The overlay's exit is the one truth: every render prop below is given it, and the element
+   * carries it as data-exiting, whatever the primitive reports for itself. */
+  const resolvedClassName =
+    typeof className === "function"
+      ? (renderProps: ContentClassNameProps) => className({...renderProps, isExiting})
+      : className;
 
   return (
     <SheetPrimitive
       {...rest}
-      className={composeTwRenderProps(className, slots.content())}
+      className={composeTwRenderProps(resolvedClassName, slots.content())}
       data-detached={isDetached ? "" : undefined}
+      data-exiting={isExiting || undefined}
       data-placement={placement}
       data-slot="sheet-content"
       data-snap-points={snapPoints?.length ? "" : undefined}
       overscrollPadding={!isDetached}
       stackAnimation={STACK_ANIMATION}
     >
-      {children}
+      {typeof children === "function"
+        ? (renderProps: ContentChildrenProps) => children({...renderProps, isExiting})
+        : children}
     </SheetPrimitive>
   );
 };
@@ -319,10 +360,21 @@ const SheetContent = ({children, className, ...rest}: SheetContentProps) => {
 /* -------------------------------------------------------------------------------------------------
  * Sheet Dialog
  * -----------------------------------------------------------------------------------------------*/
-interface SheetDialogProps extends ComponentPropsWithRef<typeof SheetContentPrimitive> {}
+/** What a function child of `Sheet.Dialog` receives: the dialog's own props plus the exit flag. */
+interface SheetDialogRenderProps extends DialogRenderProps {
+  isExiting: boolean;
+}
+
+interface SheetDialogProps extends Omit<
+  ComponentPropsWithRef<typeof SheetContentPrimitive>,
+  "children"
+> {
+  children?: ReactNode | ((renderProps: SheetDialogRenderProps) => ReactNode);
+}
 
 const SheetDialog = ({children, className, ...rest}: SheetDialogProps) => {
   const {placement} = useSheetContext();
+  const isExiting = use(SheetExitingContext);
   const slots = useMemo(() => sheetVariants({placement}), [placement]);
 
   return (
@@ -330,10 +382,13 @@ const SheetDialog = ({children, className, ...rest}: SheetDialogProps) => {
       <SheetContentPrimitive
         {...rest}
         className={composeSlotClassName(slots.dialog, className)}
+        data-exiting={isExiting || undefined}
         data-placement={placement}
         data-slot="sheet-dialog"
       >
-        {children}
+        {typeof children === "function"
+          ? (renderProps: DialogRenderProps) => children({...renderProps, isExiting})
+          : children}
       </SheetContentPrimitive>
     </SurfaceContext>
   );
@@ -486,6 +541,7 @@ export type {
   SheetBackdropProps,
   SheetContentProps,
   SheetDialogProps,
+  SheetDialogRenderProps,
   SheetHeaderProps,
   SheetHeadingProps,
   SheetBodyProps,
