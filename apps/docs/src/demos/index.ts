@@ -745,6 +745,11 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./combo-box/with-sections").then((m) => m.WithSections),
     file: "combo-box/with-sections.tsx",
   },
+  // context-menu
+  "context-menu-basic": {
+    loader: () => import("./context-menu/basic").then((m) => m.Basic),
+    file: "context-menu/basic.tsx",
+  },
   // date-field
   "date-field-basic": {
     loader: () => import("./date-field/basic").then((m) => m.Basic),

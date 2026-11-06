@@ -14,6 +14,7 @@ export const COMPONENT_GROUPS = [
   {
     category: "Collections",
     components: [
+      "(collections)/context-menu",
       "(collections)/dropdown",
       "(collections)/list-box",
       "(collections)/menu",

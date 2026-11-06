@@ -27,6 +27,7 @@ export * from "./color-slider/index.ts";
 export * from "./color-swatch-picker/index.ts";
 export * from "./color-swatch/index.ts";
 export * from "./combo-box/index.ts";
+export * from "./context-menu/index.ts";
 export * from "./date-field/index.ts";
 export * from "./date-input-group/index.ts";
 export * from "./date-picker/index.ts";

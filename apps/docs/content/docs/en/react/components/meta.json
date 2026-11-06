@@ -31,6 +31,7 @@
     "(colors)/color-swatch",
     "(colors)/color-swatch-picker",
     "(pickers)/combo-box",
+    "(collections)/context-menu",
     "(date-and-time)/date-field",
     "(pickers)/date-picker",
     "(pickers)/date-range-picker",
