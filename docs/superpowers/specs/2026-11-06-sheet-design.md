@@ -40,7 +40,7 @@ Root props:
 | `isDetached` | float away from the viewport edge | `false` |
 
 `isExiting` is exposed as a render prop and as `data-exiting` on `Backdrop`, `Content` and `Dialog`,
-so consumers can style the exit. `Close` is a `CloseButton`; `CloseTrigger` wraps any element as a
+so consumers can style the exit. `CloseTrigger` is a `CloseButton` (as `Drawer.CloseTrigger`); `Close` wraps any element as a
 close control. `NestedRoot` is a `Sheet` with `isNested` set internally; it scales the parent back.
 Every part accepts `className` (string or render function) and `ref`. Types live inline.
 
