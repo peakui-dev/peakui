@@ -8,7 +8,17 @@ import type {SheetRenderProps} from "react-aria-components/Sheet";
 
 import {sheetVariants} from "@peakui/styles";
 import {mergeProps} from "@react-aria/utils";
-import {cloneElement, isValidElement, use, useCallback, useMemo, useState} from "react";
+import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {Heading as HeadingPrimitive} from "react-aria-components/Dialog";
 import {
   SheetBackdrop as SheetBackdropPrimitive,
@@ -72,15 +82,29 @@ interface SheetRootProps {
    * @default false
    */
   isDetached?: boolean;
-  /** @internal Set by `Sheet.NestedRoot`. */
+}
+
+/** The root's props plus the flag only `Sheet.NestedRoot` may set. Not part of the public type. */
+interface InternalSheetRootProps extends SheetRootProps {
   isNested?: boolean;
 }
 
-function isSheetTrigger(child: ReactNode): child is ReactElement {
-  return isValidElement(child) && child.type === SheetTrigger;
+/**
+ * Whether a `Sheet.Trigger` is among the children, looking through fragments and nested arrays but
+ * not through components: a component's output is not visible to the root.
+ */
+function hasSheetTrigger(children: ReactNode): boolean {
+  return Children.toArray(children).some(
+    (child) =>
+      isValidElement<{children?: ReactNode}>(child) &&
+      (child.type === SheetTrigger ||
+        (child.type === Fragment && hasSheetTrigger(child.props.children))),
+  );
 }
 
-const SheetRoot = ({
+const SheetRoot = (props: SheetRootProps) => <SheetRootBase {...props} />;
+
+const SheetRootBase = ({
   children,
   defaultOpen = false,
   isDetached = false,
@@ -92,18 +116,17 @@ const SheetRoot = ({
   onOpenChange,
   placement = "bottom",
   snapPoints: snapPointsProp,
-}: SheetRootProps) => {
+}: InternalSheetRootProps) => {
   const snapPoints = useMemo(() => normalizeSnapPoints(snapPointsProp), [snapPointsProp]);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const isOpen = isOpenProp ?? uncontrolledOpen;
-  const isTriggerControlled = useMemo(
-    () => (Array.isArray(children) ? children : [children]).some(isSheetTrigger),
-    [children],
-  );
+  const isTriggerControlled = useMemo(() => hasSheetTrigger(children), [children]);
 
   /* A controlled sheet only reports: the owner decides whether the state changes. */
   const setIsOpen = useCallback(
     (open: boolean) => {
+      // Only keeps the uncontrolled state from going stale if a consumer switches from controlled
+      // to uncontrolled; controlled behaviour is proven by the Escape and open tests.
       if (isOpenProp === undefined) setUncontrolledOpen(open);
       onOpenChange?.(open);
       if (!open) onClose?.();
@@ -159,7 +182,7 @@ const SheetNestedRoot = (props: SheetRootProps) => {
     throw new Error("Sheet.NestedRoot must be placed in another Sheet");
   }
 
-  return <SheetRoot {...props} isNested />;
+  return <SheetRootBase {...props} isNested />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -172,7 +195,24 @@ interface SheetTriggerProps {
   children: ReactElement;
 }
 
-const SheetTrigger = ({children}: SheetTriggerProps) => children;
+const SheetTrigger = ({children}: SheetTriggerProps) => {
+  const context = use(SheetContext);
+  const isUndetected = !!context && !context.isTriggerControlled;
+
+  // The root could not see this trigger, so the child has no press handling and does nothing.
+  useEffect(() => {
+    if (isUndetected && process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console -- dev-only warning, emitted once per undetected trigger
+      console.error(
+        "Sheet.Trigger must be a direct child of Sheet or sit inside fragments there; a trigger " +
+          "rendered by a wrapper component is not detected and will not open the sheet. Move it " +
+          "into the Sheet's children, or control the sheet with isOpen and onOpenChange.",
+      );
+    }
+  }, [isUndetected]);
+
+  return children;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Sheet Close

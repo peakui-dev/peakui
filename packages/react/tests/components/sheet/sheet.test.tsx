@@ -509,7 +509,86 @@ describe("Sheet", () => {
     });
   });
 
+  describe("trigger detection", () => {
+    const Parts = () => (
+      <Sheet.Backdrop>
+        <Sheet.Content>
+          <Sheet.Dialog>
+            <Sheet.Heading>Title</Sheet.Heading>
+          </Sheet.Dialog>
+        </Sheet.Content>
+      </Sheet.Backdrop>
+    );
+
+    it("opens from a Trigger inside a fragment", async () => {
+      render(
+        <Sheet>
+          <>
+            <Sheet.Trigger>
+              <Button>Open</Button>
+            </Sheet.Trigger>
+          </>
+          <Parts />
+        </Sheet>,
+      );
+
+      expect(await openSheet(user)).toHaveAccessibleName("Title");
+    });
+
+    it("opens from a Trigger inside a nested array", async () => {
+      render(
+        <Sheet>
+          {[
+            <Sheet.Trigger key="t">
+              <Button>Open</Button>
+            </Sheet.Trigger>,
+          ]}
+          <Parts />
+        </Sheet>,
+      );
+
+      expect(await openSheet(user)).toHaveAccessibleName("Title");
+    });
+
+    it("does not detect a Trigger rendered by a wrapper component, and warns once", async () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      const Wrapped = () => (
+        <Sheet.Trigger>
+          <Button>Open</Button>
+        </Sheet.Trigger>
+      );
+
+      render(
+        <Sheet>
+          <Wrapped />
+          <Parts />
+        </Sheet>,
+      );
+      await user.click(screen.getByRole("button", {name: "Open"}));
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(error).toHaveBeenCalledTimes(1);
+      expect(error.mock.calls[0]?.[0]).toContain("Sheet.Trigger must be a direct child of Sheet");
+    });
+
+    it("does not warn for a detected Trigger", async () => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      render(<SheetExample />);
+      await openSheet(user);
+
+      expect(error).not.toHaveBeenCalled();
+    });
+  });
+
   describe("context", () => {
+    it("keeps isNested out of the public props", () => {
+      // @ts-expect-error isNested is internal to Sheet.NestedRoot
+      const element = <Sheet isNested>x</Sheet>;
+
+      expect(element).toBeTruthy();
+    });
+
     it("throws a clear error when NestedRoot is rendered outside a Sheet", () => {
       const error = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -530,6 +609,7 @@ describe("Sheet", () => {
   });
 
   // Pinned in later tasks.
+  it.todo("data-exiting is present on Backdrop, Content and Dialog during exit");
   it.todo("runs the lifecycle: onAnimationEnd and retained exit (Task 5)");
   it.todo("operates the handle as a slider (Task 6)");
   it.todo("drags the handle and settles on snap points (Task 7)");
