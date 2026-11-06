@@ -359,6 +359,17 @@
     animation: none !important;
     transition: none !important;
   }
+
+  /*
+   * The transition goes, the end state stays: a stacked parent still recedes and dims while a
+   * child is on top, at once. The same values as the stack keyframes' end, with the per-placement
+   * origin and shift from the rules above; forced colors still drop the filter (!important there).
+   */
+  .sheet__content[data-has-descendants] {
+    transform: perspective(1000px)
+      translate(var(--sheet-stack-shift-x, 0px), var(--sheet-stack-shift-y, 0px)) translateZ(-120px);
+    filter: brightness(0.85);
+  }
 }
 
 /*
