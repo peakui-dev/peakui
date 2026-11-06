@@ -322,17 +322,31 @@
     color: CanvasText !important;
   }
 
-  /* Disabled and selected: gray fill with a Canvas label, never GrayText on Highlight. */
+  /*
+   * Disabled and selected: a GrayText label on a Canvas pill outlined in GrayText. A GrayText fill
+   * with a Canvas label looks right on paper, but Chromium paints a Canvas backplate behind that
+   * label, which leaves it invisible; GrayText on Canvas is legible with or without the backplate.
+   * The disabled opacity is reset so GrayText is not blended into Canvas.
+   */
   .tabs__tab[data-disabled="true"][data-selected="true"] {
-    color: Canvas !important;
+    color: GrayText !important;
+    opacity: 1;
 
     .tabs__indicator {
-      background-color: GrayText !important;
+      background-color: Canvas !important;
+      outline: 2px solid GrayText;
+      outline-offset: -2px;
     }
   }
 
+  /* Secondary: the indicator is a thin line, so it takes the GrayText fill itself. */
   .tabs--secondary .tabs__tab[data-disabled="true"][data-selected="true"] {
     color: GrayText !important;
+
+    .tabs__indicator {
+      background-color: GrayText !important;
+      outline: none;
+    }
   }
 
   .tabs__tab[data-disabled="true"]:not([data-selected="true"]) {
