@@ -79,10 +79,10 @@ test.describe("ContextMenu — overlay in a real browser", () => {
   });
 
   /*
-   * While the menu is open the modal popover leaves the rest of the page inert, so a right-click
-   * elsewhere lands on BODY, not on the region. The menu must go away and the event must stay
-   * un-prevented (the browser's own menu may show); before this was handled, the menu stayed open
-   * under the native one.
+   * A right-click below the region, outside it and the menu. While the menu is open the modal
+   * popover leaves the page inert, so the event lands on BODY. The menu must go away and the event
+   * must stay un-prevented (the browser's own menu may show); before this was handled, the menu
+   * stayed open under the native one.
    */
   test("a right-click elsewhere closes the menu and leaves the browser menu alone", async ({
     page,
@@ -98,24 +98,114 @@ test.describe("ContextMenu — overlay in a real browser", () => {
     const menu = await expectMenuSettled(page);
 
     await page.evaluate(() => {
-      const record = {prevented: [] as boolean[]};
+      const record: {prevented: boolean[]; targets: string[]} = {prevented: [], targets: []};
 
       (window as unknown as {__contextMenuLog: typeof record}).__contextMenuLog = record;
-      document.addEventListener("contextmenu", (event) => {
-        record.prevented.push(event.defaultPrevented);
-      });
+      document.addEventListener(
+        "contextmenu",
+        (event) => {
+          record.targets.push((event.target as HTMLElement).tagName);
+          record.prevented.push(event.defaultPrevented);
+        },
+        true,
+      );
     });
 
-    /* Well clear of the first menu (about 220 px wide). */
+    await page.mouse.click(regionBox!.x + 300, regionBox!.y + regionBox!.height + 80, {
+      button: "right",
+    });
+
+    await expect(menu).toBeHidden();
+
+    const log = await page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            __contextMenuLog: {prevented: boolean[]; targets: string[]};
+          }
+        ).__contextMenuLog,
+    );
+
+    expect(log.targets).toEqual(["BODY"]);
+    expect(log.prevented).toEqual([false]);
+  });
+
+  /*
+   * Pinned real behaviour: with the menu open, a right-click on the region itself never reaches
+   * the region. The modal popover's inert page makes the event land on BODY (recorded by a capture
+   * listener), so the menu CLOSES instead of re-anchoring and the event stays un-prevented. The
+   * user right-clicks again to reopen at the new point. The jsdom "inside the region" test fires
+   * on the region directly and models an event the browser does not send here.
+   */
+  test("a right-click on the region while open lands on BODY, closes the menu and does not re-anchor", async ({
+    page,
+  }) => {
+    await openStory(page, "components-contextmenu--default");
+
+    const regionBox = await page.getByText("Right-click this region").boundingBox();
+
+    expect(regionBox).not.toBeNull();
+
+    await page.mouse.click(regionBox!.x + 40, regionBox!.y + 20, {button: "right"});
+
+    const menu = await expectMenuSettled(page);
+
+    await page.evaluate(() => {
+      const record: {prevented: boolean[]; targets: string[]} = {prevented: [], targets: []};
+
+      (window as unknown as {__contextMenuLog: typeof record}).__contextMenuLog = record;
+      document.addEventListener(
+        "contextmenu",
+        (event) => {
+          const element = event.target as HTMLElement;
+
+          record.targets.push(element.tagName);
+          record.prevented.push(event.defaultPrevented);
+        },
+        true,
+      );
+    });
+
+    /* Inside the region's box (it is 1200 px wide), clear of the 220 px menu. */
     await page.mouse.click(regionBox!.x + 700, regionBox!.y + 50, {button: "right"});
 
     await expect(menu).toBeHidden();
 
     const log = await page.evaluate(
-      () => (window as unknown as {__contextMenuLog: {prevented: boolean[]}}).__contextMenuLog,
+      () =>
+        (
+          window as unknown as {
+            __contextMenuLog: {prevented: boolean[]; targets: string[]};
+          }
+        ).__contextMenuLog,
     );
 
+    expect(log.targets).toEqual(["BODY"]);
     expect(log.prevented).toEqual([false]);
+    await expect(popoverLocator(page)).toHaveCount(0);
+  });
+
+  test("a held mouse press does not open the menu, a right-click still does", async ({page}) => {
+    await openStory(page, "components-contextmenu--default");
+
+    const regionBox = await page.getByText("Right-click this region").boundingBox();
+
+    expect(regionBox).not.toBeNull();
+
+    const x = regionBox!.x + 80;
+    const y = regionBox!.y + 40;
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    /* Past the 500 ms long-press threshold: holding is the thing under test. */
+    await page.waitForTimeout(800);
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await page.mouse.up();
+    await expect(page.getByRole("menu")).toHaveCount(0);
+
+    /* Positive control: the same spot opens the menu on a right-click. */
+    await page.mouse.click(x, y, {button: "right"});
+    await expectMenuSettled(page);
   });
 
   test("flips at the bottom-right viewport edge (NearViewportEdge story)", async ({page}) => {
@@ -342,7 +432,7 @@ test.describe("ContextMenu — touch", () => {
   test.setTimeout(150_000);
   test.use({hasTouch: true});
 
-  test("a long press opens the menu at the finger and the release does not select", async ({
+  test("a long press opens the menu at the finger and it stays open after the release", async ({
     page,
   }) => {
     await openStory(page, "components-contextmenu--default");

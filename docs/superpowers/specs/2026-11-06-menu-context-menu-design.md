@@ -68,8 +68,9 @@ class names (`dropdown__menu`) and needs its own spec and VRT baseline.
 ### Pointer
 `contextmenu` on the Trigger: `preventDefault`, set anchor to `(clientX, clientY)`, open. Ignore when
 `isDisabled`, when `event.defaultPrevented` already, or when the target is inside an element with
-`data-context-menu-native` (escape hatch for inputs/links). A second right-click while open moves the
-anchor and keeps the menu open. Left click outside closes (RAC dismiss).
+`data-context-menu-native` (escape hatch for inputs/links). While open, the modal popover makes the rest of the
+page inert, so a second right-click lands on BODY, not on the region: it closes the menu (the browser
+menu may show) and the user right-clicks again to reopen at the new point. Left click outside closes (RAC dismiss).
 
 ### Touch
 `useLongPress` on the Trigger with the platform default threshold; anchor to the touch point. Suppress
@@ -91,7 +92,7 @@ inline `left/top`, passed as `Popover triggerRef`. RAC flips and shifts at viewp
 ### Focus
 RAC `Popover` restores focus to the previously focused element on close. For a pointer open on a
 non-focusable region, nothing was focused, so nothing is restored. Escape closes and restores.
-Selecting an item closes (`shouldCloseOnSelect` default). The popover is modal and locks page scroll, like Dropdown, so there is no ancestor scroll to close it. A right-click outside the region and the popover closes the menu and leaves the browser menu to show.
+Selecting an item closes (`shouldCloseOnSelect` default). The popover is modal and locks page scroll, like Dropdown, so there is no ancestor scroll to close it. A right-click outside the region, the popover and any submenu popover closes the menu and leaves the browser menu to show.
 
 ## Accessibility
 
@@ -130,7 +131,7 @@ Selecting an item closes (`shouldCloseOnSelect` default). The popover is modal a
 jsdom (`@peakui/testing/helpers`): Menu renders items, sections, `onAction`, selection modes, `data-slot`s;
 ContextMenu opens on `contextmenu` with correct anchor style, ignores disabled and native-escape targets,
 opens on Shift+F10 and ContextMenu key from a focused child, Escape closes, `onOpenChange` fires,
-controlled mode, second right-click re-anchors. Long-press via fake timers and pointer events (jsdom has
+controlled mode, a contextmenu on the region while open re-anchors (an event the browser does not send once the modal popover is open; the browser tier pins that it closes). Long-press via fake timers and pointer events (jsdom has
 no layout: assert anchor inline style, not real position). SSR smoke renders closed state.
 
 Playwright (Storybook iframe, overlay spec): real right-click places the menu at the pointer; viewport-edge
