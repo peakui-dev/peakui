@@ -190,12 +190,14 @@ function SheetLifecycle({
       stationaryFrames = current === previous ? stationaryFrames + 1 : 0;
       previous = current;
 
-      if (reported.current === false) {
+      if (reported.current === false && !isSheetPanelOnScreen(scroller)) {
         /*
          * The panel is off screen and still. On desktop Safari the primitive holds the overlay
          * until the scroller fires a scroll-end, which WebKit does not fire for an instant scroll
          * (a wheel that reaches the edge, a drag release written frame by frame), so the overlay
          * would stay mounted for good. The scroll is over: say so, now and then, until it unmounts.
+         * This runs in every engine; elsewhere nothing waits for the event and it changes nothing.
+         * A panel back on screen falls through to the carry below instead.
          */
         if (
           stationaryFrames >= STATIONARY_FRAMES &&
