@@ -13,4 +13,4 @@
 export {cn, tv, type VariantProps} from "tailwind-variants";
 export * from "./components/index.ts";
 
-export const version = "0.1.0";
+export const version = "0.1.1";

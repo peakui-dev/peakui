@@ -1,5 +1,13 @@
 # @peakui/react
 
+## 0.1.1
+
+### Patch Changes
+
+- [`f344f39`](https://github.com/peakui-dev/peakui/commit/f344f3931c8370bf08a2571ad60d1f647104a567) Thanks [@vladislavkaufman](https://github.com/vladislavkaufman)! - Add package READMEs so the npm pages render documentation.
+- Updated dependencies [[`f344f39`](https://github.com/peakui-dev/peakui/commit/f344f3931c8370bf08a2571ad60d1f647104a567)]:
+  - @peakui/styles@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
