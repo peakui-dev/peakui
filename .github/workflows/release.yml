@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+          # Writes the .npmrc that maps NODE_AUTH_TOKEN onto the registry — without it
+          # npm publish in publish-release.mjs runs unauthenticated (ENEEDAUTH).
+          registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
 
