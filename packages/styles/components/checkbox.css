@@ -100,6 +100,8 @@
 
   cursor: var(--cursor-interactive);
 
+  @apply status-selected-forced;
+
   /* Background indicator pseudo-element */
   &::before {
     @apply pointer-events-none absolute inset-0 z-0 origin-center scale-70 rounded-md bg-accent opacity-0 content-[''];
@@ -204,6 +206,18 @@
 
   & svg {
     @apply size-full transform-gpu;
+  }
+}
+
+/* Forced colors: the fill pseudo-element would paint Canvas over Highlight; the mark follows the
+   control's color (HighlightText when selected, GrayText when disabled). */
+@media (forced-colors: active) {
+  .checkbox__control::before {
+    display: none;
+  }
+
+  .checkbox__control [data-slot^="checkbox-default-indicator"] {
+    color: inherit;
   }
 }
 

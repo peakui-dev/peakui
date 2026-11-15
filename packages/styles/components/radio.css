@@ -68,6 +68,8 @@
 
   cursor: var(--cursor-interactive);
 
+  @apply status-selected-forced;
+
   /* Interactive states */
   /* Focus */
   .radio:has([data-slot="radio-content"][data-focus-visible="true"]) &,
@@ -164,6 +166,22 @@
 .radio:has(input:checked) .radio__indicator:empty::before {
   @apply bg-accent-foreground;
   scale: 0.4286; /* 6px */
+}
+
+/* Forced colors: system-color keywords only (currentcolor may be forced to Canvas) */
+@media (forced-colors: active) {
+  .radio[data-selected] .radio__indicator:empty::before,
+  .radio:has([data-slot="radio-content"][aria-checked="true"]) .radio__indicator:empty::before,
+  .radio:has(input:checked) .radio__indicator:empty::before {
+    background-color: HighlightText;
+  }
+
+  .radio[data-disabled="true"][data-selected] .radio__indicator:empty::before,
+  .radio[data-disabled="true"]:has([data-slot="radio-content"][aria-checked="true"])
+    .radio__indicator:empty::before,
+  .radio[data-disabled="true"]:has(input:checked) .radio__indicator:empty::before {
+    background-color: Canvas;
+  }
 }
 
 /* Selected + Pressed state */

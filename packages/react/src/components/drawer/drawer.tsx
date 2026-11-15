@@ -2,7 +2,8 @@
 
 import type {UseOverlayStateProps, UseOverlayStateReturn} from "../../hooks/use-overlay-state.ts";
 import type {DOMRenderProps} from "../../utils/dom.tsx";
-import type {DrawerVariants, SurfaceVariants} from "@peakui/styles";
+import type {EdgePlacement} from "../../utils/overlay.ts";
+import type {DrawerVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef, ReactNode, PointerEvent as ReactPointerEvent} from "react";
 import type {Button as ButtonPrimitive} from "react-aria-components/Button";
 import type {DialogProps as DialogPrimitiveProps} from "react-aria-components/Dialog";
@@ -24,12 +25,11 @@ import {
 
 import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
 import {dom} from "../../utils/dom.tsx";
+import {DIALOG_SURFACE_CONTEXT} from "../../utils/overlay.ts";
 import {CloseButton} from "../close-button/index.ts";
 import {SurfaceContext} from "../surface/index.ts";
 
-const DEFAULT_SURFACE_CONTEXT = {variant: "default" as SurfaceVariants["variant"]};
-
-type DrawerPlacement = "top" | "bottom" | "left" | "right";
+type DrawerPlacement = EdgePlacement;
 
 /* -------------------------------------------------------------------------------------------------
  * Drawer Drag
@@ -342,7 +342,7 @@ const DrawerDialog = ({children, className, ...props}: DrawerDialogProps) => {
   const {dialogRef, dragHandlers} = useDrawerDrag(placement, isDismissable);
 
   return (
-    <SurfaceContext value={DEFAULT_SURFACE_CONTEXT}>
+    <SurfaceContext value={DIALOG_SURFACE_CONTEXT}>
       <DialogPrimitive
         ref={dialogRef}
         className={composeSlotClassName(slots?.dialog, className)}

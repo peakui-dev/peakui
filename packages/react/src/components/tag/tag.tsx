@@ -5,9 +5,11 @@ import type {ComponentPropsWithRef, ReactNode} from "react";
 import type {Button as ButtonPrimitive} from "react-aria-components/Button";
 
 import {tagVariants} from "@peakui/styles";
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import {Children, createContext, use, useMemo} from "react";
 import {Tag as TagPrimitive} from "react-aria-components/TagGroup";
 
+import {strings} from "../../i18n/strings.ts";
 import {pickChildren} from "../../utils/children.ts";
 import {composeTwRenderProps} from "../../utils/compose.ts";
 import {CloseButton} from "../close-button/index.ts";
@@ -94,10 +96,11 @@ type TagRemoveButtonProps = ComponentPropsWithRef<typeof ButtonPrimitive> & {
 
 const TagRemoveButton = ({children, className, ...restProps}: TagRemoveButtonProps) => {
   const {slots} = use(TagContext);
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
 
   return (
     <CloseButton
-      aria-label="Remove tag"
+      aria-label={formatter.format("removeTag")}
       className={composeTwRenderProps(className, slots?.removeButton())}
       slot="remove"
       {...restProps}

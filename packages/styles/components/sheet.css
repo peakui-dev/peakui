@@ -1,0 +1,440 @@
+/*
+ * Sheet. Class names come from src/components/sheet/sheet.styles.ts; all the Tailwind lives here.
+ * The file is standalone: every interactive state is written both as a pseudo-class and as a
+ * data-* attribute.
+ *
+ * The scroll-snap primitive owns the gesture, the snap settling and the exit. This file is only
+ * the visual layer: never set `transform` or `position` on the panel, because both fight the
+ * scrollport. The single exception is `transform: perspective()` on a stacked parent's content
+ * wrapper (the modal element, not the dialog), so translateZ has a perspective to work in.
+ *
+ * Placement edges are physical (left, right): they do not flip in RTL.
+ *
+ * Attributes. React Aria emits: data-position, data-swipe-direction, data-expanded,
+ * data-stack-index and data-has-descendants (overlay, content and backdrop), data-entering and
+ * data-exiting, and data-sheet-scroll on the scroller. Everything else this file keys on is a
+ * HARD CONTRACT that a later task must set:
+ *   - data-detached     : Task 4, on the content element (`isDetached`).
+ *   - data-snap-points  : Task 4, on the content element when snap points are given. The primitive
+ *                         places snap markers by percentage, so the content needs a definite size.
+ *   - data-dragging     : Task 7, on the handle while a pointer drag is active.
+ *   - data-handle-dragging : Task 7, on the scroller ([data-sheet-scroll]) during a handle drag.
+ *
+ * Which animation runs where. The primitive writes the swipe animation (swipeAnimation) as an
+ * INLINE style on the backdrop and the content, and the stack animation (stackAnimation) inline
+ * on a parent's content. Inline wins over every class here, so once Task 4 passes
+ * `peakui-sheet-backdrop` and `peakui-sheet-scale-back` those inline animations run (scroll
+ * driven in browsers with view timelines, 300ms on the Firefox path) and the enter/exit rules on
+ * the backdrop below are only the fallback for a sheet rendered without them.
+ */
+
+/* Backdrop fade; Task 4 hands this name to the primitive's swipe animation. */
+@keyframes peakui-sheet-backdrop {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * A parent sheet recedes while a child sheet is on top of it: it moves back, slides a little
+ * further out from its edge so a strip of it stays in sight past the child, and dims. The shift is
+ * per placement (set on the stacked content below); the primitive drives the progress by the
+ * child's own scroll.
+ */
+@keyframes peakui-sheet-scale-back {
+  to {
+    transform: translate(var(--sheet-stack-shift-x, 0px), var(--sheet-stack-shift-y, 0px))
+      translateZ(-120px);
+    filter: brightness(0.85);
+  }
+}
+
+/*
+ * The timing seam for the backdrop's fallback fade, the only author-timed motion in this file.
+ * Release (pointer-drag settle) and stack scale-back are driven by the primitive and by Task 7's
+ * script, not by CSS durations, so no variable is defined for them.
+ */
+.sheet__overlay {
+  @apply z-(--z-index-overlay);
+
+  --sheet-enter-duration: 300ms;
+  --sheet-exit-duration: 200ms;
+  --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* A sheet on its way out must not swallow clicks meant for the page. */
+  &[data-exiting] {
+    @apply pointer-events-none;
+  }
+}
+
+/* Only the bottom-most sheet of a stack dims the page. */
+.sheet__backdrop {
+  @apply bg-transparent;
+
+  /* Held transparent in the normal state so the forced-colors border shifts nothing. */
+  border: 1px solid transparent;
+
+  &[data-entering] {
+    animation: peakui-sheet-backdrop var(--sheet-enter-duration) var(--sheet-ease) both;
+  }
+
+  &[data-exiting] {
+    animation: peakui-sheet-backdrop var(--sheet-exit-duration) var(--sheet-ease) reverse both;
+  }
+}
+
+.sheet__backdrop--opaque[data-stack-index="0"] {
+  @apply bg-backdrop;
+}
+
+.sheet__backdrop--blur[data-stack-index="0"] {
+  @apply bg-background/[0.01] backdrop-blur-sm;
+}
+
+.sheet__backdrop--transparent {
+  @apply bg-transparent;
+}
+
+/*
+ * The panel's positioned wrapper (the primitive's modal element). It clips; it is not the scroller,
+ * so it carries no scroll-padding. Overscroll padding sits outside the height. The primitive gives
+ * the dialog inline width/height 100% of this element, so the dialog only fills it when this
+ * element has a definite size: the left/right placements and the snap-point rules below do; a
+ * bottom/top sheet without snap points sizes to its content (Task 4's story check should confirm).
+ */
+.sheet__content {
+  @apply z-1 box-content overflow-clip outline-none;
+}
+
+/*
+ * Promote only stacked sheets. Chrome rounds fractional bounds on promoted layers, which can keep
+ * the primitive from detecting full expansion.
+ */
+.sheet__content[data-has-descendants] {
+  transform: perspective(1000px);
+  @apply will-change-transform;
+}
+
+/*
+ * The stacked parent recedes toward its own open edge, not toward the middle of its box: that box
+ * carries the primitive's overscroll padding (a viewport beyond the closed edge), so a centred
+ * origin would sink the panel behind the child. Each edge names the panel's open edge, and the
+ * shift moves it a little further out, past the child.
+ */
+.sheet__content--bottom[data-has-descendants] {
+  --sheet-stack-shift-y: -1rem;
+  transform-origin: 50% 0;
+}
+
+.sheet__content--top[data-has-descendants] {
+  --sheet-stack-shift-y: 1rem;
+  transform-origin: 50% 100%;
+}
+
+.sheet__content--left[data-has-descendants] {
+  --sheet-stack-shift-x: 1rem;
+  transform-origin: 100% 50%;
+}
+
+.sheet__content--right[data-has-descendants] {
+  --sheet-stack-shift-x: -1rem;
+  transform-origin: 0 50%;
+}
+
+.sheet__content--bottom,
+.sheet__content--top {
+  @apply max-h-[calc(100%-2rem)] w-full;
+}
+
+.sheet__content--bottom {
+  @apply rounded-t-2xl;
+}
+
+.sheet__content--top {
+  @apply rounded-b-2xl;
+}
+
+.sheet__content--left,
+.sheet__content--right {
+  @apply h-full max-h-none w-[min(24rem,96vw)];
+}
+
+.sheet__content--left {
+  @apply rounded-r-2xl;
+}
+
+.sheet__content--right {
+  @apply rounded-l-2xl;
+}
+
+/* Detached: the panel floats off the viewport edge on every side. */
+.sheet__content[data-detached] {
+  @apply m-2 max-h-[calc(100%-1rem)] rounded-2xl;
+}
+
+.sheet__content--bottom[data-detached],
+.sheet__content--top[data-detached] {
+  @apply w-[calc(100%-1rem)];
+}
+
+.sheet__content--left[data-detached],
+.sheet__content--right[data-detached] {
+  @apply h-[calc(100%-1rem)];
+}
+
+/*
+ * A snap sheet needs a definite size so flex children (a virtualized picker, say) can fill it.
+ * Its first snap point reveals only the leading part of that size.
+ *
+ * One pixel short of the viewport, never all of it: a sheet exactly as tall as the stage exits to
+ * a position where it only touches the viewport edge, which an IntersectionObserver still counts
+ * as intersecting, so the primitive never sees it leave and the overlay stays mounted after
+ * closing. A pixel is enough to clear the edge, and it keeps the handle's percentages (measured
+ * against the scroll travel, which is the viewport) equal to the sheet's own.
+ */
+.sheet__content--bottom[data-snap-points],
+.sheet__content--top[data-snap-points] {
+  @apply h-[calc(100%-1px)] max-h-none;
+}
+
+/* One pixel short of the viewport for the same reason as above, along the other axis. */
+.sheet__content--left[data-snap-points],
+.sheet__content--right[data-snap-points] {
+  @apply w-[calc(100%-1px)] max-w-none;
+}
+
+/* The full detent has to fit the detached margins inside the viewport. */
+.sheet__content--bottom[data-detached][data-snap-points],
+.sheet__content--top[data-detached][data-snap-points] {
+  @apply h-[calc(100%-1rem)];
+}
+
+.sheet__content--left[data-detached][data-snap-points],
+.sheet__content--right[data-detached][data-snap-points] {
+  @apply w-[calc(100%-1rem)];
+}
+
+/* The panel. Forced colors flatten its surface, so the border carries it. */
+.sheet__dialog {
+  @apply relative flex min-h-0 flex-col overflow-hidden bg-overlay text-overlay-foreground shadow-overlay outline-none;
+
+  border: 1px solid transparent;
+}
+
+.sheet__content[data-detached] .sheet__dialog {
+  @apply rounded-2xl;
+}
+
+.sheet__dialog--bottom {
+  @apply rounded-t-2xl;
+}
+
+.sheet__dialog--top {
+  @apply rounded-b-2xl;
+}
+
+.sheet__dialog--left {
+  @apply rounded-r-2xl;
+}
+
+.sheet__dialog--right {
+  @apply rounded-l-2xl;
+}
+
+.sheet__header {
+  @apply flex shrink-0 flex-col gap-1 px-5 pt-4 pb-2;
+}
+
+.sheet__heading {
+  @apply text-lg font-semibold;
+}
+
+/*
+ * The body scrolls only once the sheet is fully expanded: a swipe at a partial detent expands
+ * the sheet instead of scrolling its content.
+ *
+ * scroll-padding (SC 2.4.11) lives here, on the real inner scroller, not on [data-sheet-scroll]:
+ * padding on the snap scroller would shift its snap positions. The primitive publishes
+ * --sheet-scroll-padding-x/-y on the overlay (the viewport area taken by the software keyboard or
+ * browser chrome); they are folded in so a focused control also clears that. The 1rem is the
+ * clearance from the sheet edge.
+ */
+.sheet__body {
+  @apply min-h-0 flex-auto scrollbar overflow-hidden px-5 py-2;
+  scroll-padding-block: calc(1rem + var(--sheet-scroll-padding-y, 0px));
+  scroll-padding-inline: calc(1rem + var(--sheet-scroll-padding-x, 0px));
+}
+
+.sheet__content[data-expanded] .sheet__body {
+  @apply overflow-y-auto overscroll-contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheet__footer {
+  @apply flex shrink-0 items-center justify-end gap-2 px-5 pt-2 pb-4;
+}
+
+/* The handle fills the sheet edge; it is at least 24px both ways (SC 2.5.8). */
+.sheet__handle {
+  @apply relative flex min-h-6 min-w-6 shrink-0 cursor-grab touch-none items-center justify-center py-3 select-none no-highlight;
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  &:active,
+  &[data-dragging] {
+    @apply cursor-grabbing;
+  }
+}
+
+/* A mouse drag follows the pointer instead of snapping on every move. */
+[data-sheet-scroll][data-handle-dragging] {
+  @apply snap-none!;
+}
+
+.sheet__handle-bar {
+  @apply block h-[0.3rem] w-8 rounded-full bg-default;
+}
+
+.sheet__close-trigger {
+  @apply absolute end-3 top-3 z-10 min-h-6 min-w-6 cursor-(--cursor-interactive) text-muted outline-none no-highlight;
+
+  /* Pseudo-element hit area for a glyph smaller than 24px. */
+  &::after {
+    content: "";
+    @apply absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2;
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply status-focused;
+  }
+
+  &:disabled,
+  &[aria-disabled="true"],
+  &[data-disabled="true"] {
+    @apply status-disabled;
+  }
+
+  @media (hover: hover) {
+    &:hover,
+    &[data-hovered="true"] {
+      @apply text-foreground;
+    }
+  }
+}
+
+/*
+ * Reduced motion goes after every rule that sets motion. Snap points still apply.
+ *
+ * What this delivers: the backdrop's fallback fade is instant, and the primitive's swipe
+ * animation (backdrop and content) and stack animation (a parent's content) are removed. Those
+ * are written as INLINE styles by the primitive (Sheet.mjs: animation-name on the backdrop and
+ * modal, plus animation-duration 300ms on the Firefox path), so only `animation: none !important`
+ * can beat them; a duration of 0s would lose to the inline style, and is ignored on the view
+ * timeline path anyway. What depends on the primitive and Task 7, not on CSS: programmatic
+ * scrolls (the primitive checks the media query itself and uses behavior "auto") and the
+ * pointer-drag release. Task 4's tests and Task 10's reduced-motion e2e must confirm the result.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sheet__overlay {
+    --sheet-enter-duration: 0s;
+    --sheet-exit-duration: 0s;
+  }
+
+  .sheet__backdrop,
+  .sheet__content {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /*
+   * The transition goes, the end state stays: a stacked parent still recedes and dims while a
+   * child is on top, at once. The same values as the stack keyframes' end, with the per-placement
+   * origin and shift from the rules above; forced colors still drop the filter (!important there).
+   */
+  .sheet__content[data-has-descendants] {
+    transform: perspective(1000px)
+      translate(var(--sheet-stack-shift-x, 0px), var(--sheet-stack-shift-y, 0px)) translateZ(-120px);
+    filter: brightness(0.85);
+  }
+}
+
+/*
+ * Forced colors. Fills and alpha are dropped, so borders and the focus ring carry the structure.
+ * System colors only. !important is used where a component state rule above is more specific and
+ * sets a non-system color: forced colors would turn that rule's color into Canvas and let it
+ * beat these.
+ */
+@media (forced-colors: active) {
+  /* The stacked parent's dim would shift system colours off their values: keep only the scale. */
+  .sheet__content {
+    filter: none !important;
+  }
+
+  .sheet__dialog,
+  .sheet__handle,
+  .sheet__backdrop {
+    border-color: CanvasText;
+  }
+
+  .sheet__handle-bar {
+    background-color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+
+  /* Alpha is dropped: an opaque Canvas with a sparse CanvasText stipple marks the dimmed page. */
+  .sheet__backdrop--opaque[data-stack-index="0"],
+  .sheet__backdrop--blur[data-stack-index="0"] {
+    background-color: Canvas !important;
+    background-image: repeating-conic-gradient(CanvasText 0% 12.5%, Canvas 0% 50%) !important;
+    background-size: 4px 4px !important;
+    backdrop-filter: none;
+  }
+
+  .sheet__handle:focus-visible,
+  .sheet__handle[data-focus-visible="true"],
+  .sheet__close-trigger:focus-visible,
+  .sheet__close-trigger[data-focus-visible="true"],
+  .sheet__dialog:focus-visible,
+  .sheet__dialog[data-focus-visible="true"] {
+    /* status-focused sets its own outline with a more specific selector. */
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  .sheet__close-trigger {
+    color: ButtonText;
+  }
+
+  .sheet__handle:disabled,
+  .sheet__handle[aria-disabled="true"],
+  .sheet__handle[data-disabled="true"] {
+    opacity: 1;
+
+    .sheet__handle-bar {
+      background-color: GrayText;
+      border-color: GrayText;
+    }
+  }
+
+  .sheet__close-trigger:disabled,
+  .sheet__close-trigger[aria-disabled="true"],
+  .sheet__close-trigger[data-disabled="true"] {
+    /* Disabled stays readable: GrayText, not a faded ButtonText. */
+    color: GrayText;
+    opacity: 1;
+  }
+}

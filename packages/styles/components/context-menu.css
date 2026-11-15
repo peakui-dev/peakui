@@ -1,0 +1,73 @@
+/*
+ * ContextMenu. Class names come from src/components/context-menu/context-menu.styles.ts.
+ *
+ * The region (.context-menu__trigger) draws nothing of its own. The anchor is a zero-size fixed
+ * element that the popover positions against; script moves it to the pointer with inline left/top.
+ */
+
+.context-menu__trigger {
+  /*
+   * Touch: the long-press that opens the menu must not also raise the browser's own callout or
+   * start a text selection. Scoped to touch input so mouse users can still select text.
+   */
+  @media (pointer: coarse) {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+
+    /* Text inputs and other native-menu regions keep selectable text. */
+    :where([data-context-menu-native]) {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+  }
+}
+
+.context-menu__anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* The popover surface is the dropdown's, without its trigger-anchored origin. */
+.context-menu__popover {
+  @apply max-w-[48svw] origin-(--trigger-anchor-point) scroll-py-1 scrollbar overflow-y-auto overscroll-contain bg-overlay p-0 text-sm md:min-w-55;
+  border-radius: min(32px, var(--radius-3xl));
+  box-shadow: var(--overlay-shadow);
+
+  /* Forced colors: the surface flattens to Canvas, so the boundary carries the popover. */
+  border: 1px solid transparent;
+
+  @media (forced-colors: active) {
+    border-color: ButtonBorder;
+  }
+
+  &:focus-visible:not([data-focused]),
+  &[data-focus-visible="true"] {
+    @apply outline-none;
+  }
+
+  &[data-entering="true"] {
+    @apply animate-in duration-150 ease-smooth fade-in-0 zoom-in-90;
+  }
+
+  &[data-exiting="true"] {
+    @apply animate-out duration-100 ease-smooth zoom-out-95 fade-out;
+    /* Stays non-interactive while closing, even if the exit animation is interrupted. */
+    @apply pointer-events-none;
+  }
+
+  &[data-exiting="true"],
+  &[data-entering="true"] {
+    @apply transition-[opacity,transform] will-change-[opacity,transform];
+  }
+
+  [data-slot="context-menu-menu"] {
+    @apply p-1.5 outline-none;
+  }
+
+  [data-slot="menu-item"] {
+    @apply px-2.5;
+  }
+}

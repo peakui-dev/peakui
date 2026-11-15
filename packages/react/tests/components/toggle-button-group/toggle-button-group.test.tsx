@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {ToggleButton} from "@/components/toggle-button/index.ts";
 import {ToggleButtonGroup, ToggleButtonGroupRoot} from "@/components/toggle-button-group/index.ts";
@@ -8,6 +8,17 @@ describe("ToggleButtonGroup", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(
+      <ToggleButtonGroup aria-label="Форматирование" selectionMode="multiple">
+        <ToggleButton id="bold">Жирный</ToggleButton>
+        <ToggleButton id="italic">Курсив</ToggleButton>
+      </ToggleButtonGroup>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   describe("рендеринг", () => {

@@ -6,12 +6,14 @@ import type {SearchFieldVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef} from "react";
 
 import {searchFieldVariants} from "@peakui/styles";
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import {cloneElement, createContext, isValidElement, use, useMemo} from "react";
 import {Group as GroupPrimitive} from "react-aria-components/Group";
 import {Input as InputPrimitive} from "react-aria-components/Input";
 import {SearchField as SearchFieldPrimitive} from "react-aria-components/SearchField";
 
 import {FieldVariantContext, useFieldVariant} from "../../contexts/field-variant.ts";
+import {strings} from "../../i18n/strings.ts";
 import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
 import {CloseButton} from "../close-button/index.ts";
 import {IconSearch} from "../icons.tsx";
@@ -173,6 +175,7 @@ interface SearchFieldClearButtonProps extends ComponentPropsWithRef<typeof Close
 
 const SearchFieldClearButton = ({className, ...rest}: SearchFieldClearButtonProps) => {
   const {slots} = use(SearchFieldContext);
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
 
   return (
     <CloseButton
@@ -181,7 +184,7 @@ const SearchFieldClearButton = ({className, ...rest}: SearchFieldClearButtonProp
        * default ("Close") spreads before its props, so this label wins there; this spread comes
        * after it in turn, so a consumer-supplied label still wins here.
        */
-      aria-label="Clear search"
+      aria-label={formatter.format("clearSearch")}
       className={composeTwRenderProps(className, slots?.clearButton())}
       slot="clear"
       {...rest}

@@ -4,9 +4,11 @@ import type {CloseButtonVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef} from "react";
 
 import {closeButtonVariants} from "@peakui/styles";
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import {useMemo} from "react";
 import {Button as ButtonPrimitive} from "react-aria-components/Button";
 
+import {strings} from "../../i18n/strings.ts";
 import {composeTwRenderProps} from "../../utils/compose.ts";
 import {CloseIcon} from "../icons.tsx";
 
@@ -38,6 +40,7 @@ const CloseButtonRoot = ({
   ...rest
 }: CloseButtonRootProps) => {
   const styles = useMemo(() => closeButtonVariants({variant}), [variant]);
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
 
   return (
     <ButtonPrimitive
@@ -46,7 +49,7 @@ const CloseButtonRoot = ({
        * and a consumer-supplied label always wins over the default. Swap the order and "Close"
        * is set in stone.
        */
-      aria-label="Close"
+      aria-label={formatter.format("close")}
       className={composeTwRenderProps(className, styles)}
       slot={slot}
       style={style}

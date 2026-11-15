@@ -198,6 +198,32 @@ export const Disabled: Story = {
   ),
 };
 
+export const DisabledChecked: Story = {
+  name: "Заблокированная выбранная",
+  render: () => (
+    <Showcase title="Заблокированная выбранная">
+      <RadioGroup isDisabled defaultValue="md">
+        <Label>Размер</Label>
+        {option("sm", "Маленький")}
+        {option("md", "Обычный")}
+      </RadioGroup>
+    </Showcase>
+  ),
+};
+
+export const InvalidChecked: Story = {
+  name: "Невалидная выбранная",
+  render: () => (
+    <Showcase title="Невалидная выбранная">
+      <RadioGroup isInvalid defaultValue="md">
+        <Label>Размер</Label>
+        {option("sm", "Маленький")}
+        {option("md", "Обычный")}
+      </RadioGroup>
+    </Showcase>
+  ),
+};
+
 export const DeliveryAndPaymentExample: Story = {
   name: "Пример доставки",
   render: () => {

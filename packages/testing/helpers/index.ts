@@ -1,4 +1,5 @@
 export {render, type PeakUIRenderOptions} from "./render.ts";
+export {expectNoAxeViolations, type AxeOptions} from "./axe.ts";
 export {setupUser, type SetupUserOptions} from "./user.ts";
 export {isHydrationError, ssrSmoke, type SsrSmokeOptions} from "./ssr.ts";
 

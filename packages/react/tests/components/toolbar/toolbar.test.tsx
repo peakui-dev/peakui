@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
 import {Button} from "@/components/button/index.ts";
@@ -12,6 +12,17 @@ describe("Toolbar", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("has no axe violations", async () => {
+    const {container} = render(
+      <Toolbar aria-label="Tools">
+        <Button>One</Button>
+        <Button>Two</Button>
+      </Toolbar>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   it("renders a toolbar with the BEM block and data-slot", () => {

@@ -183,3 +183,78 @@
     }
   }
 }
+
+/* ==========================================================================
+   Forced colors
+   ========================================================================== */
+
+/*
+ * Forced colors flattens the fill, the thumb and the track to Canvas, and paints the transparent
+ * end caps of the track (the room the thumb needs at the edges) in CanvasText. The fill and the
+ * thumb take system colors, the track gets an outline (an outline follows the border box, caps
+ * included, and takes no layout), and the caps are set explicitly. The cap colors carry
+ * !important: the orientation rules that colour the fill-side cap are more specific than this
+ * block and set non-system colors, which forced colors would turn into Canvas.
+ */
+@media (forced-colors: active) {
+  .slider .slider__track {
+    outline: 1px solid ButtonBorder;
+    border-color: Canvas !important;
+  }
+
+  .slider .slider__fill {
+    background-color: Highlight;
+  }
+
+  .slider .slider__thumb {
+    background-color: ButtonText;
+    border: 1px solid ButtonBorder;
+  }
+
+  .slider[data-orientation="horizontal"] .slider__track {
+    &[data-fill-start="true"] {
+      border-inline-start-color: Highlight !important;
+    }
+
+    &[data-fill-end="true"] {
+      border-inline-end-color: Highlight !important;
+    }
+  }
+
+  .slider[data-orientation="vertical"] .slider__track {
+    &[data-fill-start="true"] {
+      border-bottom-color: Highlight !important;
+    }
+
+    &[data-fill-end="true"] {
+      border-top-color: Highlight !important;
+    }
+  }
+
+  /* Disabled: the whole control reads as GrayText, fill included. */
+  .slider[data-disabled="true"] {
+    .slider__track {
+      outline-color: GrayText;
+    }
+
+    .slider__fill {
+      background-color: GrayText;
+    }
+
+    .slider__thumb {
+      background-color: GrayText;
+      border-color: GrayText;
+    }
+
+    /* The cap on the filled side; the side without a border has zero width, so naming both is harmless. */
+    .slider__track[data-fill-start="true"] {
+      border-inline-start-color: GrayText !important;
+      border-bottom-color: GrayText !important;
+    }
+
+    .slider__track[data-fill-end="true"] {
+      border-inline-end-color: GrayText !important;
+      border-top-color: GrayText !important;
+    }
+  }
+}

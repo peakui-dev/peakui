@@ -1,6 +1,14 @@
 import type {Key, Selection} from "react-aria-components/Menu";
 
-import {User, act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  User,
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 import React, {useState} from "react";
 import {Header as HeaderPrimitive} from "react-aria-components/Menu";
 
@@ -55,6 +63,14 @@ describe("Dropdown", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("не имеет нарушений axe в открытом состоянии", async () => {
+    render(<DropdownFixture />);
+
+    await openMenu();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+    await expectNoAxeViolations(document.body);
   });
 
   const openMenu = async () => {

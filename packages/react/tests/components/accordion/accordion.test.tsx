@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Accordion, AccordionRoot} from "@/components/accordion/index.ts";
 
@@ -34,6 +34,12 @@ describe("Accordion", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("has no axe violations", async () => {
+    const {container} = renderAccordion();
+
+    await expectNoAxeViolations(container);
   });
 
   describe("rendering", () => {

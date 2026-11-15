@@ -5,8 +5,10 @@ import type {SpinnerVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef, JSX} from "react";
 
 import {spinnerVariants} from "@peakui/styles";
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import {useId} from "react";
 
+import {strings} from "../../i18n/strings.ts";
 import {dom} from "../../utils/dom.tsx";
 
 /* -------------------------------------------------------------------------------------------------
@@ -72,9 +74,11 @@ const SpinnerRoot = <E extends keyof JSX.IntrinsicElements = "span">({
   size,
   ...props
 }: SpinnerRootProps<E> & Omit<JSX.IntrinsicElements[E], keyof SpinnerRootProps<E>>) => {
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
+
   return (
     <dom.span
-      aria-label="Loading"
+      aria-label={formatter.format("loading")}
       role="status"
       /*
        * props разливаются ПОСЛЕ aria-label, и это не косметика: именно так переданная

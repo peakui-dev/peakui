@@ -1,6 +1,6 @@
 import type {Selection} from "react-aria-components";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {Label} from "@/components/label/index.ts";
 import {Tag} from "@/components/tag/index.ts";
@@ -11,6 +11,19 @@ describe("TagGroup", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(
+      <TagGroup aria-label="Категории" selectionMode="single">
+        <TagGroup.List>
+          <Tag id="news">Новости</Tag>
+          <Tag id="travel">Путешествия</Tag>
+        </TagGroup.List>
+      </TagGroup>,
+    );
+
+    await expectNoAxeViolations(container);
   });
 
   it("выставляет data-slot и BEM-блок на корне и списке", () => {

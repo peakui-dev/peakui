@@ -1,0 +1,14 @@
+/*
+ * Menu. Class names come from src/components/menu/menu.styles.ts.
+ *
+ * An inline menu: the list, padding and gap of .dropdown__menu without a popover surface.
+ */
+
+.menu {
+  @apply relative flex w-full flex-col gap-0.5 overflow-clip p-1 outline-none;
+
+  /* This makes the separator take up 94% of the width and be centered */
+  [data-slot="separator"] {
+    @apply ms-[3%] w-[94%];
+  }
+}

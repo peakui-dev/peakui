@@ -45,6 +45,24 @@ export const Default: Story = {
   ),
 };
 
+/* Mid-range: fill and thumb both visible, the baseline for the forced-colors snapshot. */
+export const MidRange: Story = {
+  render: () => (
+    <Showcase title="Mid-range">
+      <div className="w-96">
+        <Slider defaultValue={50}>
+          <Label>Volume</Label>
+          <Slider.Output />
+          <Slider.Track>
+            <Slider.Fill />
+            <Slider.Thumb />
+          </Slider.Track>
+        </Slider>
+      </div>
+    </Showcase>
+  ),
+};
+
 export const Vertical: Story = {
   render: () => (
     <Showcase title="Vertical">

@@ -1,4 +1,4 @@
-import {render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser, waitFor} from "@peakui/testing/helpers";
 
 import {SegmentedControl, SegmentedControlRoot} from "@/components/segmented-control/index.ts";
 
@@ -18,6 +18,12 @@ describe("SegmentedControl", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(<SegmentedControl aria-label="Вид">{views()}</SegmentedControl>);
+
+    await expectNoAxeViolations(container);
   });
 
   describe("рендеринг", () => {

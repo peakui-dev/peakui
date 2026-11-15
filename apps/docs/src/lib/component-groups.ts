@@ -13,7 +13,13 @@ export const COMPONENT_GROUPS = [
   },
   {
     category: "Collections",
-    components: ["(collections)/dropdown", "(collections)/list-box", "(collections)/tag-group"],
+    components: [
+      "(collections)/context-menu",
+      "(collections)/dropdown",
+      "(collections)/list-box",
+      "(collections)/menu",
+      "(collections)/tag-group",
+    ],
   },
   {
     category: "Pickers",
@@ -112,6 +118,7 @@ export const COMPONENT_GROUPS = [
       "(overlays)/drawer",
       "(overlays)/modal",
       "(overlays)/popover",
+      "(overlays)/sheet",
       "(overlays)/toast",
       "(overlays)/tooltip",
     ],

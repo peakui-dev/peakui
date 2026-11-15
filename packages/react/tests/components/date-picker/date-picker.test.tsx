@@ -2,7 +2,15 @@ import type {DateValue} from "@internationalized/date";
 import type {ComponentProps} from "react";
 
 import {CalendarDate} from "@internationalized/date";
-import {act, cleanup, render, screen, setupUser, within} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+  within,
+} from "@peakui/testing/helpers";
 import {createRef, useState} from "react";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
@@ -70,6 +78,17 @@ describe("DatePicker", () => {
     cleanup();
     runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("has no axe violations when open", async () => {
+    const user = setupUser({advanceTimers: vi.advanceTimersByTime});
+
+    renderPicker();
+
+    await user.click(getTrigger());
+    runAllTimers();
+    expect(screen.getByRole("dialog")).toBeVisible();
+    await expectNoAxeViolations(document.body);
   });
 
   describe("structure", () => {

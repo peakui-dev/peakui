@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {act, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {FieldError} from "@/components/field-error/index.ts";
 import {InputOtp, InputOtpRoot} from "@/components/input-otp/index.ts";
@@ -26,6 +26,38 @@ const renderOtp = (props: Omit<Partial<ComponentProps<typeof InputOtp>>, "childr
 const hiddenInput = () => document.querySelector('[data-slot="input-otp"]') as HTMLInputElement;
 
 describe("InputOtp", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderOtp({"aria-label": "Код подтверждения"});
+
+    /* The OTP input settles its state while axe awaits: keep it inside act. */
+    await act(async () => {
+      await expectNoAxeViolations(container);
+    });
+  });
+
+  it("не имеет нарушений axe в невалидном состоянии с сообщением", async () => {
+    const {container} = render(
+      <InputOtp
+        isInvalid
+        aria-label="Код подтверждения"
+        maxLength={3}
+        validationErrors={["Неверный код"]}
+      >
+        <InputOtp.Group>
+          <InputOtp.Slot index={0} />
+          <InputOtp.Slot index={1} />
+          <InputOtp.Slot index={2} />
+        </InputOtp.Group>
+        <FieldError>Неверный код</FieldError>
+      </InputOtp>,
+    );
+
+    expect(screen.getByText("Неверный код")).toBeInTheDocument();
+    await act(async () => {
+      await expectNoAxeViolations(container);
+    });
+  });
+
   it("части несут свои data-slot", () => {
     renderOtp();
 

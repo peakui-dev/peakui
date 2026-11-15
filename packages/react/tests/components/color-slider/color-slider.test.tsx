@@ -1,4 +1,4 @@
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {ColorSlider, ColorSliderRoot} from "@/components/color-slider/index.ts";
 import {Label} from "@/components/label/index.ts";
@@ -16,6 +16,12 @@ function HueSlider(props: {className?: string} = {}) {
 }
 
 describe("ColorSlider", () => {
+  it("has no axe violations", async () => {
+    const {container} = render(<HueSlider />);
+
+    await expectNoAxeViolations(container);
+  });
+
   it("exposes the BEM block and data-slot on every part", () => {
     const {container} = render(<HueSlider />);
 

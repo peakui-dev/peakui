@@ -1,5 +1,6 @@
 import {render, screen, setupUser} from "@peakui/testing/helpers";
 import {useState} from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Pagination, PaginationRoot} from "@/components/pagination/index.ts";
 
@@ -266,6 +267,57 @@ describe("Pagination", () => {
         "data-custom",
         "true",
       );
+    });
+  });
+
+  describe("localization", () => {
+    it("names the navigation in Russian under ru-RU", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <Pagination />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("navigation", {name: "Постраничная навигация"})).toBeInTheDocument();
+    });
+
+    it("names the navigation in English by default", () => {
+      render(<Pagination />);
+
+      expect(screen.getByRole("navigation", {name: "Pagination"})).toBeInTheDocument();
+    });
+
+    it("lets the consumer label win", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <Pagination aria-label="Моё имя" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("navigation", {name: "Моё имя"})).toBeInTheDocument();
+    });
+
+    it.each(["ru", "de-DE", "ar-EG"])("falls back to English for %s", (locale) => {
+      render(
+        <I18nProvider locale={locale}>
+          <Pagination />
+        </I18nProvider>,
+      );
+
+      const name = locale === "ru" ? "Постраничная навигация" : "Pagination";
+
+      expect(screen.getByRole("navigation", {name})).toBeInTheDocument();
+    });
+
+    it("lets the consumer aria-labelledby win", () => {
+      render(
+        <I18nProvider locale="ru-RU">
+          <span id="x">Своё</span>
+          <Pagination aria-labelledby="x" />
+        </I18nProvider>,
+      );
+
+      expect(screen.getByRole("navigation", {name: "Своё"})).toBeInTheDocument();
     });
   });
 });

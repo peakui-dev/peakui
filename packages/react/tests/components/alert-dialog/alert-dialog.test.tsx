@@ -1,4 +1,4 @@
-import {cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {cleanup, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {AlertDialog, AlertDialogRoot} from "@/components/alert-dialog/index.ts";
 import {Button} from "@/components/button";
@@ -49,6 +49,14 @@ describe("AlertDialog", () => {
 
   afterEach(() => {
     cleanup();
+  });
+
+  it("has no axe violations when open", async () => {
+    render(<Example />);
+
+    await open(user);
+    /* The dialog is the target: RAC aria-hides the page behind it, trigger included. */
+    await expectNoAxeViolations(screen.getByRole("alertdialog"));
   });
 
   it("opens an element with the alertdialog role and BEM classes", async () => {

@@ -1,7 +1,9 @@
 import type {ComponentProps} from "react";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 
+import {FieldError} from "@/components/field-error/index.ts";
+import {Label} from "@/components/label/index.ts";
 import {TextArea, TextAreaRoot} from "@/components/textarea/index.ts";
 import {TextField} from "@/components/textfield/index.ts";
 
@@ -9,6 +11,25 @@ const renderArea = (props: ComponentProps<typeof TextArea> = {}) =>
   render(<TextArea aria-label="Описание" placeholder="Опишите продукт" {...props} />);
 
 describe("TextArea", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderArea();
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("не имеет нарушений axe в невалидном состоянии с сообщением", async () => {
+    const {container} = render(
+      <TextField isInvalid>
+        <Label>Описание</Label>
+        <TextArea />
+        <FieldError>Слишком коротко</FieldError>
+      </TextField>,
+    );
+
+    expect(screen.getByText("Слишком коротко")).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит textbox с доступным именем", () => {
     renderArea();
 

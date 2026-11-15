@@ -745,6 +745,27 @@ export const demos: Record<string, DemoItem> = {
     loader: () => import("./combo-box/with-sections").then((m) => m.WithSections),
     file: "combo-box/with-sections.tsx",
   },
+  // context-menu
+  "context-menu-basic": {
+    loader: () => import("./context-menu/basic").then((m) => m.Basic),
+    file: "context-menu/basic.tsx",
+  },
+  "context-menu-controlled": {
+    loader: () => import("./context-menu/controlled").then((m) => m.Controlled),
+    file: "context-menu/controlled.tsx",
+  },
+  "context-menu-disabled": {
+    loader: () => import("./context-menu/disabled").then((m) => m.Disabled),
+    file: "context-menu/disabled.tsx",
+  },
+  "context-menu-with-native-escape": {
+    loader: () => import("./context-menu/with-native-escape").then((m) => m.WithNativeEscape),
+    file: "context-menu/with-native-escape.tsx",
+  },
+  "context-menu-with-sections": {
+    loader: () => import("./context-menu/with-sections").then((m) => m.WithSections),
+    file: "context-menu/with-sections.tsx",
+  },
   // date-field
   "date-field-basic": {
     loader: () => import("./date-field/basic").then((m) => m.Basic),
@@ -1239,6 +1260,19 @@ export const demos: Record<string, DemoItem> = {
   "list-box-with-sections": {
     loader: () => import("./list-box/with-sections").then((m) => m.WithSections),
     file: "list-box/with-sections.tsx",
+  },
+  // menu
+  "menu-basic": {
+    loader: () => import("./menu/basic").then((m) => m.Basic),
+    file: "menu/basic.tsx",
+  },
+  "menu-with-sections": {
+    loader: () => import("./menu/with-sections").then((m) => m.WithSections),
+    file: "menu/with-sections.tsx",
+  },
+  "menu-with-selection": {
+    loader: () => import("./menu/with-selection").then((m) => m.WithSelection),
+    file: "menu/with-selection.tsx",
   },
   // meter
   "meter-basic": {
@@ -1745,6 +1779,11 @@ export const demos: Record<string, DemoItem> = {
   "separator-with-surface": {
     loader: () => import("./separator/with-surface").then((m) => m.WithSurface),
     file: "separator/with-surface.tsx",
+  },
+  // sheet
+  "sheet-basic": {
+    loader: () => import("./sheet/basic").then((m) => m.Basic),
+    file: "sheet/basic.tsx",
   },
   // skeleton
   "skeleton-animation-types": {

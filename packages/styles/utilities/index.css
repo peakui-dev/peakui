@@ -53,6 +53,44 @@
 }
 
 /*
+ * Selected indicator in forced-colors mode (checkbox box, radio control, switch track). Fills and
+ * shadows are dropped there, so a checked box would look like an unchecked one. System colors only.
+ * RAC puts the state attributes on the field root, an ancestor of the indicator, so each state is
+ * matched on the element itself or on an ancestor.
+ */
+@utility status-selected-forced {
+  @media (forced-colors: active) {
+    /* Field borders are 0 wide (the ring is a shadow, which forced colors drops): give the
+       indicator a real border here, so the normal-state layout stays untouched. */
+    border-style: solid;
+    border-width: 1px;
+    border-color: ButtonBorder;
+
+    /* !important: the component state rules (invalid + selected, checked track) are more specific
+       and set non-system colors, which forced colors turns into Canvas; a system color must win. */
+    &:is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]),
+    :is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]) & {
+      color: HighlightText !important;
+      background-color: Highlight !important;
+      border-color: Highlight !important;
+    }
+
+    &:is([data-disabled="true"]),
+    :is([data-disabled="true"]) & {
+      color: GrayText !important;
+      border-color: GrayText !important;
+    }
+
+    /* Disabled and selected: gray fill with a Canvas mark, so the mark never sits GrayText on Highlight. */
+    &:is([data-disabled="true"]):is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]),
+    :is([data-disabled="true"]):is([data-selected="true"], [aria-checked="true"], [data-indeterminate="true"]) & {
+      color: Canvas !important;
+      background-color: GrayText !important;
+    }
+  }
+}
+
+/*
  * Невалидное поле. Форма эталона целиком: в ПОКОЕ кольцо рисует outline в 1px, в ФОКУСЕ — тень в
  * 2px. Это не непоследовательность: outline в покое не срезается обрезкой предка и виден в
  * forced-colors, а тень в фокусе участвует в переходе вместе с остальными цветами.

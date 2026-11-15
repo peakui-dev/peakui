@@ -4,6 +4,21 @@ const PORT = Number(process.env.STORYBOOK_PORT ?? 6007);
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 /*
+ * The webkit project is opt-in (see `projects`). Asking for it by name (`--project=webkit`,
+ * `--project webkit` or `-p webkit`; `pnpm test:e2e:webkit` uses the first) opts in as well, with
+ * no shell syntax for the variable; it is written back to the environment so the worker processes,
+ * which inherit it, build the same list.
+ */
+const ARGS = process.argv;
+const asksForWebkit = ARGS.some(
+  (arg, index) =>
+    arg === "--project=webkit" ||
+    ((arg === "--project" || arg === "-p") && ARGS[index + 1] === "webkit"),
+);
+
+if (asksForWebkit) process.env.E2E_WEBKIT = "1";
+
+/*
  * Конфиг живёт в приложении, а не в корне: Storybook — его зависимость, и порт знает оно.
  * test:e2e поднимает dev-сервер, test:e2e:ci сначала собирает статику (см. package.json).
  */
@@ -20,6 +35,24 @@ export default defineConfig({
       name: "chromium",
       use: {...devices["Desktop Chrome"]},
     },
+    /*
+     * WebKit covers the Sheet only, whose scroll-snap overlay is where Safari differs most. Two
+     * older specs fail there for reasons of their own (Drawer: the handle drag past the threshold
+     * does not close; Modal: a backdrop click does not dismiss); widen the match once they pass.
+     *
+     * Opt-in: the project exists only when E2E_WEBKIT is set or `--project=webkit` is passed
+     * (`pnpm test:e2e:webkit`), so a clone without the WebKit build still runs `pnpm test:e2e`.
+     * One-time setup: `pnpm --filter @peakui/storybook exec playwright install webkit`.
+     */
+    ...(process.env.E2E_WEBKIT
+      ? [
+          {
+            name: "webkit",
+            testMatch: /Sheet\.spec\.ts/,
+            use: {...devices["Desktop Safari"]},
+          },
+        ]
+      : []),
   ],
   reporter: process.env.CI ? "html" : "list",
   retries: process.env.CI ? 2 : 0,

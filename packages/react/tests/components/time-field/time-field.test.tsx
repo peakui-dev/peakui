@@ -1,7 +1,7 @@
 import type {ComponentProps} from "react";
 
 import {Time} from "@internationalized/date";
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {Description} from "@/components/description/index.ts";
@@ -23,6 +23,27 @@ function renderField(props: Partial<ComponentProps<typeof TimeField>> = {}, loca
 }
 
 describe("TimeField", () => {
+  it("has no axe violations", async () => {
+    const {container} = renderField({defaultValue: new Time(9, 30)});
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("has no axe violations when invalid with an error message", async () => {
+    const {container} = render(
+      <TimeField isInvalid name="time">
+        <Label>Time</Label>
+        <TimeField.Group>
+          <TimeField.Input>{(segment) => <TimeField.Segment segment={segment} />}</TimeField.Input>
+        </TimeField.Group>
+        <FieldError>Time must be within opening hours</FieldError>
+      </TimeField>,
+    );
+
+    expect(screen.getByText("Time must be within opening hours")).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   describe("structure", () => {
     it("renders hour, minute and day period as spinbuttons", () => {
       renderField({defaultValue: new Time(9, 30)});

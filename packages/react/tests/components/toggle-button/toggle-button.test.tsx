@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, fireEvent, render, screen, setupUser} from "@peakui/testing/helpers";
 
 import {ToggleButton, ToggleButtonRoot} from "@/components/toggle-button/index.ts";
 
@@ -22,6 +22,12 @@ describe("ToggleButton", () => {
 
   beforeAll(() => {
     user = setupUser();
+  });
+
+  it("не имеет нарушений axe", async () => {
+    const {container} = render(<ToggleButton>Жирный</ToggleButton>);
+
+    await expectNoAxeViolations(container);
   });
 
   describe("рендеринг", () => {

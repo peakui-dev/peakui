@@ -1,4 +1,4 @@
-import {User, render, screen, setupUser} from "@peakui/testing/helpers";
+import {User, expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {Header} from "react-aria-components/ListBox";
 
 import {ListBox, ListBoxRoot} from "@/components/list-box/index.ts";
@@ -25,6 +25,12 @@ const renderUsers = (props: Omit<React.ComponentProps<typeof ListBox>, "children
   );
 
 describe("ListBox", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderUsers();
+
+    await expectNoAxeViolations(container);
+  });
+
   let testUtilUser: User;
   let user: SelectionUser;
 

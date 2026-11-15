@@ -79,7 +79,7 @@ describe("Chip", () => {
 | Variants      | each variant and size applies its modifier / `data-*`         |
 | States        | disabled, invalid, loading, selected — including that a disabled control does not fire handlers |
 | Interaction   | click, keyboard, typing, focus movement                      |
-| Accessibility | accessible name present, roles correct, keyboard path works   |
+| Accessibility | accessible name present, roles correct, keyboard path works, `await expectNoAxeViolations(container)` from `@peakui/testing/helpers` (contrast stays in Playwright) |
 | Parts         | both call styles (`<Chip.Root>` and `<ChipRoot>`) behave identically |
 | Edge cases    | empty collection, missing optional part, very long content    |
 

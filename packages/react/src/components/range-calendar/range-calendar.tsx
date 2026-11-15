@@ -211,6 +211,8 @@ const RangeCalendarHeader = <E extends keyof JSX.IntrinsicElements = "header">({
 
   return (
     <dom.header
+      /* Inside the calendar's application region a bare <header> would announce as a nested banner landmark. */
+      role="presentation"
       /*
        * The permitted `any`: the element type is a parameter, and the spread has erased it.
        * references/typescript.md, the polymorphic spread boundary.

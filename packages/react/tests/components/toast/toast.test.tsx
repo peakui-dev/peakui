@@ -1,6 +1,13 @@
 import type {CSSProperties} from "react";
 
-import {act, cleanup, render, screen, setupUser} from "@peakui/testing/helpers";
+import {
+  act,
+  cleanup,
+  expectNoAxeViolations,
+  render,
+  screen,
+  setupUser,
+} from "@peakui/testing/helpers";
 
 import {
   DEFAULT_EXIT_DURATION,
@@ -24,6 +31,20 @@ describe("Toast", () => {
       vi.runOnlyPendingTimers();
     });
     vi.useRealTimers();
+  });
+
+  it("не имеет нарушений axe с показанным уведомлением", async () => {
+    const queue = new ToastQueue();
+
+    render(<Toast.Provider queue={queue} />);
+
+    act(() => {
+      queue.add({title: "Сохранено"});
+    });
+
+    expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(screen.getByText("Сохранено")).toBeInTheDocument();
+    await expectNoAxeViolations(document.body);
   });
 
   it("не рендерит ничего, пока в очереди нет тостов", () => {

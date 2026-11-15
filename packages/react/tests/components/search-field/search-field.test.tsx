@@ -2,6 +2,7 @@ import type {ComponentProps} from "react";
 
 import {render, screen, setupUser} from "@peakui/testing/helpers";
 import {useState} from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
 
 import {FieldError} from "@/components/field-error/index.ts";
 import {Label} from "@/components/label/index.ts";
@@ -248,5 +249,52 @@ describe("SearchField", () => {
         "search-field-input",
       );
     }
+  });
+
+  describe("локализация", () => {
+    const renderLocalized = (locale?: string, clearLabel?: string) => {
+      const field = (
+        <SearchField name="search">
+          <Label>Поиск</Label>
+          <SearchField.Group>
+            <SearchField.SearchIcon />
+            <SearchField.Input placeholder="Поиск..." />
+            <SearchField.ClearButton {...(clearLabel ? {"aria-label": clearLabel} : {})} />
+          </SearchField.Group>
+        </SearchField>
+      );
+
+      return render(locale ? <I18nProvider locale={locale}>{field}</I18nProvider> : field);
+    };
+
+    it("называет элемент по-русски при ru-RU", async () => {
+      renderLocalized("ru-RU");
+      await user.type(screen.getByRole("searchbox"), "x");
+
+      expect(screen.getByRole("button", {name: "Очистить поиск"})).toBeInTheDocument();
+    });
+
+    it("по умолчанию называет по-английски", async () => {
+      renderLocalized();
+      await user.type(screen.getByRole("searchbox"), "x");
+
+      expect(screen.getByRole("button", {name: "Clear search"})).toBeInTheDocument();
+    });
+
+    it("метка потребителя побеждает", async () => {
+      renderLocalized("ru-RU", "Моё имя");
+      await user.type(screen.getByRole("searchbox"), "x");
+
+      expect(screen.getByRole("button", {name: "Моё имя"})).toBeInTheDocument();
+    });
+
+    it.each(["ru", "de-DE", "ar-EG"])("откатывается к английскому для %s", async (locale) => {
+      renderLocalized(locale);
+      await user.type(screen.getByRole("searchbox"), "x");
+
+      const name = locale === "ru" ? "Очистить поиск" : "Clear search";
+
+      expect(screen.getByRole("button", {name})).toBeInTheDocument();
+    });
   });
 });

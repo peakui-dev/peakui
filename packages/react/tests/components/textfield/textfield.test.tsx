@@ -1,12 +1,37 @@
-import {render, screen} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen} from "@peakui/testing/helpers";
 import {createRef} from "react";
 
+import {FieldError} from "@/components/field-error/index.ts";
 import {Input} from "@/components/input/index.ts";
 import {Label} from "@/components/label/index.ts";
 import {TextField, TextFieldRoot} from "@/components/textfield/index.ts";
 import {FieldVariantContext} from "@/contexts/field-variant.ts";
 
 describe("TextField", () => {
+  it("has no axe violations", async () => {
+    const {container} = render(
+      <TextField>
+        <Label>City</Label>
+        <Input />
+      </TextField>,
+    );
+
+    await expectNoAxeViolations(container);
+  });
+
+  it("has no axe violations when invalid with an error message", async () => {
+    const {container} = render(
+      <TextField isInvalid>
+        <Label>City</Label>
+        <Input />
+        <FieldError>City is required</FieldError>
+      </TextField>,
+    );
+
+    expect(screen.getByText("City is required")).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   it("binds the label to the control", () => {
     render(
       <TextField>

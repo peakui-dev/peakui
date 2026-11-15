@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {render, screen, setupUser} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen, setupUser} from "@peakui/testing/helpers";
 import {useState} from "react";
 
 import {Slider, SliderRoot} from "@/components/slider/index.ts";
@@ -39,6 +39,12 @@ const renderSlider = (props: ComponentProps<typeof Slider> = {}) =>
   );
 
 describe("Slider", () => {
+  it("не имеет нарушений axe", async () => {
+    const {container} = renderSlider();
+
+    await expectNoAxeViolations(container);
+  });
+
   it("рендерит бегунок со значением и доступным именем", () => {
     renderSlider();
 

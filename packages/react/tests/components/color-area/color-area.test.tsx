@@ -1,6 +1,6 @@
 import type {ComponentProps} from "react";
 
-import {render, screen} from "@peakui/testing/helpers";
+import {expectNoAxeViolations, render, screen} from "@peakui/testing/helpers";
 
 import {ColorArea, ColorAreaRoot} from "@/components/color-area/index.ts";
 
@@ -20,6 +20,12 @@ function Area(props: Partial<ComponentProps<typeof ColorArea>> = {}) {
 }
 
 describe("ColorArea", () => {
+  it("has no axe violations", async () => {
+    const {container} = render(<Area />);
+
+    await expectNoAxeViolations(container);
+  });
+
   it("exposes the BEM block and data-slot on the root and the thumb", () => {
     const {container} = render(<Area />);
 

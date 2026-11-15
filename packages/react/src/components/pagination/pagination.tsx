@@ -5,9 +5,11 @@ import type {PaginationVariants} from "@peakui/styles";
 import type {ComponentPropsWithRef, JSX, ReactNode} from "react";
 
 import {paginationVariants} from "@peakui/styles";
+import {useLocalizedStringFormatter} from "@react-aria/i18n";
 import React, {createContext, use} from "react";
 import {Button as ButtonPrimitive} from "react-aria-components/Button";
 
+import {strings} from "../../i18n/strings.ts";
 import {composeSlotClassName, composeTwRenderProps} from "../../utils/compose.ts";
 import {dom} from "../../utils/dom.tsx";
 import {IconChevronLeft, IconChevronRight} from "../icons.tsx";
@@ -52,11 +54,12 @@ const PaginationRoot = <E extends keyof JSX.IntrinsicElements = "nav">({
 }: PaginationRootProps<E> & Omit<JSX.IntrinsicElements[E], keyof PaginationRootProps<E>>) => {
   const slots = React.useMemo(() => paginationVariants({size}), [size]);
   const contextValue = React.useMemo(() => ({slots}), [slots]);
+  const formatter = useLocalizedStringFormatter(strings, "@peakui/react");
 
   return (
     <PaginationContext value={contextValue}>
       <dom.nav
-        aria-label="Pagination"
+        aria-label={formatter.format("pagination")}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         {...(props as any)}
         className={composeSlotClassName(slots.base, className)}
