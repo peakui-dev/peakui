@@ -55,7 +55,8 @@ jobs:
           publish: node scripts/publish-release.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # First releases publish with this token. Once trusted publishers are attached on
-          # npmjs for both packages, delete the NPM_TOKEN secret and this line: with no token
-          # in the environment npm authenticates through OIDC instead.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Trusted publishing: no token in the environment, so publish-release.mjs adds
+          # --provenance and npm authenticates through OIDC. Requires the trusted publishers
+          # configured on npmjs for both packages (repo peakui-dev/peakui, workflow
+          # release.yml, environment npm-publish) and id-token: write above. Once the first
+          # OIDC publish is verified, delete the NPM_TOKEN repo secret.
